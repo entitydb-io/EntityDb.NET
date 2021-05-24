@@ -1,0 +1,20 @@
+﻿using EntityDb.Abstractions.Tags;
+using System;
+
+namespace EntityDb.Abstractions.Strategies
+{
+    /// <summary>
+    /// Represents a type used to get tags for a <typeparamref name="TEntity"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity to be tagged.</typeparam>
+    public interface ITaggingStrategy<TEntity>
+    {
+        /// <summary>
+        /// Returns the tags for a <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <param name="entityId">The id of the entity.</param>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The tags for <paramref name="entity"/>.</returns>
+        ITag[] GetTags(Guid entityId, TEntity entity);
+    }
+}

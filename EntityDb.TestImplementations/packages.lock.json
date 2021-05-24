@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETCoreApp,Version=v5.0": {
+      "entitydb.abstractions": {
+        "type": "Project"
+      },
+      "entitydb.common": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Abstractions": "1.0.0"
+        }
+      }
+    }
+  }
+}
