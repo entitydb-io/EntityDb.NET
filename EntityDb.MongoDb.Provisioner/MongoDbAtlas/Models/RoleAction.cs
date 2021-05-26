@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EntityDb.MongoDb.Provisioner.Models
+namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models
 {
     public class MongoDbAtlasRoleAction
     {

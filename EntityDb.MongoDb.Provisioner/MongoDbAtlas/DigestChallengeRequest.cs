@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace EntityDb.MongoDb.Provisioner
+namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 {
     public record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop, string? Stale, uint NonceCount, string ClientNonce, DateTime ExpiresAt)
     {

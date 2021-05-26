@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <UserSecretsId>5e19b0ee-0104-4642-959a-c453e0cffca0</UserSecretsId>
-  </PropertyGroup>
-
   <!--Application-->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -20,12 +16,21 @@
 
   <!--Package-->
   <PropertyGroup>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
+    <IncludeSymbols>false</IncludeSymbols>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>entitydb-provision-mongodb</ToolCommandName>
+    <Authors>Chris Philips</Authors>
+    <Company>entitydb.io</Company>
+    <Copyright>2021 © entitydb.io</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21216.1" />
   </ItemGroup>
 
   <ItemGroup>
