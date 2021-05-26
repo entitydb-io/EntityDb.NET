@@ -6,7 +6,6 @@ jobs:
   nuget:
     name: Build
     runs-on: ubuntu-latest
-    needs: version
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
