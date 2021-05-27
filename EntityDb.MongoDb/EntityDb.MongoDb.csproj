@@ -27,6 +27,8 @@
     <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackageTags>EntityDb EventSourcing DDD CQRS MongoDb</PackageTags>
+    <Description>An implementation of the EntityDb Transaction Repository interface, specifically for MongoDb.</Description>
   </PropertyGroup>
 
   <ItemGroup>

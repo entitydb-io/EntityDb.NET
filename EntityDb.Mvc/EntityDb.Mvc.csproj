@@ -27,6 +27,8 @@
     <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackageTags>EntityDb EventSourcing DDD CQRS MVC</PackageTags>
+    <Description>Provides a model for a Transaction Source that is mapped from an HttpContext. The source includes: Claims, Connection Information, and Raw Headers.</Description>
   </PropertyGroup>
 
   <ItemGroup>

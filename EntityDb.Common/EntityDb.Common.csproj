@@ -27,6 +27,8 @@
     <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
+    <Description>A standard set of implementations (excluding persistence) of the EntityDb abstraction layer.</Description>
   </PropertyGroup>
 
   <ItemGroup>

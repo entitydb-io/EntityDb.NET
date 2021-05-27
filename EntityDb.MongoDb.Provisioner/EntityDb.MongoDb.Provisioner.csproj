@@ -27,6 +27,8 @@
     <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackageTags>EntityDb EventSourcing DDD CQRS MongoDb</PackageTags>
+    <Description>A dotnet tool for provisioning a role, user, and database for usage with the EntityDb.MongoDb pacakge. Note - this tool is made for provisioning on a MongoDb Atlas Cluster. It does not work for other instances of MongoDb at this time.</Description>
   </PropertyGroup>
   
   <ItemGroup>
