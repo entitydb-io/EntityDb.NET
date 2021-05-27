@@ -19,12 +19,12 @@ jobs:
           # However, Bash uses POSIX regular expressions, and POSIX does not support non-capturing groups: (?:...)
           # To make it compatible, the non-capture modifiers have been removed.
           
-          echo ${{ github.ref }}
-          echo ${{ github.ref#refs/tags/v }}
+          echo ${GITHUB_REF}
+          echo ${GITHUB_REF/refs\/tags\/v/}
 
           semantic_version_pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
           
-          if [[ ${{ github.ref#refs/tags/v }} =~ $semantic_version_pattern ]]; then
+          if [[ ${GITHUB_REF/refs\/tags\/v/} =~ $semantic_version_pattern ]]; then
             echo ::set-output name=is_semantic_version::'true'
 
             if [[ ${BASH_REMATCH[4]} != '' ]]; then
