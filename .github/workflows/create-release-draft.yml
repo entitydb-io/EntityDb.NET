@@ -1,0 +1,57 @@
+on: 
+  push:
+    tags:
+      - '*'
+
+name: Create GitHub Release Draft
+
+jobs:
+  tag:
+    name: Try Parsing Tag
+    runs-on: ubuntu-latest
+    outputs:
+      is_semantic_version: ${{ steps.parse.outputs.is_semantic_version }}
+      is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+    steps:          
+      - id: parse
+        run: |
+          # This pattern comes from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+          # However, Bash uses POSIX regular expressions, and POSIX does not support non-capturing groups: (?:...)
+          # To make it compatible, the non-capture modifiers have been removed.
+          
+          echo ${{ github.ref }}
+          echo ${{ github.ref#refs/tags/v }}
+
+          semantic_version_pattern='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-((0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
+          
+          if [[ ${{ github.ref#refs/tags/v }} =~ $semantic_version_pattern ]]; then
+            echo ::set-output name=is_semantic_version::'true'
+
+            if [[ ${BASH_REMATCH[4]} != '' ]]; then
+              echo ::set-output name=is_prerelease::'true'
+            else
+              echo ::set-output name=is_prerelease::'false'
+            fi
+          else
+            echo ::set-output name=is_semantic_version::'false'
+            echo ::set-output name=is_prerelease::'false'
+          fi
+
+  create:
+    name: Create GitHub Release Draft
+    runs-on: ubuntu-latest
+    needs:
+      - tag
+    if: ${{ needs.tag.outputs.is_semantic_version == 'true' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Create GitHub Release Release Draft
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: true
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          prerelease: ${{ needs.tag.outsputs.is_prerelease == 'true' }}
