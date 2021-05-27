@@ -128,7 +128,7 @@ namespace EntityDb.Mvc.Tests.Sources
             Assert.Single(mvcSource.Headers[0].Values);
             Assert.Equal(headerValue, mvcSource.Headers[0].Values[0]);
 
-            Assert.Equal(connectionId, mvcSource.Connection.Id);
+            Assert.Equal(connectionId, mvcSource.Connection.ConnectionId);
             Assert.Equal(remoteIpAddress, mvcSource.Connection.RemoteIpAddress);
             Assert.Equal(remotePort, mvcSource.Connection.RemotePort);
             Assert.Equal(localIpAddress, mvcSource.Connection.LocalIpAddress);
@@ -153,7 +153,7 @@ namespace EntityDb.Mvc.Tests.Sources
             Assert.Equal("Test", reconstructedMvcSource.Headers[0].Name);
             Assert.Equal("Test", reconstructedMvcSource.Headers[0].Values[0]);
 
-            Assert.Equal("Test", reconstructedMvcSource.Connection.Id);
+            Assert.Equal("Test", reconstructedMvcSource.Connection.ConnectionId);
             Assert.Equal("http://test.remote", reconstructedMvcSource.Connection.RemoteIpAddress);
             Assert.Equal(123, reconstructedMvcSource.Connection.RemotePort);
             Assert.Equal("http://test.local", reconstructedMvcSource.Connection.LocalIpAddress);
