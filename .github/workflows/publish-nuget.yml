@@ -10,17 +10,13 @@ jobs:
     name: Extract Release Information
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      notes: ${{ steps.notes.outputs.notes }}
+      version: ${{ steps.get_release.outputs.tag_name }}
+      notes: ${{ steps.get_release.outputs.body }}
     steps:
-      - id: release
+      - id: get_release
         uses: bruceadams/get-release@v1.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - id: version
-        run: echo ::set-output name=version::${steps.release.tag_name#v}
-      - id: notes
-        run: echo ::set-output name=notes::${steps.release.body}
 
   nuget:
     name: Publish to Nuget.org
