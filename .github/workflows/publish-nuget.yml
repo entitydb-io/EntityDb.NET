@@ -22,6 +22,8 @@ jobs:
     name: Publish to Nuget.org
     runs-on: windows-latest
     needs: extract
+    env:
+      NOTES: ${{ needs.extract.outputs.notes }} 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -32,6 +34,6 @@ jobs:
       - name: Run Project Tests
         run: dotnet test --no-restore -c Release
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${{ needs.extract.outputs.notes }}
+        run: dotnet pack --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${Env:NOTES}
       - name: Publish to Nuget.org
         run: dotnet nuget push */**.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
