@@ -5,7 +5,7 @@ namespace EntityDb.Mvc.Sources
     /// <summary>
     /// Represents the connection used by agent to request a transaction using a <see cref="Microsoft.AspNetCore.Mvc.Controller"/>.
     /// </summary>
-    public sealed record MvcSourceConnection(string Id, string? RemoteIpAddress, int RemotePort, string? LocalIpAddress, int LocalPort)
+    public sealed record MvcSourceConnection(string ConnectionId, string? RemoteIpAddress, int RemotePort, string? LocalIpAddress, int LocalPort)
     {
         /// <summary>
         /// Returns a new instance of <see cref="MvcSourceConnection"/> that is mapped from an <see cref="HttpContext"/>.
@@ -16,7 +16,7 @@ namespace EntityDb.Mvc.Sources
         {
             return new MvcSourceConnection
             (
-                Id: httpContext.Connection.Id,
+                ConnectionId: httpContext.Connection.Id,
                 RemoteIpAddress: httpContext.Connection.RemoteIpAddress?.ToString(),
                 RemotePort: httpContext.Connection.RemotePort,
                 LocalIpAddress: httpContext.Connection.LocalIpAddress?.ToString(),
