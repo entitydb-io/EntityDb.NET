@@ -36,7 +36,7 @@ namespace EntityDb.TestImplementations.Entities
             return this with { VersionNumber = versionNumber };
         }
 
-        public IEnumerable<ITag> GetTags(Guid entityId)
+        public IEnumerable<ITag> GetTags()
         {
             if (Tags != null)
             {

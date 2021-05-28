@@ -37,7 +37,7 @@ namespace EntityDb.Common.Transactions
         {
             var previousEntity = _knownEntities[entityId];
             var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
-            var previousTags = _serviceProvider.GetTags(entityId, previousEntity);
+            var previousTags = _serviceProvider.GetTags(previousEntity);
 
             if (_serviceProvider.IsAuthorized(previousEntity, command, _claimsPrincipal) == false)
             {
@@ -49,7 +49,7 @@ namespace EntityDb.Common.Transactions
             nextFacts.Add(_serviceProvider.GetVersionNumberFact<TEntity>(previousVersionNumber + 1));
 
             var nextEntity = nextFacts.Reduce(previousEntity);
-            var nextTags = _serviceProvider.GetTags(entityId, nextEntity);
+            var nextTags = _serviceProvider.GetTags(nextEntity);
 
             var transactionFacts = new List<TransactionFact<TEntity>>();
 
@@ -113,7 +113,7 @@ namespace EntityDb.Common.Transactions
         /// </remarks>
         public TransactionBuilder<TEntity> Create(Guid entityId, ICommand<TEntity> command)
         {
-            var entity = _serviceProvider.Construct<TEntity>();
+            var entity = _serviceProvider.Construct<TEntity>(entityId);
 
             if (_knownEntities.ContainsKey(entityId))
             {

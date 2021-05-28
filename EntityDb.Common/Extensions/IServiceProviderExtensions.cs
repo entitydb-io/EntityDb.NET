@@ -66,12 +66,13 @@ namespace EntityDb.Common.Extensions
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="entityId">The id of the entity.</param>
         /// <returns>A new instance of <typeparamref name="TEntity"/>.</returns>
-        public static TEntity Construct<TEntity>(this IServiceProvider serviceProvider)
+        public static TEntity Construct<TEntity>(this IServiceProvider serviceProvider, Guid entityId)
         {
             var constructingStrategy = serviceProvider.GetRequiredService<IConstructingStrategy<TEntity>>();
 
-            return constructingStrategy.Construct();
+            return constructingStrategy.Construct(entityId);
         }
 
         /// <summary>
@@ -107,16 +108,15 @@ namespace EntityDb.Common.Extensions
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="serviceProvider">The service provider.</param>
-        /// <param name="entityId">The id of the entity.</param>
         /// <param name="entity">The entity.</param>
         /// <returns>The tags for <paramref name="entity"/>.</returns>
-        public static ITag[] GetTags<TEntity>(this IServiceProvider serviceProvider, Guid entityId, TEntity entity)
+        public static ITag[] GetTags<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
         {
             var taggingStrategy = serviceProvider.GetService<ITaggingStrategy<TEntity>>();
 
             if (taggingStrategy != null)
             {
-                return taggingStrategy.GetTags(entityId, entity);
+                return taggingStrategy.GetTags(entity);
             }
 
             return Array.Empty<ITag>();
@@ -181,7 +181,7 @@ namespace EntityDb.Common.Extensions
                 snapshot = await snapshotRepository.GetSnapshot(entityId);
             }
 
-            var entity = snapshot ?? serviceProvider.Construct<TEntity>();
+            var entity = snapshot ?? serviceProvider.Construct<TEntity>(entityId);
 
             var versionNumber = serviceProvider.GetVersionNumber(entity);
 

@@ -12,9 +12,8 @@ namespace EntityDb.Abstractions.Strategies
         /// <summary>
         /// Returns the tags for a <typeparamref name="TEntity"/>.
         /// </summary>
-        /// <param name="entityId">The id of the entity.</param>
         /// <param name="entity">The entity.</param>
         /// <returns>The tags for <paramref name="entity"/>.</returns>
-        ITag[] GetTags(Guid entityId, TEntity entity);
+        ITag[] GetTags(TEntity entity);
     }
 }

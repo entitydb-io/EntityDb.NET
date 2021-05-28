@@ -25,7 +25,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ACT
 
-            var tags = serviceProvider.GetTags(Guid.NewGuid(), new TransactionEntity());
+            var tags = serviceProvider.GetTags(new TransactionEntity());
 
             // ASSERT
 

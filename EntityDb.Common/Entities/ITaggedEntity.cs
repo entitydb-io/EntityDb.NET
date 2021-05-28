@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
-using System;
 using System.Collections.Generic;
 
 namespace EntityDb.Common.Entities
@@ -10,7 +9,7 @@ namespace EntityDb.Common.Entities
     /// </summary>
     public interface ITaggedEntity
     {
-        /// <inheritdoc cref="ITaggingStrategy{TEntity}.GetTags(Guid, TEntity)"/>
-        public IEnumerable<ITag> GetTags(Guid entityId);
+        /// <inheritdoc cref="ITaggingStrategy{TEntity}.GetTags(TEntity)"/>
+        public IEnumerable<ITag> GetTags();
     }
 }
