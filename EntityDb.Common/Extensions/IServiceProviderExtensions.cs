@@ -189,7 +189,7 @@ namespace EntityDb.Common.Extensions
 
             var facts = await transactionRepository.GetFacts(factQuery);
 
-            entity = facts.Reduce(entity);
+            entity = entity.Reduce(facts);
 
             if (serviceProvider.ShouldCache(snapshot, entity) && snapshotRepository != null)
             {
