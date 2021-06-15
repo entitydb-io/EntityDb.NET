@@ -11,6 +11,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
         {
             var createUser = new Command("create-user");
 
+            AddMongoDbAtlasArgumentsTo(createUser);
             AddEntityNameArgumentTo(createUser);
             AddEntityPasswordArgumentTo(createUser);
 
