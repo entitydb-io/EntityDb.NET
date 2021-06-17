@@ -216,6 +216,11 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
+
         public async ValueTask DisposeAsync()
         {
             await _mongoDbSession.DisposeAsync();

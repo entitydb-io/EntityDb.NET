@@ -11,7 +11,7 @@ namespace EntityDb.Abstractions.Transactions
     /// Represents an explicit set of objects which represent a complete history of a set of entities.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity represented by the objects stored in the <see cref="ITransactionRepository{TEntity}"/>.</typeparam>
-    public interface ITransactionRepository<TEntity> : IAsyncDisposable
+    public interface ITransactionRepository<TEntity> : IDisposable, IAsyncDisposable
     {
         /// <summary>
         /// Returns the transaction ids which are found by a source query.

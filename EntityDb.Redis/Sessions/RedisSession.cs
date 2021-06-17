@@ -71,6 +71,11 @@ namespace EntityDb.Redis.Sessions
             }
         }
 
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
+
         public async ValueTask DisposeAsync()
         {
             await Task.Yield();

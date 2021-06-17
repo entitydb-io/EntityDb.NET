@@ -63,6 +63,11 @@ namespace EntityDb.Redis.Snapshots
             );
         }
 
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
+
         public async virtual ValueTask DisposeAsync()
         {
             await RedisSession.DisposeAsync();
