@@ -43,7 +43,7 @@ namespace EntityDb.RedisMongoDb.Tests
 
             serviceCollection.AddConstructingStrategy<TransactionEntity, TransactionEntityConstructingStrategy>();
             serviceCollection.AddVersionedEntityVersioningStrategy<TransactionEntity>();
-            serviceCollection.AddTaggedEntityTaggingStrategy<TransactionEntity>();
+            serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
 
             serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>(TransactionEntity.RedisKeyNamespace, (serviceProvider) =>

@@ -5,29 +5,29 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedTagQuery(ITagQuery TagQuery, bool InvertFilter, bool ReverseSort, int? ReplaceSkip, int? ReplaceTake) : ModifiedQueryBase(TagQuery, ReplaceSkip, ReplaceTake), ITagQuery
+    internal sealed record ModifiedLeaseQuery(ILeaseQuery LeaseQuery, bool InvertFilter, bool ReverseSort, int? ReplaceSkip, int? ReplaceTake) : ModifiedQueryBase(LeaseQuery, ReplaceSkip, ReplaceTake), ILeaseQuery
     {
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             if (InvertFilter)
             {
                 return builder.Not
                 (
-                    TagQuery.GetFilter(builder)
+                    LeaseQuery.GetFilter(builder)
                 );
             }
 
-            return TagQuery.GetFilter(builder);
+            return LeaseQuery.GetFilter(builder);
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             if (ReverseSort)
             {
-                return TagQuery.GetSort(builder.Reverse());
+                return LeaseQuery.GetSort(builder.Reverse());
             }
 
-            return TagQuery.GetSort(builder);
+            return LeaseQuery.GetSort(builder);
         }
     }
 }

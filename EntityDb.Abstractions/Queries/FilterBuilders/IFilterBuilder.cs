@@ -3,7 +3,7 @@
 namespace EntityDb.Abstractions.Queries.FilterBuilders
 {
     /// <summary>
-    /// Builds a <typeparamref name="TFilter"/> for an object repository. Possible objects include: sources, commands, facts, and tags.
+    /// Builds a <typeparamref name="TFilter"/> for an object repository. Possible objects include: sources, commands, facts, and leases.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
     public interface IFilterBuilder<TFilter>

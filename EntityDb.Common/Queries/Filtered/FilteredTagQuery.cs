@@ -4,20 +4,20 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredTagQuery(ITagQuery TagQuery, ITagFilter TagFilter) : FilteredQueryBase(TagQuery), ITagQuery
+    internal sealed record FilteredLeaseQuery(ILeaseQuery LeaseQuery, ILeaseFilter LeaseFilter) : FilteredQueryBase(LeaseQuery), ILeaseQuery
     {
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
-                TagQuery.GetFilter(builder),
-                TagFilter.GetFilter(builder)
+                LeaseQuery.GetFilter(builder),
+                LeaseFilter.GetFilter(builder)
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
-            return TagQuery.GetSort(builder);
+            return LeaseQuery.GetSort(builder);
         }
     }
 }

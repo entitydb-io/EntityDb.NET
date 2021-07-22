@@ -1,7 +1,7 @@
 ﻿namespace EntityDb.Abstractions.Queries.SortBuilders
 {
     /// <summary>
-    /// Builds a sort for an object repository. Possible objects include: sources, commands, facts, and tags.
+    /// Builds a sort for an object repository. Possible objects include: sources, commands, facts, and leases.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     public interface ISortBuilder<TSort>

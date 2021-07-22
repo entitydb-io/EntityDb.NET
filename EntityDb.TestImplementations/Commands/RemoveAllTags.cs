@@ -6,11 +6,11 @@ using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Commands
 {
-    public record RemoveAllTags : ICommand<TransactionEntity>
+    public record RemoveAllLeases : ICommand<TransactionEntity>
     {
         public IEnumerable<IFact<TransactionEntity>> Execute(TransactionEntity entity)
         {
-            yield return new AllTagsRemoved();
+            yield return new AllLeasesRemoved();
         }
     }
 }

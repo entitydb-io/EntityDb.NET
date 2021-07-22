@@ -1,17 +1,17 @@
 ﻿using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using EntityDb.TestImplementations.Entities;
 using System;
 
 namespace EntityDb.TestImplementations.Facts
 {
-    public record AllTagsRemoved : IFact<TransactionEntity>
+    public record AllLeasesRemoved : IFact<TransactionEntity>
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
             return entity with
             {
-                Tags = Array.Empty<ITag>(),
+                Leases = Array.Empty<ILease>(),
             };
         }
     }

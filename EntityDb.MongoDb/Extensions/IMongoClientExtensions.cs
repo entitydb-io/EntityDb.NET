@@ -13,7 +13,7 @@ namespace EntityDb.MongoDb.Extensions
             await SourceDocument.ProvisionCollection(mongoDatabase);
             await CommandDocument.ProvisionCollection(mongoDatabase);
             await FactDocument.ProvisionCollection(mongoDatabase);
-            await TagDocument.ProvisionCollection(mongoDatabase);
+            await LeaseDocument.ProvisionCollection(mongoDatabase);
         }
     }
 }

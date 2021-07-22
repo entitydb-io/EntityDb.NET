@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
@@ -49,11 +49,11 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
-        public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
+        public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await TagDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, tagQuery),
+                async (serviceProvider, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -85,11 +85,11 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
-        public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
+        public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await TagDocument.GetEntityIds(clientSessionHandle, mongoDatabase, tagQuery),
+                async (serviceProvider, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -121,12 +121,12 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
-        public Task<ITag[]> GetTags(ITagQuery tagQuery)
+        public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (serviceProvider, clientSessionHandle, mongoDatabase) => TagDocument.GetTags(serviceProvider, clientSessionHandle, mongoDatabase, tagQuery),
-                Array.Empty<ITag>()
+                (serviceProvider, clientSessionHandle, mongoDatabase) => LeaseDocument.GetLeases(serviceProvider, clientSessionHandle, mongoDatabase, leaseQuery),
+                Array.Empty<ILease>()
             );
         }
 
@@ -192,15 +192,15 @@ namespace EntityDb.MongoDb.Transactions
                             transactionCommand.Facts
                         );
 
-                        await TagDocument.DeleteMany
+                        await LeaseDocument.DeleteMany
                         (
                             clientSessionHandle,
                             mongoDatabase,
                             transactionCommand.EntityId,
-                            transactionCommand.DeleteTags
+                            transactionCommand.DeleteLeases
                         );
 
-                        await TagDocument.InsertMany
+                        await LeaseDocument.InsertMany
                         (
                             serviceProvider,
                             clientSessionHandle,
@@ -209,7 +209,7 @@ namespace EntityDb.MongoDb.Transactions
                             transaction.Id,
                             transactionCommand.EntityId,
                             nextVersionNumber,
-                            transactionCommand.InsertTags
+                            transactionCommand.InsertLeases
                         );
                     }
                 }

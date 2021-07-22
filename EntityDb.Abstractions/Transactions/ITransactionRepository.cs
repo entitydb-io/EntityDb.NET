@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using System;
 using System.Threading.Tasks;
 
@@ -35,11 +35,11 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetTransactionIds(IFactQuery factQuery);
 
         /// <summary>
-        /// Returns the transaction ids which are found by a tag query.
+        /// Returns the transaction ids which are found by a lease query.
         /// </summary>
-        /// <param name="tagQuery">The tag query.</param>
-        /// <returns>The transaction ids which are found by <paramref name="tagQuery"/>.</returns>
-        Task<Guid[]> GetTransactionIds(ITagQuery tagQuery);
+        /// <param name="leaseQuery">The lease query.</param>
+        /// <returns>The transaction ids which are found by <paramref name="leaseQuery"/>.</returns>
+        Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery);
 
         /// <summary>
         /// Returns the entity ids which are found by a source query.
@@ -63,11 +63,11 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetEntityIds(IFactQuery factQuery);
 
         /// <summary>
-        /// Returns the entity ids which are found by a tag query.
+        /// Returns the entity ids which are found by a lease query.
         /// </summary>
-        /// <param name="tagQuery">The tag query.</param>
-        /// <returns>The entity ids which are found by <paramref name="tagQuery"/>.</returns>
-        Task<Guid[]> GetEntityIds(ITagQuery tagQuery);
+        /// <param name="leaseQuery">The lease query.</param>
+        /// <returns>The entity ids which are found by <paramref name="leaseQuery"/>.</returns>
+        Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery);
 
         /// <summary>
         /// Returns the sources which are found by a source query.
@@ -91,11 +91,11 @@ namespace EntityDb.Abstractions.Transactions
         Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery);
 
         /// <summary>
-        /// Returns the tags which are found by a tag query.
+        /// Returns the leases which are found by a lease query.
         /// </summary>
-        /// <param name="tagQuery">The tag query.</param>
-        /// <returns>The tags which are found by <paramref name="tagQuery"/>.</returns>
-        Task<ITag[]> GetTags(ITagQuery tagQuery);
+        /// <param name="leaseQuery">The lease query.</param>
+        /// <returns>The leases which are found by <paramref name="leaseQuery"/>.</returns>
+        Task<ILease[]> GetLeases(ILeaseQuery leaseQuery);
 
         /// <summary>
         /// Inserts a single transaction with an atomic commit.

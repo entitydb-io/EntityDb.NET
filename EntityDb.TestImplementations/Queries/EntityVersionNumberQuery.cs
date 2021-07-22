@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record EntityVersionNumberQuery(ulong Gte, ulong Lte) : ICommandQuery, IFactQuery, ITagQuery
+    public record EntityVersionNumberQuery(ulong Gte, ulong Lte) : ICommandQuery, IFactQuery, ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
@@ -24,7 +24,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
@@ -47,7 +47,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.EntityVersionNumber(true);
         }

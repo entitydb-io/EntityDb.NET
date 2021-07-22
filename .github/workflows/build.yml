@@ -8,7 +8,7 @@ on:
 name: Build
 
 jobs:
-  nuget:
+  build:
     name: Build
     runs-on: windows-latest
     steps:

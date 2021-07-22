@@ -2,26 +2,26 @@
 
 namespace EntityDb.Common.Queries.SortBuilders
 {
-    internal sealed record TagReverseSortBuilder<TSort>(ITagSortBuilder<TSort> TagSortBuilder) : ReverseSortBuilderBase<TSort>(TagSortBuilder), ITagSortBuilder<TSort>
+    internal sealed record LeaseReverseSortBuilder<TSort>(ILeaseSortBuilder<TSort> LeaseSortBuilder) : ReverseSortBuilderBase<TSort>(LeaseSortBuilder), ILeaseSortBuilder<TSort>
     {
         public TSort EntityId(bool ascending)
         {
-            return TagSortBuilder.EntityId(!ascending);
+            return LeaseSortBuilder.EntityId(!ascending);
         }
 
         public TSort EntityVersionNumber(bool ascending)
         {
-            return TagSortBuilder.EntityVersionNumber(!ascending);
+            return LeaseSortBuilder.EntityVersionNumber(!ascending);
         }
 
-        public TSort TagType(bool ascending)
+        public TSort LeaseType(bool ascending)
         {
-            return TagSortBuilder.TagType(!ascending);
+            return LeaseSortBuilder.LeaseType(!ascending);
         }
 
-        public TSort TagProperty<TTag>(bool ascending, System.Linq.Expressions.Expression<System.Func<TTag, object>> tagExpression)
+        public TSort LeaseProperty<TLease>(bool ascending, System.Linq.Expressions.Expression<System.Func<TLease, object>> leaseExpression)
         {
-            return TagSortBuilder.TagProperty(!ascending, tagExpression);
+            return LeaseSortBuilder.LeaseProperty(!ascending, leaseExpression);
         }
     }
 }

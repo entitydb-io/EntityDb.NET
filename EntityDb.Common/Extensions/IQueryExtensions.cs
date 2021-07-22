@@ -45,14 +45,14 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        /// Returns a new <see cref="ITagQuery"/> that "ands" a tag filter with the filter of a tag query. All other properties of the query are inherited.
+        /// Returns a new <see cref="ILeaseQuery"/> that "ands" a lease filter with the filter of a lease query. All other properties of the query are inherited.
         /// </summary>
-        /// <param name="tagQuery">The tag query.</param>
-        /// <param name="tagFilter">The tag filter.</param>
-        /// <returns>A new <see cref="ITagQuery"/> that "ands" <paramref name="tagFilter"/> with the filter of <paramref name="tagQuery"/>.</returns>
-        public static ITagQuery Filter(this ITagQuery tagQuery, ITagFilter tagFilter)
+        /// <param name="leaseQuery">The lease query.</param>
+        /// <param name="leaseFilter">The lease filter.</param>
+        /// <returns>A new <see cref="ILeaseQuery"/> that "ands" <paramref name="leaseFilter"/> with the filter of <paramref name="leaseQuery"/>.</returns>
+        public static ILeaseQuery Filter(this ILeaseQuery leaseQuery, ILeaseFilter leaseFilter)
         {
-            return new FilteredTagQuery(tagQuery, tagFilter);
+            return new FilteredLeaseQuery(leaseQuery, leaseFilter);
         }
 
         /// <summary>
@@ -98,17 +98,17 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        /// Returns a new, modified <see cref="ITagQuery"/>. The way in which it is modified depends on the parameters of this extension method.
+        /// Returns a new, modified <see cref="ILeaseQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
-        /// <param name="tagQuery">The tag query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ITagQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="tagQuery"/>. Otherwise, the new <see cref="ITagQuery"/> will just return the same filter as <paramref name="tagQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ITagQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ITagSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ITagQuery"/> will just return the same sort as <paramref name="tagQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="ITagQuery"/> will null-coalesce this value with the skip of <paramref name="tagQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="ITagQuery"/> will null-coalesce this value with the take of <paramref name="tagQuery"/>.</param>
-        /// <returns>A new, modified <see cref="ITagQuery"/>.</returns>
-        public static ITagQuery Modify(this ITagQuery tagQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        /// <param name="leaseQuery">The lease query.</param>
+        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ILeaseQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="leaseQuery"/>. Otherwise, the new <see cref="ILeaseQuery"/> will just return the same filter as <paramref name="leaseQuery"/>.</param>
+        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ILeaseQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ILeaseSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ILeaseQuery"/> will just return the same sort as <paramref name="leaseQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
+        /// <param name="replaceSkip">The new <see cref="ILeaseQuery"/> will null-coalesce this value with the skip of <paramref name="leaseQuery"/>.</param>
+        /// <param name="replaceTake">The new <see cref="ILeaseQuery"/> will null-coalesce this value with the take of <paramref name="leaseQuery"/>.</param>
+        /// <returns>A new, modified <see cref="ILeaseQuery"/>.</returns>
+        public static ILeaseQuery Modify(this ILeaseQuery leaseQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
         {
-            return new ModifiedTagQuery(tagQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedLeaseQuery(leaseQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
         }
     }
 }

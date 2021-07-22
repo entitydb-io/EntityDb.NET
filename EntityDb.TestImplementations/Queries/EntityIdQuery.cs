@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record EntityIdQuery(Guid EntityId) : ISourceQuery, ICommandQuery, IFactQuery, ITagQuery
+    public record EntityIdQuery(Guid EntityId) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {
@@ -22,7 +22,7 @@ namespace EntityDb.TestImplementations.Queries
             return builder.EntityIdIn(EntityId);
         }
 
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.EntityIdIn(EntityId);
         }
@@ -51,7 +51,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

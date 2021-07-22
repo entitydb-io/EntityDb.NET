@@ -68,14 +68,14 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        /// Adds an internal implementation of <see cref="ITaggingStrategy{TEntity}"/> to a service collection for an entity that implements <see cref="ITaggedEntity"/>.
+        /// Adds an internal implementation of <see cref="ILeasingStrategy{TEntity}"/> to a service collection for an entity that implements <see cref="ILeasedEntity"/>.
         /// </summary>
-        /// <typeparam name="TEntity">The type of the entity to be tagged.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity to be leased.</typeparam>
         /// <param name="serviceCollection">The service collection.</param>
-        public static void AddTaggedEntityTaggingStrategy<TEntity>(this IServiceCollection serviceCollection)
-            where TEntity : ITaggedEntity
+        public static void AddLeasedEntityLeasingStrategy<TEntity>(this IServiceCollection serviceCollection)
+            where TEntity : ILeasedEntity
         {
-            serviceCollection.AddSingleton<ITaggingStrategy<TEntity>, TaggedEntityTaggingStrategy<TEntity>>();
+            serviceCollection.AddSingleton<ILeasingStrategy<TEntity>, LeasedEntityLeasingStrategy<TEntity>>();
         }
 
         /// <summary>

@@ -37,7 +37,7 @@ namespace EntityDb.Common.Transactions
         {
             var previousEntity = _knownEntities[entityId];
             var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
-            var previousTags = _serviceProvider.GetTags(previousEntity);
+            var previousLeases = _serviceProvider.GetLeases(previousEntity);
 
             if (_serviceProvider.IsAuthorized(previousEntity, command, _claimsPrincipal) == false)
             {
@@ -49,7 +49,7 @@ namespace EntityDb.Common.Transactions
             nextFacts.Add(_serviceProvider.GetVersionNumberFact<TEntity>(previousVersionNumber + 1));
 
             var nextEntity = previousEntity.Reduce(nextFacts);
-            var nextTags = _serviceProvider.GetTags(nextEntity);
+            var nextLeases = _serviceProvider.GetLeases(nextEntity);
 
             var transactionFacts = new List<TransactionFact<TEntity>>();
 
@@ -68,8 +68,8 @@ namespace EntityDb.Common.Transactions
                 previousVersionNumber,
                 command,
                 transactionFacts.ToArray(),
-                previousTags.Except(nextTags).ToArray(),
-                nextTags.Except(previousTags).ToArray()
+                previousLeases.Except(nextLeases).ToArray(),
+                nextLeases.Except(previousLeases).ToArray()
             ));
 
             _knownEntities[entityId] = nextEntity;

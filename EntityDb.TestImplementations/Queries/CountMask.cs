@@ -3,11 +3,11 @@ using EntityDb.Common.Queries.Filtered;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Source;
-using EntityDb.TestImplementations.Tags;
+using EntityDb.TestImplementations.Leases;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountFilter : ISourceFilter, ICommandFilter, IFactFilter, ITagFilter
+    public record CountFilter : ISourceFilter, ICommandFilter, IFactFilter, ILeaseFilter
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {
@@ -24,9 +24,9 @@ namespace EntityDb.TestImplementations.Queries
             return builder.FactTypeIn(typeof(Counted));
         }
 
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
-            return builder.TagTypeIn(typeof(CountTag));
+            return builder.LeaseTypeIn(typeof(CountLease));
         }
     }
 }

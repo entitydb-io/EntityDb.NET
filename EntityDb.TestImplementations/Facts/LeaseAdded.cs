@@ -1,12 +1,12 @@
 ﻿using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Common.Leases;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Leases;
 using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Facts
 {
-    public record Counted(int Number) : IFact<TransactionEntity>
+    public record LeaseAdded(string LeaseScope, string LeaseLabel, string LeaseValue) : IFact<TransactionEntity>
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
@@ -17,7 +17,7 @@ namespace EntityDb.TestImplementations.Facts
                 leases.AddRange(entity.Leases);
             }
 
-            leases.Add(new CountLease(Number));
+            leases.Add(new Lease(LeaseScope, LeaseLabel, LeaseValue));
 
             return entity with
             {

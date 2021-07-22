@@ -2,7 +2,7 @@
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
@@ -104,22 +104,22 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        /// Returns the tags for a <typeparamref name="TEntity"/>.
+        /// Returns the leases for a <typeparamref name="TEntity"/>.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="serviceProvider">The service provider.</param>
         /// <param name="entity">The entity.</param>
-        /// <returns>The tags for <paramref name="entity"/>.</returns>
-        public static ITag[] GetTags<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
+        /// <returns>The leases for <paramref name="entity"/>.</returns>
+        public static ILease[] GetLeases<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
         {
-            var taggingStrategy = serviceProvider.GetService<ITaggingStrategy<TEntity>>();
+            var leasingStrategy = serviceProvider.GetService<ILeasingStrategy<TEntity>>();
 
-            if (taggingStrategy != null)
+            if (leasingStrategy != null)
             {
-                return taggingStrategy.GetTags(entity);
+                return leasingStrategy.GetLeases(entity);
             }
 
-            return Array.Empty<ITag>();
+            return Array.Empty<ILease>();
         }
 
         /// <summary>

@@ -1,11 +1,7 @@
-﻿using EntityDb.Abstractions.Facts;
-using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
+﻿using EntityDb.Common.Extensions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
-using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Extensions
@@ -17,7 +13,7 @@ namespace EntityDb.Common.Tests.Extensions
         }
 
         [Fact]
-        public void GivenNoTaggingStrategy_WhenGettingTags_ThenReturnEmptyArray()
+        public void GivenNoLeasingStrategy_WhenGettingLeases_ThenReturnEmptyArray()
         {
             // ARRANGE
 
@@ -25,11 +21,11 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ACT
 
-            var tags = serviceProvider.GetTags(new TransactionEntity());
+            var leases = serviceProvider.GetLeases(new TransactionEntity());
 
             // ASSERT
 
-            Assert.Empty(tags);
+            Assert.Empty(leases);
         }
 
         [Fact]

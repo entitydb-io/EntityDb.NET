@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using System;
 
 namespace EntityDb.Abstractions.Transactions
@@ -45,16 +45,16 @@ namespace EntityDb.Abstractions.Transactions
         /// The metadata properties which must be removed.
         /// </summary>
         /// <remarks>
-        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
+        /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
         /// </remarks>
-        ITag[] DeleteTags { get; }
+        ILease[] DeleteLeases { get; }
 
         /// <summary>
         /// The metadata properties which must be added.
         /// </summary>
         /// <remarks>
-        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
+        /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
         /// </remarks>
-        ITag[] InsertTags { get; }
+        ILease[] InsertLeases { get; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    /// Abstracts a query for an object repository. Possible objects include: sources, commands, facts, and tags.
+    /// Abstracts a query for an object repository. Possible objects include: sources, commands, facts, and leases.
     /// </summary>
     public interface IQuery
     {

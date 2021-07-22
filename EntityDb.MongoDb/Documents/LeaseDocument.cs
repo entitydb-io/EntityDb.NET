@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record TagDocument
+    internal sealed record LeaseDocument
     (
         DateTime TransactionTimeStamp,
         Guid TransactionId,
@@ -32,12 +32,12 @@ namespace EntityDb.MongoDb.Documents
         _id
     )
     {
-        private static readonly TagFilterBuilder _tagFilterBuilder = new();
-        private static readonly TagSortBuilder _tagSortBuilder = new();
+        private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
+        private static readonly LeaseSortBuilder _leaseSortBuilder = new();
         private static readonly IndexKeysDefinitionBuilder<BsonDocument> _indexKeys = Builders<BsonDocument>.IndexKeys;
         private static readonly ProjectionDefinitionBuilder<BsonDocument> _projection = Builders<BsonDocument>.Projection;
 
-        public const string CollectionName = "Tags";
+        public const string CollectionName = "Leases";
 
         public static readonly string[] HoistedFieldNames = new[]
         {
@@ -89,48 +89,48 @@ namespace EntityDb.MongoDb.Documents
             Guid transactionId,
             Guid entityId,
             ulong entityVersionNumber,
-            ITag[] tags
+            ILease[] leases
         )
         {
-            if (tags.Length > 0)
+            if (leases.Length > 0)
             {
                 var mongoCollection = GetCollection(mongoDatabase);
 
-                var tagDocuments = tags.Select(tag => new TagDocument
+                var leaseDocuments = leases.Select(lease => new LeaseDocument
                 (
                     transactionTimeStamp,
                     transactionId,
                     entityId,
                     entityVersionNumber,
-                    tag.Scope,
-                    tag.Label,
-                    tag.Value,
-                    BsonDocumentEnvelope.Deconstruct(tag, serviceProvider)
+                    lease.Scope,
+                    lease.Label,
+                    lease.Value,
+                    BsonDocumentEnvelope.Deconstruct(lease, serviceProvider)
                 ));
 
                 await InsertMany
                 (
                     clientSessionHandle,
                     mongoCollection,
-                    tagDocuments
+                    leaseDocuments
                 );
             }
         }
 
-        public static Task<List<TagDocument>> GetMany
+        public static Task<List<LeaseDocument>> GetMany
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ITagQuery tagQuery,
-            ProjectionDefinition<BsonDocument, TagDocument> projection
+            ILeaseQuery leaseQuery,
+            ProjectionDefinition<BsonDocument, LeaseDocument> projection
         )
         {
             var mongoCollection = GetCollection(mongoDatabase);
 
-            var filter = tagQuery.GetFilter(_tagFilterBuilder);
-            var sort = tagQuery.GetSort(_tagSortBuilder);
-            var skip = tagQuery.Skip;
-            var take = tagQuery.Take;
+            var filter = leaseQuery.GetFilter(_leaseFilterBuilder);
+            var sort = leaseQuery.GetSort(_leaseSortBuilder);
+            var skip = leaseQuery.Skip;
+            var take = leaseQuery.Take;
 
             return GetMany
             (
@@ -148,14 +148,14 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ITagQuery tagQuery
+            ILeaseQuery leaseQuery
         )
         {
-            var tagDocuments = await GetMany
+            var leaseDocuments = await GetMany
             (
                 clientSessionHandle,
                 mongoDatabase,
-                tagQuery,
+                leaseQuery,
                 _projection.Combine
                 (
                     _projection.Exclude(nameof(_id)),
@@ -163,8 +163,8 @@ namespace EntityDb.MongoDb.Documents
                 )
             );
 
-            return tagDocuments
-                .Select(tagDocument => tagDocument.TransactionId)
+            return leaseDocuments
+                .Select(leaseDocument => leaseDocument.TransactionId)
                 .Distinct()
                 .ToArray();
         }
@@ -173,14 +173,14 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ITagQuery tagQuery
+            ILeaseQuery leaseQuery
         )
         {
-            var tagDocuments = await GetMany
+            var leaseDocuments = await GetMany
             (
                 clientSessionHandle,
                 mongoDatabase,
-                tagQuery,
+                leaseQuery,
                 _projection.Combine
                 (
                     _projection.Exclude(nameof(_id)),
@@ -188,25 +188,25 @@ namespace EntityDb.MongoDb.Documents
                 )
             );
 
-            return tagDocuments
-                .Select(tagDocument => tagDocument.EntityId)
+            return leaseDocuments
+                .Select(leaseDocument => leaseDocument.EntityId)
                 .Distinct()
                 .ToArray();
         }
 
-        public static async Task<ITag[]> GetTags
+        public static async Task<ILease[]> GetLeases
         (
             IServiceProvider serviceProvider,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ITagQuery tagQuery
+            ILeaseQuery leaseQuery
         )
         {
-            var tagDocuments = await GetMany
+            var leaseDocuments = await GetMany
             (
                 clientSessionHandle,
                 mongoDatabase,
-                tagQuery,
+                leaseQuery,
                 _projection.Combine
                 (
                     _projection.Exclude(nameof(_id)),
@@ -214,8 +214,8 @@ namespace EntityDb.MongoDb.Documents
                 )
             );
 
-            return tagDocuments
-                .Select(tagDocument => tagDocument.Data.Reconstruct<ITag>(serviceProvider))
+            return leaseDocuments
+                .Select(leaseDocument => leaseDocument.Data.Reconstruct<ILease>(serviceProvider))
                 .ToArray();
         }
 
@@ -224,22 +224,22 @@ namespace EntityDb.MongoDb.Documents
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             Guid entityId,
-            ITag[] tags
+            ILease[] leases
         )
         {
-            if (tags.Length > 0)
+            if (leases.Length > 0)
             {
                 var mongoCollection = GetCollection(mongoDatabase);
 
-                var deleteTagsQuery = new DeleteTagsQuery(entityId, tags);
+                var deleteLeasesQuery = new DeleteLeasesQuery(entityId, leases);
 
-                var tagDocumentFilter = deleteTagsQuery.GetFilter(_tagFilterBuilder);
+                var leaseDocumentFilter = deleteLeasesQuery.GetFilter(_leaseFilterBuilder);
 
                 await DeleteMany
                 (
                     clientSessionHandle,
                     mongoCollection,
-                    tagDocumentFilter
+                    leaseDocumentFilter
                 );
             }
         }

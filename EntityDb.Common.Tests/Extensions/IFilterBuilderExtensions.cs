@@ -4,7 +4,7 @@ using Moq;
 using System.Linq;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Tags
+namespace EntityDb.Common.Tests.Extensions
 {
     public class IFilterBuilderExtensionsTests
     {

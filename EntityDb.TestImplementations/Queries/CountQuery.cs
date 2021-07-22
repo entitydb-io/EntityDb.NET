@@ -1,16 +1,16 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using EntityDb.Common.Tags;
+using EntityDb.Common.Leases;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Source;
-using EntityDb.TestImplementations.Tags;
+using EntityDb.TestImplementations.Leases;
 
 namespace EntityDb.TestImplementations.Queries
 {
 
-    public record CountQuery<TEntity>(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ITagQuery
+    public record CountQuery<TEntity>(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {
@@ -27,9 +27,9 @@ namespace EntityDb.TestImplementations.Queries
             return builder.FactMatches((Counted counted) => Gte <= counted.Number && counted.Number <= Lte);
         }
 
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
-            return builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte);
+            return builder.LeaseMatches((CountLease countLease) => Gte <= countLease.Number && countLease.Number <= Lte);
         }
 
         public TSort? GetSort<TSort>(ISourceSortBuilder<TSort> builder)
@@ -65,15 +65,15 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
                 builder.EntityId(true),
                 builder.EntityVersionNumber(true),
-                builder.TagType(true),
-                builder.TagProperty(true, (CountTag countTag) => countTag.Number),
-                builder.TagProperty(true, (Tag tag) => tag.Scope)
+                builder.LeaseType(true),
+                builder.LeaseProperty(true, (CountLease countLease) => countLease.Number),
+                builder.LeaseProperty(true, (Lease lease) => lease.Scope)
             );
         }
 

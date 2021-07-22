@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Common.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,11 +12,11 @@ namespace EntityDb.TestImplementations.Entities
     (
         ulong VersionNumber = default,
         string? Role = default,
-        ITag[]? Tags = default
+        ILease[]? Leases = default
     ) :
         IAuthorizedEntity<TransactionEntity>,
         IVersionedEntity<TransactionEntity>,
-        ITaggedEntity
+        ILeasedEntity
     {
         public const string MongoCollectionName = "Test";
         public const string RedisKeyNamespace = "test";
@@ -36,14 +36,14 @@ namespace EntityDb.TestImplementations.Entities
             return this with { VersionNumber = versionNumber };
         }
 
-        public IEnumerable<ITag> GetTags()
+        public IEnumerable<ILease> GetLeases()
         {
-            if (Tags != null)
+            if (Leases != null)
             {
-                return Tags;
+                return Leases;
             }
 
-            return Enumerable.Empty<ITag>();
+            return Enumerable.Empty<ILease>();
         }
     }
 }

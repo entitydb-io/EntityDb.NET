@@ -60,10 +60,10 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                 Collection = FactDocument.CollectionName,
             };
 
-            var tagResource = new MongoDbAtlasResource
+            var leaseResource = new MongoDbAtlasResource
             {
                 Db = entityName,
-                Collection = TagDocument.CollectionName,
+                Collection = LeaseDocument.CollectionName,
             };
 
             var roleActions = new[]
@@ -92,7 +92,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                         sourceResource,
                         commandResource,
                         factResource,
-                        tagResource,
+                        leaseResource,
                     },
                 },
                 new MongoDbAtlasRoleAction
@@ -103,7 +103,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                         sourceResource,
                         commandResource,
                         factResource,
-                        tagResource,
+                        leaseResource,
                     },
                 },
                 new MongoDbAtlasRoleAction
@@ -114,7 +114,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                         sourceResource,
                         commandResource,
                         factResource,
-                        tagResource,
+                        leaseResource,
                     },
                 },
                 new MongoDbAtlasRoleAction
@@ -122,7 +122,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                     Action = "REMOVE",
                     Resources = new[]
                     {
-                        tagResource,
+                        leaseResource,
                     },
                 },
             };
