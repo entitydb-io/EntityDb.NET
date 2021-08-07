@@ -17,7 +17,7 @@ namespace EntityDb.Common.Strategies.Resolving
             (
                 Assembly.CreateQualifiedName(assemblyFullName, typeFullName),
                 Assembly.Load,
-                (assembly, typeName, ignoreCase) => assembly?.GetType(typeName, true, ignoreCase),
+                (assembly, typeName, ignoreCase) => assembly!.GetType(typeName, true, ignoreCase),
                 false,
                 false
             );
