@@ -2,8 +2,8 @@
 using EntityDb.Common.Queries.Filtered;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Facts;
-using EntityDb.TestImplementations.Source;
 using EntityDb.TestImplementations.Leases;
+using EntityDb.TestImplementations.Source;
 
 namespace EntityDb.TestImplementations.Queries
 {

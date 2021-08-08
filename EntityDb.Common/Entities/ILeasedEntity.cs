@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Strategies;
 using System.Collections.Generic;
 
 namespace EntityDb.Common.Entities

@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Leases;
-using System;
 
 namespace EntityDb.Abstractions.Strategies
 {

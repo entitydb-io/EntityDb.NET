@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
 using System;
 using System.Threading.Tasks;
 

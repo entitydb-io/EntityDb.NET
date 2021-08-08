@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Strategies.Resolving;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.FilterDefinitions;
 using MongoDB.Bson;
