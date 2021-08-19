@@ -482,6 +482,58 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
+        public async Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged()
+        {
+            // ARRANGE
+
+            const ulong previousVersionNumber = 0;
+
+            var entityId = Guid.NewGuid();
+
+            static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong previousVersionNumber)
+            {
+                return new Transaction<TransactionEntity>
+                (
+                    Guid.NewGuid(),
+                    DateTime.UtcNow,
+                    new NoSource(),
+                    new[]
+                    {
+                        new TransactionCommand<TransactionEntity>
+                        (
+                            entityId,
+                            previousVersionNumber,
+                            new DoNothing(),
+                            Array.Empty<TransactionFact<TransactionEntity>>(),
+                            Array.Empty<ILease>(),
+                            Array.Empty<ILease>()
+                        ),
+                    }
+                );
+            }
+
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+
+            loggerMock
+                .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
+                .Verifiable();
+
+            await using var transactionRepository = await CreateRepository(loggerOverride: loggerMock.Object);
+
+            // ACT
+
+            var firstTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
+            var secondTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
+
+            // ASSERT
+
+            Assert.True(firstTransactionInserted);
+            Assert.False(secondTransactionInserted);
+
+            loggerMock.Verify();
+        }
+
+        [Fact]
         public async Task GivenNonUniqueSubversionNumbers_WhenInsertingFacts_ThenReturnFalse()
         {
             // ARRANGE
