@@ -14,7 +14,6 @@ namespace EntityDb.Abstractions.Transactions
         /// <remarks>
         /// <see cref="ITransactionRepository{TEntity}.PutTransaction(ITransaction{TEntity})"/> should always return <c>false</c> if this is <c>true</c>.
         /// </remarks>
-        //TODO: Make sure the generic test suite verifies that this requirement is satisified
         bool ReadOnly { get; }
 
         /// <summary>
