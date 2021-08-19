@@ -3,6 +3,8 @@ using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Queries.FilterBuilders;
+using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -734,6 +736,81 @@ namespace EntityDb.Common.Tests.Transactions
             actualInitialLeases.SequenceEqual(expectedInitialLeases).ShouldBeTrue();
 
             actualFinalLeases.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public async Task GivenTransactionCreatesEntity_WhenQueryingForVersisonOne_ThenReturnTheExpectedCommand()
+        {
+            // ARRANGE
+
+            var expectedCommand = new Count(1);
+
+            var transaction = _serviceProvider
+                .GetTransactionBuilder<TransactionEntity>()
+                .Create(Guid.NewGuid(), expectedCommand)
+                .Build(Guid.NewGuid(), new NoSource());
+
+            var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
+
+            using var transactionRepository = await CreateRepository();
+
+            // ACT
+
+            await transactionRepository.PutTransaction(transaction);
+
+            var newCommands = await transactionRepository.GetCommands(versionOneCommandQuery);
+
+            // ASSERT
+
+            transaction.Commands.Length.ShouldBe(1);
+
+            transaction.Commands[0].ExpectedPreviousVersionNumber.ShouldBe(default);
+
+            newCommands.Length.ShouldBe(1);
+
+            newCommands[0].ShouldBeEquivalentTo(expectedCommand);
+        }
+
+        [Fact]
+        public async Task GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand()
+        {
+            // ARRANGE
+
+            var expectedCommand = new Count(2);
+
+            var entityId = Guid.NewGuid();
+
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+
+            var firstTransaction = transactionBuilder
+                .Create(entityId, new Count(1))
+                .Build(Guid.NewGuid(), new NoSource());
+
+            var secondTransaction = transactionBuilder
+                .Append(entityId, expectedCommand)
+                .Build(Guid.NewGuid(), new NoSource());
+
+            var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
+
+            using var transactionRepository = await CreateRepository();
+
+            await transactionRepository.PutTransaction(firstTransaction);
+
+            // ACT
+
+            await transactionRepository.PutTransaction(secondTransaction);
+
+            var newCommands = await transactionRepository.GetCommands(versionTwoCommandQuery);
+
+            // ASSERT
+
+            secondTransaction.Commands.Length.ShouldBe(1);
+
+            secondTransaction.Commands[0].ExpectedPreviousVersionNumber.ShouldBe(1ul);
+
+            newCommands.Length.ShouldBe(1);
+
+            newCommands[0].ShouldBeEquivalentTo(expectedCommand);
         }
 
         [Theory]

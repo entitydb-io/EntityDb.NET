@@ -21,7 +21,6 @@ namespace EntityDb.Abstractions.Transactions
         /// <remarks>
         /// The repository must use a VersionNumber equal to <see cref="ExpectedPreviousVersionNumber"/> + 1.
         /// </remarks>
-        //TODO: Make sure that the generic test suite verifies that this requirement is satisified.
         ulong ExpectedPreviousVersionNumber { get; }
 
         /// <summary>
