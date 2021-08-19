@@ -1,5 +1,6 @@
-﻿using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
 using EntityDb.Common.Strategies;
@@ -58,6 +59,17 @@ namespace EntityDb.Common.Extensions
             serviceCollection.AddLogging();
 
             serviceCollection.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();
+        }
+
+        /// <summary>
+        /// Adds a custom implementation of <see cref="IAgentAccessor"/> to a service collection.
+        /// </summary>
+        /// <typeparam name="TAgentAccessor">The type of the agent accessor.</typeparam>
+        /// <param name="serviceCollection">The service collection</param>
+        public static void AddAgentAccessor<TAgentAccessor>(this IServiceCollection serviceCollection)
+            where TAgentAccessor : class, IAgentAccessor
+        {
+            serviceCollection.AddScoped<IAgentAccessor, TAgentAccessor>();
         }
 
         /// <summary>

@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntityDb.Abstractions\EntityDb.Abstractions.csproj" />
+    <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
   </ItemGroup>
 
 </Project>

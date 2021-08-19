@@ -10,7 +10,6 @@ using EntityDb.TestImplementations.Source;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -24,7 +23,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
         private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to, IServiceProvider serviceProvider, ITransactionRepository<TransactionEntity>? transactionRepository = null, ISnapshotRepository<TransactionEntity>? snapshotRepository = null)
         {
-            var transactionBuilder = new TransactionBuilder<TransactionEntity>(new ClaimsPrincipal(), serviceProvider);
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             if (transactionRepository != null)
             {

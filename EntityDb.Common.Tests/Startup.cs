@@ -1,4 +1,5 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,8 @@ namespace EntityDb.Common.Tests
             });
 
             serviceCollection.AddLifoResolvingStrategyChain();
+
+            serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
             serviceCollection.AddConstructingStrategy<TransactionEntity, TransactionEntityConstructingStrategy>();
             serviceCollection.AddVersionedEntityVersioningStrategy<TransactionEntity>();

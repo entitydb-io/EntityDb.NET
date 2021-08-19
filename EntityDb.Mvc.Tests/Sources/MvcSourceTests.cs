@@ -1,9 +1,11 @@
-﻿using EntityDb.MongoDb.Envelopes;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
+using EntityDb.MongoDb.Envelopes;
 using EntityDb.Mvc.Sources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -13,11 +15,13 @@ namespace EntityDb.Mvc.Tests.Sources
 {
     public class MvcSourceTests
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
 
-        public MvcSourceTests(IServiceProvider serviceProvider)
+        public MvcSourceTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
         {
-            _serviceProvider = serviceProvider;
+            _logger = loggerFactory.CreateLogger<MvcSourceTests>();
+            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         private static MvcSource CreateMvcSource()
@@ -144,9 +148,9 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             var originalMvcSource = CreateMvcSource();
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _serviceProvider);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _logger);
 
-            var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(_serviceProvider);
+            var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(_logger, _resolvingStrategyChain);
 
             Assert.Single(reconstructedMvcSource.Headers);
             Assert.Single(reconstructedMvcSource.Headers[0].Values);

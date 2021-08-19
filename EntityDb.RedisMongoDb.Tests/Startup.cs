@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.Redis.Extensions;
+using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,6 +37,8 @@ namespace EntityDb.RedisMongoDb.Tests
 
                 return mongoDbRunner;
             });
+
+            serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
             serviceCollection.AddDefaultResolvingStrategy();
 

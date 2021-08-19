@@ -1429,7 +1429,7 @@
       "entitydb.mvc": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Abstractions": "1.0.0"
+          "EntityDb.Common": "1.0.0"
         }
       },
       "entitydb.testimplementations": {

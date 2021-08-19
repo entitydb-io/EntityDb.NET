@@ -1,26 +1,24 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Queries.FilterBuilders;
-using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Queries;
 using EntityDb.Common.Leases;
+using EntityDb.Common.Queries;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Facts;
+using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
 using EntityDb.TestImplementations.Source;
-using EntityDb.TestImplementations.Leases;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -371,7 +369,7 @@ namespace EntityDb.Common.Tests.Transactions
 
         private ITransaction<TransactionEntity> BuildTransaction(Guid transactionId, Guid entityId, object source, ICommand<TransactionEntity>[] commands, DateTime? timeStampOverride = null)
         {
-            var transactionBuilder = new TransactionBuilder<TransactionEntity>(new ClaimsPrincipal(), _serviceProvider);
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             transactionBuilder.Create(entityId, commands[0]);
 
@@ -666,8 +664,7 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases()
         {
             // ARRANGE
-
-            var transactionBuilder = new TransactionBuilder<TransactionEntity>(new ClaimsPrincipal(), _serviceProvider);
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             var expectedInitialLeases = new[]
             {

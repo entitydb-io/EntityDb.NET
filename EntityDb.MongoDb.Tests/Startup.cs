@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Extensions;
+using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,8 @@ namespace EntityDb.MongoDb.Tests
 
                 return mongoDbRunner;
             });
+
+            serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
             serviceCollection.AddDefaultResolvingStrategy();
 

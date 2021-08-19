@@ -10,7 +10,7 @@ namespace EntityDb.Mvc.Tests
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddLogging();
+            serviceCollection.AddDefaultLogger();
 
             serviceCollection.AddDefaultResolvingStrategy();
 

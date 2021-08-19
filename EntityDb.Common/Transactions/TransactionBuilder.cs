@@ -6,7 +6,6 @@ using EntityDb.Common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions
@@ -19,17 +18,14 @@ namespace EntityDb.Common.Transactions
     {
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
         private readonly List<TransactionCommand<TEntity>> _transactionCommands = new();
-        private readonly ClaimsPrincipal _claimsPrincipal;
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of <see cref="TransactionBuilder{TEntity}"/>.
         /// </summary>
-        /// <param name="claimsPrincipal">The claims of the agent.</param>
         /// <param name="serviceProvider">The service provider.</param>
-        public TransactionBuilder(ClaimsPrincipal claimsPrincipal, IServiceProvider serviceProvider)
+        public TransactionBuilder(IServiceProvider serviceProvider)
         {
-            _claimsPrincipal = claimsPrincipal;
             _serviceProvider = serviceProvider;
         }
 
@@ -39,7 +35,7 @@ namespace EntityDb.Common.Transactions
             var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
             var previousLeases = _serviceProvider.GetLeases(previousEntity);
 
-            if (_serviceProvider.IsAuthorized(previousEntity, command, _claimsPrincipal) == false)
+            if (_serviceProvider.IsAuthorized(previousEntity, command) == false)
             {
                 throw new CommandNotAuthorizedException();
             }

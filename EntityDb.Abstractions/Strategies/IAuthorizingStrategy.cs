@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Commands;
-using System.Security.Claims;
+﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.Commands;
 
 namespace EntityDb.Abstractions.Strategies
 {
@@ -14,8 +14,8 @@ namespace EntityDb.Abstractions.Strategies
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="command">The command.</param>
-        /// <param name="claimsPrincipal">The claims of the agent.</param>
+        /// <param name="agent">The agent.</param>
         /// <returns><c>true</c> if execution is authorized, or <c>false</c> if execution is not authorized.</returns>
-        bool IsAuthorized(TEntity entity, ICommand<TEntity> command, ClaimsPrincipal claimsPrincipal);
+        bool IsAuthorized(TEntity entity, ICommand<TEntity> command, IAgent agent);
     }
 }

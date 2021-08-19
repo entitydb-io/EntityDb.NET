@@ -1,14 +1,15 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Extensions
@@ -18,6 +19,29 @@ namespace EntityDb.Common.Extensions
     /// </summary>
     public static class IServiceProviderExtensions
     {
+        /// <summary>
+        /// Returns the <see cref="IAgent"/> associated with the current service scope.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <returns></returns>
+        public static IAgent GetAgent(this IServiceProvider serviceProvider)
+        {
+            var agentAccessor = serviceProvider.GetRequiredService<IAgentAccessor>();
+
+            return agentAccessor.GetAgent();
+        }
+
+        /// <summary>
+        /// Returns a new instance of <see cref="TransactionBuilder{TEntity}"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity for which a transaction is to be built.</typeparam>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <returns></returns>
+        public static TransactionBuilder<TEntity> GetTransactionBuilder<TEntity>(this IServiceProvider serviceProvider)
+        {
+            return new TransactionBuilder<TEntity>(serviceProvider);
+        }
+
         /// <summary>
         /// Returns the resolved <see cref="Type"/> or throws if the <see cref="Type"/> cannot be resolved.
         /// </summary>
@@ -129,15 +153,16 @@ namespace EntityDb.Common.Extensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="command">The command.</param>
-        /// <param name="claimsPrincipal">The claims of the agent.</param>
         /// <returns><c>true</c> if execution is authorized, or <c>false</c> if execution is not authorized.</returns>
-        public static bool IsAuthorized<TEntity>(this IServiceProvider serviceProvider, TEntity entity, ICommand<TEntity> command, ClaimsPrincipal claimsPrincipal)
+        public static bool IsAuthorized<TEntity>(this IServiceProvider serviceProvider, TEntity entity, ICommand<TEntity> command)
         {
             var authorizingStrategy = serviceProvider.GetService<IAuthorizingStrategy<TEntity>>();
 
             if (authorizingStrategy != null)
             {
-                return authorizingStrategy.IsAuthorized(entity, command, claimsPrincipal);
+                var agent = serviceProvider.GetAgent();
+
+                return authorizingStrategy.IsAuthorized(entity, command, agent);
             }
 
             return true;

@@ -1,10 +1,9 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Common.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 
 namespace EntityDb.TestImplementations.Entities
 {
@@ -21,11 +20,11 @@ namespace EntityDb.TestImplementations.Entities
         public const string MongoCollectionName = "Test";
         public const string RedisKeyNamespace = "test";
 
-        public bool IsAuthorized(ICommand<TransactionEntity> command, ClaimsPrincipal claimsPrincipal)
+        public bool IsAuthorized(ICommand<TransactionEntity> command, IAgent agent)
         {
             if (Role != null)
             {
-                return claimsPrincipal.IsInRole(Role);
+                return agent.HasRole(Role);
             }
 
             return true;

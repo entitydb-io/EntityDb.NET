@@ -37,7 +37,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ACT
 
-            var isAuthorized = serviceProvider.IsAuthorized(new TransactionEntity(), new DoNothing(), default!);
+            var isAuthorized = serviceProvider.IsAuthorized(new TransactionEntity(), new DoNothing());
 
             // ASSERT
 
