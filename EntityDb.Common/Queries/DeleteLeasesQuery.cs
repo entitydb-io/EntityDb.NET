@@ -1,7 +1,7 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using EntityDb.Abstractions.Leases;
 using EntityDb.Common.Leases;
 using System;
 using System.Linq;

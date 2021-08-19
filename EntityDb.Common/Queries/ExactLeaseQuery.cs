@@ -1,7 +1,7 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using EntityDb.Abstractions.Leases;
 using EntityDb.Common.Leases;
 
 namespace EntityDb.Common.Queries
@@ -11,6 +11,7 @@ namespace EntityDb.Common.Queries
     /// </summary>
     public sealed record ExactLeaseQuery(ILease Lease) : ILeaseQuery
     {
+        /// <inheritdoc cref="ILeaseQuery.GetFilter{TFilter}(ILeaseFilterBuilder{TFilter})" />
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.LeaseMatches<Lease>((x) =>
@@ -19,13 +20,16 @@ namespace EntityDb.Common.Queries
                 x.Value == Lease.Value);
         }
 
+        /// <inheritdoc cref="ILeaseQuery.GetSort{TSort}(ILeaseSortBuilder{TSort})" />
         public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return default;
         }
 
+        /// <inheritdoc cref="IQuery.Skip" />
         public int? Skip => null;
 
+        /// <inheritdoc cref="IQuery.Take" />
         public int? Take => 1;
     }
 }

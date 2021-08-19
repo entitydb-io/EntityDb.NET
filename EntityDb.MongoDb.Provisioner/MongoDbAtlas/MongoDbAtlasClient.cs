@@ -192,11 +192,6 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             throw new InvalidOperationException();
         }
 
-        public void Dispose()
-        {
-            _httpClient.Dispose();
-        }
-
         public static async Task<MongoDbAtlasClient> Create(string groupName, string publicKey, string privateKey)
         {
             var getGroupsResponse = await Send(publicKey, privateKey, () => new HttpRequestMessage
@@ -219,7 +214,11 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             }
 
             throw new InvalidOperationException();
+        }
 
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }
