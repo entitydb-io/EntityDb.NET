@@ -1,11 +1,9 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
 using EntityDb.TestImplementations.Entities;
-using Mongo2Go;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,14 +12,10 @@ namespace EntityDb.MongoDb.Tests.Sessions
 {
     public class MongoDbSessionTests
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly MongoDbRunner _mongoDbRunner;
         private readonly ILogger _logger;
 
-        public MongoDbSessionTests(IServiceProvider serviceProvider, MongoDbRunner mongoDbRunner, ILoggerFactory loggerFactory)
+        public MongoDbSessionTests(ILoggerFactory loggerFactory)
         {
-            _serviceProvider = serviceProvider;
-            _mongoDbRunner = mongoDbRunner;
             _logger = loggerFactory.CreateLogger<MongoDbSessionTests>();
         }
 
