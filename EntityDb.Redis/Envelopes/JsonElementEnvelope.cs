@@ -1,8 +1,7 @@
-﻿using EntityDb.Common.Extensions;
-using EntityDb.Common.Strategies.Resolving;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
 using EntityDb.Redis.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Text.Json;
 
@@ -23,58 +22,50 @@ namespace EntityDb.Redis.Envelopes
             return JsonSerializer.Deserialize<JsonElement>(json);
         }
 
-        public TObject Reconstruct<TObject>(IServiceProvider serviceProvider)
+        public TObject Reconstruct<TObject>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(JsonElementEnvelope));
-
             try
             {
-                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(), serviceProvider.ResolveType(AssemblyFullName, TypeFullName, TypeName))!;
+                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(), resolvingStrategyChain.ResolveType(AssemblyFullName, TypeFullName, TypeName))!;
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to reconstruct.");
+                logger.LogError(exception, "Unable to reconstruct.");
 
                 throw new DeserializeException();
             }
         }
 
-        public byte[] Serialize(IServiceProvider serviceProvider)
+        public byte[] Serialize(ILogger logger)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(JsonElementEnvelope));
-
             try
             {
                 return JsonSerializer.SerializeToUtf8Bytes(this, typeof(JsonElementEnvelope));
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to serialize.");
+                logger.LogError(exception, "Unable to serialize.");
 
                 throw new SerializeException();
             }
         }
 
-        public static JsonElementEnvelope Deserialize(byte[] utf8JsonBytes, IServiceProvider serviceProvider)
+        public static JsonElementEnvelope Deserialize(byte[] utf8JsonBytes, ILogger logger)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(JsonElementEnvelope));
-
             try
             {
                 return (JsonElementEnvelope)JsonSerializer.Deserialize(utf8JsonBytes, typeof(JsonElementEnvelope))!;
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to deserialize.");
+                logger.LogError(exception, "Unable to deserialize.");
 
                 throw new DeserializeException();
             }
         }
 
-        public static JsonElementEnvelope Deconstruct(dynamic? @object, IServiceProvider serviceProvider)
+        public static JsonElementEnvelope Deconstruct(dynamic? @object, ILogger logger)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(JsonElementEnvelope));
-
             try
             {
                 var jsonElement = GetJsonElement(@object);
@@ -91,7 +82,7 @@ namespace EntityDb.Redis.Envelopes
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to deconstruct.");
+                logger.LogError(exception, "Unable to deconstruct.");
 
                 throw new SerializeException();
             }

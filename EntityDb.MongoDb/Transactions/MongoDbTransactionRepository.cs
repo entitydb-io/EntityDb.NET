@@ -1,13 +1,14 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await SourceDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, sourceQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await SourceDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, sourceQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -35,7 +36,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await CommandDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, commandQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await CommandDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, commandQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -44,7 +45,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await FactDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, factQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await FactDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, factQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -53,7 +54,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -62,7 +63,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await SourceDocument.GetEntityIds(clientSessionHandle, mongoDatabase, sourceQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await SourceDocument.GetEntityIds(clientSessionHandle, mongoDatabase, sourceQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -71,7 +72,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await CommandDocument.GetEntityIds(clientSessionHandle, mongoDatabase, commandQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await CommandDocument.GetEntityIds(clientSessionHandle, mongoDatabase, commandQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -80,7 +81,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await FactDocument.GetEntityIds(clientSessionHandle, mongoDatabase, factQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await FactDocument.GetEntityIds(clientSessionHandle, mongoDatabase, factQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -89,7 +90,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery),
                 Array.Empty<Guid>()
             );
         }
@@ -98,7 +99,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (serviceProvider, clientSessionHandle, mongoDatabase) => SourceDocument.GetSources(serviceProvider, clientSessionHandle, mongoDatabase, sourceQuery),
+                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => SourceDocument.GetSources(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, sourceQuery),
                 Array.Empty<object>()
             );
         }
@@ -107,7 +108,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (serviceProvider, clientSessionHandle, mongoDatabase) => CommandDocument.GetCommands<TEntity>(serviceProvider, clientSessionHandle, mongoDatabase, commandQuery),
+                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => CommandDocument.GetCommands<TEntity>(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, commandQuery),
                 Array.Empty<ICommand<TEntity>>()
             );
         }
@@ -116,7 +117,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (serviceProvider, clientSessionHandle, mongoDatabase) => FactDocument.GetFacts<TEntity>(serviceProvider, clientSessionHandle, mongoDatabase, factQuery),
+                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => FactDocument.GetFacts<TEntity>(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, factQuery),
                 Array.Empty<IFact<TEntity>>()
             );
         }
@@ -125,7 +126,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (serviceProvider, clientSessionHandle, mongoDatabase) => LeaseDocument.GetLeases(serviceProvider, clientSessionHandle, mongoDatabase, leaseQuery),
+                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => LeaseDocument.GetLeases(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, leaseQuery),
                 Array.Empty<ILease>()
             );
         }
@@ -216,6 +217,7 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
+        [ExcludeFromCodeCoverage]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

@@ -2,6 +2,7 @@
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots
@@ -44,7 +45,7 @@ namespace EntityDb.Redis.Snapshots
         {
             return RedisSession.ExecuteQuery
             (
-                async (serviceProvider, redisDatabase) =>
+                async (logger, resolvingStrategyChain, redisDatabase) =>
                 {
                     var key = GetKey(entityId);
 
@@ -52,9 +53,9 @@ namespace EntityDb.Redis.Snapshots
 
                     if (snapshotValue.HasValue)
                     {
-                        var jsonElementEnvelope = JsonElementEnvelope.Deserialize(snapshotValue, serviceProvider);
+                        var jsonElementEnvelope = JsonElementEnvelope.Deserialize(snapshotValue, logger);
 
-                        return jsonElementEnvelope.Reconstruct<TEntity>(serviceProvider);
+                        return jsonElementEnvelope.Reconstruct<TEntity>(logger, resolvingStrategyChain);
                     }
 
                     return default;
@@ -63,6 +64,7 @@ namespace EntityDb.Redis.Snapshots
             );
         }
 
+        [ExcludeFromCodeCoverage]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

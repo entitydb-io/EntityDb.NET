@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Loggers;
+using System;
 
 namespace EntityDb.Abstractions.Transactions
 {
@@ -25,5 +26,10 @@ namespace EntityDb.Abstractions.Transactions
         /// Determines how long to wait before a command should be automatically aborted.
         /// </summary>
         TimeSpan? WriteTimeout { get; }
+
+        /// <summary>
+        /// Overrides the logger for the session.
+        /// </summary>
+        ILogger? LoggerOverride { get; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -82,7 +84,7 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task InsertMany
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             DateTime transactionTimeStamp,
@@ -105,7 +107,7 @@ namespace EntityDb.MongoDb.Documents
                     lease.Scope,
                     lease.Label,
                     lease.Value,
-                    BsonDocumentEnvelope.Deconstruct(lease, serviceProvider)
+                    BsonDocumentEnvelope.Deconstruct(lease, logger)
                 ));
 
                 await InsertMany
@@ -196,7 +198,8 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task<ILease[]> GetLeases
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
@@ -215,7 +218,7 @@ namespace EntityDb.MongoDb.Documents
             );
 
             return leaseDocuments
-                .Select(leaseDocument => leaseDocument.Data.Reconstruct<ILease>(serviceProvider))
+                .Select(leaseDocument => leaseDocument.Data.Reconstruct<ILease>(logger, resolvingStrategyChain))
                 .ToArray();
         }
 

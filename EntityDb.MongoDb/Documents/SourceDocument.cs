@@ -1,4 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
@@ -66,7 +68,7 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task InsertOne
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             DateTime transactionTimeStamp,
@@ -80,7 +82,7 @@ namespace EntityDb.MongoDb.Documents
                 transactionTimeStamp,
                 transactionId,
                 entityIds,
-                BsonDocumentEnvelope.Deconstruct(source, serviceProvider)
+                BsonDocumentEnvelope.Deconstruct(source, logger)
             );
 
             var mongoCollection = GetCollection(mongoDatabase);
@@ -187,7 +189,8 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task<object[]> GetSources
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
@@ -216,7 +219,7 @@ namespace EntityDb.MongoDb.Documents
             );
 
             return sourceDocuments
-                .Select(sourceDocument => sourceDocument.Data.Reconstruct<object>(serviceProvider))
+                .Select(sourceDocument => sourceDocument.Data.Reconstruct<object>(logger, resolvingStrategyChain))
                 .ToArray();
         }
     }

@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Transactions;
 using System;
 
 namespace EntityDb.Common.Transactions
@@ -14,5 +15,8 @@ namespace EntityDb.Common.Transactions
 
         /// <inheritdoc/>
         public TimeSpan? WriteTimeout { get; set; }
+
+        /// <inheritdoc/>
+        public ILogger? LoggerOverride { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -91,7 +93,7 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task InsertMany<TEntity>
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             DateTime transactionTimeStamp,
@@ -114,7 +116,7 @@ namespace EntityDb.MongoDb.Documents
                         entityId,
                         entityVersionNumber,
                         transactionFact.SubversionNumber,
-                        BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, serviceProvider)
+                        BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
                     );
 
                     factDocuments.Add(factDocument);
@@ -223,7 +225,8 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task<IFact<TEntity>[]> GetFacts<TEntity>
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
@@ -252,7 +255,7 @@ namespace EntityDb.MongoDb.Documents
             );
 
             return factDocuments
-                .Select(factDocument => factDocument.Data.Reconstruct<IFact<TEntity>>(serviceProvider))
+                .Select(factDocument => factDocument.Data.Reconstruct<IFact<TEntity>>(logger, resolvingStrategyChain))
                 .ToArray();
         }
     }

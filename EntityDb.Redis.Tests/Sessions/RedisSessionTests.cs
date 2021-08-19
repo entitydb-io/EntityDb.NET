@@ -30,7 +30,7 @@ namespace EntityDb.Redis.Tests.Sessions
 
                 // ACT
 
-                var result = await redisSession.ExecuteQuery<object?>((serviceProvider, redisDatabase) => throw new Exception(), default);
+                var result = await redisSession.ExecuteQuery<object?>((logger, resolvingStrategyChain, redisDatabase) => throw new Exception(), default);
 
                 // ASSERT
 

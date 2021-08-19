@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
@@ -77,12 +78,13 @@ namespace EntityDb.Common.Tests.Transactions
             _serviceProvider = serviceProvider;
         }
 
-        private Task<ITransactionRepository<TransactionEntity>> CreateRepository(bool readOnly = false, bool tolerateLag = false)
+        private Task<ITransactionRepository<TransactionEntity>> CreateRepository(bool readOnly = false, bool tolerateLag = false, ILogger? loggerOverride = null)
         {
             return _serviceProvider.CreateTransactionRepository<TransactionEntity>(new TransactionSessionOptions
             {
                 ReadOnly = readOnly,
                 SecondaryPreferred = tolerateLag,
+                LoggerOverride = loggerOverride,
             });
         }
 

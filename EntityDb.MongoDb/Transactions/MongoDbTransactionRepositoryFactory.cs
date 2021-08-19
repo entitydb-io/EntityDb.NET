@@ -1,5 +1,9 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Sessions;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -9,14 +13,15 @@ namespace EntityDb.MongoDb.Transactions
 {
     internal class MongoDbTransactionRepositoryFactory<TEntity> : ITransactionRepositoryFactory<TEntity>
     {
-        private readonly string _connectionString;
-        private readonly string _databaseName;
+        protected readonly ILogger _logger;
+        protected readonly IResolvingStrategyChain _resolvingStrategyChain;
+        protected readonly string _connectionString;
+        protected readonly string _databaseName;
 
-        protected readonly IServiceProvider _serviceProvider;
-
-        public MongoDbTransactionRepositoryFactory(IServiceProvider serviceProvider, string connectionString, string databaseName)
+        public MongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
         {
-            _serviceProvider = serviceProvider;
+            _logger = loggerFactory.CreateLogger<TEntity>();
+            _resolvingStrategyChain = resolvingStrategyChain;
             _connectionString = connectionString;
             _databaseName = databaseName;
         }
@@ -51,9 +56,9 @@ namespace EntityDb.MongoDb.Transactions
         }
 
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
-        internal virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase)
+        internal virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
         {
-            return new MongoDbSession(_serviceProvider, clientSessionHandle, mongoDatabase);
+            return new MongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger, _resolvingStrategyChain);
         }
 
         public async Task<IMongoDbSession> CreateSession(ITransactionSessionOptions transactionSessionOptions)
@@ -64,12 +69,12 @@ namespace EntityDb.MongoDb.Transactions
 
             if (transactionSessionOptions.ReadOnly)
             {
-                return CreateSession(null, mongoDatabase);
+                return CreateSession(null, mongoDatabase, transactionSessionOptions.LoggerOverride);
             }
 
             var clientSessionHandle = await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
 
-            return CreateSession(clientSessionHandle, mongoDatabase);
+            return CreateSession(clientSessionHandle, mongoDatabase, transactionSessionOptions.LoggerOverride);
         }
 
         public async Task<ITransactionRepository<TEntity>> CreateRepository(ITransactionSessionOptions transactionSessionOptions)
@@ -77,6 +82,16 @@ namespace EntityDb.MongoDb.Transactions
             var mongoDbSession = await CreateSession(transactionSessionOptions);
 
             return new MongoDbTransactionRepository<TEntity>(mongoDbSession);
+        }
+
+        public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider, string connectionString, string databaseName)
+        {
+            return ActivatorUtilities.CreateInstance<MongoDbTransactionRepositoryFactory<TEntity>>
+            (
+                serviceProvider,
+                connectionString,
+                databaseName
+            );
         }
     }
 }

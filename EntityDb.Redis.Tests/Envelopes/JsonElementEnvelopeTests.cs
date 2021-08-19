@@ -1,6 +1,8 @@
-﻿using EntityDb.Redis.Envelopes;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
+using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Exceptions;
-using System;
 using System.Text;
 using Xunit;
 
@@ -8,11 +10,13 @@ namespace EntityDb.Redis.Tests.Envelopes
 {
     public class JsonElementEnvelopeTests
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
 
-        public JsonElementEnvelopeTests(IServiceProvider serviceProvider)
+        public JsonElementEnvelopeTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
         {
-            _serviceProvider = serviceProvider;
+            _logger = loggerFactory.CreateLogger<JsonElementEnvelopeTests>();
+            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         public interface IRecord
@@ -34,13 +38,13 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             // ACT
 
-            var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, _serviceProvider);
+            var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, _logger);
 
-            var json = jsonElementEnvelope.Serialize(_serviceProvider);
+            var json = jsonElementEnvelope.Serialize(_logger);
 
-            var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _serviceProvider);
+            var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _logger);
 
-            var reconstructedTestRecord = reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_serviceProvider);
+            var reconstructedTestRecord = reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
@@ -62,7 +66,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             Assert.Throws<DeserializeException>(() =>
             {
-                JsonElementEnvelope.Deserialize(invalidJsonBytes, _serviceProvider);
+                JsonElementEnvelope.Deserialize(invalidJsonBytes, _logger);
             });
         }
 
@@ -77,7 +81,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             Assert.Throws<DeserializeException>(() =>
             {
-                JsonElementEnvelope.Reconstruct<object>(_serviceProvider);
+                JsonElementEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
             });
         }
 
@@ -92,7 +96,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             Assert.Throws<SerializeException>(() =>
             {
-                JsonElementEnvelope.Serialize(_serviceProvider);
+                JsonElementEnvelope.Serialize(_logger);
             });
         }
 
@@ -103,7 +107,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             Assert.Throws<SerializeException>(() =>
             {
-                JsonElementEnvelope.Deconstruct(default!, _serviceProvider);
+                JsonElementEnvelope.Deconstruct(default!, _logger);
             });
         }
     }

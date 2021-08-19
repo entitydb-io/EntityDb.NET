@@ -1,4 +1,6 @@
-﻿using EntityDb.Common.Queries;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Common.Extensions;
+using EntityDb.Common.Queries;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
@@ -14,11 +16,13 @@ namespace EntityDb.MongoDb.Tests.Sessions
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly MongoDbRunner _mongoDbRunner;
+        private readonly ILogger _logger;
 
-        public MongoDbSessionTests(IServiceProvider serviceProvider, MongoDbRunner mongoDbRunner)
+        public MongoDbSessionTests(IServiceProvider serviceProvider, MongoDbRunner mongoDbRunner, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _mongoDbRunner = mongoDbRunner;
+            _logger = loggerFactory.CreateLogger<MongoDbSessionTests>();
         }
 
         [Fact]
@@ -26,7 +30,7 @@ namespace EntityDb.MongoDb.Tests.Sessions
         {
             // ARRANGE
 
-            var mongoDbSession = new MongoDbSession(_serviceProvider, default!, default!);
+            var mongoDbSession = new MongoDbSession(default!, default!, _logger, default!);
 
             var mongoDbRepository = new MongoDbTransactionRepository<TransactionEntity>(mongoDbSession);
 
@@ -44,7 +48,7 @@ namespace EntityDb.MongoDb.Tests.Sessions
         {
             // ARRANGE
 
-            var mongoDbTransactionRepositoryFactory = new TestModeMongoDbTransactionRepositoryFactory<TransactionEntity>(_serviceProvider, _mongoDbRunner.ConnectionString, "Fake");
+            var mongoDbTransactionRepositoryFactory = TestModeMongoDbTransactionRepositoryFactory<TransactionEntity>.Create(_serviceProvider, _mongoDbRunner.ConnectionString, "Fake");
 
             var mongoDbSession = await mongoDbTransactionRepositoryFactory.CreateSession(new TransactionSessionOptions
             {

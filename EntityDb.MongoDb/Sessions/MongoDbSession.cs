@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
 using MongoDB.Driver;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -9,22 +9,23 @@ namespace EntityDb.MongoDb.Sessions
 {
     internal class MongoDbSession : IMongoDbSession
     {
-        protected readonly IServiceProvider _serviceProvider;
         protected readonly IClientSessionHandle? _clientSessionHandle;
         protected readonly IMongoDatabase _mongoDatabase;
         protected readonly ILogger _logger;
+        protected readonly IResolvingStrategyChain _resolvingStrategyChain;
 
         public MongoDbSession
         (
-            IServiceProvider serviceProvider,
             IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase
+            IMongoDatabase mongoDatabase,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain
         )
         {
-            _serviceProvider = serviceProvider;
             _clientSessionHandle = clientSessionHandle;
             _mongoDatabase = mongoDatabase;
-            _logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(MongoDbSession));
+            _logger = logger;
+            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation, Func<Task<TResult>> catchResult)
@@ -35,19 +36,17 @@ namespace EntityDb.MongoDb.Sessions
             }
             catch (Exception exception)
             {
-                var eventId = new EventId(exception.GetHashCode(), exception.GetType().Name);
-
-                _logger.LogError(eventId, exception, "The operation cannot be completed.");
+                _logger.LogError(exception, "The operation cannot be completed.");
 
                 return await catchResult.Invoke();
             }
         }
 
-        public Task<TResult> ExecuteQuery<TResult>(Func<IServiceProvider, IClientSessionHandle?, IMongoDatabase, Task<TResult>> query, TResult defaultResult)
+        public Task<TResult> ExecuteQuery<TResult>(Func<ILogger, IResolvingStrategyChain, IClientSessionHandle?, IMongoDatabase, Task<TResult>> query, TResult defaultResult)
         {
             return Execute
             (
-                async () => await query.Invoke(_serviceProvider, _clientSessionHandle, _mongoDatabase),
+                async () => await query.Invoke(_logger, _resolvingStrategyChain, _clientSessionHandle, _mongoDatabase),
                 () =>
                 {
                     return Task.FromResult(defaultResult);
@@ -56,7 +55,7 @@ namespace EntityDb.MongoDb.Sessions
         }
 
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
-        public virtual async Task<bool> ExecuteCommand(Func<IServiceProvider, IClientSessionHandle, IMongoDatabase, Task> command)
+        public virtual async Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
         {
             if (_clientSessionHandle == null)
             {
@@ -70,7 +69,7 @@ namespace EntityDb.MongoDb.Sessions
             {
                 _clientSessionHandle.StartTransaction();
 
-                await command.Invoke(_serviceProvider, _clientSessionHandle, _mongoDatabase);
+                await command.Invoke(_logger, _clientSessionHandle, _mongoDatabase);
 
                 await _clientSessionHandle.CommitTransactionAsync();
 
@@ -86,6 +85,7 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

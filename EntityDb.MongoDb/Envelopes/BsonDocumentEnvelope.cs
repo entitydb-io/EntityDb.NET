@@ -1,8 +1,7 @@
-﻿using EntityDb.Common.Extensions;
-using EntityDb.Common.Strategies.Resolving;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using System;
@@ -25,47 +24,41 @@ namespace EntityDb.MongoDb.Envelopes
             return bsonDocument;
         }
 
-        public TObject Reconstruct<TObject>(IServiceProvider serviceProvider)
+        public TObject Reconstruct<TObject>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(BsonDocumentEnvelope));
-
             try
             {
-                return (TObject)BsonSerializer.Deserialize(Value, serviceProvider.ResolveType(AssemblyFullName, TypeFullName, TypeName));
+                return (TObject)BsonSerializer.Deserialize(Value, resolvingStrategyChain.ResolveType(AssemblyFullName, TypeFullName, TypeName));
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to reconstruct.");
+                logger.LogError(exception, "Unable to reconstruct.");
 
                 throw new DeserializeException();
             }
         }
 
-        public byte[] Serialize(Type type, IServiceProvider serviceProvider)
+        public byte[] Serialize(Type type, ILogger logger)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(BsonDocumentEnvelope));
-
             try
             {
                 return this.ToBsonDocument(type).ToBson();
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to serialize.");
+                logger.LogError(exception, "Unable to serialize.");
 
                 throw new SerializeException();
             }
         }
 
-        public byte[] Serialize(IServiceProvider serviceProvider)
+        public byte[] Serialize(ILogger logger)
         {
-            return Serialize(typeof(BsonDocumentEnvelope), serviceProvider);
+            return Serialize(typeof(BsonDocumentEnvelope), logger);
         }
 
-        public static BsonDocumentEnvelope Deserialize(byte[] bsonBytes, IServiceProvider serviceProvider)
+        public static BsonDocumentEnvelope Deserialize(byte[] bsonBytes, ILogger logger)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(BsonDocumentEnvelope));
-
             try
             {
                 var bsonDocument = new RawBsonDocument(bsonBytes);
@@ -74,16 +67,14 @@ namespace EntityDb.MongoDb.Envelopes
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to deserialize.");
+                logger.LogError(exception, "Unable to deserialize.");
 
                 throw new DeserializeException();
             }
         }
 
-        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, IServiceProvider serviceProvider, bool removeTypeDiscriminatorProperty = true)
+        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger, bool removeTypeDiscriminatorProperty = true)
         {
-            var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(BsonDocumentEnvelope));
-
             try
             {
                 var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
@@ -100,7 +91,7 @@ namespace EntityDb.MongoDb.Envelopes
             }
             catch (Exception exception)
             {
-                logger.LogError(exception.GetHashCode(), exception, "Unable to deconstruct.");
+                logger.LogError(exception, "Unable to deconstruct.");
 
                 throw new SerializeException();
             }

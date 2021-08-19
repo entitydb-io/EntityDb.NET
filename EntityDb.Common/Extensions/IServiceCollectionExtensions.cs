@@ -1,5 +1,7 @@
 ﻿using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Common.Entities;
+using EntityDb.Common.Loggers;
 using EntityDb.Common.Strategies;
 using EntityDb.Common.Strategies.Resolving;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +44,20 @@ namespace EntityDb.Common.Extensions
         public static void AddLifoResolvingStrategyChain(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IResolvingStrategyChain, LifoResolvingStrategyChain>();
+        }
+
+        /// <summary>
+        /// Adds an internal implementation of <see cref="ILoggerFactory"/> to a service collection.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <remarks>
+        /// Uses the Microsoft.Extensions.Logging framework under the hood.
+        /// </remarks>
+        public static void AddDefaultLogger(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddLogging();
+
+            serviceCollection.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();
         }
 
         /// <summary>

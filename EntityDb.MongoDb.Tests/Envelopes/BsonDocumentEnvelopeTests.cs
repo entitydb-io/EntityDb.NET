@@ -1,4 +1,7 @@
-﻿using EntityDb.MongoDb.Envelopes;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
+using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Exceptions;
 using System;
 using System.Text;
@@ -8,11 +11,13 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 {
     public class BsonDocumentEnvelopeTests
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
 
-        public BsonDocumentEnvelopeTests(IServiceProvider serviceProvider)
+        public BsonDocumentEnvelopeTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
         {
-            _serviceProvider = serviceProvider;
+            _logger = loggerFactory.CreateLogger<BsonDocumentEnvelopeTests>();
+            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         public interface IRecord
@@ -30,13 +35,13 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             IRecord boxedTestRecord = originalTestRecord;
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, _serviceProvider);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, _logger);
 
-            var bsonBytes = bsonDocumentEnvelope.Serialize(_serviceProvider);
+            var bsonBytes = bsonDocumentEnvelope.Serialize(_logger);
 
-            var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, _serviceProvider);
+            var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, _logger);
 
-            var reconstructedTestRecord = reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_serviceProvider);
+            var reconstructedTestRecord = reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
@@ -56,7 +61,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             Assert.Throws<DeserializeException>(() =>
             {
-                BsonDocumentEnvelope.Deserialize(invalidBsonBytes, _serviceProvider);
+                BsonDocumentEnvelope.Deserialize(invalidBsonBytes, _logger);
             });
         }
 
@@ -71,7 +76,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             Assert.Throws<DeserializeException>(() =>
             {
-                bsonDocumentEnvelope.Reconstruct<object>(_serviceProvider);
+                bsonDocumentEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
             });
         }
 
@@ -86,7 +91,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             Assert.Throws<SerializeException>(() =>
             {
-                bsonDocumentEnvelope.Serialize(typeof(DateTime), _serviceProvider);
+                bsonDocumentEnvelope.Serialize(typeof(DateTime), _logger);
             });
         }
 
@@ -97,7 +102,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             Assert.Throws<SerializeException>(() =>
             {
-                BsonDocumentEnvelope.Deconstruct(default!, _serviceProvider);
+                BsonDocumentEnvelope.Deconstruct(default!, _logger);
             });
         }
 
@@ -108,7 +113,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _serviceProvider, removeTypeDiscriminatorProperty: true);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: true);
 
             // ASSERT
 
@@ -122,7 +127,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _serviceProvider, removeTypeDiscriminatorProperty: false);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: false);
 
             // ASSERT
 

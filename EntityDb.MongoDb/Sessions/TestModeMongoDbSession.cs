@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
 
@@ -8,14 +10,16 @@ namespace EntityDb.MongoDb.Sessions
     {
         public TestModeMongoDbSession
         (
-            IServiceProvider serviceProvider,
             IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase
+            IMongoDatabase mongoDatabase,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain
         ) : base
         (
-            serviceProvider,
             clientSessionHandle,
-            mongoDatabase
+            mongoDatabase,
+            logger,
+            resolvingStrategyChain
         )
         {
             if (clientSessionHandle != null)
@@ -24,7 +28,7 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
-        public override async Task<bool> ExecuteCommand(Func<IServiceProvider, IClientSessionHandle, IMongoDatabase, Task> command)
+        public override async Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
         {
             if (_clientSessionHandle == null)
             {
@@ -35,7 +39,7 @@ namespace EntityDb.MongoDb.Sessions
             (
                 async () =>
                 {
-                    await command.Invoke(_serviceProvider, _clientSessionHandle, _mongoDatabase);
+                    await command.Invoke(_logger, _clientSessionHandle, _mongoDatabase);
 
                     return true;
                 },

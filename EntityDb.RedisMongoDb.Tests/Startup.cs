@@ -17,7 +17,7 @@ namespace EntityDb.RedisMongoDb.Tests
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddLogging();
+            serviceCollection.AddDefaultLogger();
 
             serviceCollection.AddSingleton((serviceProvider) => RedisRunner.Start());
 

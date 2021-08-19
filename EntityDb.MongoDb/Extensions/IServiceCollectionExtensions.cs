@@ -28,7 +28,7 @@ namespace EntityDb.MongoDb.Extensions
             {
                 var connectionString = getConnectionString.Invoke(serviceProvider);
 
-                return new MongoDbTransactionRepositoryFactory<TEntity>(serviceProvider, connectionString, databaseName);
+                return MongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString, databaseName);
             });
         }
 
@@ -48,7 +48,7 @@ namespace EntityDb.MongoDb.Extensions
             {
                 var connectionString = getConnectionString.Invoke(serviceProvider);
 
-                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(serviceProvider, connectionString, databaseName);
+                return TestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString, databaseName);
             });
         }
     }

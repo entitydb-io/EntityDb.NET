@@ -13,7 +13,7 @@ namespace EntityDb.Redis.Tests
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddLogging();
+            serviceCollection.AddDefaultLogger();
 
             serviceCollection.AddSingleton((serviceProvider) =>
             {

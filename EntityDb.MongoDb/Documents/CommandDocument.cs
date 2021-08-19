@@ -1,5 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -70,7 +72,7 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task InsertOne<TEntity>
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             DateTime transactionTimeStamp,
@@ -88,7 +90,7 @@ namespace EntityDb.MongoDb.Documents
                 transactionId,
                 entityId,
                 entityVersionNumber,
-                BsonDocumentEnvelope.Deconstruct(command, serviceProvider)
+                BsonDocumentEnvelope.Deconstruct(command, logger)
             );
 
             await InsertOne
@@ -193,7 +195,8 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task<ICommand<TEntity>[]> GetCommands<TEntity>
         (
-            IServiceProvider serviceProvider,
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
@@ -222,7 +225,7 @@ namespace EntityDb.MongoDb.Documents
             );
 
             return commandDocuments
-                .Select(commandDocument => commandDocument.Data.Reconstruct<ICommand<TEntity>>(serviceProvider))
+                .Select(commandDocument => commandDocument.Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain))
                 .ToArray();
         }
 
