@@ -9,6 +9,7 @@ using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Source;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -81,9 +82,9 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             // ASSERT
 
-            Assert.NotNull(snapshot);
-            Assert.Equal(expectedSnapshotVersion, snapshot!.VersionNumber);
-            Assert.Equal(expectedCurrentVersion, current.VersionNumber);
+            snapshot.ShouldNotBeNull();
+            snapshot.VersionNumber.ShouldBe(expectedSnapshotVersion);
+            current.VersionNumber.ShouldBe(expectedCurrentVersion);
         }
     }
 }

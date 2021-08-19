@@ -16,6 +16,7 @@ using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
 using EntityDb.TestImplementations.Source;
 using Moq;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,7 +108,7 @@ namespace EntityDb.Common.Tests.Transactions
             {
                 var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
-                Assert.True(transactionInserted);
+                transactionInserted.ShouldBeTrue();
             }
 
             // ACT
@@ -120,11 +121,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.True(expectedTrueResults.SequenceEqual(actualTrueResults));
-            Assert.True(expectedFalseResults.SequenceEqual(actualFalseResults));
-            Assert.True(reversedExpectedTrueResults.SequenceEqual(reversedActualTrueResults));
-            Assert.True(reversedExpectedFalseResults.SequenceEqual(reversedActualFalseResults));
-            Assert.True(expectedSkipTakeResults.SequenceEqual(actualSkipTakeResults));
+            actualTrueResults.SequenceEqual(expectedTrueResults).ShouldBeTrue();
+            actualFalseResults.SequenceEqual(expectedFalseResults).ShouldBeTrue();
+            reversedActualTrueResults.SequenceEqual(reversedExpectedTrueResults).ShouldBeTrue();
+            reversedActualFalseResults.SequenceEqual(reversedExpectedFalseResults).ShouldBeTrue();
+            actualSkipTakeResults.SequenceEqual(expectedSkipTakeResults).ShouldBeTrue();
         }
 
         private Task TestGetTransactionIds(ISourceQuery query, List<ITransaction<TransactionEntity>> transactions, ExpectedObjects expectedObjects, Func<ISourceQuery, ISourceQuery>? filter = null)
@@ -418,7 +419,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            await Assert.ThrowsAsync<CannotWriteInReadOnlyModeException>(async () => await transactionRepository.PutTransaction(transaction));
+            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(async () => await transactionRepository.PutTransaction(transaction));
         }
 
         [Fact]
@@ -459,8 +460,8 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.True(firstTransactionInserted);
-            Assert.False(secondTransactionInserted);
+            firstTransactionInserted.ShouldBeTrue();
+            secondTransactionInserted.ShouldBeFalse();
         }
 
         [Fact]
@@ -507,7 +508,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.False(transactionInserted);
+            transactionInserted.ShouldBeFalse();
         }
 
         [Fact]
@@ -556,8 +557,8 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.True(firstTransactionInserted);
-            Assert.False(secondTransactionInserted);
+            firstTransactionInserted.ShouldBeTrue();
+            secondTransactionInserted.ShouldBeFalse();
 
             loggerMock.Verify();
         }
@@ -609,7 +610,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.False(transactionInserted);
+            transactionInserted.ShouldBeFalse();
         }
 
         [Fact]
@@ -661,7 +662,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.False(transactionInserted);
+            transactionInserted.ShouldBeFalse();
         }
 
         [Fact]
@@ -688,7 +689,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Equal(expectedEntity, actualEntity);
+            actualEntity.ShouldBeEquivalentTo(expectedEntity);
         }
 
         [Fact]
@@ -730,8 +731,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Equal(expectedInitialLeases, actualInitialLeases);
-            Assert.Empty(actualFinalLeases);
+            actualInitialLeases.SequenceEqual(expectedInitialLeases).ShouldBeTrue();
+
+            actualFinalLeases.ShouldBeEmpty();
         }
 
         [Theory]
@@ -790,8 +792,8 @@ namespace EntityDb.Common.Tests.Transactions
                 transactions.Add(transaction);
             }
 
-            Assert.NotNull(gte);
-            Assert.NotNull(lte);
+            gte.ShouldNotBeNull();
+            lte.ShouldNotBeNull();
 
             var query = new TransactionTimeStampQuery(gte!.Value, lte!.Value);
 
@@ -856,7 +858,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactions.Add(transaction);
             }
 
-            Assert.NotNull(transactionId);
+            transactionId.ShouldNotBeNull();
 
             var query = new TransactionIdQuery(transactionId!.Value);
 
@@ -921,7 +923,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactions.Add(transaction);
             }
 
-            Assert.NotNull(entityId);
+            entityId.ShouldNotBeNull();
 
             var query = new EntityIdQuery(entityId!.Value);
 

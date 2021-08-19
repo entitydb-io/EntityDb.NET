@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -38,9 +39,9 @@ namespace EntityDb.Common.Tests.Snapshots
 
             // ASSERT
 
-            Assert.True(snapshotInserted);
+            snapshotInserted.ShouldBeTrue();
 
-            Assert.Equal(expectedSnapshot, actualSnapshot);
+            actualSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
         }
     }
 }

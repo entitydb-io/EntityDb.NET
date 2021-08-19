@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Exceptions;
+using Shouldly;
 using System;
 using System.Text;
 using Xunit;
@@ -45,7 +46,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
-            Assert.Equal(originalTestRecord.TestProperty, unboxedTestRecord.TestProperty);
+            unboxedTestRecord.TestProperty.ShouldBe(originalTestRecord.TestProperty);
         }
 
         [Fact]
@@ -59,7 +60,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             // ASSERT
 
-            Assert.Throws<DeserializeException>(() =>
+            Should.Throw<DeserializeException>(() =>
             {
                 BsonDocumentEnvelope.Deserialize(invalidBsonBytes, _logger);
             });
@@ -74,7 +75,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             // ASSERT
 
-            Assert.Throws<DeserializeException>(() =>
+            Should.Throw<DeserializeException>(() =>
             {
                 bsonDocumentEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
             });
@@ -89,7 +90,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             // ASSERT
 
-            Assert.Throws<SerializeException>(() =>
+            Should.Throw<SerializeException>(() =>
             {
                 bsonDocumentEnvelope.Serialize(typeof(DateTime), _logger);
             });
@@ -100,7 +101,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ASSERT
 
-            Assert.Throws<SerializeException>(() =>
+            Should.Throw<SerializeException>(() =>
             {
                 BsonDocumentEnvelope.Deconstruct(default!, _logger);
             });
@@ -117,7 +118,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             // ASSERT
 
-            Assert.False(bsonDocumentEnvelope.Value.Contains("_t"));
+            bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelope.TypeDiscriminatorPropertyName).ShouldBeFalse();
         }
 
         [Fact]
@@ -131,7 +132,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             // ASSERT
 
-            Assert.True(bsonDocumentEnvelope.Value.Contains("_t"));
+            bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelope.TypeDiscriminatorPropertyName).ShouldBe(true);
         }
     }
 }

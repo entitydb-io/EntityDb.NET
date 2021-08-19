@@ -2,6 +2,7 @@
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Snapshots;
 using EntityDb.TestImplementations.Entities;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -34,7 +35,7 @@ namespace EntityDb.Redis.Tests.Sessions
 
                 // ASSERT
 
-                Assert.Null(result);
+                result.ShouldBeNull();
             }
             else
             {
@@ -60,7 +61,7 @@ namespace EntityDb.Redis.Tests.Sessions
 
                 // ASSERT
 
-                Assert.False(executed);
+                executed.ShouldBeFalse();
             }
             else
             {

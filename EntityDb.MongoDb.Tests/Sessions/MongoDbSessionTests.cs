@@ -4,6 +4,7 @@ using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
 using EntityDb.TestImplementations.Entities;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -34,7 +35,7 @@ namespace EntityDb.MongoDb.Tests.Sessions
 
             // ASSERT
 
-            Assert.Empty(facts);
+            facts.ShouldBeEmpty();
         }
     }
 }

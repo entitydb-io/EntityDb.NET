@@ -10,15 +10,15 @@ namespace EntityDb.MongoDb.Envelopes
 {
     internal sealed record BsonDocumentEnvelope(string? AssemblyFullName, string? TypeFullName, string? TypeName, BsonDocument Value)
     {
+        public const string TypeDiscriminatorPropertyName = "_t";
+
         private static BsonDocument GetBsonDocument(dynamic? @object, bool removeTypeDiscriminatorProperty)
         {
-            const string typeDiscriminatorPropertyName = "_t";
-
             var bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
 
-            if (removeTypeDiscriminatorProperty && bsonDocument.Contains(typeDiscriminatorPropertyName))
+            if (removeTypeDiscriminatorProperty && bsonDocument.Contains(TypeDiscriminatorPropertyName))
             {
-                bsonDocument.Remove(typeDiscriminatorPropertyName);
+                bsonDocument.Remove(TypeDiscriminatorPropertyName);
             }
 
             return bsonDocument;

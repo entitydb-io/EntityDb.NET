@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Strategies.Resolving;
 using Moq;
+using Shouldly;
 using System;
 using Xunit;
 
@@ -40,7 +41,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Assert.Throws<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!, default!, default!));
+            Should.Throw<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!, default!, default!));
 
             loggerMock.Verify();
         }

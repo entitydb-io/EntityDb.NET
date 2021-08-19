@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
+using Shouldly;
 using System;
 using Xunit;
 
@@ -25,7 +26,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ASSERT
 
-            Assert.Empty(leases);
+            leases.ShouldBeEmpty();
         }
 
         [Fact]
@@ -41,7 +42,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ASSERT
 
-            Assert.True(isAuthorized);
+            isAuthorized.ShouldBeTrue();
         }
 
         [Fact]
@@ -57,7 +58,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ASSERT
 
-            Assert.False(shouldCache);
+            shouldCache.ShouldBeFalse();
         }
     }
 }

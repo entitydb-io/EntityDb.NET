@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Exceptions;
+using Shouldly;
 using System.Text;
 using Xunit;
 
@@ -50,7 +51,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             // ASSERT
 
-            Assert.Equal(originalTestRecord.TestProperty, unboxedTestRecord.TestProperty);
+            unboxedTestRecord.TestProperty.ShouldBe(originalTestRecord.TestProperty);
         }
 
         [Fact]
@@ -64,7 +65,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             // ACT
 
-            Assert.Throws<DeserializeException>(() =>
+            Should.Throw<DeserializeException>(() =>
             {
                 JsonElementEnvelope.Deserialize(invalidJsonBytes, _logger);
             });
@@ -79,7 +80,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             // ACT
 
-            Assert.Throws<DeserializeException>(() =>
+            Should.Throw<DeserializeException>(() =>
             {
                 JsonElementEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
             });
@@ -94,7 +95,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             // ACT
 
-            Assert.Throws<SerializeException>(() =>
+            Should.Throw<SerializeException>(() =>
             {
                 JsonElementEnvelope.Serialize(_logger);
             });
@@ -105,7 +106,7 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ACT
 
-            Assert.Throws<SerializeException>(() =>
+            Should.Throw<SerializeException>(() =>
             {
                 JsonElementEnvelope.Deconstruct(default!, _logger);
             });

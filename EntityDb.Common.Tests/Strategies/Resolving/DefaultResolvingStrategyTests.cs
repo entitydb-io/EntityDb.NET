@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Strategies.Resolving;
+using Shouldly;
 using System.IO;
 using Xunit;
 
@@ -26,7 +27,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Assert.Equal(expectedType, actualType);
+            actualType.ShouldBe(expectedType);
         }
 
         [Fact]
@@ -44,7 +45,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Assert.Null(actualType);
+            actualType.ShouldBeNull();
         }
 
         [Fact]
@@ -60,7 +61,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Assert.Null(actualType);
+            actualType.ShouldBeNull();
         }
 
         [Fact]
@@ -72,7 +73,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Assert.Throws<FileNotFoundException>(() =>
+            Should.Throw<FileNotFoundException>(() =>
             {
                 resolvingStrategy.ResolveType("Garbage", "Garbage", "Garbage");
             });

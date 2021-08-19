@@ -6,6 +6,7 @@ using EntityDb.Mvc.Sources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using Shouldly;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -24,27 +25,7 @@ namespace EntityDb.Mvc.Tests.Sources
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        private static MvcSource CreateMvcSource()
-        {
-            var headers = new[]
-            {
-                new MvcSourceHeader("Test", new[]{ "Test" }),
-            };
-
-            var connection = new MvcSourceConnection("Test", "http://test.remote", 123, "http://test.local", 456);
-
-            var claims = new[]
-            {
-                new MvcSourceClaim("Role", "Test", null, "", ""),
-            };
-
-            return new MvcSource(headers, connection, claims);
-        }
-
-        [Theory]
-        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
-        [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
-        public void GivenHttpContext_ThenBuildMvcSource
+        private static HttpContext CreateHttpContext
         (
             string headerName,
             string headerValue,
@@ -57,8 +38,6 @@ namespace EntityDb.Mvc.Tests.Sources
             string claimValue
         )
         {
-            // ARRANGE
-
             var headers = new Dictionary<string, StringValues>
             {
                 [headerName] = new StringValues(headerValue),
@@ -119,7 +98,28 @@ namespace EntityDb.Mvc.Tests.Sources
                 .SetupGet(context => context.User)
                 .Returns(claimsPrincipal);
 
-            var httpContext = httpContextMock.Object;
+            return httpContextMock.Object;
+        }
+
+        [Theory]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
+        public void GivenHttpContext_ThenBuildMvcSource
+        (
+            string headerName,
+            string headerValue,
+            string connectionId,
+            string? remoteIpAddress,
+            int remotePort,
+            string? localIpAddress,
+            int localPort,
+            string claimType,
+            string claimValue
+        )
+        {
+            // ARRANGE
+
+            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
 
             // ACT
 
@@ -127,48 +127,66 @@ namespace EntityDb.Mvc.Tests.Sources
 
             // ASSERT
 
-            Assert.Single(mvcSource.Headers);
-            Assert.Equal(headerName, mvcSource.Headers[0].Name);
-            Assert.Single(mvcSource.Headers[0].Values);
-            Assert.Equal(headerValue, mvcSource.Headers[0].Values[0]);
+            mvcSource.Headers.Length.ShouldBe(1);
+            mvcSource.Headers[0].Name.ShouldBe(headerName);
+            mvcSource.Headers[0].Values.Length.ShouldBe(1);
+            mvcSource.Headers[0].Values[0].ShouldBe(headerValue);
 
-            Assert.Equal(connectionId, mvcSource.Connection.ConnectionId);
-            Assert.Equal(remoteIpAddress, mvcSource.Connection.RemoteIpAddress);
-            Assert.Equal(remotePort, mvcSource.Connection.RemotePort);
-            Assert.Equal(localIpAddress, mvcSource.Connection.LocalIpAddress);
-            Assert.Equal(localPort, mvcSource.Connection.LocalPort);
+            mvcSource.Connection.ConnectionId.ShouldBe(connectionId);
+            mvcSource.Connection.RemoteIpAddress.ShouldBe(remoteIpAddress);
+            mvcSource.Connection.RemotePort.ShouldBe(remotePort);
+            mvcSource.Connection.LocalIpAddress.ShouldBe(localIpAddress);
+            mvcSource.Connection.LocalPort.ShouldBe(localPort);
 
-            Assert.Single(mvcSource.Claims);
-            Assert.Equal(claimType, mvcSource.Claims[0].Type);
-            Assert.Equal(claimValue, mvcSource.Claims[0].Value);
+            mvcSource.Claims.Length.ShouldBe(1);
+            mvcSource.Claims[0].Type.ShouldBe(claimType);
+            mvcSource.Claims[0].Value.ShouldBe(claimValue);
         }
 
-        [Fact]
-        public void CanDeconstructMvcSourceAsBsonDocumentEnvelope()
+        [Theory]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
+        public void CanDeconstructMvcSourceAsBsonDocumentEnvelope
+        (
+            string headerName,
+            string headerValue,
+            string connectionId,
+            string? remoteIpAddress,
+            int remotePort,
+            string? localIpAddress,
+            int localPort,
+            string claimType,
+            string claimValue
+        )
         {
-            var originalMvcSource = CreateMvcSource();
+            // ARRANGE
+
+            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
+
+            var originalMvcSource = MvcSource.FromHttpContext(httpContext);
 
             var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _logger);
 
+            // ACT
+
             var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(_logger, _resolvingStrategyChain);
 
-            Assert.Single(reconstructedMvcSource.Headers);
-            Assert.Single(reconstructedMvcSource.Headers[0].Values);
-            Assert.Equal("Test", reconstructedMvcSource.Headers[0].Name);
-            Assert.Equal("Test", reconstructedMvcSource.Headers[0].Values[0]);
+            // ASSERT
 
-            Assert.Equal("Test", reconstructedMvcSource.Connection.ConnectionId);
-            Assert.Equal("http://test.remote", reconstructedMvcSource.Connection.RemoteIpAddress);
-            Assert.Equal(123, reconstructedMvcSource.Connection.RemotePort);
-            Assert.Equal("http://test.local", reconstructedMvcSource.Connection.LocalIpAddress);
-            Assert.Equal(456, reconstructedMvcSource.Connection.LocalPort);
+            reconstructedMvcSource.Headers.Length.ShouldBe(1);
+            reconstructedMvcSource.Headers[0].Name.ShouldBe(headerName);
+            reconstructedMvcSource.Headers[0].Values.Length.ShouldBe(1);
+            reconstructedMvcSource.Headers[0].Values[0].ShouldBe(headerValue);
 
-            Assert.Single(reconstructedMvcSource.Claims);
-            Assert.Equal("Role", reconstructedMvcSource.Claims[0].Type);
-            Assert.Equal("Test", reconstructedMvcSource.Claims[0].Value);
-            Assert.Null(reconstructedMvcSource.Claims[0].ValueType);
-            Assert.Equal("", reconstructedMvcSource.Claims[0].Issuer);
-            Assert.Equal("", reconstructedMvcSource.Claims[0].OriginalIssuer);
+            reconstructedMvcSource.Connection.ConnectionId.ShouldBe(connectionId);
+            reconstructedMvcSource.Connection.RemoteIpAddress.ShouldBe(remoteIpAddress);
+            reconstructedMvcSource.Connection.RemotePort.ShouldBe(remotePort);
+            reconstructedMvcSource.Connection.LocalIpAddress.ShouldBe(localIpAddress);
+            reconstructedMvcSource.Connection.LocalPort.ShouldBe(localPort);
+
+            reconstructedMvcSource.Claims.Length.ShouldBe(1);
+            reconstructedMvcSource.Claims[0].Type.ShouldBe(claimType);
+            reconstructedMvcSource.Claims[0].Value.ShouldBe(claimValue);
         }
     }
 }

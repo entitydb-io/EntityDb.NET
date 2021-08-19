@@ -1,6 +1,7 @@
 ﻿using EntityDb.MongoDb.Rewriters;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
+using Shouldly;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -64,7 +65,7 @@ namespace EntityDb.MongoDb.Tests.Rewriters
 
             // ASSERT
 
-            Assert.True(expectedBson.SequenceEqual(actualBson));
+            actualBson.SequenceEqual(expectedBson).ShouldBeTrue();
         }
 
         [Fact]
@@ -86,7 +87,7 @@ namespace EntityDb.MongoDb.Tests.Rewriters
 
             // ASSERT
 
-            Assert.Throws<NotSupportedException>(() =>
+            Should.Throw<NotSupportedException>(() =>
             {
                 bsonDocumentRewriter.Rewrite(originalBsonDocument);
             });

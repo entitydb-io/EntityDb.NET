@@ -11,6 +11,7 @@ using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Facts;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -55,7 +56,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Throws<CommandNotAuthorizedException>(() =>
+            Should.Throw<CommandNotAuthorizedException>(() =>
             {
                 transactionBuilder.Append(entityId, new DoNothing());
             });
@@ -87,7 +88,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Throws<CommandNotAuthorizedException>(() =>
+            Should.Throw<CommandNotAuthorizedException>(() =>
             {
                 transactionBuilder.Create(entityId, new DoNothing());
             });
@@ -109,7 +110,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Throws<EntityNotLoadedException>(() =>
+            Should.Throw<EntityNotLoadedException>(() =>
             {
                 transactionBuilder.Append(entityId, new DoNothing());
             });
@@ -135,7 +136,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Throws<EntityAlreadyCreatedException>(() =>
+            Should.Throw<EntityAlreadyCreatedException>(() =>
             {
                 transactionBuilder.Create(entityId, new DoNothing());
             });
@@ -163,7 +164,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            await Assert.ThrowsAsync<EntityAlreadyLoadedException>(async () =>
+            await Should.ThrowAsync<EntityAlreadyLoadedException>(async () =>
             {
                 await transactionBuilder.Load(entityId, transactionRepository);
             });
@@ -187,7 +188,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            await Assert.ThrowsAsync<EntityNotCreatedException>(async () =>
+            await Should.ThrowAsync<EntityNotCreatedException>(async () =>
             {
                 await transactionBuilder.Load(Guid.NewGuid(), transactionRepository);
             });
@@ -224,7 +225,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 0; i < NumberOfVersionsToTest; i++)
             {
-                Assert.Equal(i, transaction.Commands[i].ExpectedPreviousVersionNumber);
+                transaction.Commands[i].ExpectedPreviousVersionNumber.ShouldBe(i);
             }
         }
 
@@ -256,9 +257,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Assert.Single(transaction.Commands);
+            transaction.Commands.Length.ShouldBe(1);
 
-            Assert.Equal(new DoNothing(), transaction.Commands[0].Command);
+            transaction.Commands[0].Command.ShouldBeEquivalentTo(new DoNothing());
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Common.Extensions;
 using Moq;
+using Shouldly;
 using System.Linq;
 using Xunit;
 
@@ -51,7 +52,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -78,7 +79,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -106,7 +107,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -133,7 +134,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -160,7 +161,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -188,7 +189,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
 
@@ -215,7 +216,7 @@ namespace EntityDb.Common.Tests.Extensions
 
                 // ASSERT
 
-                Assert.Equal(entry.ExpectedOutput, actualOutput);
+                actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
     }
