@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace EntityDb.Common.Strategies.Resolving
 {
-    //TODO: Rename to MemberInfoName
     internal sealed class TypeNameResolvingStrategy : IResolvingStrategy
     {
         private readonly Dictionary<string, Type> _typeDictionary;
