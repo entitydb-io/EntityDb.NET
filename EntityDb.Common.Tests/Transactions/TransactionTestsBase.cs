@@ -391,6 +391,37 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
+        public async Task GivenReadOnlyMode_WhenPuttingTransaction_ThenThrow()
+        {
+            // ARRANGE
+
+            var transaction = new Transaction<TransactionEntity>
+            (
+                Guid.NewGuid(),
+                DateTime.UtcNow,
+                new NoSource(),
+                new[]
+                {
+                        new TransactionCommand<TransactionEntity>
+                        (
+                            Guid.NewGuid(),
+                            0,
+                            new DoNothing(),
+                            Array.Empty<TransactionFact<TransactionEntity>>(),
+                            Array.Empty<ILease>(),
+                            Array.Empty<ILease>()
+                        ),
+                }
+            );
+
+            await using var transactionRepository = await CreateRepository(readOnly: true);
+
+            // ASSERT
+
+            await Assert.ThrowsAsync<CannotWriteInReadOnlyModeException>(async () => await transactionRepository.PutTransaction(transaction));
+        }
+
+        [Fact]
         public async Task GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse()
         {
             // ARRANGE

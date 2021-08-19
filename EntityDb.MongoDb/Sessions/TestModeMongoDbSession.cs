@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Exceptions;
 using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace EntityDb.MongoDb.Sessions
         {
             if (_clientSessionHandle == null)
             {
-                return false;
+                throw new CannotWriteInReadOnlyModeException();
             }
 
             return await Execute

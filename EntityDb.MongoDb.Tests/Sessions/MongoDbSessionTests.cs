@@ -42,27 +42,5 @@ namespace EntityDb.MongoDb.Tests.Sessions
 
             Assert.Empty(facts);
         }
-
-        [Fact]
-        public async Task GivenValidTestModeMongoDbSession_WhenWritingInReadOnly_ThenReturnFalse()
-        {
-            // ARRANGE
-
-            var mongoDbTransactionRepositoryFactory = TestModeMongoDbTransactionRepositoryFactory<TransactionEntity>.Create(_serviceProvider, _mongoDbRunner.ConnectionString, "Fake");
-
-            var mongoDbSession = await mongoDbTransactionRepositoryFactory.CreateSession(new TransactionSessionOptions
-            {
-                ReadOnly = true,
-                SecondaryPreferred = true,
-            });
-
-            // ACT
-
-            var executed = await mongoDbSession.ExecuteCommand((logger, clientSessionHandle, mongoDatabase) => Task.CompletedTask);
-
-            // ASSERT
-
-            Assert.False(executed);
-        }
     }
 }
