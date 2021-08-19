@@ -4,18 +4,18 @@
     ".NETCoreApp,Version=v5.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[3.0.3, )",
-        "resolved": "3.0.3",
-        "contentHash": "PdyhdzG2LK7YUEtccObPql+3OuFODaFNeYayxdPoK1eHb2StZoeQf1WMb16QrKiIdi4fs5Kog8jxXtlZOgAEuA=="
+        "requested": "[3.1.0, )",
+        "resolved": "3.1.0",
+        "contentHash": "YzYqSRrjoP5lULBhTDcTOjuM4IDPPi6PhFsl4w8EI4WdZhE6llt7E38Tg4CHyrS+QKwyu1+9OwkdDgluOdoBTw=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
-        "requested": "[16.9.4, )",
-        "resolved": "16.9.4",
-        "contentHash": "M/k16vmS7Hz/+Kuy3p6XE743XPjYYMzfN5ZvpSLY44Ngh5IBMk0Je5Qed8oq6/kvzJA2DTrXa7YrfceHhbQKeQ==",
+        "requested": "[16.11.0, )",
+        "resolved": "16.11.0",
+        "contentHash": "f4mbG1SUSkNWF5p7B3Y8ZxMsvKhxCmpZhdl+w6tMtLSUGE7Izi1syU6TkmKOvB2BV66pdbENConFAISOix4ohQ==",
         "dependencies": {
-          "Microsoft.CodeCoverage": "16.9.4",
-          "Microsoft.TestPlatform.TestHost": "16.9.4"
+          "Microsoft.CodeCoverage": "16.11.0",
+          "Microsoft.TestPlatform.TestHost": "16.11.0"
         }
       },
       "Mongo2Go": {
@@ -52,9 +52,9 @@
       },
       "Xunit.DependencyInjection": {
         "type": "Direct",
-        "requested": "[7.2.0, )",
-        "resolved": "7.2.0",
-        "contentHash": "vhztO46sJ4xlFc/ub3vxLNvpmzp44ohrBkm3Ips1BsbXkVOs1QKVf4p3H+B+ehE0XqIUbqfa7b8OKoO+VEv/RA==",
+        "requested": "[7.4.0, )",
+        "resolved": "7.4.0",
+        "contentHash": "HaGJ1wOCBTLjdwpqj8L8M3m5VgL4WnlhVGKsOcEKRIDc1KHVWhqNdV8y+k83eqOBtgZfYCAwd3Yu+VI8SKKNLw==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "2.1.0",
           "xunit.extensibility.execution": "[2.2.0, 3.0.0)"
@@ -99,8 +99,8 @@
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
-        "resolved": "16.9.4",
-        "contentHash": "N/RYB07gJkPZ1nJiq0QGxFIL+X5vVl4GI99PiTYXpbfI30NTZMRJgZ+4jYLFYLDQqj9o1Juhv+3iiymd7lozrA=="
+        "resolved": "16.11.0",
+        "contentHash": "wf6lpAeCqP0KFfbDVtfL50lr7jY1gq0+0oSphyksfLOEygMDXqnaxHK5LPFtMEhYSEtgXdNyXNnEddOqQQUdlQ=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -253,8 +253,8 @@
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
-        "resolved": "16.9.4",
-        "contentHash": "t43y1MZYshZFfc/g8nzy4o86PW2WfFcoQ+MjgYUlfj1pptKHc7Xr+R6sFBODA+y1I+Mc+Ujzme/c2cGX2AuOwQ==",
+        "resolved": "16.11.0",
+        "contentHash": "EiknJx9N9Z30gs7R+HHhki7fA8EiiM3pwD1vkw3bFsBC8kdVq/O7mHf1hrg5aJp+ASO6BoOzQueD2ysfTOy/Bg==",
         "dependencies": {
           "NuGet.Frameworks": "5.0.0",
           "System.Reflection.Metadata": "1.6.0"
@@ -262,10 +262,10 @@
       },
       "Microsoft.TestPlatform.TestHost": {
         "type": "Transitive",
-        "resolved": "16.9.4",
-        "contentHash": "3YuJ7OSb1YPk+OTZfpa8U7I+TUZRH/nCeOWcN+TERp1SUZrcGeG2IGBZvVZ9CbKuQ+7wLiwsfcIgKIu+kbvibg==",
+        "resolved": "16.11.0",
+        "contentHash": "/Q+R0EcCJE8JaYCk+bGReicw/xrB0HhecrYrUcLbn95BnAlaTJrZhoLkUhvtKTAVtqX/AIKWXYtutiU/Q6QUgg==",
         "dependencies": {
-          "Microsoft.TestPlatform.ObjectModel": "16.9.4",
+          "Microsoft.TestPlatform.ObjectModel": "16.11.0",
           "Newtonsoft.Json": "9.0.1"
         }
       },
@@ -281,38 +281,38 @@
       },
       "MongoDB.Bson": {
         "type": "Transitive",
-        "resolved": "2.12.3",
-        "contentHash": "1gkSkX+hlyeNMvrcx4JeeGnTqAmOctoekczmASEzxuQiA15wo2YKm40TVx/pFbZGV57ekguzF8w2nurO5+2IQg==",
+        "resolved": "2.13.1",
+        "contentHash": "B/AI2we7YwfFuNcXr4jlCnVI5dJp+g8vkyj3Shi/bOpGhZQaxW4jK/NiiTwYvqxaMOe4MtVR+6Zlk4D2zalC7A==",
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "5.0.0"
         }
       },
       "MongoDB.Driver": {
         "type": "Transitive",
-        "resolved": "2.12.3",
-        "contentHash": "tRjJixeBeA7Gus49kdf3t9uKUwzRTpN8S2OGkrusZw+nwSeFOH0K5VEjBpVgQEekwJLqnUNd1IkhKd5nK2Fz7A==",
+        "resolved": "2.13.1",
+        "contentHash": "BGpE1Ce33T3MrStgxC4CPLVDA2ngsI+WZk4SYn+ycOaU5uQ7zwbQzqpdzHrS7EcMNVpD9r2wnpjos0nxhxvshw==",
         "dependencies": {
-          "MongoDB.Bson": "2.12.3",
-          "MongoDB.Driver.Core": "2.12.3",
-          "MongoDB.Libmongocrypt": "1.2.1"
+          "MongoDB.Bson": "2.13.1",
+          "MongoDB.Driver.Core": "2.13.1",
+          "MongoDB.Libmongocrypt": "1.2.2"
         }
       },
       "MongoDB.Driver.Core": {
         "type": "Transitive",
-        "resolved": "2.12.3",
-        "contentHash": "wb5F6J5eolHwSLtIlCpENEYY05CvCtWt79ptVdmVTLbFq58dbsu6rEfxEtd9V7lkyPCeUoJuiSkCxceXx9mMgQ==",
+        "resolved": "2.13.1",
+        "contentHash": "lLYYMBneLHA9PYwWzbfC3p0NkAqzxbT8ZuinCH9MwR2bgHqu/6cOaJG12twKsnjc6KJVBboY0ufjHt43T9ZLnA==",
         "dependencies": {
           "DnsClient": "1.4.0",
-          "MongoDB.Bson": "2.12.3",
-          "MongoDB.Libmongocrypt": "1.2.1",
+          "MongoDB.Bson": "2.13.1",
+          "MongoDB.Libmongocrypt": "1.2.2",
           "SharpCompress": "0.23.0",
           "System.Buffers": "4.5.1"
         }
       },
       "MongoDB.Libmongocrypt": {
         "type": "Transitive",
-        "resolved": "1.2.1",
-        "contentHash": "VUtUAO2W6+DOjBtLHuD9WlTTcxYLXCNfp9YeKcws5LNAl0xej2KX1I37VsTAKnmnMjAF2Vwy1FXLCpK84FglMA=="
+        "resolved": "1.2.2",
+        "contentHash": "pKrlKJk4wem4MyfkaMqj+sqJ+RwUDnqnt76/Xwm5DDjMzEU5QtDkzQOLq5bVwFhNgC8LMn6Hr22tl5WsmN5+AA=="
       },
       "NETStandard.Library": {
         "type": "Transitive",
@@ -1439,9 +1439,9 @@
         "type": "Project",
         "dependencies": {
           "EntityDb.TestImplementations": "1.0.0",
-          "Microsoft.NET.Test.Sdk": "16.9.4",
+          "Microsoft.NET.Test.Sdk": "16.11.0",
           "Moq": "4.16.1",
-          "Xunit.DependencyInjection": "7.2.0",
+          "Xunit.DependencyInjection": "7.4.0",
           "Xunit.DependencyInjection.Logging": "2.1.0",
           "xunit": "2.4.1"
         }
@@ -1450,7 +1450,7 @@
         "type": "Project",
         "dependencies": {
           "EntityDb.Common": "1.0.0",
-          "MongoDB.Driver": "2.12.3"
+          "MongoDB.Driver": "2.13.1"
         }
       },
       "entitydb.testimplementations": {

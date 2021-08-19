@@ -4,13 +4,13 @@
     ".NETCoreApp,Version=v5.0": {
       "MongoDB.Driver": {
         "type": "Direct",
-        "requested": "[2.12.3, )",
-        "resolved": "2.12.3",
-        "contentHash": "tRjJixeBeA7Gus49kdf3t9uKUwzRTpN8S2OGkrusZw+nwSeFOH0K5VEjBpVgQEekwJLqnUNd1IkhKd5nK2Fz7A==",
+        "requested": "[2.13.1, )",
+        "resolved": "2.13.1",
+        "contentHash": "BGpE1Ce33T3MrStgxC4CPLVDA2ngsI+WZk4SYn+ycOaU5uQ7zwbQzqpdzHrS7EcMNVpD9r2wnpjos0nxhxvshw==",
         "dependencies": {
-          "MongoDB.Bson": "2.12.3",
-          "MongoDB.Driver.Core": "2.12.3",
-          "MongoDB.Libmongocrypt": "1.2.1"
+          "MongoDB.Bson": "2.13.1",
+          "MongoDB.Driver.Core": "2.13.1",
+          "MongoDB.Libmongocrypt": "1.2.2"
         }
       },
       "DnsClient": {
@@ -25,28 +25,28 @@
       },
       "MongoDB.Bson": {
         "type": "Transitive",
-        "resolved": "2.12.3",
-        "contentHash": "1gkSkX+hlyeNMvrcx4JeeGnTqAmOctoekczmASEzxuQiA15wo2YKm40TVx/pFbZGV57ekguzF8w2nurO5+2IQg==",
+        "resolved": "2.13.1",
+        "contentHash": "B/AI2we7YwfFuNcXr4jlCnVI5dJp+g8vkyj3Shi/bOpGhZQaxW4jK/NiiTwYvqxaMOe4MtVR+6Zlk4D2zalC7A==",
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "5.0.0"
         }
       },
       "MongoDB.Driver.Core": {
         "type": "Transitive",
-        "resolved": "2.12.3",
-        "contentHash": "wb5F6J5eolHwSLtIlCpENEYY05CvCtWt79ptVdmVTLbFq58dbsu6rEfxEtd9V7lkyPCeUoJuiSkCxceXx9mMgQ==",
+        "resolved": "2.13.1",
+        "contentHash": "lLYYMBneLHA9PYwWzbfC3p0NkAqzxbT8ZuinCH9MwR2bgHqu/6cOaJG12twKsnjc6KJVBboY0ufjHt43T9ZLnA==",
         "dependencies": {
           "DnsClient": "1.4.0",
-          "MongoDB.Bson": "2.12.3",
-          "MongoDB.Libmongocrypt": "1.2.1",
+          "MongoDB.Bson": "2.13.1",
+          "MongoDB.Libmongocrypt": "1.2.2",
           "SharpCompress": "0.23.0",
           "System.Buffers": "4.5.1"
         }
       },
       "MongoDB.Libmongocrypt": {
         "type": "Transitive",
-        "resolved": "1.2.1",
-        "contentHash": "VUtUAO2W6+DOjBtLHuD9WlTTcxYLXCNfp9YeKcws5LNAl0xej2KX1I37VsTAKnmnMjAF2Vwy1FXLCpK84FglMA=="
+        "resolved": "1.2.2",
+        "contentHash": "pKrlKJk4wem4MyfkaMqj+sqJ+RwUDnqnt76/Xwm5DDjMzEU5QtDkzQOLq5bVwFhNgC8LMn6Hr22tl5WsmN5+AA=="
       },
       "SharpCompress": {
         "type": "Transitive",

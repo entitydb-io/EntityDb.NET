@@ -4,9 +4,9 @@
     ".NETCoreApp,Version=v5.0": {
       "StackExchange.Redis": {
         "type": "Direct",
-        "requested": "[2.2.4, )",
-        "resolved": "2.2.4",
-        "contentHash": "wM0OuRyRaZTFndFRjIOvas4jjkeclRJsmNm0eAx5tOju3SQisrLubNaSFT/dBypi4Vh1n7nYc1gWpw9L7ernOg==",
+        "requested": "[2.2.62, )",
+        "resolved": "2.2.62",
+        "contentHash": "rcIFo/dK67An3mO1Heov0GZj9TYLMd+YB4drA09vOQz9ZpdjMhxSVtlDATcGpC++EH0aUGGnRnzhq0R0oXBOXg==",
         "dependencies": {
           "Pipelines.Sockets.Unofficial": "2.2.0",
           "System.Diagnostics.PerformanceCounter": "5.0.0"
