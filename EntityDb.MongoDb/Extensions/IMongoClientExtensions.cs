@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Extensions
 {
-    internal static class IMongoClientExtensions
+    public static class IMongoClientExtensions
     {
         public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName)
         {
