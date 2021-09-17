@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
+using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.SortDefinitions;
 using MongoDB.Bson;
@@ -11,7 +12,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
     internal abstract class SortBuilderBase : ISortBuilder<SortDefinition<BsonDocument>>
     {
         private static readonly SortDefinitionBuilder<BsonDocument> _sort = Builders<BsonDocument>.Sort;
-        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.TypeName)}";
+        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
         private static readonly string _dataValueFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
 
         protected static SortDefinition<BsonDocument> Sort(bool ascending, string fieldName)

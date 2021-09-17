@@ -76,7 +76,7 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            var JsonElementEnvelope = new JsonElementEnvelope(default, default, default, default!);
+            var JsonElementEnvelope = new JsonElementEnvelope(default!, default!);
 
             // ACT
 
@@ -91,7 +91,7 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            var JsonElementEnvelope = new JsonElementEnvelope(default, default, default, default!);
+            var JsonElementEnvelope = new JsonElementEnvelope(default!, default!);
 
             // ACT
 

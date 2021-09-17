@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace EntityDb.Abstractions.Strategies
 {
     /// <summary>
-    /// Represents a type that resolves a <see cref="Type"/> by using the <see cref="Assembly.FullName"/>, <see cref="Type.FullName"/>, and <see cref="MemberInfo.Name"/>.
+    /// Represents a type that resolves a <see cref="Type"/> or returns null.
     /// </summary>
     public interface IResolvingStrategy
     {
         /// <summary>
         /// Returns the resolved <see cref="Type"/> or null if the <see cref="Type"/> cannot be resolved.
         /// </summary>
-        /// <param name="assemblyFullName">The <see cref="Assembly.FullName"/> of the <see cref="Type.Assembly"/>.</param>
-        /// <param name="typeFullName">The <see cref="Type.FullName"/>.</param>
-        /// <param name="typeName">The <see cref="MemberInfo.Name"/>.</param>
+        /// <param name="headers">Describes the type that needs to be resolved.</param>
         /// <returns>The resolved <see cref="Type"/> or null if the <see cref="Type"/> cannot be resolved.</returns>
-        Type? ResolveType(string? assemblyFullName, string? typeFullName, string? typeName);
+        Type? ResolveType(IReadOnlyDictionary<string, string> headers);
     }
 }

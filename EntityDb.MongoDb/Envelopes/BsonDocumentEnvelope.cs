@@ -1,14 +1,22 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Exceptions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 using System;
+using System.Collections.Generic;
 
 namespace EntityDb.MongoDb.Envelopes
 {
-    internal sealed record BsonDocumentEnvelope(string? AssemblyFullName, string? TypeFullName, string? TypeName, BsonDocument Value)
+    internal sealed record BsonDocumentEnvelope
+    (
+        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)] Dictionary<string, string> Headers,
+        BsonDocument Value
+    )
     {
         public const string TypeDiscriminatorPropertyName = "_t";
 
@@ -28,7 +36,7 @@ namespace EntityDb.MongoDb.Envelopes
         {
             try
             {
-                return (TObject)BsonSerializer.Deserialize(Value, resolvingStrategyChain.ResolveType(AssemblyFullName, TypeFullName, TypeName));
+                return (TObject)BsonSerializer.Deserialize(Value, resolvingStrategyChain.ResolveType(Headers));
             }
             catch (Exception exception)
             {
@@ -79,13 +87,11 @@ namespace EntityDb.MongoDb.Envelopes
             {
                 var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
 
-                var (assemblyFullName, typeFullName, typeName) = (@object as object)!.GetType().GetTypeInfo();
+                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new BsonDocumentEnvelope
                 (
-                    assemblyFullName,
-                    typeFullName,
-                    typeName,
+                    headers,
                     bsonDocument
                 );
             }

@@ -30,9 +30,9 @@ namespace EntityDb.Common.Extensions
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="types">The types that can be resolved by <see cref="MemberInfo.Name"/>.</param>
-        public static void AddTypeNameResolvingStrategy(this IServiceCollection serviceCollection, Type[] types)
+        public static void AddMemberInfoNameResolvingStrategy(this IServiceCollection serviceCollection, Type[] types)
         {
-            serviceCollection.AddSingleton<IResolvingStrategy>((serviceProvider) => new TypeNameResolvingStrategy(types));
+            serviceCollection.AddSingleton<IResolvingStrategy>((serviceProvider) => new MemberInfoNameResolvingStrategy(types));
         }
 
         /// <summary>

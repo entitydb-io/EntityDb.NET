@@ -71,7 +71,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!, default!, default!);
+            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 
@@ -86,7 +86,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!, default!, default!);
+            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 

@@ -1,6 +1,7 @@
-﻿using EntityDb.Common.Extensions;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Strategies.Resolving;
 using Shouldly;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -17,13 +18,13 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var expectedType = record.GetType();
 
-            var (assemblyFullName, typeFullName, _) = record.GetType().GetTypeInfo();
+            var headers = EnvelopeHelper.GetTypeHeaders(expectedType, includeFullNames: true, includeMemberInfoName: false);
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(assemblyFullName, typeFullName, null);
+            var actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -31,17 +32,17 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         }
 
         [Fact]
-        public void GivenTypeName_WhenLoadingType_ThenReturnNull()
+        public void GivenMemberInfoName_WhenLoadingType_ThenReturnNull()
         {
             // ARRANGE
 
-            var (_, _, typeName) = typeof(object).GetTypeInfo();
+            var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), includeFullNames: false, includeMemberInfoName: true);
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(null, null, typeName);
+            var actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -55,9 +56,14 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
+            var headers = new Dictionary<string, string>
+            {
+                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+            };
+
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(null, null, null);
+            var actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -71,12 +77,17 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
+            var headers = new Dictionary<string, string>
+            {
+                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+                [EnvelopeHelper.AssemblyFullName] = "Garbage",
+                [EnvelopeHelper.TypeFullName] = "Garbage",
+                [EnvelopeHelper.MemberInfoName] = "Garbage",
+            };
+
             // ASSERT
 
-            Should.Throw<FileNotFoundException>(() =>
-            {
-                resolvingStrategy.ResolveType("Garbage", "Garbage", "Garbage");
-            });
+            Should.Throw<FileNotFoundException>(() => resolvingStrategy.ResolveType(headers));
         }
     }
 }

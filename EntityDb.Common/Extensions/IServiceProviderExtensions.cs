@@ -9,6 +9,7 @@ using EntityDb.Common.Queries;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -46,15 +47,13 @@ namespace EntityDb.Common.Extensions
         /// Returns the resolved <see cref="Type"/> or throws if the <see cref="Type"/> cannot be resolved.
         /// </summary>
         /// <param name="serviceProvider">The servie provider.</param>
-        /// <param name="assemblyFullName">The <see cref="Assembly.FullName"/> of the <see cref="Type.Assembly"/>.</param>
-        /// <param name="typeFullName">The <see cref="Type.FullName"/>.</param>
-        /// <param name="typeName">The <see cref="MemberInfo.Name"/>.</param>
+        /// <param name="headers">Describes the type that needs to be resolved.</param>
         /// <returns>The resolved <see cref="Type"/>.</returns>
-        public static Type ResolveType(this IServiceProvider serviceProvider, string? assemblyFullName, string? typeFullName, string? typeName)
+        public static Type ResolveType(this IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> headers)
         {
             var resolvingStrategyChain = serviceProvider.GetRequiredService<IResolvingStrategyChain>();
 
-            return resolvingStrategyChain.ResolveType(assemblyFullName, typeFullName, typeName);
+            return resolvingStrategyChain.ResolveType(headers);
         }
 
         /// <summary>

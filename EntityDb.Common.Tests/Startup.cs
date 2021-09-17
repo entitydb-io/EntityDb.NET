@@ -17,7 +17,7 @@ namespace EntityDb.Common.Tests
             serviceCollection.AddDefaultResolvingStrategy();
 
             // This is only here to add coverage
-            serviceCollection.AddTypeNameResolvingStrategy(new[]
+            serviceCollection.AddMemberInfoNameResolvingStrategy(new[]
             {
                 typeof(object),
             });

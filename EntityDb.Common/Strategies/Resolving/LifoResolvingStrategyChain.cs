@@ -19,13 +19,13 @@ namespace EntityDb.Common.Strategies.Resolving
             _resolvingStrategies = resolvingStrategies.Reverse().ToArray();
         }
 
-        public Type ResolveType(string? assemblyFullName, string? typeFullName, string? typeName)
+        public Type ResolveType(IReadOnlyDictionary<string, string> headers)
         {
             foreach (var resolvingStrategy in _resolvingStrategies)
             {
                 try
                 {
-                    var resolvedType = resolvingStrategy.ResolveType(assemblyFullName, typeFullName, typeName);
+                    var resolvedType = resolvingStrategy.ResolveType(headers);
 
                     if (resolvedType != null)
                     {

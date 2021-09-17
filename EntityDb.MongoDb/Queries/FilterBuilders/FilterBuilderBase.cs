@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
-using EntityDb.Common.Extensions;
+using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.FilterDefinitions;
 using MongoDB.Bson;
@@ -12,7 +12,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
     internal abstract class FilterBuilderBase : IFilterBuilder<FilterDefinition<BsonDocument>>
     {
         private static readonly FilterDefinitionBuilder<BsonDocument> _filter = Builders<BsonDocument>.Filter;
-        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.TypeName)}";
+        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
         private static readonly string _dataValueFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
 
         protected static FilterDefinition<BsonDocument> In<TValue>(string fieldName, TValue[] values)
@@ -37,7 +37,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 
         protected static FilterDefinition<BsonDocument> DataTypeIn(params Type[] dataTypes)
         {
-            var typeNames = dataTypes.GetTypeNames();
+            var typeNames = EnvelopeHelper.GetTypeHeaderValues(dataTypes);
 
             return _filter.In(_dataTypeNameFieldName, typeNames);
         }

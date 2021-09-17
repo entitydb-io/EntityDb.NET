@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace EntityDb.Abstractions.Strategies
 {
@@ -11,10 +11,8 @@ namespace EntityDb.Abstractions.Strategies
         /// <summary>
         /// Returns the resolved <see cref="Type"/> or throws if the <see cref="Type"/> cannot be resolved.
         /// </summary>
-        /// <param name="assemblyFullName">The <see cref="Assembly.FullName"/> of the <see cref="Type.Assembly"/>.</param>
-        /// <param name="typeFullName">The <see cref="Type.FullName"/>.</param>
-        /// <param name="typeName">The <see cref="MemberInfo.Name"/>.</param>
+        /// <param name="headers">Describes the type that needs to be resolved.</param>
         /// <returns>The resolved <see cref="Type"/>.</returns>
-        Type ResolveType(string? assemblyFullName, string? typeFullName, string? typeName);
+        Type ResolveType(IReadOnlyDictionary<string, string> headers);
     }
 }

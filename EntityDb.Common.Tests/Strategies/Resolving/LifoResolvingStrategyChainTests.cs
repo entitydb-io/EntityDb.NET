@@ -5,6 +5,7 @@ using EntityDb.Common.Strategies.Resolving;
 using Moq;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Strategies.Resolving
@@ -31,7 +32,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
             var resolvingStrategyMock = new Mock<IResolvingStrategy>();
 
             resolvingStrategyMock
-                .Setup(strategy => strategy.ResolveType(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+                .Setup(strategy => strategy.ResolveType(It.IsAny<Dictionary<string, string>>()))
                 .Throws(new Exception());
 
             var resolvingStrategyChain = new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[]
@@ -41,7 +42,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Should.Throw<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!, default!, default!));
+            Should.Throw<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!));
 
             loggerMock.Verify();
         }

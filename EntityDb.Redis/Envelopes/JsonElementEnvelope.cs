@@ -1,17 +1,17 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
 using EntityDb.Redis.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace EntityDb.Redis.Envelopes
 {
     internal sealed record JsonElementEnvelope
     (
-        string? AssemblyFullName,
-        string? TypeFullName,
-        string? TypeName,
+        Dictionary<string, string> Headers,
         JsonElement Value
     )
     {
@@ -26,7 +26,7 @@ namespace EntityDb.Redis.Envelopes
         {
             try
             {
-                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(), resolvingStrategyChain.ResolveType(AssemblyFullName, TypeFullName, TypeName))!;
+                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(), resolvingStrategyChain.ResolveType(Headers))!;
             }
             catch (Exception exception)
             {
@@ -70,13 +70,11 @@ namespace EntityDb.Redis.Envelopes
             {
                 var jsonElement = GetJsonElement(@object);
 
-                var (assemblyFullName, typeFullName, typeName) = (@object as object)!.GetType().GetTypeInfo();
+                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new JsonElementEnvelope
                 (
-                    assemblyFullName,
-                    typeFullName,
-                    typeName,
+                    headers,
                     jsonElement
                 );
             }

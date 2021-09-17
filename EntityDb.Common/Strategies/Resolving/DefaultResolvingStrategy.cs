@@ -1,13 +1,23 @@
 ﻿using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Envelopes;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace EntityDb.Common.Strategies.Resolving
 {
     internal class DefaultResolvingStrategy : IResolvingStrategy
     {
-        public Type? ResolveType(string? assemblyFullName, string? typeFullName, string? typeName)
+        public Type? ResolveType(IReadOnlyDictionary<string, string> headers)
         {
+            if (EnvelopeHelper.NotThisPlatform(headers))
+            {
+                return null;
+            }
+
+            EnvelopeHelper.TryGetAssemblyFullName(headers, out var assemblyFullName);
+            EnvelopeHelper.TryGetTypeFullName(headers, out var typeFullName);
+
             if (assemblyFullName == null || typeFullName == null)
             {
                 return null;
