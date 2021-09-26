@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Exceptions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
