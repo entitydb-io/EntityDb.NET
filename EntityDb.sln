@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Redis.Tests", "Ent
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.TestImplementations", "EntityDb.TestImplementations\EntityDb.TestImplementations.csproj", "{E55C33DF-354C-455B-9EA2-FE494D591B45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDb.RedisMongoDb.Tests", "EntityDb.RedisMongoDb.Tests\EntityDb.RedisMongoDb.Tests.csproj", "{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.RedisMongoDb.Tests", "EntityDb.RedisMongoDb.Tests\EntityDb.RedisMongoDb.Tests.csproj", "{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDb.Void", "EntityDb.Void\EntityDb.Void.csproj", "{C4239113-18BE-4418-87A8-E9617EF0A2DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4239113-18BE-4418-87A8-E9617EF0A2DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4239113-18BE-4418-87A8-E9617EF0A2DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4239113-18BE-4418-87A8-E9617EF0A2DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4239113-18BE-4418-87A8-E9617EF0A2DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
