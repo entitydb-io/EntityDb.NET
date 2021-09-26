@@ -3,7 +3,7 @@ using EntityDb.Void.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EntityDb.MongoDb.Extensions
+namespace EntityDb.Void.Extensions
 {
     /// <summary>
     /// Extensions for service collections.
