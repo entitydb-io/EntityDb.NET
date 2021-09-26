@@ -1,16 +1,16 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Queries;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Extensions
@@ -77,11 +77,37 @@ namespace EntityDb.Common.Extensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <param name="snapshotSessionOptions">The agent's use case for the repository.</param>
         /// <returns>A new instance of <see cref="ISnapshotRepository{TEntity}"/>.</returns>
-        public static async Task<ISnapshotRepository<TEntity>> CreateSnapshotRepository<TEntity>(this IServiceProvider serviceProvider, ISnapshotSessionOptions snapshotSessionOptions)
+        public static Task<ISnapshotRepository<TEntity>> CreateSnapshotRepository<TEntity>(this IServiceProvider serviceProvider, ISnapshotSessionOptions snapshotSessionOptions)
         {
             var snapshotRepositoryFactory = serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
 
-            return await snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
+            return snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
+        }
+
+        /// <summary>
+        /// Create a new instance of <see cref="IEntityRepository{TEntity}"/>
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="transactionSessionOptions">The agent's use case for the nested transaction repository.</param>
+        /// <param name="snapshotSessionOptions">The agent's use case for the nested snapshot repository, if needed.</param>
+        /// <returns></returns>
+        public static async Task<IEntityRepository<TEntity>> CreateEntityRepository<TEntity>(this IServiceProvider serviceProvider, ITransactionSessionOptions transactionSessionOptions, ISnapshotSessionOptions? snapshotSessionOptions = null)
+        {
+            var transactionRepositoryFactory = serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TEntity>>();
+
+            var transactionRepository = await transactionRepositoryFactory.CreateRepository(transactionSessionOptions);
+
+            if (snapshotSessionOptions == null)
+            {
+                return new EntityRepository<TEntity>(serviceProvider, transactionRepository, null);
+            }
+
+            var snapshotRepositoryFactory = serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
+
+            var snapshotRepository = await snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
+
+            return new EntityRepository<TEntity>(serviceProvider, transactionRepository, snapshotRepository);
         }
 
         /// <summary>
@@ -185,42 +211,6 @@ namespace EntityDb.Common.Extensions
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Returns an instance of <typeparamref name="TEntity"/> that represents the current state of an entity.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="serviceProvider">The service provider.</param>
-        /// <param name="entityId">The id of the entity.</param>
-        /// <param name="transactionRepository">The repository which contains relevant entity data.</param>
-        /// <param name="snapshotRepository">An optional repository which may or may not contain a snapshot of an entity.</param>
-        /// <returns>An instance of <typeparamref name="TEntity"/> that represents the current state of an entity.</returns>
-        public static async Task<TEntity> GetEntity<TEntity>(this IServiceProvider serviceProvider, Guid entityId, ITransactionRepository<TEntity> transactionRepository, ISnapshotRepository<TEntity>? snapshotRepository = null)
-        {
-            TEntity? snapshot = default;
-
-            if (snapshotRepository != null)
-            {
-                snapshot = await snapshotRepository.GetSnapshot(entityId);
-            }
-
-            var entity = snapshot ?? serviceProvider.Construct<TEntity>(entityId);
-
-            var versionNumber = serviceProvider.GetVersionNumber(entity);
-
-            var factQuery = new GetEntityQuery(entityId, versionNumber);
-
-            var facts = await transactionRepository.GetFacts(factQuery);
-
-            entity = entity.Reduce(facts);
-
-            if (serviceProvider.ShouldCache(snapshot, entity) && snapshotRepository != null)
-            {
-                await snapshotRepository.PutSnapshot(entityId, entity);
-            }
-
-            return entity;
         }
     }
 }

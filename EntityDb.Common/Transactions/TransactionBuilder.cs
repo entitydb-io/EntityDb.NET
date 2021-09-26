@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -75,20 +75,19 @@ namespace EntityDb.Common.Transactions
         /// Loads an already-existing entity into the builder.
         /// </summary>
         /// <param name="entityId">The id of the entity to load.</param>
-        /// <param name="transactionRepository">The repository which contains relevant entity data.</param>
-        /// <param name="snapshotRepository">An optional repository which may or may not contain a snapshot of an entity.</param>
+        /// <param name="entityRepository">The repository which encapsulates transactions and snapshots.</param>
         /// <returns>A new task that loads an already-existing entity into the builder.</returns>
         /// <remarks>
         /// Call this method to load an entity that already exists before calling <see cref="Append(Guid, ICommand{TEntity})"/>.
         /// </remarks>
-        public async Task Load(Guid entityId, ITransactionRepository<TEntity> transactionRepository, ISnapshotRepository<TEntity>? snapshotRepository = null)
+        public async Task Load(Guid entityId, IEntityRepository<TEntity> entityRepository)
         {
             if (_knownEntities.ContainsKey(entityId))
             {
                 throw new EntityAlreadyLoadedException();
             }
 
-            var entity = await _serviceProvider.GetEntity(entityId, transactionRepository, snapshotRepository);
+            var entity = await entityRepository.Get(entityId);
 
             if (_serviceProvider.GetVersionNumber(entity) == 0)
             {
@@ -109,12 +108,12 @@ namespace EntityDb.Common.Transactions
         /// </remarks>
         public TransactionBuilder<TEntity> Create(Guid entityId, ICommand<TEntity> command)
         {
-            var entity = _serviceProvider.Construct<TEntity>(entityId);
-
             if (_knownEntities.ContainsKey(entityId))
             {
                 throw new EntityAlreadyCreatedException();
             }
+
+            var entity = _serviceProvider.Construct<TEntity>(entityId);
 
             _knownEntities.Add(entityId, entity);
 

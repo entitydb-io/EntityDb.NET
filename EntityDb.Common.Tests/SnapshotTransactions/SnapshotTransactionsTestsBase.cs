@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
@@ -22,13 +22,13 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
         {
         }
 
-        private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to, IServiceProvider serviceProvider, ITransactionRepository<TransactionEntity>? transactionRepository = null, ISnapshotRepository<TransactionEntity>? snapshotRepository = null)
+        private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to, IServiceProvider serviceProvider, IEntityRepository<TransactionEntity>? entityRepository = null)
         {
             var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            if (transactionRepository != null)
+            if (entityRepository != null)
             {
-                await transactionBuilder.Load(entityId, transactionRepository, snapshotRepository);
+                await transactionBuilder.Load(entityId, entityRepository);
             }
             else
             {
@@ -62,23 +62,21 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await serviceProvider.CreateTransactionRepository<TransactionEntity>(new TransactionSessionOptions());
-
-            await using var snapshotRepository = await serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(new TransactionSessionOptions(), new SnapshotSessionOptions());
 
             var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 
-            await transactionRepository.PutTransaction(firstTransaction);
+            await entityRepository.Put(firstTransaction);
 
-            var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion, serviceProvider, transactionRepository, snapshotRepository);
+            var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion, serviceProvider, entityRepository);
 
-            await transactionRepository.PutTransaction(secondTransaction);
+            await entityRepository.Put(secondTransaction);
 
             // ACT
 
-            var current = await serviceProvider.GetEntity(entityId, transactionRepository);
+            var current = await entityRepository.Get(entityId);
 
-            var snapshot = await snapshotRepository.GetSnapshot(entityId);
+            var snapshot = await entityRepository.SnapshotRepository!.GetSnapshot(entityId);
 
             // ASSERT
 

@@ -5,7 +5,6 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Facts;
-using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Facts;
@@ -48,11 +47,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using var transactionRepository = await serviceProvider.CreateTransactionRepository<TransactionEntity>(new TransactionSessionOptions());
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
-            await transactionBuilder.Load(entityId, transactionRepository);
+            await transactionBuilder.Load(entityId, entityRepository);
 
             // ASSERT
 
@@ -156,17 +155,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using var transactionRepository = await serviceProvider.CreateTransactionRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
-            await transactionBuilder.Load(entityId, transactionRepository);
+            await transactionBuilder.Load(entityId, entityRepository);
 
             // ASSERT
 
             await Should.ThrowAsync<EntityAlreadyLoadedException>(async () =>
             {
-                await transactionBuilder.Load(entityId, transactionRepository);
+                await transactionBuilder.Load(entityId, entityRepository);
             });
         }
 
@@ -184,13 +183,13 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using var transactionRepository = await serviceProvider.CreateTransactionRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ASSERT
 
             await Should.ThrowAsync<EntityNotCreatedException>(async () =>
             {
-                await transactionBuilder.Load(Guid.NewGuid(), transactionRepository);
+                await transactionBuilder.Load(Guid.NewGuid(), entityRepository);
             });
         }
 
@@ -243,13 +242,13 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using var transactionRepository = await serviceProvider.CreateTransactionRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
-            var entity = await serviceProvider.GetEntity(entityId, transactionRepository);
+            var entity = await entityRepository.Get(entityId);
 
-            await transactionBuilder.Load(entityId, transactionRepository);
+            await transactionBuilder.Load(entityId, entityRepository);
 
             transactionBuilder.Append(entityId, new DoNothing());
 

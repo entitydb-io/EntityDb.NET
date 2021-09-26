@@ -3,9 +3,8 @@ using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Queries.FilterBuilders;
-using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Leases;
@@ -681,13 +680,15 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await CreateRepository();
 
+            var entityRepository = new EntityRepository<TransactionEntity>(_serviceProvider, transactionRepository);
+
             var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(), new[] { new DoNothing() });
 
             await transactionRepository.PutTransaction(transaction);
 
             // ACT
 
-            var actualEntity = await _serviceProvider.GetEntity(entityId, transactionRepository);
+            var actualEntity = await entityRepository.Get(entityId);
 
             // ASSERT
 
