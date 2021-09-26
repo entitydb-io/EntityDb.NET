@@ -5,7 +5,17 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
-    internal sealed record TransactionCommand<TEntity>(Guid EntityId, ulong ExpectedPreviousVersionNumber, ICommand<TEntity> Command, ITransactionFact<TEntity>[] Facts, ILease[] DeleteLeases, ILease[] InsertLeases) : ITransactionCommand<TEntity>
+    internal sealed record TransactionCommand<TEntity>
+    (
+        TEntity? PreviousSnapshot,
+        TEntity NextSnapshot,
+        Guid EntityId,
+        ulong ExpectedPreviousVersionNumber,
+        ICommand<TEntity> Command,
+        ITransactionFact<TEntity>[] Facts,
+        ILease[] DeleteLeases,
+        ILease[] InsertLeases
+    ) : ITransactionCommand<TEntity>
     {
     }
 }

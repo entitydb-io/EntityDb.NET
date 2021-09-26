@@ -406,6 +406,8 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                         new TransactionCommand<TransactionEntity>
                         (
+                            default,
+                            default!,
                             Guid.NewGuid(),
                             0,
                             new DoNothing(),
@@ -441,6 +443,8 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         (
+                            default,
+                            default!,
                             Guid.NewGuid(),
                             0,
                             new DoNothing(),
@@ -482,6 +486,8 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     (
+                        default,
+                        default!,
                         entityId,
                         previousVersionNumber,
                         new DoNothing(),
@@ -491,6 +497,8 @@ namespace EntityDb.Common.Tests.Transactions
                     ),
                     new TransactionCommand<TransactionEntity>
                     (
+                        default,
+                        default!,
                         entityId,
                         previousVersionNumber,
                         new DoNothing(),
@@ -532,6 +540,8 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         (
+                            default,
+                            default!,
                             entityId,
                             previousVersionNumber,
                             new DoNothing(),
@@ -581,6 +591,8 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     (
+                        default,
+                        default!,
                         entityId,
                         0,
                         new DoNothing(),
@@ -630,6 +642,8 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     (
+                        default,
+                        default!,
                         Guid.NewGuid(),
                         0,
                         new DoNothing(),
@@ -642,6 +656,8 @@ namespace EntityDb.Common.Tests.Transactions
                     ),
                     new TransactionCommand<TransactionEntity>
                     (
+                        default,
+                        default!,
                         Guid.NewGuid(),
                         0,
                         new DoNothing(),

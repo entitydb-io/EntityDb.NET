@@ -5,6 +5,7 @@ using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities
@@ -49,16 +50,26 @@ namespace EntityDb.Common.Entities
 
             entity = entity.Reduce(facts);
 
-            if (_serviceProvider.ShouldCache(snapshot, entity) && _snapshotRepository != null)
-            {
-                await _snapshotRepository.PutSnapshot(entityId, entity);
-            }
-
             return entity;
         }
 
         public Task<bool> Put(ITransaction<TEntity> transaction)
         {
+            if (_snapshotRepository != null)
+            {
+                var lastCommands = transaction.Commands
+                    .GroupBy(command => command.EntityId)
+                    .Select(group => group.Last());
+
+                foreach (var lastCommand in lastCommands)
+                {
+                    if (_serviceProvider.ShouldCache(lastCommand.PreviousSnapshot, lastCommand.NextSnapshot))
+                    {
+                        _snapshotRepository.PutSnapshot(lastCommand.EntityId, lastCommand.NextSnapshot);
+                    }
+                }
+            }
+
             return _transactionRepository.PutTransaction(transaction);
         }
 

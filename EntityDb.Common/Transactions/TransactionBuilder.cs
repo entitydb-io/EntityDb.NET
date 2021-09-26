@@ -60,6 +60,8 @@ namespace EntityDb.Common.Transactions
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             (
+                previousEntity,
+                nextEntity,
                 entityId,
                 previousVersionNumber,
                 command,

@@ -11,6 +11,16 @@ namespace EntityDb.Abstractions.Transactions
     public interface ITransactionCommand<TEntity>
     {
         /// <summary>
+        /// A snapshot of the entity before the command.
+        /// </summary>
+        TEntity? PreviousSnapshot { get; }
+
+        /// <summary>
+        /// A snapshot of the entity after the command.
+        /// </summary>
+        TEntity NextSnapshot { get; }
+
+        /// <summary>
         /// The id of the entity.
         /// </summary>
         Guid EntityId { get; }
