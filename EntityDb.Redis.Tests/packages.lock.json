@@ -59,9 +59,9 @@
       },
       "Xunit.DependencyInjection": {
         "type": "Direct",
-        "requested": "[7.4.0, )",
-        "resolved": "7.4.0",
-        "contentHash": "HaGJ1wOCBTLjdwpqj8L8M3m5VgL4WnlhVGKsOcEKRIDc1KHVWhqNdV8y+k83eqOBtgZfYCAwd3Yu+VI8SKKNLw==",
+        "requested": "[7.6.0, )",
+        "resolved": "7.6.0",
+        "contentHash": "NlTOChspLE8bkBzCK++V24sYyW3cH/KtEI652hdYE/YNVUy8FGLlFDXRd7SGYbwCCQrHlKgSBifuoAVBRzu2ow==",
         "dependencies": {
           "Microsoft.Extensions.Hosting": "2.1.0",
           "xunit.extensibility.execution": "[2.2.0, 3.0.0)"
@@ -69,11 +69,11 @@
       },
       "Xunit.DependencyInjection.Logging": {
         "type": "Direct",
-        "requested": "[2.1.0, )",
-        "resolved": "2.1.0",
-        "contentHash": "g98FFEevCkS6BJ5d4jm8/fXS2NmvTe1swYj+R98rRiPowujj0rzkK5j8Fun/oazVXAvNxRz3m/Xqr8/fgVP5xQ==",
+        "requested": "[7.5.1, )",
+        "resolved": "7.5.1",
+        "contentHash": "sfvec2PxvShNpXm7dWFJDAsugoG4k7dTuzGd3DqwfJr2nO3S7LHLlSnD852fT9qHsc5J632TJIpntjeeAL4JRA==",
         "dependencies": {
-          "Xunit.DependencyInjection": "5.2.0"
+          "Xunit.DependencyInjection": "7.5.1"
         }
       },
       "xunit.runner.visualstudio": {
@@ -1845,8 +1845,8 @@
           "Microsoft.NET.Test.Sdk": "16.11.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
-          "Xunit.DependencyInjection": "7.4.0",
-          "Xunit.DependencyInjection.Logging": "2.1.0",
+          "Xunit.DependencyInjection": "7.6.0",
+          "Xunit.DependencyInjection.Logging": "7.5.1",
           "xunit": "2.4.1"
         }
       },
