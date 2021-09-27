@@ -54,7 +54,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             // ACT
 
-            var shouldCache = serviceProvider.ShouldCache<TransactionEntity>(default, default!);
+            var shouldCache = serviceProvider.ShouldPutSnapshot<TransactionEntity>(default, default!);
 
             // ASSERT
 

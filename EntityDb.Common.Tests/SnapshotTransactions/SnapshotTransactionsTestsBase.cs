@@ -49,10 +49,10 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
         {
             // ARRANGE
 
-            var cachingStrategyMock = new Mock<ICachingStrategy<TransactionEntity>>(MockBehavior.Strict);
+            var cachingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
             cachingStrategyMock
-                .Setup(strategy => strategy.ShouldCache(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
+                .Setup(strategy => strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
                 .Returns((TransactionEntity? previousEntity, TransactionEntity nextEntity) => nextEntity.VersionNumber == expectedSnapshotVersion);
 
             var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>

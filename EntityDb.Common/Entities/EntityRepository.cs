@@ -63,7 +63,7 @@ namespace EntityDb.Common.Entities
 
                 foreach (var lastCommand in lastCommands)
                 {
-                    if (_serviceProvider.ShouldCache(lastCommand.PreviousSnapshot, lastCommand.NextSnapshot))
+                    if (_serviceProvider.ShouldPutSnapshot(lastCommand.PreviousSnapshot, lastCommand.NextSnapshot))
                     {
                         _snapshotRepository.PutSnapshot(lastCommand.EntityId, lastCommand.NextSnapshot);
                     }
