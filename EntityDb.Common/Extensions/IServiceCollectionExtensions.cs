@@ -73,6 +73,18 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
+        /// Adds a custom implementation of <see cref="ISnapshottingStrategy{TEntity}"/> to a service collection.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be snapshotted.</typeparam>
+        /// <typeparam name="TSnapshottingStrategy">The type that implements <see cref="ISnapshottingStrategy{TEntity}"/>.</typeparam>
+        /// <param name="serviceCollection">The service collection</param>
+        public static void AddSnapshottingStrategy<TEntity, TSnapshottingStrategy>(this IServiceCollection serviceCollection)
+            where TSnapshottingStrategy : class, ISnapshottingStrategy<TEntity>
+        {
+            serviceCollection.AddSingleton<ISnapshottingStrategy<TEntity>, TSnapshottingStrategy>();
+        }
+
+        /// <summary>
         /// Adds a custom implementation of <see cref="IConstructingStrategy{TEntity}"/> to a service collection.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity to be constructed.</typeparam>
