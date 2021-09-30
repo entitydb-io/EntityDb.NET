@@ -26,6 +26,7 @@ namespace EntityDb.MongoDb.Provisioner
             CreateRole.AddTo(rootCommand);
             CreateUser.AddTo(rootCommand);
             CreateCollections.AddTo(rootCommand);
+            CreateCollectionsDirect.AddTo(rootCommand);
 
             return rootCommand.InvokeAsync(args);
         }
