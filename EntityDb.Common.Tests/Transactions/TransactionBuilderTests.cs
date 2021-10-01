@@ -224,7 +224,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 0; i < NumberOfVersionsToTest; i++)
             {
-                transaction.Commands[i].ExpectedPreviousVersionNumber.ShouldBe(i);
+                transaction.Commands[(int)i].ExpectedPreviousVersionNumber.ShouldBe(i);
             }
         }
 

@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    /// Abstracts a query for a lease repository.
+    /// Abstracts a query on leases.
     /// </summary>
     public interface ILeaseQuery : IQuery
     {

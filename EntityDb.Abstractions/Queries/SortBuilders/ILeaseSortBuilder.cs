@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace EntityDb.Abstractions.Queries.SortBuilders
 {
     /// <summary>
-    /// Builds a sort for a lease repository.
+    /// Builds a sort for a lease query.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     public interface ILeaseSortBuilder<TSort> : ISortBuilder<TSort>
@@ -36,7 +36,7 @@ namespace EntityDb.Abstractions.Queries.SortBuilders
         /// <typeparam name="TLease">The type of lease in the lease expression.</typeparam>
         /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
         /// <param name="leaseExpression">The lease expression.</param>
-        /// <returns>A <typeparamref name="TSort"/> that oders leases by a lease expression.</returns>
+        /// <returns>A <typeparamref name="TSort"/> that orders leases by <paramref name="leaseExpression"/>.</returns>
         TSort LeaseProperty<TLease>(bool ascending, Expression<Func<TLease, object>> leaseExpression);
     }
 }

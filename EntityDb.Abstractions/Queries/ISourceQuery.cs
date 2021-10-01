@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    /// Abstracts a query for a source repository.
+    /// Abstracts a query on sources.
     /// </summary>
     public interface ISourceQuery : IQuery
     {

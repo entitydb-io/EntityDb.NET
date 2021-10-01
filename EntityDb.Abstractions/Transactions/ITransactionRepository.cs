@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Tags;
 using System;
 using System.Threading.Tasks;
 
@@ -42,6 +43,13 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery);
 
         /// <summary>
+        /// Returns the transaction ids which are found by a tag query.
+        /// </summary>
+        /// <param name="tagQuery">The tag query.</param>
+        /// <returns>The transaction ids which are found by <paramref name="tagQuery"/>.</returns>
+        Task<Guid[]> GetTransactionIds(ITagQuery tagQuery);
+
+        /// <summary>
         /// Returns the entity ids which are found by a source query.
         /// </summary>
         /// <param name="sourceQuery">The source query.</param>
@@ -68,6 +76,13 @@ namespace EntityDb.Abstractions.Transactions
         /// <param name="leaseQuery">The lease query.</param>
         /// <returns>The entity ids which are found by <paramref name="leaseQuery"/>.</returns>
         Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery);
+
+        /// <summary>
+        /// Returns the entity ids which are found by a tag query.
+        /// </summary>
+        /// <param name="tagQuery">The tag query.</param>
+        /// <returns>The entity ids which are found by <paramref name="tagQuery"/>.</returns>
+        Task<Guid[]> GetEntityIds(ITagQuery tagQuery);
 
         /// <summary>
         /// Returns the sources which are found by a source query.
@@ -98,10 +113,17 @@ namespace EntityDb.Abstractions.Transactions
         Task<ILease[]> GetLeases(ILeaseQuery leaseQuery);
 
         /// <summary>
+        /// Returns the tags which are found by a tag query.
+        /// </summary>
+        /// <param name="tagQuery">The tag query.</param>
+        /// <returns>The tags which are found by <paramref name="tagQuery"/>.</returns>
+        Task<ITag[]> GetTags(ITagQuery tagQuery);
+
+        /// <summary>
         /// Inserts a single transaction with an atomic commit.
         /// </summary>
         /// <param name="transaction">The transaction.</param>
-        /// <returns><c>true</c> if the insert suceeded, or <c>false</c> if the insert failed.</returns>
+        /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
         Task<bool> PutTransaction(ITransaction<TEntity> transaction);
     }
 }

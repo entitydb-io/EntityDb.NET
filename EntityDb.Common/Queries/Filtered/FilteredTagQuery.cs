@@ -1,23 +1,23 @@
-﻿using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredLeaseQuery(ILeaseQuery LeaseQuery, ILeaseFilter LeaseFilter) : FilteredQueryBase(LeaseQuery), ILeaseQuery
+    internal sealed record FilteredTagQuery(ITagQuery TagQuery, ITagFilter TagFilter) : FilteredQueryBase(TagQuery), ITagQuery
     {
-        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
-                LeaseQuery.GetFilter(builder),
-                LeaseFilter.GetFilter(builder)
+                TagQuery.GetFilter(builder),
+                TagFilter.GetFilter(builder)
             );
         }
 
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
         {
-            return LeaseQuery.GetSort(builder);
+            return TagQuery.GetSort(builder);
         }
     }
 }

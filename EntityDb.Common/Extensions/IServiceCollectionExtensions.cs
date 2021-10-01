@@ -119,6 +119,17 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
+        /// Adds an internal implementation of <see cref="ITaggingStrategy{TEntity}"/> to a service collection for an entity that implements <see cref="ITaggedEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be tagged.</typeparam>
+        /// <param name="serviceCollection">The service collection.</param>
+        public static void AddTaggedEntityTaggingStrategy<TEntity>(this IServiceCollection serviceCollection)
+            where TEntity : ITaggedEntity
+        {
+            serviceCollection.AddSingleton<ITaggingStrategy<TEntity>, TaggedEntityTaggingStrategy<TEntity>>();
+        }
+
+        /// <summary>
         /// Adds an internal implementation of <see cref="IAuthorizingStrategy{TEntity}"/> to a service collection for an entity that implements <see cref="IAuthorizedEntity{TEntity}"/>.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity to be authorized.</typeparam>

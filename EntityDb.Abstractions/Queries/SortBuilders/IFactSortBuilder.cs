@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace EntityDb.Abstractions.Queries.SortBuilders
 {
     /// <summary>
-    /// Builds a <typeparamref name="TSort"/> for a fact repository.
+    /// Builds a <typeparamref name="TSort"/> for a fact query.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     public interface IFactSortBuilder<TSort> : ISortBuilder<TSort>
@@ -43,7 +43,7 @@ namespace EntityDb.Abstractions.Queries.SortBuilders
         /// <typeparam name="TFact">The type of fact in the fact expression.</typeparam>
         /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
         /// <param name="factExpression">The fact expression.</param>
-        /// <returns>A <typeparamref name="TSort"/> that oders facts by a fact expression.</returns>
+        /// <returns>A <typeparamref name="TSort"/> that orders facts by <paramref name="factExpression"/>.</returns>
         TSort FactProperty<TFact>(bool ascending, Expression<Func<TFact, object>> factExpression);
     }
 }

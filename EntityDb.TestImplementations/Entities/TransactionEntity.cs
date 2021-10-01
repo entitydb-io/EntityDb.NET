@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Common.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,13 @@ namespace EntityDb.TestImplementations.Entities
     (
         ulong VersionNumber = default,
         string? Role = default,
-        ILease[]? Leases = default
+        ILease[]? Leases = default,
+        ITag[]? Tags = default
     ) :
         IAuthorizedEntity<TransactionEntity>,
         IVersionedEntity<TransactionEntity>,
-        ILeasedEntity
+        ILeasedEntity,
+        ITaggedEntity
     {
         public const string MongoCollectionName = "Test";
         public const string RedisKeyNamespace = "test";
@@ -43,6 +46,16 @@ namespace EntityDb.TestImplementations.Entities
             }
 
             return Enumerable.Empty<ILease>();
+        }
+
+        public IEnumerable<ITag> GetTags()
+        {
+            if (Tags != null)
+            {
+                return Tags;
+            }
+
+            return Enumerable.Empty<ITag>();
         }
     }
 }

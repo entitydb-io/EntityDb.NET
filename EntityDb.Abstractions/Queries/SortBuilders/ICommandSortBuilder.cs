@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace EntityDb.Abstractions.Queries.SortBuilders
 {
     /// <summary>
-    /// Builds a <typeparamref name="TSort"/> for a command repository.
+    /// Builds a <typeparamref name="TSort"/> for a command query.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     public interface ICommandSortBuilder<TSort> : ISortBuilder<TSort>
@@ -36,7 +36,7 @@ namespace EntityDb.Abstractions.Queries.SortBuilders
         /// <typeparam name="TCommand">The type of command in the command expression.</typeparam>
         /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
         /// <param name="commandExpression">The command expression.</param>
-        /// <returns>A <typeparamref name="TSort"/> that oders commands by a command expression.</returns>
+        /// <returns>A <typeparamref name="TSort"/> that orders commands by <paramref name="commandExpression"/>.</returns>
         TSort CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression);
     }
 }

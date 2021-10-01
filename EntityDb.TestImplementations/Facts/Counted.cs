@@ -1,7 +1,9 @@
 ﻿using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Leases;
+using EntityDb.TestImplementations.Tags;
 using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Facts
@@ -19,9 +21,19 @@ namespace EntityDb.TestImplementations.Facts
 
             leases.Add(new CountLease(Number));
 
+            var tags = new List<ITag>();
+
+            if (entity.Tags != null)
+            {
+                tags.AddRange(entity.Tags);
+            }
+            
+            tags.Add(new CountTag(Number));
+            
             return entity with
             {
                 Leases = leases.ToArray(),
+                Tags = tags.ToArray(),
             };
         }
     }

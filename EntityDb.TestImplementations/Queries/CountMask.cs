@@ -4,10 +4,11 @@ using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Source;
+using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountFilter : ISourceFilter, ICommandFilter, IFactFilter, ILeaseFilter
+    public record CountFilter : ISourceFilter, ICommandFilter, IFactFilter, ILeaseFilter, ITagFilter
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {
@@ -27,6 +28,11 @@ namespace EntityDb.TestImplementations.Queries
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.LeaseTypeIn(typeof(CountLease));
+        }
+
+        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        {
+            return builder.TagTypeIn(typeof(CountTag));
         }
     }
 }

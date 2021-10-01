@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -16,6 +17,7 @@ namespace EntityDb.Void.Transactions
         private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask = Task.FromResult(Array.Empty<ICommand<TEntity>>());
         private static readonly Task<IFact<TEntity>[]> _emptyFactArrayTask = Task.FromResult(Array.Empty<IFact<TEntity>>());
         private static readonly Task<ILease[]> _emptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
+        private static readonly Task<ITag[]> _emptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
         private static readonly Task<bool> _trueTask = Task.FromResult(true);
 
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
@@ -34,6 +36,11 @@ namespace EntityDb.Void.Transactions
         }
 
         public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
+        {
+            return _emptyGuidArrayTask;
+        }
+
+        public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
         {
             return _emptyGuidArrayTask;
         }
@@ -58,6 +65,11 @@ namespace EntityDb.Void.Transactions
             return _emptyGuidArrayTask;
         }
 
+        public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
+        {
+            return _emptyGuidArrayTask;
+        }
+
         public Task<object[]> GetSources(ISourceQuery sourceQuery)
         {
             return _emptyObjectArrayTask;
@@ -76,6 +88,11 @@ namespace EntityDb.Void.Transactions
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
             return _emptyLeaseArrayTask;
+        }
+
+        public Task<ITag[]> GetTags(ITagQuery tagQuery)
+        {
+            return _emptyTagArrayTask;
         }
 
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
