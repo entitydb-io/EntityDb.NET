@@ -29,8 +29,17 @@
     <NeutralLanguage>en</NeutralLanguage>
     <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
     <Description>A standard set of implementations (excluding persistence) of the EntityDb abstraction layer.</Description>
+    <PackageIcon>ICON.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\ICON.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

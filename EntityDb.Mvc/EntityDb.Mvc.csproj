@@ -29,7 +29,16 @@
     <NeutralLanguage>en</NeutralLanguage>
     <PackageTags>EntityDb EventSourcing DDD CQRS MVC</PackageTags>
     <Description>Provides a model for a Transaction Source that is mapped from an HttpContext. The source includes: Claims, Connection Information, and Raw Headers.</Description>
+    <PackageIcon>ICON.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\ICON.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
