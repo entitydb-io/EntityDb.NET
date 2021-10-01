@@ -1,8 +1,8 @@
+using EntityDb.MongoDb.Extensions;
 using MongoDB.Driver;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-using EntityDb.MongoDb.Extensions;
 
 namespace EntityDb.MongoDb.Provisioner.Commands
 {
@@ -13,14 +13,14 @@ namespace EntityDb.MongoDb.Provisioner.Commands
             var createCollectionsDirect = new Command("create-collections-direct");
 
             AddEntityNameArgumentTo(createCollectionsDirect);
-            
+
             var connectionStringArgument = new Argument<string>("connection-string", "The connection string to the mongodb instance.");
 
             createCollectionsDirect.AddArgument(connectionStringArgument);
 
             createCollectionsDirect.Handler = CommandHandler.Create(async (string entityName, string connectionString) =>
             {
-                await Execute( entityName, connectionString);
+                await Execute(entityName, connectionString);
             });
 
             rootCommand.AddCommand(createCollectionsDirect);
