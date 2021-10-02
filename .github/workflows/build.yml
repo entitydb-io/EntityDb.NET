@@ -5,6 +5,7 @@ on:
     tags-ignore:
       - '**'
     paths:
+      - '.github/workflows/build.yml'
       - 'src/**'
 
 name: Build
