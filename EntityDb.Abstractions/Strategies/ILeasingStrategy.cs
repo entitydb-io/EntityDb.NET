@@ -6,7 +6,7 @@ namespace EntityDb.Abstractions.Strategies
     /// Represents a type used to get leases for a <typeparamref name="TEntity"/>.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity to be leased.</typeparam>
-    public interface ILeasingStrategy<TEntity>
+    public interface ILeasingStrategy<in TEntity>
     {
         /// <summary>
         /// Returns the leases for a <typeparamref name="TEntity"/>.

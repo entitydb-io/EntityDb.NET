@@ -10,6 +10,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -100,7 +101,7 @@ namespace EntityDb.MongoDb.Documents
             Guid transactionId,
             Guid entityId,
             ulong entityVersionNumber,
-            ITransactionFact<TEntity>[] transactionFacts
+            ImmutableArray<ITransactionFact<TEntity>> transactionFacts
         )
         {
             if (transactionFacts.Length > 0)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions
 {
@@ -29,6 +30,6 @@ namespace EntityDb.Abstractions.Transactions
         /// <remarks>
         /// <see cref="Commands"/> must be handled in the order they are given.
         /// </remarks>
-        ITransactionCommand<TEntity>[] Commands { get; }
+        ImmutableArray<ITransactionCommand<TEntity>> Commands { get; }
     }
 }

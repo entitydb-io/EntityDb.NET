@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace EntityDb.Abstractions.Queries.FilterBuilders
 {
     /// <summary>
-    /// Builds a <typeparamref name="TFilter"/> for a source repository.
+    /// Builds a <typeparamref name="TFilter"/> for a source query.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
     public interface ISourceFilterBuilder<TFilter> : IFilterBuilder<TFilter>

@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    /// Abstracts a query for a command repository.
+    /// Abstracts a query on commands.
     /// </summary>
     public interface ICommandQuery : IQuery
     {

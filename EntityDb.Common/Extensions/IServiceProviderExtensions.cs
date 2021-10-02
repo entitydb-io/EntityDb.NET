@@ -5,6 +5,7 @@ using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Transactions;
@@ -169,6 +170,25 @@ namespace EntityDb.Common.Extensions
             }
 
             return Array.Empty<ILease>();
+        }
+
+        /// <summary>
+        /// Returns the tags for a <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The tags for <paramref name="entity"/>.</returns>
+        public static ITag[] GetTags<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
+        {
+            var taggingStrategy = serviceProvider.GetService<ITaggingStrategy<TEntity>>();
+
+            if (taggingStrategy != null)
+            {
+                return taggingStrategy.GetTags(entity);
+            }
+
+            return Array.Empty<ITag>();
         }
 
         /// <summary>

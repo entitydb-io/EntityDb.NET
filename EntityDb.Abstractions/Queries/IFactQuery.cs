@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    /// Abstracts a query for a fact repository.
+    /// Abstracts a query on facts.
     /// </summary>
     public interface IFactQuery : IQuery
     {

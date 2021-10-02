@@ -43,6 +43,7 @@ namespace EntityDb.MongoDb.Tests
             serviceCollection.AddConstructingStrategy<TransactionEntity, TransactionEntityConstructingStrategy>();
             serviceCollection.AddVersionedEntityVersioningStrategy<TransactionEntity>();
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
+            serviceCollection.AddTaggedEntityTaggingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
 
             serviceCollection.AddTestModeMongoDbTransactions<TransactionEntity>(TransactionEntity.MongoCollectionName, (serviceProvider) =>

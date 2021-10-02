@@ -4,7 +4,7 @@
     /// Represents a single metadata property and the context in which the metadata property must be unique.
     /// </summary>
     /// <remarks>
-    /// The lease repository is responsible for enforcing the uniqueness constraint.
+    /// The transaction repository is responsible for enforcing the uniqueness constraint.
     /// 
     /// If a lease needs to be unique in a global context, a constant should be used as the <see cref="Scope"/> for all instances of the lease.
     /// 

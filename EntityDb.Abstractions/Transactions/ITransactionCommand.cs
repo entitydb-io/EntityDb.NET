@@ -1,6 +1,9 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions
 {
@@ -44,26 +47,42 @@ namespace EntityDb.Abstractions.Transactions
         /// <remarks>
         /// <see cref="Facts"/> does not need to be ordered, but each entry must have a unique <see cref="ITransactionFact{TEntity}.SubversionNumber"/> for the given <see cref="ExpectedPreviousVersionNumber"/>.
         /// 
-        /// Allthough it may seem awkward, this provides two benefits.
+        /// All though it may seem awkward, this provides two benefits.
         /// 1. None of the repository implementations need to implement subversion number counting.
         /// 2. The generic test suite can verify that the uniqueness constraint is satisfied.
         /// </remarks>
-        ITransactionFact<TEntity>[] Facts { get; }
+        ImmutableArray<ITransactionFact<TEntity>> Facts { get; }
 
         /// <summary>
-        /// The metadata properties which must be removed.
+        /// The unique metadata properties which must be removed.
         /// </summary>
         /// <remarks>
         /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
         /// </remarks>
-        ILease[] DeleteLeases { get; }
+        ImmutableArray<ILease> DeleteLeases { get; }
 
         /// <summary>
-        /// The metadata properties which must be added.
+        /// The unique metadata properties which must be added.
         /// </summary>
         /// <remarks>
         /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
         /// </remarks>
-        ILease[] InsertLeases { get; }
+        ImmutableArray<ILease> InsertLeases { get; }
+
+        /// <summary>
+        /// The non-unique metadata properties which must be removed.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
+        /// </remarks>
+        ImmutableArray<ITag> DeleteTags { get; }
+
+        /// <summary>
+        /// The non-unique metadata properties which must be added.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
+        /// </remarks>
+        ImmutableArray<ITag> InsertTags { get; }
     }
 }

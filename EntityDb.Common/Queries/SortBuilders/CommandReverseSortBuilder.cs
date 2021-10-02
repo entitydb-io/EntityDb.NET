@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
+using System;
+using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders
 {
@@ -19,7 +21,7 @@ namespace EntityDb.Common.Queries.SortBuilders
             return CommandSortBuilder.CommandType(!ascending);
         }
 
-        public TSort CommandProperty<TCommand>(bool ascending, System.Linq.Expressions.Expression<System.Func<TCommand, object>> commandExpression)
+        public TSort CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression)
         {
             return CommandSortBuilder.CommandProperty(!ascending, commandExpression);
         }

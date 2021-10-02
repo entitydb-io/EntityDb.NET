@@ -51,5 +51,16 @@ namespace EntityDb.Common.Extensions
         {
             return new LeaseReverseSortBuilder<TSort>(leaseSortBuilder);
         }
+
+        /// <summary>
+        /// Returns a <see cref="ITagSortBuilder{TSort}"/> that orders tags in the reverse order of another <see cref="ITagSortBuilder{TSort}"/>.
+        /// </summary>
+        /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
+        /// <param name="tagSortBuilder">The tag sort builder.</param>
+        /// <returns>A <see cref="ITagSortBuilder{TSort}"/> that orders tags in the reverse order of <paramref name="tagSortBuilder"/>.</returns>
+        public static ITagSortBuilder<TSort> Reverse<TSort>(this ITagSortBuilder<TSort> tagSortBuilder)
+        {
+            return new TagReverseSortBuilder<TSort>(tagSortBuilder);
+        }
     }
 }

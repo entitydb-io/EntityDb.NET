@@ -5,6 +5,7 @@ using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,6 +35,7 @@ namespace EntityDb.Common.Transactions
             var previousEntity = _knownEntities[entityId];
             var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
             var previousLeases = _serviceProvider.GetLeases(previousEntity);
+            var previousTags = _serviceProvider.GetTags(previousEntity);
 
             if (_serviceProvider.IsAuthorized(previousEntity, command) == false)
             {
@@ -46,6 +48,7 @@ namespace EntityDb.Common.Transactions
 
             var nextEntity = previousEntity.Reduce(nextFacts);
             var nextLeases = _serviceProvider.GetLeases(nextEntity);
+            var nextTags = _serviceProvider.GetTags(nextEntity);
 
             var transactionFacts = new List<TransactionFact<TEntity>>();
 
@@ -60,14 +63,16 @@ namespace EntityDb.Common.Transactions
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             (
-                previousEntity,
-                nextEntity,
-                entityId,
-                previousVersionNumber,
-                command,
-                transactionFacts.ToArray(),
-                previousLeases.Except(nextLeases).ToArray(),
-                nextLeases.Except(previousLeases).ToArray()
+                PreviousSnapshot: previousEntity,
+                NextSnapshot: nextEntity,
+                EntityId: entityId,
+                ExpectedPreviousVersionNumber: previousVersionNumber,
+                Command: command,
+                Facts: transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>(),
+                DeleteLeases: previousLeases.Except(nextLeases).ToImmutableArray(),
+                InsertLeases: nextLeases.Except(previousLeases).ToImmutableArray(),
+                DeleteTags: previousTags.Except(nextTags).ToImmutableArray(),
+                InsertTags: nextTags.Except(previousTags).ToImmutableArray()
             ));
 
             _knownEntities[entityId] = nextEntity;
@@ -158,7 +163,7 @@ namespace EntityDb.Common.Transactions
                 timeStamp = timeStampOverride.Value.ToUniversalTime();
             }
 
-            var transaction = new Transaction<TEntity>(transactionId, timeStamp, source, _transactionCommands.ToArray());
+            var transaction = new Transaction<TEntity>(transactionId, timeStamp, source, _transactionCommands.ToImmutableArray<ITransactionCommand<TEntity>>());
 
             _transactionCommands.Clear();
 

@@ -2,6 +2,8 @@
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
+using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders
 {
@@ -27,7 +29,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
             return SortDataType(ascending);
         }
 
-        public SortDefinition<BsonDocument> LeaseProperty<TLease>(bool ascending, System.Linq.Expressions.Expression<System.Func<TLease, object>> leaseExpression)
+        public SortDefinition<BsonDocument> LeaseProperty<TLease>(bool ascending, Expression<Func<TLease, object>> leaseExpression)
         {
             return SortDataValue(ascending, leaseExpression);
         }

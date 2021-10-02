@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
+using System;
+using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders
 {
@@ -24,7 +26,7 @@ namespace EntityDb.Common.Queries.SortBuilders
             return FactSortBuilder.FactType(!ascending);
         }
 
-        public TSort FactProperty<TFact>(bool ascending, System.Linq.Expressions.Expression<System.Func<TFact, object>> factExpression)
+        public TSort FactProperty<TFact>(bool ascending, Expression<Func<TFact, object>> factExpression)
         {
             return FactSortBuilder.FactProperty(!ascending, factExpression);
         }
