@@ -22,8 +22,8 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore src\EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test src\EntityDb.sln --no-restore -c Release --collect:"XPlat Code Coverage" -r ./TestResults
-      - name: Coveralls GitHub Action
+        run: dotnet test src\EntityDb.sln --no-restore -c Release --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Publish Coverage Results
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
