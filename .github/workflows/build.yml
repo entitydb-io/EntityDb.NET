@@ -21,4 +21,4 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore src\EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test --no-restore -c Release
+        run: dotnet test src\EntityDb.sln --no-restore -c Release
