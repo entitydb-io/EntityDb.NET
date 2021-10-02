@@ -1,4 +1,4 @@
-# EntityDb.NET
+# EntityDb.NET [![codecov](https://codecov.io/gh/entitydb-io/EntityDb.NET/branch/main/graph/badge.svg?token=2IK4D211SY)](https://codecov.io/gh/entitydb-io/EntityDb.NET)
 
 At its core, EntityDb.NET is a set of abstractions and implementations for the Event Sourcing pattern, with the added ability to enforce uniqueness constraints and the ability to tag resources.
 
