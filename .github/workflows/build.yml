@@ -4,6 +4,8 @@ on:
       - '**'
     tags-ignore:
       - '**'
+    paths:
+      - 'src/**'
 
 name: Build
 
@@ -17,6 +19,6 @@ jobs:
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v1
       - name: Restore Dependencies
-        run: dotnet restore --locked-mode
+        run: dotnet restore src\EntityDb.sln --locked-mode
       - name: Run Project Tests
         run: dotnet test --no-restore -c Release
