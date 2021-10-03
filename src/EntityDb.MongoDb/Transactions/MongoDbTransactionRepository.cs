@@ -113,9 +113,9 @@ namespace EntityDb.MongoDb.Transactions
 
                         await CommandDocument.InsertOne(clientSessionHandle, mongoDatabase, CommandDocument.BuildOne(logger, transaction, transactionCommand));
                         await FactDocument.InsertMany(clientSessionHandle, mongoDatabase, FactDocument.BuildMany(logger, transaction, transactionCommand));
-                        await LeaseDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.DeleteLeases);
+                        await LeaseDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.Leases.Delete);
                         await LeaseDocument.InsertMany(clientSessionHandle, mongoDatabase, LeaseDocument.BuildMany(logger, transaction, transactionCommand));
-                        await TagDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.DeleteTags);
+                        await TagDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.Tags.Delete);
                         await TagDocument.InsertMany(clientSessionHandle, mongoDatabase, TagDocument.BuildMany(logger, transaction, transactionCommand));
                     }
                 }

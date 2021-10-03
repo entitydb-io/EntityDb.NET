@@ -15,9 +15,7 @@ namespace EntityDb.Common.Transactions
         public ulong ExpectedPreviousVersionNumber { get; init; }
         public ICommand<TEntity> Command { get; init; } = default!;
         public ImmutableArray<ITransactionFact<TEntity>> Facts { get; init; }
-        public ImmutableArray<ILease> DeleteLeases { get; init; }
-        public ImmutableArray<ILease> InsertLeases { get; init; }
-        public ImmutableArray<ITag> DeleteTags { get; init; }
-        public ImmutableArray<ITag> InsertTags { get; init; }
+        public ITransactionMetaData<ILease> Leases { get; init; } = default!;
+        public ITransactionMetaData<ITag> Tags { get; init; } = default!;
     }
 }

@@ -55,7 +55,7 @@ namespace EntityDb.MongoDb.Documents
             ITransactionCommand<TEntity> transactionCommand
         )
         {
-            return transactionCommand.InsertTags
+            return transactionCommand.Tags.Insert
                 .Select(insertTag => new TagDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
