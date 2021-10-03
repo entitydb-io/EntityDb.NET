@@ -9,6 +9,8 @@ namespace EntityDb.MongoDb.Queries
 {
     internal record EntityIdsQuery<TDocument>
     (
+        IClientSessionHandle? ClientSessionHandle,
+        IMongoCollection<BsonDocument> MongoCollection,
         FilterDefinition<BsonDocument> Filter,
         SortDefinition<BsonDocument>? Sort,
         int? Skip,
@@ -16,6 +18,8 @@ namespace EntityDb.MongoDb.Queries
     )
         : GuidQuery<TDocument>
     (
+        ClientSessionHandle,
+        MongoCollection,
         Filter,
         _projection,
         Sort,

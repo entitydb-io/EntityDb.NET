@@ -1,5 +1,4 @@
-﻿using EntityDb.MongoDb.Documents;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,9 @@ using System.Threading.Tasks;
 namespace EntityDb.MongoDb.Queries
 {
     internal abstract record GuidQuery<TDocument>
-    (
+(
+        IClientSessionHandle? ClientSessionHandle,
+        IMongoCollection<BsonDocument> MongoCollection,
         FilterDefinition<BsonDocument> Filter,
         ProjectionDefinition<BsonDocument, TDocument> Projection,
         SortDefinition<BsonDocument>? Sort,
@@ -18,23 +19,20 @@ namespace EntityDb.MongoDb.Queries
     )
         : DocumentQuery<TDocument>
     (
+        ClientSessionHandle,
+        MongoCollection,
         Filter,
         Projection,
         Sort,
         null,
         null
     )
-        where TDocument : ITransactionDocument
     {
         protected abstract IEnumerable<Guid> MapToGuids(IEnumerable<TDocument> documents);
 
-        public async Task<Guid[]> DistinctGuids
-        (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoCollection<BsonDocument> mongoCollection
-        )
+        public async Task<Guid[]> GetDistinctGuids()
         {
-            var documents = await Execute(clientSessionHandle, mongoCollection);
+            var documents = await GetDocuments();
 
             var guids = MapToGuids(documents).Distinct();
 

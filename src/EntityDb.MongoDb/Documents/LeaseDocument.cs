@@ -94,66 +94,58 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static GuidQuery<LeaseDocument> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            var query = new TransactionIdQuery<LeaseDocument>
+            return new TransactionIdQuery<LeaseDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
                 leaseQuery.Skip,
                 leaseQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<Guid[]> GetEntityIds
+        public static GuidQuery<LeaseDocument> GetEntityIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            var query = new EntityIdQuery<LeaseDocument>
+            return new EntityIdQuery<LeaseDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
                 leaseQuery.Skip,
                 leaseQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<List<LeaseDocument>> GetMany
+        public static DataQuery<LeaseDocument> GetDataQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            var query = new DataQuery<LeaseDocument>
+            return new DataQuery<LeaseDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
                 leaseQuery.Skip,
                 leaseQuery.Take
             );
-
-            return query.Execute(clientSessionHandle, GetCollection(mongoDatabase));
         }
 
         public static async Task DeleteMany

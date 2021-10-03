@@ -82,69 +82,57 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static GuidQuery<CommandDocument> GetTransactionIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var query = new TransactionIdQuery<CommandDocument>
+            return new TransactionIdQuery<CommandDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<Guid[]> GetEntityIds
+        public static GuidQuery<CommandDocument> GetEntityIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var query = new EntityIdQuery<CommandDocument>
+            return new EntityIdQuery<CommandDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<List<CommandDocument>> GetMany
+        public static DataQuery<CommandDocument> GetDataQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var query = new DataQuery<CommandDocument>
+            return new DataQuery<CommandDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
-            );
-
-            return query.Execute
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
@@ -159,17 +147,15 @@ namespace EntityDb.MongoDb.Documents
 
             var query = new EntityVersionQuery<CommandDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
             );
 
-            var commandDocuments = await query.Execute
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
-            );
+            var commandDocuments = await query.GetDocuments();
 
             var lastCommandDocument = commandDocuments.SingleOrDefault();
 

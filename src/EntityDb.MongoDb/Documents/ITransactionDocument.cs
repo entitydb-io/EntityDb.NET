@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using EntityDb.MongoDb.Envelopes;
+using MongoDB.Bson;
 using System;
 
 namespace EntityDb.MongoDb.Documents
@@ -10,5 +11,6 @@ namespace EntityDb.MongoDb.Documents
 #pragma warning restore IDE1006 // Naming Styles
 
         Guid TransactionId { get; }
+        BsonDocumentEnvelope Data { get; }
     }
 }

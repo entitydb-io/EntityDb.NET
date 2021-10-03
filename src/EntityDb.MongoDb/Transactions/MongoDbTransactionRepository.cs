@@ -6,7 +6,6 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Sessions;
@@ -30,171 +29,121 @@ namespace EntityDb.MongoDb.Transactions
 
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await SourceDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, sourceQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
         public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await CommandDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, commandQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
         public Task<Guid[]> GetTransactionIds(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await FactDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, factQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
         public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery)
             );
         }
 
         public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await TagDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, tagQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => TagDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, tagQuery)
             );
         }
 
         public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await SourceDocument.GetEntityIds(clientSessionHandle, mongoDatabase, sourceQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
         public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await CommandDocument.GetEntityIds(clientSessionHandle, mongoDatabase, commandQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
         public Task<Guid[]> GetEntityIds(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await FactDocument.GetEntityIds(clientSessionHandle, mongoDatabase, factQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
         public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, leaseQuery)
             );
         }
 
         public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteGuidQuery
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => await TagDocument.GetEntityIds(clientSessionHandle, mongoDatabase, tagQuery),
-                Array.Empty<Guid>()
+                (clientSessionHandle, mongoDatabase) => TagDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, tagQuery)
             );
         }
 
         public Task<object[]> GetSources(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteDataQuery<SourceDocument, object>
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
-                {
-                    var sourceDocuments = await SourceDocument.GetMany(clientSessionHandle, mongoDatabase, sourceQuery);
-
-                    return sourceDocuments
-                        .Select(sourceDocument => sourceDocument.Data.Reconstruct<object>(logger, resolvingStrategyChain))
-                        .ToArray();
-                },
-                Array.Empty<object>()
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetDataQuery(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteDataQuery<CommandDocument, ICommand<TEntity>>
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
-                {
-                    var commandDocuments = await CommandDocument.GetMany(clientSessionHandle, mongoDatabase, commandQuery);
-
-                    return commandDocuments
-                        .Select(commandDocument => commandDocument.Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain))
-                        .ToArray();
-                },
-                Array.Empty<ICommand<TEntity>>()
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetDataQuery(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
         public Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteDataQuery<FactDocument, IFact<TEntity>>
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
-                {
-                    var factDocuments = await FactDocument.GetMany(clientSessionHandle, mongoDatabase, factQuery);
-
-                    return factDocuments
-                        .Select(factDocument => factDocument.Data.Reconstruct<IFact<TEntity>>(logger, resolvingStrategyChain))
-                        .ToArray();
-                },
-                Array.Empty<IFact<TEntity>>()
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetDataQuery(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteDataQuery<LeaseDocument, ILease>
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
-                {
-                    var leaseDocuments = await LeaseDocument.GetMany(clientSessionHandle, mongoDatabase, leaseQuery);
-
-                    return leaseDocuments
-                        .Select(leaseDocument => leaseDocument.Data.Reconstruct<ILease>(logger, resolvingStrategyChain))
-                        .ToArray();
-                },
-                Array.Empty<ILease>()
+                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetDataQuery(clientSessionHandle, mongoDatabase, leaseQuery)
             );
         }
 
         public Task<ITag[]> GetTags(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteQuery
+            return _mongoDbSession.ExecuteDataQuery<TagDocument, ITag>
             (
-                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
-                {
-                    var tagDocuments = await TagDocument.GetMany(clientSessionHandle, mongoDatabase, tagQuery);
-
-                    return tagDocuments
-                        .Select(tagDocument => tagDocument.Data.Reconstruct<ITag>(logger, resolvingStrategyChain))
-                        .ToArray();
-                },
-                Array.Empty<ITag>()
+                (clientSessionHandle, mongoDatabase) => TagDocument.GetDataQuery(clientSessionHandle, mongoDatabase, tagQuery)
             );
         }
 

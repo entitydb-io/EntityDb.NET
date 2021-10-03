@@ -82,69 +82,57 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static GuidQuery<FactDocument> GetTransactionIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var query = new TransactionIdQuery<FactDocument>
+            return new TransactionIdQuery<FactDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
                 factQuery.Skip,
                 factQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<Guid[]> GetEntityIds
+        public static GuidQuery<FactDocument> GetEntityIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var query = new EntityIdQuery<FactDocument>
+            return new EntityIdQuery<FactDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
                 factQuery.Skip,
                 factQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<List<FactDocument>> GetMany
+        public static DataQuery<FactDocument> GetDataQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var query = new DataQuery<FactDocument>
+            return new DataQuery<FactDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
                 factQuery.Skip,
                 factQuery.Take
-            );
-
-            return query.Execute
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
     }

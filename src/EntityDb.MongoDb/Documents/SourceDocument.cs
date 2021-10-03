@@ -78,69 +78,57 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static GuidQuery<SourceDocument> GetTransactionIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var query = new TransactionIdQuery<SourceDocument>
+            return new TransactionIdQuery<SourceDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
                 sourceQuery.Skip,
                 sourceQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<Guid[]> GetEntityIds
+        public static GuidQuery<SourceDocument> GetEntityIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var query = new EntityIdsQuery<SourceDocument>
+            return new EntityIdsQuery<SourceDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
                 sourceQuery.Skip,
                 sourceQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<List<SourceDocument>> GetMany
+        public static DataQuery<SourceDocument> GetDataQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var query = new DataQuery<SourceDocument>
+            return new DataQuery<SourceDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
                 sourceQuery.Skip,
                 sourceQuery.Take
-            );
-
-            return query.Execute
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
     }

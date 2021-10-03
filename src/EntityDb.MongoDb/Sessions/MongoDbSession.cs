@@ -1,6 +1,8 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
+using EntityDb.MongoDb.Documents;
+using EntityDb.MongoDb.Queries;
 using MongoDB.Driver;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -43,15 +45,21 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
-        public Task<TResult> ExecuteQuery<TResult>(Func<ILogger, IResolvingStrategyChain, IClientSessionHandle?, IMongoDatabase, Task<TResult>> query, TResult defaultResult)
+        public Task<TModel[]> ExecuteDataQuery<TDocument, TModel>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument
         {
             return Execute
             (
-                async () => await query.Invoke(_logger, _resolvingStrategyChain, _clientSessionHandle, _mongoDatabase),
-                () =>
-                {
-                    return Task.FromResult(defaultResult);
-                }
+                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase).GetModels<TModel>(_logger, _resolvingStrategyChain),
+                () => Task.FromResult(Array.Empty<TModel>())
+            );
+        }
+
+        public Task<Guid[]> ExecuteGuidQuery<TDocument>(Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder)
+        {
+            return Execute
+            (
+                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase).GetDistinctGuids(),
+                () => Task.FromResult(Array.Empty<Guid>())
             );
         }
 

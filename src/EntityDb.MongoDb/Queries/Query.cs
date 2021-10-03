@@ -7,6 +7,8 @@ namespace EntityDb.MongoDb.Queries
 {
     internal record DocumentQuery<TDocument>
     (
+        IClientSessionHandle? ClientSessionHandle,
+        IMongoCollection<BsonDocument> MongoCollection,
         FilterDefinition<BsonDocument> Filter,
         ProjectionDefinition<BsonDocument, TDocument> Projection,
         SortDefinition<BsonDocument>? Sort,
@@ -16,23 +18,19 @@ namespace EntityDb.MongoDb.Queries
     {
         protected static readonly ProjectionDefinitionBuilder<BsonDocument> _projectionBuilder = Builders<BsonDocument>.Projection;
 
-        public Task<List<TDocument>> Execute
-        (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoCollection<BsonDocument> mongoCollection
-        )
+        public Task<List<TDocument>> GetDocuments()
         {
             IFindFluent<BsonDocument, TDocument> find;
 
-            if (clientSessionHandle != null)
+            if (ClientSessionHandle != null)
             {
-                find = mongoCollection
-                    .Find(clientSessionHandle, Filter)
+                find = MongoCollection
+                    .Find(ClientSessionHandle, Filter)
                     .Project(Projection);
             }
             else
             {
-                find = mongoCollection
+                find = MongoCollection
                     .Find(Filter)
                     .Project(Projection);
             }

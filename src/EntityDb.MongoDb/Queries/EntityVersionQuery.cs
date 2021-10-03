@@ -6,6 +6,8 @@ namespace EntityDb.MongoDb.Queries
 {
     internal record EntityVersionQuery<TDocument>
     (
+        IClientSessionHandle? ClientSessionHandle,
+        IMongoCollection<BsonDocument> MongoCollection,
         FilterDefinition<BsonDocument> Filter,
         SortDefinition<BsonDocument>? Sort,
         int? Skip,
@@ -13,6 +15,8 @@ namespace EntityDb.MongoDb.Queries
     )
         : DocumentQuery<TDocument>
     (
+        ClientSessionHandle,
+        MongoCollection,
         Filter,
         _projection,
         Sort,

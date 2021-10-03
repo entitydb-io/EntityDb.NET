@@ -1,7 +1,6 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Common.Queries;
-using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -76,69 +75,57 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static GuidQuery<TagDocument> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ITagQuery tagQuery
         )
         {
-            var query = new TransactionIdQuery<TagDocument>
+            return new TransactionIdQuery<TagDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
                 tagQuery.Skip,
                 tagQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<Guid[]> GetEntityIds
+        public static GuidQuery<TagDocument> GetEntityIdsQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ITagQuery tagQuery
         )
         {
-            var query = new EntityIdQuery<TagDocument>
+            return new EntityIdQuery<TagDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
                 tagQuery.Skip,
                 tagQuery.Take
-            );
-
-            return query.DistinctGuids
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
-        public static Task<List<TagDocument>> GetMany
+        public static DataQuery<TagDocument> GetDataQuery
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ITagQuery tagQuery
         )
         {
-            var query = new DataQuery<TagDocument>
+            return new DataQuery<TagDocument>
             (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
                 tagQuery.Skip,
                 tagQuery.Take
-            );
-
-            return query.Execute
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase)
             );
         }
 
