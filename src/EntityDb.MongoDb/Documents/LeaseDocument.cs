@@ -1,4 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Common.Queries;
 using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -158,14 +160,22 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ILeaseFilter leaseFilter
+            Guid entityId,
+            IReadOnlyCollection<ILease> deleteLeases
         )
         {
+            if (deleteLeases.Count == 0)
+            {
+                return;
+            }
+
+            var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
+
             await DeleteMany
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
-                leaseFilter.GetFilter(_leaseFilterBuilder)
+                deleteLeasesQuery.GetFilter(_leaseFilterBuilder)
             );
         }
     }

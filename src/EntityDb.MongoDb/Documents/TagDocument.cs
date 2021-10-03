@@ -1,4 +1,6 @@
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Tags;
+using EntityDb.Common.Queries;
 using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -144,14 +146,22 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            ITagFilter tagFilter
+            Guid entityId,
+            IReadOnlyCollection<ITag> deleteTags
         )
         {
+            if (deleteTags.Count == 0)
+            {
+                return;
+            }
+
+            var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
+
             await DeleteMany
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
-                tagFilter.GetFilter(_tagFilterBuilder)
+                deleteTagsQuery.GetFilter(_tagFilterBuilder)
             );
         }
     }

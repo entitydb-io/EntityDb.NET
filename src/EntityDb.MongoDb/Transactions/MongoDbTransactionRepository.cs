@@ -333,17 +333,13 @@ namespace EntityDb.MongoDb.Transactions
                             GetFactDocuments(logger, transaction, transactionCommand)
                         );
 
-                        if (transactionCommand.DeleteLeases.Length > 0)
-                        {
-                            var deleteLeasesQuery = new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
-
-                            await LeaseDocument.DeleteMany
-                            (
-                                clientSessionHandle,
-                                mongoDatabase,
-                                deleteLeasesQuery
-                            );
-                        }
+                        await LeaseDocument.DeleteMany
+                        (
+                            clientSessionHandle,
+                            mongoDatabase,
+                            transactionCommand.EntityId,
+                            transactionCommand.DeleteLeases
+                        );
 
                         await LeaseDocument.InsertMany
                         (
@@ -352,17 +348,13 @@ namespace EntityDb.MongoDb.Transactions
                             GetInsertLeaseDocuments(logger, transaction, transactionCommand)
                         );
 
-                        if (transactionCommand.DeleteTags.Length > 0)
-                        {
-                            var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
-
-                            await TagDocument.DeleteMany
-                            (
-                                clientSessionHandle,
-                                mongoDatabase,
-                                deleteTagsQuery
-                            );
-                        }
+                        await TagDocument.DeleteMany
+                        (
+                            clientSessionHandle,
+                            mongoDatabase,
+                            transactionCommand.EntityId,
+                            transactionCommand.DeleteTags
+                        );
 
                         await TagDocument.InsertMany
                         (
