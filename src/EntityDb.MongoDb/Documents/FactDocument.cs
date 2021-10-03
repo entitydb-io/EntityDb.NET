@@ -1,4 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -7,6 +9,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -65,6 +68,25 @@ namespace EntityDb.MongoDb.Documents
                     ),
                 }
             );
+        }
+
+        public static IEnumerable<FactDocument> BuildMany<TEntity>
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.Facts
+                .Select(transactionFact => new FactDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    transactionFact.SubversionNumber,
+                    BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
+                ));
         }
 
         public static async Task InsertMany

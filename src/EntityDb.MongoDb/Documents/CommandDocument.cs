@@ -1,4 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -63,6 +65,23 @@ namespace EntityDb.MongoDb.Documents
                         }
                     ),
                 }
+            );
+        }
+
+        public static CommandDocument BuildOne<TEntity>
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return new CommandDocument
+            (
+                transaction.TimeStamp,
+                transaction.Id,
+                transactionCommand.EntityId,
+                transactionCommand.ExpectedPreviousVersionNumber + 1,
+                BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
             );
         }
 

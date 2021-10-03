@@ -1,5 +1,7 @@
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -9,6 +11,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -58,6 +61,26 @@ namespace EntityDb.MongoDb.Documents
                 CollectionName,
                 Array.Empty<CreateIndexModel<BsonDocument>>()
             );
+        }
+
+        public static IEnumerable<TagDocument> BuildMany<TEntity>
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.InsertTags
+                .Select(insertTag => new TagDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    insertTag.Label,
+                    insertTag.Value,
+                    BsonDocumentEnvelope.Deconstruct(insertTag, logger)
+                ));
         }
 
         public static async Task InsertMany

@@ -1,4 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -6,6 +8,7 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -59,6 +62,21 @@ namespace EntityDb.MongoDb.Documents
                         }
                     ),
                 }
+            );
+        }
+
+        public static SourceDocument BuildOne<TEntity>
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction
+        )
+        {
+            return new SourceDocument
+            (
+                transaction.TimeStamp,
+                transaction.Id,
+                transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
+                BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
             );
         }
 

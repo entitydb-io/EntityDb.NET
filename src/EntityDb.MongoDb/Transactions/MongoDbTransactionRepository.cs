@@ -147,98 +147,6 @@ namespace EntityDb.MongoDb.Transactions
             );
         }
 
-        private static SourceDocument GetSourceDocument
-        (
-            ILogger logger,
-            ITransaction<TEntity> transaction
-        )
-        {
-            return new SourceDocument
-            (
-                transaction.TimeStamp,
-                transaction.Id,
-                transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
-                BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
-            );
-        }
-
-        private static CommandDocument GetCommandDocument
-        (
-            ILogger logger,
-            ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
-        )
-        {
-            return new CommandDocument
-            (
-                transaction.TimeStamp,
-                transaction.Id,
-                transactionCommand.EntityId,
-                transactionCommand.ExpectedPreviousVersionNumber + 1,
-                BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
-            );
-        }
-
-        private static IEnumerable<FactDocument> GetFactDocuments
-        (
-            ILogger logger,
-            ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
-        )
-        {
-            return transactionCommand.Facts
-                .Select(transactionFact => new FactDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    transactionFact.SubversionNumber,
-                    BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
-                ));
-        }
-
-        private static IEnumerable<LeaseDocument> GetInsertLeaseDocuments
-        (
-            ILogger logger,
-            ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
-        )
-        {
-            return transactionCommand.InsertLeases
-                .Select(insertLease => new LeaseDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    insertLease.Scope,
-                    insertLease.Label,
-                    insertLease.Value,
-                    BsonDocumentEnvelope.Deconstruct(insertLease, logger)
-                ));
-        }
-
-        private static IEnumerable<TagDocument> GetInsertTagDocuments
-        (
-            ILogger logger,
-            ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
-        )
-        {
-            return transactionCommand.InsertTags
-                .Select(insertTag => new TagDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    insertTag.Label,
-                    insertTag.Value,
-                    BsonDocumentEnvelope.Deconstruct(insertTag, logger)
-                ));
-        }
-
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             return _mongoDbSession.ExecuteCommand
@@ -249,7 +157,7 @@ namespace EntityDb.MongoDb.Transactions
                     (
                         clientSessionHandle,
                         mongoDatabase,
-                        GetSourceDocument(logger, transaction)
+                        SourceDocument.BuildOne(logger, transaction)
                     );
 
                     foreach (var transactionCommand in transaction.Commands)
@@ -266,20 +174,18 @@ namespace EntityDb.MongoDb.Transactions
                             throw new OptimisticConcurrencyException();
                         }
 
-                        var nextVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1;
-
                         await CommandDocument.InsertOne
                         (
                             clientSessionHandle,
                             mongoDatabase,
-                            GetCommandDocument(logger, transaction, transactionCommand)
+                            CommandDocument.BuildOne(logger, transaction, transactionCommand)
                         );
 
                         await FactDocument.InsertMany
                         (
                             clientSessionHandle,
                             mongoDatabase,
-                            GetFactDocuments(logger, transaction, transactionCommand)
+                            FactDocument.BuildMany(logger, transaction, transactionCommand)
                         );
 
                         await LeaseDocument.DeleteMany
@@ -294,7 +200,7 @@ namespace EntityDb.MongoDb.Transactions
                         (
                             clientSessionHandle,
                             mongoDatabase,
-                            GetInsertLeaseDocuments(logger, transaction, transactionCommand)
+                            LeaseDocument.BuildMany(logger, transaction, transactionCommand)
                         );
 
                         await TagDocument.DeleteMany
@@ -309,7 +215,7 @@ namespace EntityDb.MongoDb.Transactions
                         (
                             clientSessionHandle,
                             mongoDatabase,
-                            GetInsertTagDocuments(logger, transaction, transactionCommand)
+                            TagDocument.BuildMany(logger, transaction, transactionCommand)
                         );
                     }
                 }

@@ -1,5 +1,7 @@
 ﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -9,6 +11,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -76,6 +79,27 @@ namespace EntityDb.MongoDb.Documents
                     ),
                 }
             );
+        }
+
+        public static IEnumerable<LeaseDocument> BuildMany<TEntity>
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.InsertLeases
+                .Select(insertLease => new LeaseDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    insertLease.Scope,
+                    insertLease.Label,
+                    insertLease.Value,
+                    BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+                ));
         }
 
         public static async Task InsertMany
