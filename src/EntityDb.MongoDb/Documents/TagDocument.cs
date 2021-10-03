@@ -1,6 +1,7 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
@@ -21,15 +22,13 @@ namespace EntityDb.MongoDb.Documents
         string Value,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : EntityDocumentBase
+    ) : DocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
-        EntityId,
-        EntityVersionNumber,
         Data,
         _id
-    )
+    ), IEntityDocument
     {
         private static readonly TagFilterBuilder _tagFilterBuilder = new();
         private static readonly TagSortBuilder _tagSortBuilder = new();
@@ -82,14 +81,18 @@ namespace EntityDb.MongoDb.Documents
             ITagQuery tagQuery
         )
         {
-            return GetTransactionIds<TagDocument>
+            var query = new TransactionIdQuery<TagDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
                 tagQuery.Skip,
                 tagQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -100,14 +103,18 @@ namespace EntityDb.MongoDb.Documents
             ITagQuery tagQuery
         )
         {
-            return GetEntityIds<TagDocument>
+            var query = new EntityIdQuery<TagDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
                 tagQuery.Skip,
                 tagQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -118,15 +125,18 @@ namespace EntityDb.MongoDb.Documents
             ITagQuery tagQuery
         )
         {
-            return GetMany<TagDocument>
+            var query = new DataQuery<TagDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 tagQuery.GetFilter(_tagFilterBuilder),
                 tagQuery.GetSort(_tagSortBuilder),
-                DataProjection,
                 tagQuery.Skip,
                 tagQuery.Take
+            );
+
+            return query.Execute
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 

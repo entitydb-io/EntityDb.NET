@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
@@ -19,15 +20,13 @@ namespace EntityDb.MongoDb.Documents
         ulong EntitySubversionNumber,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : EntityDocumentBase
+    ) : DocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
-        EntityId,
-        EntityVersionNumber,
         Data,
         _id
-    )
+    ), IEntityDocument
     {
         private static readonly FactFilterBuilder _factFilterBuilder = new();
         private static readonly FactSortBuilder _factSortBuilder = new();
@@ -90,14 +89,18 @@ namespace EntityDb.MongoDb.Documents
             IFactQuery factQuery
         )
         {
-            return GetTransactionIds<FactDocument>
+            var query = new TransactionIdQuery<FactDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
                 factQuery.Skip,
                 factQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -108,14 +111,18 @@ namespace EntityDb.MongoDb.Documents
             IFactQuery factQuery
         )
         {
-            return GetEntityIds<FactDocument>
+            var query = new EntityIdQuery<FactDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
                 factQuery.Skip,
                 factQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -126,15 +133,18 @@ namespace EntityDb.MongoDb.Documents
             IFactQuery factQuery
         )
         {
-            return GetMany<FactDocument>
+            var query = new DataQuery<FactDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
-                DataProjection,
-                skip: factQuery.Skip,
-                limit: factQuery.Take
+                factQuery.Skip,
+                factQuery.Take
+            );
+
+            return query.Execute
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
     }

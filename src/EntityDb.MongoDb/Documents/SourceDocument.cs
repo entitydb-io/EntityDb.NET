@@ -1,12 +1,12 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -18,22 +18,16 @@ namespace EntityDb.MongoDb.Documents
         Guid[] EntityIds,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : TransactionDocumentBase
+    ) : DocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
         Data,
         _id
-    )
+    ), IEntitiesDocument
     {
         private static readonly SourceFilterBuilder _sourceFilterBuilder = new();
         private static readonly SourceSortBuilder _sourceSortBuilder = new();
-
-        private static readonly ProjectionDefinition<BsonDocument> _entityIdsProjection = Projection.Combine
-        (
-            Projection.Exclude(nameof(_id)),
-            Projection.Include(nameof(EntityIds))
-        );
 
         public const string CollectionName = "Sources";
 
@@ -91,48 +85,41 @@ namespace EntityDb.MongoDb.Documents
             ISourceQuery sourceQuery
         )
         {
-            return GetTransactionIds<SourceDocument>
+            var query = new TransactionIdQuery<SourceDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
                 sourceQuery.Skip,
                 sourceQuery.Take
             );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
+            );
         }
 
-        public static async Task<Guid[]> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var sourceDocuments = await GetMany<SourceDocument>
+            var query = new EntityIdsQuery<SourceDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
-                _entityIdsProjection
+                sourceQuery.Skip,
+                sourceQuery.Take
             );
 
-            var entityIds = sourceDocuments
-                .SelectMany(sourceDocument => sourceDocument.EntityIds)
-                .Distinct();
-
-            if (sourceQuery.Skip.HasValue)
-            {
-                entityIds = entityIds.Skip(sourceQuery.Skip.Value);
-            }
-
-            if (sourceQuery.Take.HasValue)
-            {
-                entityIds = entityIds.Take(sourceQuery.Take.Value);
-            }
-
-            return entityIds.ToArray();
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
+            );
         }
 
         public static Task<List<SourceDocument>> GetMany
@@ -142,15 +129,18 @@ namespace EntityDb.MongoDb.Documents
             ISourceQuery sourceQuery
         )
         {
-            return GetMany<SourceDocument>
+            var query = new DataQuery<SourceDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 sourceQuery.GetFilter(_sourceFilterBuilder),
                 sourceQuery.GetSort(_sourceSortBuilder),
-                DataProjection,
                 sourceQuery.Skip,
                 sourceQuery.Take
+            );
+
+            return query.Execute
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
     }

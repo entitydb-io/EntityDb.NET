@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
@@ -22,15 +23,13 @@ namespace EntityDb.MongoDb.Documents
         string Value,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : EntityDocumentBase
+    ) : DocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
-        EntityId,
-        EntityVersionNumber,
         Data,
         _id
-    )
+    ), IEntityDocument
     {
         private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
         private static readonly LeaseSortBuilder _leaseSortBuilder = new();
@@ -100,14 +99,18 @@ namespace EntityDb.MongoDb.Documents
             ILeaseQuery leaseQuery
         )
         {
-            return GetTransactionIds<LeaseDocument>
+            var query = new TransactionIdQuery<LeaseDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
                 leaseQuery.Skip,
                 leaseQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -118,14 +121,18 @@ namespace EntityDb.MongoDb.Documents
             ILeaseQuery leaseQuery
         )
         {
-            return GetEntityIds<LeaseDocument>
+            var query = new EntityIdQuery<LeaseDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
                 leaseQuery.Skip,
                 leaseQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -136,16 +143,15 @@ namespace EntityDb.MongoDb.Documents
             ILeaseQuery leaseQuery
         )
         {
-            return GetMany<LeaseDocument>
+            var query = new DataQuery<LeaseDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
-                DataProjection,
                 leaseQuery.Skip,
                 leaseQuery.Take
             );
+
+            return query.Execute(clientSessionHandle, GetCollection(mongoDatabase));
         }
 
         public static async Task DeleteMany

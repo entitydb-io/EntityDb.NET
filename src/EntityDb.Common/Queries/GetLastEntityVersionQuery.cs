@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.Common.Queries
 {
-    internal sealed record GetLastCommandQuery(Guid EntityId) : ICommandQuery
+    internal sealed record GetLastEntityVersionQuery(Guid EntityId) : ICommandQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {

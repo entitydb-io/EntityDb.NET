@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
@@ -20,24 +21,16 @@ namespace EntityDb.MongoDb.Documents
         ulong EntityVersionNumber,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : EntityDocumentBase
+    ) : DocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
-        EntityId,
-        EntityVersionNumber,
         Data,
         _id
-    )
+    ), IEntityDocument
     {
         private static readonly CommandFilterBuilder _commandFilterBuilder = new();
         private static readonly CommandSortBuilder _commandSortBuilder = new();
-
-        private static readonly ProjectionDefinition<BsonDocument> _entityVersionNumberProjection = Projection.Combine
-        (
-            Projection.Exclude(nameof(_id)),
-            Projection.Include(nameof(EntityVersionNumber))
-        );
 
         public const string CollectionName = "Commands";
 
@@ -96,14 +89,18 @@ namespace EntityDb.MongoDb.Documents
             ICommandQuery commandQuery
         )
         {
-            return GetTransactionIds<CommandDocument>
+            var query = new TransactionIdQuery<CommandDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -114,14 +111,18 @@ namespace EntityDb.MongoDb.Documents
             ICommandQuery commandQuery
         )
         {
-            return GetEntityIds<CommandDocument>
+            var query = new EntityIdQuery<CommandDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
                 commandQuery.Skip,
                 commandQuery.Take
+            );
+
+            return query.DistinctGuids
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
             );
         }
 
@@ -132,36 +133,42 @@ namespace EntityDb.MongoDb.Documents
             ICommandQuery commandQuery
         )
         {
-            return GetMany<CommandDocument>
+            var query = new DataQuery<CommandDocument>
             (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
-                DataProjection,
                 commandQuery.Skip,
                 commandQuery.Take
             );
+
+            return query.Execute
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase)
+            );
         }
 
-        public static async Task<ulong> GetPreviousVersionNumber
+        public static async Task<ulong> GetLastEntityVersionNumber
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
             Guid entityId
         )
         {
-            var getLastCommandQuery = new GetLastCommandQuery(entityId);
+            var commandQuery = new GetLastEntityVersionQuery(entityId);
 
-            var commandDocuments = await GetMany<CommandDocument>
+            var query = new EntityVersionQuery<CommandDocument>
+            (
+                commandQuery.GetFilter(_commandFilterBuilder),
+                commandQuery.GetSort(_commandSortBuilder),
+                commandQuery.Skip,
+                commandQuery.Take
+            );
+
+            var commandDocuments = await query.Execute
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
-                getLastCommandQuery.GetFilter(_commandFilterBuilder),
-                getLastCommandQuery.GetSort(_commandSortBuilder),
-                _entityVersionNumberProjection,
-                getLastCommandQuery.Skip,
-                getLastCommandQuery.Take
+                GetCollection(mongoDatabase)
             );
 
             var lastCommandDocument = commandDocuments.SingleOrDefault();

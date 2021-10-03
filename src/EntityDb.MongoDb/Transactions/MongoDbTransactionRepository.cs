@@ -305,7 +305,7 @@ namespace EntityDb.MongoDb.Transactions
 
                     foreach (var transactionCommand in transaction.Commands)
                     {
-                        var actualPreviousVersion = await CommandDocument.GetPreviousVersionNumber
+                        var actualPreviousVersion = await CommandDocument.GetLastEntityVersionNumber
                         (
                             clientSessionHandle,
                             mongoDatabase,
