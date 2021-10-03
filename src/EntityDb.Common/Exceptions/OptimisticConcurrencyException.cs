@@ -12,5 +12,17 @@ namespace EntityDb.Common.Exceptions
     /// </remarks>
     public sealed class OptimisticConcurrencyException : Exception
     {
+        /// <summary>
+        /// Throws a new <see cref="OptimisticConcurrencyException"/> if <paramref name="expectedPreviousVersionNumber"/> is not equal to <paramref name="actualPreviousVersionNumber"/>.
+        /// </summary>
+        /// <param name="expectedPreviousVersionNumber"></param>
+        /// <param name="actualPreviousVersionNumber"></param>
+        public static void ThrowIfMismatch(ulong expectedPreviousVersionNumber, ulong actualPreviousVersionNumber)
+        {
+            if (expectedPreviousVersionNumber != actualPreviousVersionNumber)
+            {
+                throw new OptimisticConcurrencyException();
+            }
+        }
     }
 }

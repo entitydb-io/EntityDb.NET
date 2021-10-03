@@ -103,70 +103,20 @@ namespace EntityDb.MongoDb.Transactions
             (
                 async (logger, clientSessionHandle, mongoDatabase) =>
                 {
-                    await SourceDocument.InsertOne
-                    (
-                        clientSessionHandle,
-                        mongoDatabase,
-                        SourceDocument.BuildOne(logger, transaction)
-                    );
+                    await SourceDocument.InsertOne(clientSessionHandle, mongoDatabase, SourceDocument.BuildOne(logger, transaction));
 
                     foreach (var transactionCommand in transaction.Commands)
                     {
-                        var actualPreviousVersion = await CommandDocument.GetLastEntityVersionNumber
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            transactionCommand.EntityId
-                        );
+                        var actualPreviousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(clientSessionHandle, mongoDatabase, transactionCommand.EntityId);
 
-                        if (transactionCommand.ExpectedPreviousVersionNumber != actualPreviousVersion)
-                        {
-                            throw new OptimisticConcurrencyException();
-                        }
+                        OptimisticConcurrencyException.ThrowIfMismatch(transactionCommand.ExpectedPreviousVersionNumber, actualPreviousVersionNumber);
 
-                        await CommandDocument.InsertOne
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            CommandDocument.BuildOne(logger, transaction, transactionCommand)
-                        );
-
-                        await FactDocument.InsertMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            FactDocument.BuildMany(logger, transaction, transactionCommand)
-                        );
-
-                        await LeaseDocument.DeleteMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            transactionCommand.EntityId,
-                            transactionCommand.DeleteLeases
-                        );
-
-                        await LeaseDocument.InsertMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            LeaseDocument.BuildMany(logger, transaction, transactionCommand)
-                        );
-
-                        await TagDocument.DeleteMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            transactionCommand.EntityId,
-                            transactionCommand.DeleteTags
-                        );
-
-                        await TagDocument.InsertMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            TagDocument.BuildMany(logger, transaction, transactionCommand)
-                        );
+                        await CommandDocument.InsertOne(clientSessionHandle, mongoDatabase, CommandDocument.BuildOne(logger, transaction, transactionCommand));
+                        await FactDocument.InsertMany(clientSessionHandle, mongoDatabase, FactDocument.BuildMany(logger, transaction, transactionCommand));
+                        await LeaseDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.DeleteLeases);
+                        await LeaseDocument.InsertMany(clientSessionHandle, mongoDatabase, LeaseDocument.BuildMany(logger, transaction, transactionCommand));
+                        await TagDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId, transactionCommand.DeleteTags);
+                        await TagDocument.InsertMany(clientSessionHandle, mongoDatabase, TagDocument.BuildMany(logger, transaction, transactionCommand));
                     }
                 }
             );
