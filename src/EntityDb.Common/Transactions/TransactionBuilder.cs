@@ -1,6 +1,8 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -51,25 +53,30 @@ namespace EntityDb.Common.Transactions
             return transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>();
         }
 
+        private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity, TEntity nextEntity, Func<TEntity, TMetaData[]> metaDataMapper)
+        {
+            var previousMetaData = metaDataMapper.Invoke(previousEntity);
+            var nextMetaData = metaDataMapper.Invoke(nextEntity);
+
+            return new TransactionMetaData<TMetaData>
+            {
+                Delete = previousMetaData.Except(nextMetaData).ToImmutableArray(),
+                Insert = nextMetaData.Except(previousMetaData).ToImmutableArray(),
+            };
+        }
+
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
             var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
-            var previousLeases = _serviceProvider.GetLeases(previousEntity);
-            var previousTags = _serviceProvider.GetTags(previousEntity);
 
-            if (_serviceProvider.IsAuthorized(previousEntity, command) == false)
-            {
-                throw new CommandNotAuthorizedException();
-            }
+            CommandNotAuthorizedException.ThrowIfFalse(_serviceProvider.IsAuthorized(previousEntity, command));
 
             var nextFacts = previousEntity.Execute(command);
 
             nextFacts.Add(_serviceProvider.GetVersionNumberFact<TEntity>(previousVersionNumber + 1));
 
             var nextEntity = previousEntity.Reduce(nextFacts);
-            var nextLeases = _serviceProvider.GetLeases(nextEntity);
-            var nextTags = _serviceProvider.GetTags(nextEntity);
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
@@ -79,10 +86,8 @@ namespace EntityDb.Common.Transactions
                 ExpectedPreviousVersionNumber = previousVersionNumber,
                 Command = command,
                 Facts = GetTransactionFacts(nextFacts),
-                DeleteLeases = previousLeases.Except(nextLeases).ToImmutableArray(),
-                InsertLeases = nextLeases.Except(previousLeases).ToImmutableArray(),
-                DeleteTags = previousTags.Except(nextTags).ToImmutableArray(),
-                InsertTags = nextTags.Except(previousTags).ToImmutableArray()
+                Leases = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetLeases<TEntity>),
+                Tags = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetTags<TEntity>),
             });
 
             _knownEntities[entityId] = nextEntity;

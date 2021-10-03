@@ -556,10 +556,8 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };
@@ -595,10 +593,8 @@ namespace EntityDb.Common.Tests.Transactions
                             ExpectedPreviousVersionNumber = 0,
                             Command = new DoNothing(),
                             Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                            DeleteLeases = ImmutableArray<ILease>.Empty,
-                            InsertLeases = ImmutableArray<ILease>.Empty,
-                            DeleteTags = ImmutableArray<ITag>.Empty,
-                            InsertTags = ImmutableArray<ITag>.Empty,
+                            Leases = new TransactionMetaData<ILease>(),
+                            Tags = new TransactionMetaData<ITag>(),
                         },
                     }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
                 };
@@ -640,10 +636,8 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = previousVersionNumber,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                     new TransactionCommand<TransactionEntity>
                     {
@@ -653,10 +647,8 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = previousVersionNumber,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };
@@ -698,10 +690,8 @@ namespace EntityDb.Common.Tests.Transactions
                             ExpectedPreviousVersionNumber = previousVersionNumber,
                             Command = new DoNothing(),
                             Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                            DeleteLeases = ImmutableArray<ILease>.Empty,
-                            InsertLeases = ImmutableArray<ILease>.Empty,
-                            DeleteTags = ImmutableArray<ITag>.Empty,
-                            InsertTags = ImmutableArray<ITag>.Empty,
+                            Leases = new TransactionMetaData<ILease>(),
+                            Tags = new TransactionMetaData<ITag>(),
                         },
                     }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
                 };
@@ -763,10 +753,8 @@ namespace EntityDb.Common.Tests.Transactions
                                 Fact = new NothingDone(),
                             },
                         }.ToImmutableArray<ITransactionFact<TransactionEntity>>(),
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };
@@ -804,13 +792,11 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = new[]
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>
                         {
-                            tag,
-                        }.ToImmutableArray<ITag>(),
+                            Insert = new[] { tag }.ToImmutableArray<ITag>(),
+                        }
                     },
                     new TransactionCommand<TransactionEntity>
                     {
@@ -820,13 +806,11 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = ImmutableArray<ILease>.Empty,
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = new[]
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>
                         {
-                            tag,
-                        }.ToImmutableArray<ITag>(),
+                            Insert = new[] { tag }.ToImmutableArray<ITag>(),
+                        }
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };
@@ -864,13 +848,11 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = new[]
+                        Leases = new TransactionMetaData<ILease>
                         {
-                            lease,
-                        }.ToImmutableArray<ILease>(),
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                            Insert = new[] { lease }.ToImmutableArray<ILease>(),
+                        },
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                     new TransactionCommand<TransactionEntity>
                     {
@@ -880,13 +862,11 @@ namespace EntityDb.Common.Tests.Transactions
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
                         Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        DeleteLeases = ImmutableArray<ILease>.Empty,
-                        InsertLeases = new[]
+                        Leases = new TransactionMetaData<ILease>
                         {
-                            lease,
-                        }.ToImmutableArray<ILease>(),
-                        DeleteTags = ImmutableArray<ITag>.Empty,
-                        InsertTags = ImmutableArray<ITag>.Empty,
+                            Insert = new[] { lease }.ToImmutableArray<ILease>(),
+                        },
+                        Tags = new TransactionMetaData<ITag>(),
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };

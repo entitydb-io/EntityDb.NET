@@ -137,10 +137,6 @@ namespace EntityDb.Mvc.Tests.Sources
             mvcSource.Connection.RemotePort.ShouldBe(remotePort);
             mvcSource.Connection.LocalIpAddress.ShouldBe(localIpAddress);
             mvcSource.Connection.LocalPort.ShouldBe(localPort);
-
-            mvcSource.Claims.Length.ShouldBe(1);
-            mvcSource.Claims[0].Type.ShouldBe(claimType);
-            mvcSource.Claims[0].Value.ShouldBe(claimValue);
         }
 
         [Theory]
@@ -183,10 +179,6 @@ namespace EntityDb.Mvc.Tests.Sources
             reconstructedMvcSource.Connection.RemotePort.ShouldBe(remotePort);
             reconstructedMvcSource.Connection.LocalIpAddress.ShouldBe(localIpAddress);
             reconstructedMvcSource.Connection.LocalPort.ShouldBe(localPort);
-
-            reconstructedMvcSource.Claims.Length.ShouldBe(1);
-            reconstructedMvcSource.Claims[0].Type.ShouldBe(claimType);
-            reconstructedMvcSource.Claims[0].Value.ShouldBe(claimValue);
         }
     }
 }

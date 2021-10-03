@@ -53,35 +53,13 @@ namespace EntityDb.Abstractions.Transactions
         ImmutableArray<ITransactionFact<TEntity>> Facts { get; }
 
         /// <summary>
-        /// The unique metadata properties which must be removed.
+        /// The unique metadata properties.
         /// </summary>
-        /// <remarks>
-        /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
-        /// </remarks>
-        ImmutableArray<ILease> DeleteLeases { get; }
+        ITransactionMetaData<ILease> Leases { get; }
 
         /// <summary>
-        /// The unique metadata properties which must be added.
+        /// The non-unique metadata properties.
         /// </summary>
-        /// <remarks>
-        /// <see cref="DeleteLeases"/> must be deleted from the repository before <see cref="InsertLeases"/> are inserted into the repository.
-        /// </remarks>
-        ImmutableArray<ILease> InsertLeases { get; }
-
-        /// <summary>
-        /// The non-unique metadata properties which must be removed.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
-        /// </remarks>
-        ImmutableArray<ITag> DeleteTags { get; }
-
-        /// <summary>
-        /// The non-unique metadata properties which must be added.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="DeleteTags"/> must be deleted from the repository before <see cref="InsertTags"/> are inserted into the repository.
-        /// </remarks>
-        ImmutableArray<ITag> InsertTags { get; }
+        ITransactionMetaData<ITag> Tags { get; }
     }
 }

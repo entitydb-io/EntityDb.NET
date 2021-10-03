@@ -8,5 +8,16 @@ namespace EntityDb.Common.Exceptions
     /// </summary>
     public sealed class CommandNotAuthorizedException : Exception
     {
+        /// <summary>
+        /// Throws a new <see cref="CommandNotAuthorizedException"/> if <paramref name="isAuthorized"/> is <c>false</c>.
+        /// </summary>
+        /// <param name="isAuthorized"></param>
+        public static void ThrowIfFalse(bool isAuthorized)
+        {
+            if (isAuthorized == false)
+            {
+                throw new CommandNotAuthorizedException();
+            }
+        }
     }
 }

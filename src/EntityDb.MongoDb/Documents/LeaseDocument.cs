@@ -73,7 +73,7 @@ namespace EntityDb.MongoDb.Documents
             ITransactionCommand<TEntity> transactionCommand
         )
         {
-            return transactionCommand.InsertLeases
+            return transactionCommand.Leases.Insert
                 .Select(insertLease => new LeaseDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,

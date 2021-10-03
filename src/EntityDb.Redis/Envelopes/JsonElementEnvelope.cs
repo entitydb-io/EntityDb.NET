@@ -9,11 +9,10 @@ using System.Text.Json;
 namespace EntityDb.Redis.Envelopes
 {
     internal sealed record JsonElementEnvelope
-    (
-        Dictionary<string, string> Headers,
-        JsonElement Value
-    )
     {
+        public Dictionary<string, string> Headers { get; init; } = default!;
+        public JsonElement Value { get; init; }
+
         private static JsonElement GetJsonElement(dynamic? @object)
         {
             var json = JsonSerializer.Serialize(@object);
@@ -72,10 +71,10 @@ namespace EntityDb.Redis.Envelopes
                 var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new JsonElementEnvelope
-                (
-                    headers,
-                    jsonElement
-                );
+                {
+                    Headers = headers,
+                    Value = jsonElement
+                };
             }
             catch (Exception exception)
             {
