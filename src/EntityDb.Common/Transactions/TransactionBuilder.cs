@@ -53,27 +53,15 @@ namespace EntityDb.Common.Transactions
             return transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>();
         }
 
-        private ITransactionMetaData<ILease> GetTransactionLeases(TEntity previousEntity, TEntity nextEntity)
+        private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity, TEntity nextEntity, Func<TEntity, TMetaData[]> metaDataMapper)
         {
-            var previousLeases = _serviceProvider.GetLeases(previousEntity);
-            var nextLeases = _serviceProvider.GetLeases(nextEntity);
+            var previousMetaData = metaDataMapper.Invoke(previousEntity);
+            var nextMetaData = metaDataMapper.Invoke(nextEntity);
 
-            return new TransactionMetaData<ILease>
+            return new TransactionMetaData<TMetaData>
             {
-                Delete = previousLeases.Except(nextLeases).ToImmutableArray(),
-                Insert = nextLeases.Except(previousLeases).ToImmutableArray(),
-            };
-        }
-
-        private ITransactionMetaData<ITag> GetTransactionTags(TEntity previousEntity, TEntity nextEntity)
-        {
-            var previousTags = _serviceProvider.GetTags(previousEntity);
-            var nextTags = _serviceProvider.GetTags(nextEntity);
-
-            return new TransactionMetaData<ITag>
-            {
-                Delete = previousTags.Except(nextTags).ToImmutableArray(),
-                Insert = nextTags.Except(previousTags).ToImmutableArray(),
+                Delete = previousMetaData.Except(nextMetaData).ToImmutableArray(),
+                Insert = nextMetaData.Except(previousMetaData).ToImmutableArray(),
             };
         }
 
@@ -98,8 +86,8 @@ namespace EntityDb.Common.Transactions
                 ExpectedPreviousVersionNumber = previousVersionNumber,
                 Command = command,
                 Facts = GetTransactionFacts(nextFacts),
-                Leases = GetTransactionLeases(previousEntity, nextEntity),
-                Tags = GetTransactionTags(previousEntity, nextEntity),
+                Leases = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetLeases<TEntity>),
+                Tags = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetTags<TEntity>),
             });
 
             _knownEntities[entityId] = nextEntity;
