@@ -1,0 +1,5 @@
+ignore:
+  - "!src/**/*"
+  - "src/*.Tests/**/*"
+  - "src/EntityDb.MongoDb.Provisioner/**/*"
+  - "src/EntityDb.TestImplementations/**/*"
