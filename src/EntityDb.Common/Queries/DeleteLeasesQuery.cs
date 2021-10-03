@@ -3,13 +3,14 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Common.Leases;
+using EntityDb.Common.Queries.Filters;
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityDb.Common.Queries
 {
-    internal sealed record DeleteLeasesQuery(Guid EntityId, ImmutableArray<ILease> Leases) : ILeaseQuery
+    internal sealed record DeleteLeasesQuery(Guid EntityId, IReadOnlyCollection<ILease> Leases) : ILeaseQuery, ILeaseFilter
     {
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {

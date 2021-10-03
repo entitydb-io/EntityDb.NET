@@ -16,12 +16,12 @@ namespace EntityDb.MongoDb.Documents
         DateTime TransactionTimeStamp,
         Guid TransactionId,
         BsonDocumentEnvelope Data,
-#pragma warning disable IDE1006 // Naming Styles
         [property: BsonIgnoreIfNull]
         ObjectId? _id
-#pragma warning restore IDE1006 // Naming Styles
-    )
+    ) : ITransactionDocument
     {
+        protected static readonly IndexKeysDefinitionBuilder<BsonDocument> IndexKeys = Builders<BsonDocument>.IndexKeys;
+
         static DocumentBase()
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
@@ -46,51 +46,7 @@ namespace EntityDb.MongoDb.Documents
                 await mongoCollection.Indexes.CreateManyAsync(indices);
             }
         }
-
-        protected static Task<List<TDocument>> GetMany<TDocument>
-        (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoCollection<BsonDocument> mongoCollection,
-            FilterDefinition<BsonDocument> filter,
-            SortDefinition<BsonDocument>? sort,
-            ProjectionDefinition<BsonDocument, TDocument> projection,
-            int? skip,
-            int? limit
-        )
-        {
-            IFindFluent<BsonDocument, TDocument> query;
-
-            if (clientSessionHandle != null)
-            {
-                query = mongoCollection
-                    .Find(clientSessionHandle, filter)
-                    .Project(projection);
-            }
-            else
-            {
-                query = mongoCollection
-                    .Find(filter)
-                    .Project(projection);
-            }
-
-            if (sort != null)
-            {
-                query = query.Sort(sort);
-            }
-
-            if (skip != null)
-            {
-                query = query.Skip(skip);
-            }
-
-            if (limit != null)
-            {
-                query = query.Limit(limit);
-            }
-
-            return query.ToListAsync();
-        }
-
+        
         protected static Task InsertOne<TDocument>
         (
             IClientSessionHandle clientSessionHandle,
@@ -98,24 +54,33 @@ namespace EntityDb.MongoDb.Documents
             TDocument document
         )
         {
+            var bsonDocument = document.ToBsonDocument();
+
             return mongoCollection
                 .InsertOneAsync
                 (
                     session: clientSessionHandle,
-                    document: document.ToBsonDocument()
+                    document: bsonDocument
                 );
         }
 
-        protected static Task InsertMany<TDocument>
+        protected static async Task InsertMany<TDocument>
         (
             IClientSessionHandle clientSessionHandle,
             IMongoCollection<BsonDocument> mongoCollection,
-            IEnumerable<TDocument> documents
+            IReadOnlyCollection<TDocument> documents
         )
         {
-            var bsonDocuments = documents.Select(document => document.ToBsonDocument());
+            if (documents.Count == 0)
+            {
+                return;
+            }
 
-            return mongoCollection
+            var bsonDocuments = documents
+                .Select(document => document.ToBsonDocument())
+                .ToArray();
+
+            await mongoCollection
                 .InsertManyAsync
                 (
                     session: clientSessionHandle,
