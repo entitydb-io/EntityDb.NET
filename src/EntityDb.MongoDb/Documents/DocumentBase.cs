@@ -37,19 +37,19 @@ namespace EntityDb.MongoDb.Documents
 
         protected static async Task ProvisionCollection
         (
-            IMongoDatabase mongoDatabase,
-            string collectionName,
+            IMongoCollection<BsonDocument> mongoCollection,
             CreateIndexModel<BsonDocument>[] indices
         )
         {
+            var mongoDatabase = mongoCollection.Database;
+            var collectionName = mongoCollection.CollectionNamespace.CollectionName;
+
             var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
             var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
 
             if (entityCollectionNames.Contains(collectionName) == false)
             {
                 await mongoDatabase.CreateCollectionAsync(collectionName);
-
-                var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
                 await mongoCollection.Indexes.CreateManyAsync(indices);
             }

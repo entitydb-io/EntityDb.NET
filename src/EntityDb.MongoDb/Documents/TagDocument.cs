@@ -42,9 +42,22 @@ namespace EntityDb.MongoDb.Documents
         {
             return ProvisionCollection
             (
-                mongoDatabase,
-                CollectionName,
-                Array.Empty<CreateIndexModel<BsonDocument>>()
+                GetMongoCollection(mongoDatabase, CollectionName),
+                new[]
+                {
+                    new CreateIndexModel<BsonDocument>
+                    (
+                        keys: IndexKeys.Combine
+                        (
+                            IndexKeys.Descending(nameof(Label)),
+                            IndexKeys.Descending(nameof(Value))
+                        ),
+                        options: new CreateIndexOptions
+                        {
+                            Name = $"Lookup Index",
+                        }
+                    ),
+                }
             );
         }
 

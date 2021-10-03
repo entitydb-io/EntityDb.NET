@@ -44,8 +44,7 @@ namespace EntityDb.MongoDb.Documents
         {
             return ProvisionCollection
             (
-                mongoDatabase,
-                CollectionName,
+                GetMongoCollection(mongoDatabase, CollectionName),
                 new[]
                 {
                     new CreateIndexModel<BsonDocument>
