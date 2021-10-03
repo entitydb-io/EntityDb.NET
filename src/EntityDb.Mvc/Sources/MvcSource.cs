@@ -5,8 +5,18 @@ namespace EntityDb.Mvc.Sources
     /// <summary>
     /// Represents the description of an agent who requests transactions using a <see cref="Microsoft.AspNetCore.Mvc.Controller"/>.
     /// </summary>
-    public sealed record MvcSource(MvcSourceHeader[] Headers, MvcSourceConnection Connection, MvcSourceClaim[] Claims)
+    public sealed record MvcSource
     {
+        /// <summary>
+        /// HTTP Headers
+        /// </summary>
+        public MvcSourceHeader[] Headers { get; init; } = default!;
+
+        /// <summary>
+        /// HTTP Connection
+        /// </summary>
+        public MvcSourceConnection Connection { get; init; } = default!;
+
         /// <summary>
         /// Returns a new instance of <see cref="MvcSource"/> that is mapped from an <see cref="HttpContext"/>.
         /// </summary>
@@ -16,9 +26,12 @@ namespace EntityDb.Mvc.Sources
         {
             var headers = MvcSourceHeader.FromHttpContext(httpContext);
             var connection = MvcSourceConnection.FromHttpContext(httpContext);
-            var claims = MvcSourceClaim.FromHttpContext(httpContext);
 
-            return new MvcSource(headers, connection, claims);
+            return new MvcSource
+            {
+                Headers = headers,
+                Connection = connection,
+            };
         }
     }
 }
