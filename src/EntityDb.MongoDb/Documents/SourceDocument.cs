@@ -1,12 +1,11 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,8 +28,12 @@ namespace EntityDb.MongoDb.Documents
     {
         private static readonly SourceFilterBuilder _sourceFilterBuilder = new();
         private static readonly SourceSortBuilder _sourceSortBuilder = new();
-        private static readonly ProjectionDefinitionBuilder<BsonDocument> _projection = Builders<BsonDocument>.Projection;
-        private static readonly IndexKeysDefinitionBuilder<BsonDocument> _indexKeys = Builders<BsonDocument>.IndexKeys;
+
+        private static readonly ProjectionDefinition<BsonDocument> _entityIdsProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(EntityIds))
+        );
 
         public const string CollectionName = "Sources";
 
@@ -52,9 +55,9 @@ namespace EntityDb.MongoDb.Documents
                 {
                     new CreateIndexModel<BsonDocument>
                     (
-                        keys: _indexKeys.Combine
+                        keys: IndexKeys.Combine
                         (
-                            _indexKeys.Descending(nameof(TransactionId))
+                            IndexKeys.Descending(nameof(TransactionId))
                         ),
                         options: new CreateIndexOptions
                         {
@@ -66,31 +69,17 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task InsertOne
+        public static Task InsertOne
         (
-            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            DateTime transactionTimeStamp,
-            Guid transactionId,
-            Guid[] entityIds,
-            object source
+            SourceDocument sourceDocument
         )
         {
-            var sourceDocument = new SourceDocument
-            (
-                transactionTimeStamp,
-                transactionId,
-                entityIds,
-                BsonDocumentEnvelope.Deconstruct(source, logger)
-            );
-
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            await InsertOne
+            return InsertOne
             (
                 clientSessionHandle,
-                mongoCollection,
+                GetCollection(mongoDatabase),
                 sourceDocument
             );
         }
@@ -115,11 +104,7 @@ namespace EntityDb.MongoDb.Documents
                 mongoCollection,
                 filter,
                 sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(TransactionId))
-                ),
+                TransactionIdProjection,
                 null,
                 null
             );
@@ -148,79 +133,49 @@ namespace EntityDb.MongoDb.Documents
             ISourceQuery sourceQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = sourceQuery.GetFilter(_sourceFilterBuilder);
-            var sort = sourceQuery.GetSort(_sourceSortBuilder);
-            var skip = sourceQuery.Skip;
-            var take = sourceQuery.Take;
-
             var sourceDocuments = await GetMany<SourceDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(EntityIds))
-                ),
-                null,
-                null
+                GetCollection(mongoDatabase),
+                sourceQuery.GetFilter(_sourceFilterBuilder),
+                sourceQuery.GetSort(_sourceSortBuilder),
+                _entityIdsProjection
             );
 
             var entityIds = sourceDocuments
                 .SelectMany(sourceDocument => sourceDocument.EntityIds)
                 .Distinct();
 
-            if (skip.HasValue)
+            if (sourceQuery.Skip.HasValue)
             {
-                entityIds = entityIds.Skip(skip.Value);
+                entityIds = entityIds.Skip(sourceQuery.Skip.Value);
             }
 
-            if (take.HasValue)
+            if (sourceQuery.Take.HasValue)
             {
-                entityIds = entityIds.Take(take.Value);
+                entityIds = entityIds.Take(sourceQuery.Take.Value);
             }
 
             return entityIds.ToArray();
         }
 
-        public static async Task<object[]> GetSources
+        public static Task<List<SourceDocument>> GetMany
         (
-            ILogger logger,
-            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = sourceQuery.GetFilter(_sourceFilterBuilder);
-            var sort = sourceQuery.GetSort(_sourceSortBuilder);
-            var skip = sourceQuery.Skip;
-            var take = sourceQuery.Take;
-
-            var sourceDocuments = await GetMany<SourceDocument>
+            return GetMany<SourceDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(Data))
-                ),
-                skip,
-                take
+                GetCollection(mongoDatabase),
+                sourceQuery.GetFilter(_sourceFilterBuilder),
+                sourceQuery.GetSort(_sourceSortBuilder),
+                DataProjection,
+                sourceQuery.Skip,
+                sourceQuery.Take
             );
-
-            return sourceDocuments
-                .Select(sourceDocument => sourceDocument.Data.Reconstruct<object>(logger, resolvingStrategyChain))
-                .ToArray();
         }
     }
 }

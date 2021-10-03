@@ -1,14 +1,18 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
+using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Documents;
+using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -118,7 +122,14 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => SourceDocument.GetSources(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, sourceQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
+                {
+                    var sourceDocuments = await SourceDocument.GetMany(clientSessionHandle, mongoDatabase, sourceQuery);
+
+                    return sourceDocuments
+                        .Select(sourceDocument => sourceDocument.Data.Reconstruct<object>(logger, resolvingStrategyChain))
+                        .ToArray();
+                },
                 Array.Empty<object>()
             );
         }
@@ -127,7 +138,14 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => CommandDocument.GetCommands<TEntity>(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, commandQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
+                {
+                    var commandDocuments = await CommandDocument.GetMany(clientSessionHandle, mongoDatabase, commandQuery);
+
+                    return commandDocuments
+                        .Select(commandDocument => commandDocument.Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain))
+                        .ToArray();
+                },
                 Array.Empty<ICommand<TEntity>>()
             );
         }
@@ -136,7 +154,14 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => FactDocument.GetFacts<TEntity>(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, factQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
+                {
+                    var factDocuments = await FactDocument.GetMany(clientSessionHandle, mongoDatabase, factQuery);
+
+                    return factDocuments
+                        .Select(factDocument => factDocument.Data.Reconstruct<IFact<TEntity>>(logger, resolvingStrategyChain))
+                        .ToArray();
+                },
                 Array.Empty<IFact<TEntity>>()
             );
         }
@@ -145,7 +170,14 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => LeaseDocument.GetLeases(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, leaseQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
+                {
+                    var leaseDocuments = await LeaseDocument.GetMany(clientSessionHandle, mongoDatabase, leaseQuery);
+
+                    return leaseDocuments
+                        .Select(leaseDocument => leaseDocument.Data.Reconstruct<ILease>(logger, resolvingStrategyChain))
+                        .ToArray();
+                },
                 Array.Empty<ILease>()
             );
         }
@@ -154,31 +186,121 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteQuery
             (
-                (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) => TagDocument.GetTags(logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase, tagQuery),
+                async (logger, resolvingStrategyChain, clientSessionHandle, mongoDatabase) =>
+                {
+                    var tagDocuments = await TagDocument.GetMany(clientSessionHandle, mongoDatabase, tagQuery);
+
+                    return tagDocuments
+                        .Select(tagDocument => tagDocument.Data.Reconstruct<ITag>(logger, resolvingStrategyChain))
+                        .ToArray();
+                },
                 Array.Empty<ITag>()
             );
+        }
+
+        private static SourceDocument GetSourceDocument
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction
+        )
+        {
+            return new SourceDocument
+            (
+                transaction.TimeStamp,
+                transaction.Id,
+                transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
+                BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
+            );
+        }
+
+        private static CommandDocument GetCommandDocument
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return new CommandDocument
+            (
+                transaction.TimeStamp,
+                transaction.Id,
+                transactionCommand.EntityId,
+                transactionCommand.ExpectedPreviousVersionNumber + 1,
+                BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
+            );
+        }
+
+        private static IEnumerable<FactDocument> GetFactDocuments
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.Facts
+                .Select(transactionFact => new FactDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    transactionFact.SubversionNumber,
+                    BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
+                ));
+        }
+
+        private static IEnumerable<LeaseDocument> GetInsertLeaseDocuments
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.InsertLeases
+                .Select(insertLease => new LeaseDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    insertLease.Scope,
+                    insertLease.Label,
+                    insertLease.Value,
+                    BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+                ));
+        }
+
+        private static IEnumerable<TagDocument> GetInsertTagDocuments
+        (
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionCommand<TEntity> transactionCommand
+        )
+        {
+            return transactionCommand.InsertTags
+                .Select(insertTag => new TagDocument
+                (
+                    transaction.TimeStamp,
+                    transaction.Id,
+                    transactionCommand.EntityId,
+                    transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    insertTag.Label,
+                    insertTag.Value,
+                    BsonDocumentEnvelope.Deconstruct(insertTag, logger)
+                ));
         }
 
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             return _mongoDbSession.ExecuteCommand
             (
-                async (serviceProvider, clientSessionHandle, mongoDatabase) =>
+                async (logger, clientSessionHandle, mongoDatabase) =>
                 {
-                    var entityIds = transaction.Commands
-                        .Select(command => command.EntityId)
-                        .Distinct()
-                        .ToArray();
-
                     await SourceDocument.InsertOne
                     (
-                        serviceProvider,
                         clientSessionHandle,
                         mongoDatabase,
-                        transaction.TimeStamp,
-                        transaction.Id,
-                        entityIds,
-                        transaction.Source
+                        GetSourceDocument(logger, transaction)
                     );
 
                     foreach (var transactionCommand in transaction.Commands)
@@ -199,66 +321,54 @@ namespace EntityDb.MongoDb.Transactions
 
                         await CommandDocument.InsertOne
                         (
-                            serviceProvider,
                             clientSessionHandle,
                             mongoDatabase,
-                            transaction.TimeStamp,
-                            transaction.Id,
-                            transactionCommand.EntityId,
-                            nextVersionNumber,
-                            transactionCommand.Command
+                            GetCommandDocument(logger, transaction, transactionCommand)
                         );
 
                         await FactDocument.InsertMany
                         (
-                            serviceProvider,
                             clientSessionHandle,
                             mongoDatabase,
-                            transaction.TimeStamp,
-                            transaction.Id,
-                            transactionCommand.EntityId,
-                            nextVersionNumber,
-                            transactionCommand.Facts
+                            GetFactDocuments(logger, transaction, transactionCommand)
                         );
 
-                        await LeaseDocument.DeleteMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            transactionCommand.EntityId,
-                            transactionCommand.DeleteLeases
-                        );
+                        if (transactionCommand.DeleteLeases.Length > 0)
+                        {
+                            var deleteLeasesQuery = new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
+
+                            await LeaseDocument.DeleteMany
+                            (
+                                clientSessionHandle,
+                                mongoDatabase,
+                                deleteLeasesQuery
+                            );
+                        }
 
                         await LeaseDocument.InsertMany
                         (
-                            serviceProvider,
                             clientSessionHandle,
                             mongoDatabase,
-                            transaction.TimeStamp,
-                            transaction.Id,
-                            transactionCommand.EntityId,
-                            nextVersionNumber,
-                            transactionCommand.InsertLeases
+                            GetInsertLeaseDocuments(logger, transaction, transactionCommand)
                         );
 
-                        await TagDocument.DeleteMany
-                        (
-                            clientSessionHandle,
-                            mongoDatabase,
-                            transactionCommand.EntityId,
-                            transactionCommand.DeleteTags
-                        );
+                        if (transactionCommand.DeleteTags.Length > 0)
+                        {
+                            var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
+
+                            await TagDocument.DeleteMany
+                            (
+                                clientSessionHandle,
+                                mongoDatabase,
+                                deleteTagsQuery
+                            );
+                        }
 
                         await TagDocument.InsertMany
                         (
-                            serviceProvider,
                             clientSessionHandle,
                             mongoDatabase,
-                            transaction.TimeStamp,
-                            transaction.Id,
-                            transactionCommand.EntityId,
-                            nextVersionNumber,
-                            transactionCommand.InsertTags
+                            GetInsertTagDocuments(logger, transaction, transactionCommand)
                         );
                     }
                 }

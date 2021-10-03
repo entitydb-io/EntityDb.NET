@@ -1,8 +1,5 @@
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Tags;
-using EntityDb.Common.Queries;
+using EntityDb.Common.Queries.Filtered;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
@@ -10,7 +7,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,8 +32,12 @@ namespace EntityDb.MongoDb.Documents
     {
         private static readonly TagFilterBuilder _tagFilterBuilder = new();
         private static readonly TagSortBuilder _tagSortBuilder = new();
-        private static readonly IndexKeysDefinitionBuilder<BsonDocument> _indexKeys = Builders<BsonDocument>.IndexKeys;
-        private static readonly ProjectionDefinitionBuilder<BsonDocument> _projection = Builders<BsonDocument>.Projection;
+
+        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(EntityId))
+        );
 
         public const string CollectionName = "Tags";
 
@@ -67,64 +67,16 @@ namespace EntityDb.MongoDb.Documents
 
         public static async Task InsertMany
         (
-            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            DateTime transactionTimeStamp,
-            Guid transactionId,
-            Guid entityId,
-            ulong entityVersionNumber,
-            ImmutableArray<ITag> tags
+            IEnumerable<TagDocument> tagDocuments
         )
         {
-            if (tags.Length > 0)
-            {
-                var mongoCollection = GetCollection(mongoDatabase);
-
-                var tagDocuments = tags.Select(tag => new TagDocument
-                (
-                    transactionTimeStamp,
-                    transactionId,
-                    entityId,
-                    entityVersionNumber,
-                    tag.Label,
-                    tag.Value,
-                    BsonDocumentEnvelope.Deconstruct(tag, logger)
-                ));
-
-                await InsertMany
-                (
-                    clientSessionHandle,
-                    mongoCollection,
-                    tagDocuments
-                );
-            }
-        }
-
-        public static Task<List<TagDocument>> GetMany
-        (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
-            ITagQuery tagQuery,
-            ProjectionDefinition<BsonDocument, TagDocument> projection
-        )
-        {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = tagQuery.GetFilter(_tagFilterBuilder);
-            var sort = tagQuery.GetSort(_tagSortBuilder);
-            var skip = tagQuery.Skip;
-            var take = tagQuery.Take;
-
-            return GetMany
+            await InsertMany
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                projection,
-                skip,
-                take
+                GetCollection(mongoDatabase),
+                tagDocuments
             );
         }
 
@@ -135,22 +87,30 @@ namespace EntityDb.MongoDb.Documents
             ITagQuery tagQuery
         )
         {
-            var tagDocuments = await GetMany
+            var tagDocuments = await GetMany<TagDocument>
             (
                 clientSessionHandle,
-                mongoDatabase,
-                tagQuery,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(TransactionId))
-                )
+                GetCollection(mongoDatabase),
+                tagQuery.GetFilter(_tagFilterBuilder),
+                tagQuery.GetSort(_tagSortBuilder),
+                TransactionIdProjection
             );
 
-            return tagDocuments
+            var transactionIds = tagDocuments
                 .Select(tagDocument => tagDocument.TransactionId)
-                .Distinct()
-                .ToArray();
+                .Distinct();
+
+            if (tagQuery.Skip.HasValue)
+            {
+                transactionIds = transactionIds.Skip(tagQuery.Skip.Value);
+            }
+
+            if (tagQuery.Take.HasValue)
+            {
+                transactionIds = transactionIds.Take(tagQuery.Take.Value);
+            }
+
+            return transactionIds.ToArray();
         }
 
         public static async Task<Guid[]> GetEntityIds
@@ -160,73 +120,64 @@ namespace EntityDb.MongoDb.Documents
             ITagQuery tagQuery
         )
         {
-            var tagDocuments = await GetMany
+            var tagDocuments = await GetMany<TagDocument>
             (
                 clientSessionHandle,
-                mongoDatabase,
-                tagQuery,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(EntityId))
-                )
+                GetCollection(mongoDatabase),
+                tagQuery.GetFilter(_tagFilterBuilder),
+                tagQuery.GetSort(_tagSortBuilder),
+                _entityIdProjection
             );
 
-            return tagDocuments
+            var entityIds = tagDocuments
                 .Select(tagDocument => tagDocument.EntityId)
-                .Distinct()
-                .ToArray();
+                .Distinct();
+
+            if (tagQuery.Skip.HasValue)
+            {
+                entityIds = entityIds.Skip(tagQuery.Skip.Value);
+            }
+
+            if (tagQuery.Take.HasValue)
+            {
+                entityIds = entityIds.Take(tagQuery.Take.Value);
+            }
+
+            return entityIds.ToArray();
         }
 
-        public static async Task<ITag[]> GetTags
+        public static Task<List<TagDocument>> GetMany
         (
-            ILogger logger,
-            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ITagQuery tagQuery
         )
         {
-            var tagDocuments = await GetMany
+            return GetMany<TagDocument>
             (
                 clientSessionHandle,
-                mongoDatabase,
-                tagQuery,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(Data))
-                )
+                GetCollection(mongoDatabase),
+                tagQuery.GetFilter(_tagFilterBuilder),
+                tagQuery.GetSort(_tagSortBuilder),
+                DataProjection,
+                tagQuery.Skip,
+                tagQuery.Take
             );
-
-            return tagDocuments
-                .Select(tagDocument => tagDocument.Data.Reconstruct<ITag>(logger, resolvingStrategyChain))
-                .ToArray();
         }
 
         public static async Task DeleteMany
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            Guid entityId,
-            ImmutableArray<ITag> tags
+            ITagFilter tagFilter
         )
         {
-            if (tags.Length > 0)
-            {
-                var mongoCollection = GetCollection(mongoDatabase);
-
-                var deleteTagsQuery = new DeleteTagsQuery(entityId, tags);
-
-                var tagDocumentFilter = deleteTagsQuery.GetFilter(_tagFilterBuilder);
-
-                await DeleteMany
-                (
-                    clientSessionHandle,
-                    mongoCollection,
-                    tagDocumentFilter
-                );
-            }
+            await DeleteMany
+            (
+                clientSessionHandle,
+                GetCollection(mongoDatabase),
+                tagFilter.GetFilter(_tagFilterBuilder)
+            );
         }
     }
 }

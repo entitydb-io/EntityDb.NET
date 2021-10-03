@@ -1,7 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -9,6 +6,7 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,8 +30,18 @@ namespace EntityDb.MongoDb.Documents
     {
         private static readonly CommandFilterBuilder _commandFilterBuilder = new();
         private static readonly CommandSortBuilder _commandSortBuilder = new();
-        private static readonly ProjectionDefinitionBuilder<BsonDocument> _projection = Builders<BsonDocument>.Projection;
-        private static readonly IndexKeysDefinitionBuilder<BsonDocument> _indexKeys = Builders<BsonDocument>.IndexKeys;
+
+        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(EntityId))
+        );
+
+        private static readonly ProjectionDefinition<BsonDocument> _entityVersionNumberProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(EntityVersionNumber))
+        );
 
         public const string CollectionName = "Commands";
 
@@ -55,10 +63,10 @@ namespace EntityDb.MongoDb.Documents
                 {
                     new CreateIndexModel<BsonDocument>
                     (
-                        keys: _indexKeys.Combine
+                        keys: IndexKeys.Combine
                         (
-                            _indexKeys.Descending(nameof(EntityId)),
-                            _indexKeys.Descending(nameof(EntityVersionNumber))
+                            IndexKeys.Descending(nameof(EntityId)),
+                            IndexKeys.Descending(nameof(EntityVersionNumber))
                         ),
                         options: new CreateIndexOptions
                         {
@@ -70,33 +78,17 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task InsertOne<TEntity>
+        public static Task InsertOne
         (
-            ILogger logger,
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            DateTime transactionTimeStamp,
-            Guid transactionId,
-            Guid entityId,
-            ulong entityVersionNumber,
-            ICommand<TEntity> command
+            CommandDocument commandDocument
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var commandDocument = new CommandDocument
-            (
-                transactionTimeStamp,
-                transactionId,
-                entityId,
-                entityVersionNumber,
-                BsonDocumentEnvelope.Deconstruct(command, logger)
-            );
-
-            await InsertOne
+            return InsertOne
             (
                 clientSessionHandle,
-                mongoCollection,
+                GetCollection(mongoDatabase),
                 commandDocument
             );
         }
@@ -108,40 +100,27 @@ namespace EntityDb.MongoDb.Documents
             ICommandQuery commandQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = commandQuery.GetFilter(_commandFilterBuilder);
-            var sort = commandQuery.GetSort(_commandSortBuilder);
-            var skip = commandQuery.Skip;
-            var take = commandQuery.Take;
-
             var commandDocuments = await GetMany<CommandDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(TransactionId))
-                ),
-                null,
-                null
+                GetCollection(mongoDatabase),
+                commandQuery.GetFilter(_commandFilterBuilder),
+                commandQuery.GetSort(_commandSortBuilder),
+                TransactionIdProjection
             );
 
             var transactionIds = commandDocuments
                 .Select(commandDocument => commandDocument.TransactionId)
                 .Distinct();
 
-            if (skip.HasValue)
+            if (commandQuery.Skip.HasValue)
             {
-                transactionIds = transactionIds.Skip(skip.Value);
+                transactionIds = transactionIds.Skip(commandQuery.Skip.Value);
             }
 
-            if (take.HasValue)
+            if (commandQuery.Take.HasValue)
             {
-                transactionIds = transactionIds.Take(take.Value);
+                transactionIds = transactionIds.Take(commandQuery.Take.Value);
             }
 
             return transactionIds.ToArray();
@@ -154,79 +133,49 @@ namespace EntityDb.MongoDb.Documents
             ICommandQuery commandQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = commandQuery.GetFilter(_commandFilterBuilder);
-            var sort = commandQuery.GetSort(_commandSortBuilder);
-            var skip = commandQuery.Skip;
-            var take = commandQuery.Take;
-
             var commandDocuments = await GetMany<CommandDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                 _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(EntityId))
-                ),
-                null,
-                null
+                GetCollection(mongoDatabase),
+                commandQuery.GetFilter(_commandFilterBuilder),
+                commandQuery.GetSort(_commandSortBuilder),
+                _entityIdProjection
             );
 
             var entityIds = commandDocuments
                 .Select(commandDocument => commandDocument.EntityId)
                 .Distinct();
 
-            if (skip.HasValue)
+            if (commandQuery.Skip.HasValue)
             {
-                entityIds = entityIds.Skip(skip.Value);
+                entityIds = entityIds.Skip(commandQuery.Skip.Value);
             }
 
-            if (take.HasValue)
+            if (commandQuery.Take.HasValue)
             {
-                entityIds = entityIds.Take(take.Value);
+                entityIds = entityIds.Take(commandQuery.Take.Value);
             }
 
             return entityIds.ToArray();
         }
 
-        public static async Task<ICommand<TEntity>[]> GetCommands<TEntity>
+        public static Task<List<CommandDocument>> GetMany
         (
-            ILogger logger,
-            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = commandQuery.GetFilter(_commandFilterBuilder);
-            var sort = commandQuery.GetSort(_commandSortBuilder);
-            var skip = commandQuery.Skip;
-            var take = commandQuery.Take;
-
-            var commandDocuments = await GetMany<CommandDocument>
+            return GetMany<CommandDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(Data))
-                ),
-                skip,
-                take
+                GetCollection(mongoDatabase),
+                commandQuery.GetFilter(_commandFilterBuilder),
+                commandQuery.GetSort(_commandSortBuilder),
+                DataProjection,
+                commandQuery.Skip,
+                commandQuery.Take
             );
-
-            return commandDocuments
-                .Select(commandDocument => commandDocument.Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain))
-                .ToArray();
         }
 
         public static async Task<ulong> GetPreviousVersionNumber
@@ -236,38 +185,27 @@ namespace EntityDb.MongoDb.Documents
             Guid entityId
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var commandQuery = new GetLastCommandQuery(entityId);
-
-            var filter = commandQuery.GetFilter(_commandFilterBuilder);
-            var sort = commandQuery.GetSort(_commandSortBuilder);
-            var skip = commandQuery.Skip;
-            var take = commandQuery.Take;
+            var getLastCommandQuery = new GetLastCommandQuery(entityId);
 
             var commandDocuments = await GetMany<CommandDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(EntityVersionNumber))
-                ),
-                skip,
-                take
+                GetCollection(mongoDatabase),
+                getLastCommandQuery.GetFilter(_commandFilterBuilder),
+                getLastCommandQuery.GetSort(_commandSortBuilder),
+                _entityVersionNumberProjection,
+                getLastCommandQuery.Skip,
+                getLastCommandQuery.Take
             );
 
             var lastCommandDocument = commandDocuments.SingleOrDefault();
 
-            if (lastCommandDocument != null)
+            if (lastCommandDocument == null)
             {
-                return lastCommandDocument.EntityVersionNumber;
+                return default;
             }
 
-            return 0;
+            return lastCommandDocument.EntityVersionNumber;
         }
     }
 }

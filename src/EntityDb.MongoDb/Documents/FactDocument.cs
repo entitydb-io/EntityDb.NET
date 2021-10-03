@@ -1,8 +1,4 @@
-﻿using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
@@ -10,7 +6,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -33,11 +28,14 @@ namespace EntityDb.MongoDb.Documents
         _id
     )
     {
-
         private static readonly FactFilterBuilder _factFilterBuilder = new();
         private static readonly FactSortBuilder _factSortBuilder = new();
-        private static readonly ProjectionDefinitionBuilder<BsonDocument> _projection = Builders<BsonDocument>.Projection;
-        private static readonly IndexKeysDefinitionBuilder<BsonDocument> _indexKeys = Builders<BsonDocument>.IndexKeys;
+
+        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(EntityId))
+        );
 
         public const string CollectionName = "Facts";
 
@@ -59,11 +57,11 @@ namespace EntityDb.MongoDb.Documents
                 {
                     new CreateIndexModel<BsonDocument>
                     (
-                        keys: _indexKeys.Combine
+                        keys: IndexKeys.Combine
                         (
-                            _indexKeys.Ascending(nameof(EntityId)),
-                            _indexKeys.Ascending(nameof(EntityVersionNumber)),
-                            _indexKeys.Ascending(nameof(EntitySubversionNumber))
+                            IndexKeys.Ascending(nameof(EntityId)),
+                            IndexKeys.Ascending(nameof(EntityVersionNumber)),
+                            IndexKeys.Ascending(nameof(EntitySubversionNumber))
                         ),
                         options: new CreateIndexOptions
                         {
@@ -79,57 +77,15 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            FactDocument[] factDocuments
+            IEnumerable<FactDocument> factDocuments
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
             await InsertMany
             (
                 clientSessionHandle,
-                mongoCollection,
+                GetCollection(mongoDatabase),
                 factDocuments
             );
-        }
-
-        public static async Task InsertMany<TEntity>
-        (
-            ILogger logger,
-            IClientSessionHandle clientSessionHandle,
-            IMongoDatabase mongoDatabase,
-            DateTime transactionTimeStamp,
-            Guid transactionId,
-            Guid entityId,
-            ulong entityVersionNumber,
-            ImmutableArray<ITransactionFact<TEntity>> transactionFacts
-        )
-        {
-            if (transactionFacts.Length > 0)
-            {
-                var factDocuments = new List<FactDocument>();
-
-                foreach (var transactionFact in transactionFacts)
-                {
-                    var factDocument = new FactDocument
-                    (
-                        transactionTimeStamp,
-                        transactionId,
-                        entityId,
-                        entityVersionNumber,
-                        transactionFact.SubversionNumber,
-                        BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
-                    );
-
-                    factDocuments.Add(factDocument);
-                }
-
-                await InsertMany
-                (
-                    clientSessionHandle,
-                    mongoDatabase,
-                    factDocuments.ToArray()
-                );
-            }
         }
 
         public static async Task<Guid[]> GetTransactionIds
@@ -139,40 +95,27 @@ namespace EntityDb.MongoDb.Documents
             IFactQuery factQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = factQuery.GetFilter(_factFilterBuilder);
-            var sort = factQuery.GetSort(_factSortBuilder);
-            var skip = factQuery.Skip;
-            var take = factQuery.Take;
-
             var factDocuments = await GetMany<FactDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(TransactionId))
-                ),
-                null,
-                null
+                GetCollection(mongoDatabase),
+                factQuery.GetFilter(_factFilterBuilder),
+                factQuery.GetSort(_factSortBuilder),
+                TransactionIdProjection
             );
 
             var transactionIds = factDocuments
                 .Select(factDocument => factDocument.TransactionId)
                 .Distinct();
 
-            if (skip.HasValue)
+            if (factQuery.Skip.HasValue)
             {
-                transactionIds = transactionIds.Skip(skip.Value);
+                transactionIds = transactionIds.Skip(factQuery.Skip.Value);
             }
 
-            if (take.HasValue)
+            if (factQuery.Take.HasValue)
             {
-                transactionIds = transactionIds.Take(take.Value);
+                transactionIds = transactionIds.Take(factQuery.Take.Value);
             }
 
             return transactionIds.ToArray();
@@ -185,79 +128,49 @@ namespace EntityDb.MongoDb.Documents
             IFactQuery factQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = factQuery.GetFilter(_factFilterBuilder);
-            var sort = factQuery.GetSort(_factSortBuilder);
-            var skip = factQuery.Skip;
-            var take = factQuery.Take;
-
             var factDocuments = await GetMany<FactDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(EntityId))
-                ),
-                null,
-                null
+                GetCollection(mongoDatabase),
+                factQuery.GetFilter(_factFilterBuilder),
+                factQuery.GetSort(_factSortBuilder),
+                _entityIdProjection
             );
 
             var entityIds = factDocuments
                 .Select(factDocument => factDocument.EntityId)
                 .Distinct();
 
-            if (skip.HasValue)
+            if (factQuery.Skip.HasValue)
             {
-                entityIds = entityIds.Skip(skip.Value);
+                entityIds = entityIds.Skip(factQuery.Skip.Value);
             }
 
-            if (take.HasValue)
+            if (factQuery.Take.HasValue)
             {
-                entityIds = entityIds.Take(take.Value);
+                entityIds = entityIds.Take(factQuery.Take.Value);
             }
 
             return entityIds.ToArray();
         }
 
-        public static async Task<IFact<TEntity>[]> GetFacts<TEntity>
+        public static Task<List<FactDocument>> GetMany
         (
-            ILogger logger,
-            IResolvingStrategyChain resolvingStrategyChain,
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = factQuery.GetFilter(_factFilterBuilder);
-            var sort = factQuery.GetSort(_factSortBuilder);
-            var skip = factQuery.Skip;
-            var take = factQuery.Take;
-
-            var factDocuments = await GetMany<FactDocument>
+            return GetMany<FactDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                _projection.Combine
-                (
-                    _projection.Exclude(nameof(_id)),
-                    _projection.Include(nameof(Data))
-                ),
-                skip,
-                take
+                GetCollection(mongoDatabase),
+                factQuery.GetFilter(_factFilterBuilder),
+                factQuery.GetSort(_factSortBuilder),
+                DataProjection,
+                skip: factQuery.Skip,
+                limit: factQuery.Take
             );
-
-            return factDocuments
-                .Select(factDocument => factDocument.Data.Reconstruct<IFact<TEntity>>(logger, resolvingStrategyChain))
-                .ToArray();
         }
     }
 }

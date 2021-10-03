@@ -22,6 +22,21 @@ namespace EntityDb.MongoDb.Documents
 #pragma warning restore IDE1006 // Naming Styles
     )
     {
+        protected static readonly ProjectionDefinitionBuilder<BsonDocument> Projection = Builders<BsonDocument>.Projection;
+        protected static readonly IndexKeysDefinitionBuilder<BsonDocument> IndexKeys = Builders<BsonDocument>.IndexKeys;
+
+        protected static readonly ProjectionDefinition<BsonDocument> TransactionIdProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(TransactionId))
+        );
+
+        protected static readonly ProjectionDefinition<BsonDocument> DataProjection = Projection.Combine
+        (
+            Projection.Exclude(nameof(_id)),
+            Projection.Include(nameof(Data))
+        );
+
         static DocumentBase()
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
@@ -54,8 +69,8 @@ namespace EntityDb.MongoDb.Documents
             FilterDefinition<BsonDocument> filter,
             SortDefinition<BsonDocument>? sort,
             ProjectionDefinition<BsonDocument, TDocument> projection,
-            int? skip,
-            int? limit
+            int? skip = null,
+            int? limit = null
         )
         {
             IFindFluent<BsonDocument, TDocument> query;
@@ -98,24 +113,33 @@ namespace EntityDb.MongoDb.Documents
             TDocument document
         )
         {
+            var bsonDocument = document.ToBsonDocument();
+
             return mongoCollection
                 .InsertOneAsync
                 (
                     session: clientSessionHandle,
-                    document: document.ToBsonDocument()
+                    document: bsonDocument
                 );
         }
 
-        protected static Task InsertMany<TDocument>
+        protected static async Task InsertMany<TDocument>
         (
             IClientSessionHandle clientSessionHandle,
             IMongoCollection<BsonDocument> mongoCollection,
             IEnumerable<TDocument> documents
         )
         {
-            var bsonDocuments = documents.Select(document => document.ToBsonDocument());
+            var bsonDocuments = documents
+                .Select(document => document.ToBsonDocument())
+                .ToArray();
 
-            return mongoCollection
+            if (bsonDocuments.Length == 0)
+            {
+                return;
+            }
+
+            await mongoCollection
                 .InsertManyAsync
                 (
                     session: clientSessionHandle,
