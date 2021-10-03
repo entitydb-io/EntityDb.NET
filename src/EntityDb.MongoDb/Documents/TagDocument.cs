@@ -168,6 +168,11 @@ namespace EntityDb.MongoDb.Documents
             IReadOnlyCollection<ITag> deleteTags
         )
         {
+            if (deleteTags.Count == 0)
+            {
+                return;
+            }
+
             var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
 
             await DeleteMany

@@ -187,6 +187,11 @@ namespace EntityDb.MongoDb.Documents
             IReadOnlyCollection<ILease> deleteLeases
         )
         {
+            if (deleteLeases.Count == 0)
+            {
+                return;
+            }
+
             var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
 
             await DeleteMany
