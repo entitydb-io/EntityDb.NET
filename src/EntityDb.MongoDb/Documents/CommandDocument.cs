@@ -37,11 +37,6 @@ namespace EntityDb.MongoDb.Documents
 
         public const string CollectionName = "Commands";
 
-        private static IMongoCollection<BsonDocument> GetCollection(IMongoDatabase mongoDatabase)
-        {
-            return mongoDatabase.GetCollection<BsonDocument>(CollectionName);
-        }
-
         public static Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase
@@ -97,7 +92,7 @@ namespace EntityDb.MongoDb.Documents
             return InsertOne
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 commandDocument
             );
         }
@@ -113,7 +108,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<CommandDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = commandQuery.GetFilter(_commandFilterBuilder),
                     Sort = commandQuery.GetSort(_commandSortBuilder),
                     DistinctSkip = commandQuery.Skip,
@@ -133,7 +128,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new EntityIdQuery<CommandDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = commandQuery.GetFilter(_commandFilterBuilder),
                     Sort = commandQuery.GetSort(_commandSortBuilder),
                     DistinctSkip = commandQuery.Skip,
@@ -153,7 +148,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new DataQuery<CommandDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = commandQuery.GetFilter(_commandFilterBuilder),
                     Sort = commandQuery.GetSort(_commandSortBuilder),
                     Skip = commandQuery.Skip,
@@ -174,7 +169,7 @@ namespace EntityDb.MongoDb.Documents
             var query = new EntityVersionQuery<CommandDocument>
             {
                 ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
+                MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                 Filter = commandQuery.GetFilter(_commandFilterBuilder),
                 Sort = commandQuery.GetSort(_commandSortBuilder),
                 Skip = commandQuery.Skip,

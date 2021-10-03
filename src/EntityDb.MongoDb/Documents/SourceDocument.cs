@@ -34,11 +34,6 @@ namespace EntityDb.MongoDb.Documents
 
         public const string CollectionName = "Sources";
 
-        private static IMongoCollection<BsonDocument> GetCollection(IMongoDatabase mongoDatabase)
-        {
-            return mongoDatabase.GetCollection<BsonDocument>(CollectionName);
-        }
-
         public static Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase
@@ -91,7 +86,7 @@ namespace EntityDb.MongoDb.Documents
             return InsertOne
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 sourceDocument
             );
         }
@@ -107,7 +102,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<SourceDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
                     Sort = sourceQuery.GetSort(_sourceSortBuilder),
                     DistinctSkip = sourceQuery.Skip,
@@ -127,7 +122,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new EntityIdsQuery<SourceDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
                     Sort = sourceQuery.GetSort(_sourceSortBuilder),
                     DistinctSkip = sourceQuery.Skip,
@@ -147,7 +142,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new DataQuery<SourceDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
                     Sort = sourceQuery.GetSort(_sourceSortBuilder),
                     Skip = sourceQuery.Skip,

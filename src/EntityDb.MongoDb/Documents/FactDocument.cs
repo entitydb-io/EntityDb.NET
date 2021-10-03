@@ -38,11 +38,6 @@ namespace EntityDb.MongoDb.Documents
 
         public const string CollectionName = "Facts";
 
-        private static IMongoCollection<BsonDocument> GetCollection(IMongoDatabase mongoDatabase)
-        {
-            return mongoDatabase.GetCollection<BsonDocument>(CollectionName);
-        }
-
         public static Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase
@@ -102,7 +97,7 @@ namespace EntityDb.MongoDb.Documents
             await InsertMany
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 factDocuments
             );
         }
@@ -118,7 +113,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<FactDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = factQuery.GetFilter(_factFilterBuilder),
                     Sort = factQuery.GetSort(_factSortBuilder),
                     DistinctSkip = factQuery.Skip,
@@ -138,7 +133,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new EntityIdQuery<FactDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = factQuery.GetFilter(_factFilterBuilder),
                     Sort = factQuery.GetSort(_factSortBuilder),
                     DistinctSkip = factQuery.Skip,
@@ -158,7 +153,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new DataQuery<FactDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = factQuery.GetFilter(_factFilterBuilder),
                     Sort = factQuery.GetSort(_factSortBuilder),
                     Skip = factQuery.Skip,

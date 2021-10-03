@@ -48,11 +48,6 @@ namespace EntityDb.MongoDb.Documents
             nameof(Value),
         };
 
-        private static IMongoCollection<BsonDocument> GetCollection(IMongoDatabase mongoDatabase)
-        {
-            return mongoDatabase.GetCollection<BsonDocument>(CollectionName);
-        }
-
         public static Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase
@@ -114,7 +109,7 @@ namespace EntityDb.MongoDb.Documents
             await InsertMany
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 leaseDocuments
             );
         }
@@ -130,7 +125,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<LeaseDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
                     Sort = leaseQuery.GetSort(_leaseSortBuilder),
                     DistinctSkip = leaseQuery.Skip,
@@ -150,7 +145,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new EntityIdQuery<LeaseDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
                     Sort = leaseQuery.GetSort(_leaseSortBuilder),
                     DistinctSkip = leaseQuery.Skip,
@@ -170,7 +165,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new DataQuery<LeaseDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
                     Sort = leaseQuery.GetSort(_leaseSortBuilder),
                     Skip = leaseQuery.Skip,
@@ -197,7 +192,7 @@ namespace EntityDb.MongoDb.Documents
             await DeleteMany
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 deleteLeasesQuery.GetFilter(_leaseFilterBuilder)
             );
         }
