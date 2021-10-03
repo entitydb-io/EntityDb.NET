@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -30,6 +31,26 @@ namespace EntityDb.Common.Transactions
             _serviceProvider = serviceProvider;
         }
 
+        private static ImmutableArray<ITransactionFact<TEntity>> GetTransactionFacts(IEnumerable<IFact<TEntity>> facts)
+        {
+            var transactionFacts = new List<TransactionFact<TEntity>>();
+
+            ulong subversionNumber = default;
+
+            foreach (var fact in facts)
+            {
+                transactionFacts.Add(new TransactionFact<TEntity>
+                {
+                    SubversionNumber = subversionNumber,
+                    Fact = fact
+                });
+
+                subversionNumber += 1;
+            }
+
+            return transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>();
+        }
+
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
@@ -50,30 +71,19 @@ namespace EntityDb.Common.Transactions
             var nextLeases = _serviceProvider.GetLeases(nextEntity);
             var nextTags = _serviceProvider.GetTags(nextEntity);
 
-            var transactionFacts = new List<TransactionFact<TEntity>>();
-
-            ulong subversionNumber = default;
-
-            foreach (var nextFact in nextFacts)
-            {
-                transactionFacts.Add(new TransactionFact<TEntity>(subversionNumber, nextFact));
-
-                subversionNumber += 1;
-            }
-
             _transactionCommands.Add(new TransactionCommand<TEntity>
-            (
-                PreviousSnapshot: previousEntity,
-                NextSnapshot: nextEntity,
-                EntityId: entityId,
-                ExpectedPreviousVersionNumber: previousVersionNumber,
-                Command: command,
-                Facts: transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>(),
-                DeleteLeases: previousLeases.Except(nextLeases).ToImmutableArray(),
-                InsertLeases: nextLeases.Except(previousLeases).ToImmutableArray(),
-                DeleteTags: previousTags.Except(nextTags).ToImmutableArray(),
-                InsertTags: nextTags.Except(previousTags).ToImmutableArray()
-            ));
+            {
+                PreviousSnapshot = previousEntity,
+                NextSnapshot = nextEntity,
+                EntityId = entityId,
+                ExpectedPreviousVersionNumber = previousVersionNumber,
+                Command = command,
+                Facts = GetTransactionFacts(nextFacts),
+                DeleteLeases = previousLeases.Except(nextLeases).ToImmutableArray(),
+                InsertLeases = nextLeases.Except(previousLeases).ToImmutableArray(),
+                DeleteTags = previousTags.Except(nextTags).ToImmutableArray(),
+                InsertTags = nextTags.Except(previousTags).ToImmutableArray()
+            });
 
             _knownEntities[entityId] = nextEntity;
         }
@@ -163,7 +173,13 @@ namespace EntityDb.Common.Transactions
                 timeStamp = timeStampOverride.Value.ToUniversalTime();
             }
 
-            var transaction = new Transaction<TEntity>(transactionId, timeStamp, source, _transactionCommands.ToImmutableArray<ITransactionCommand<TEntity>>());
+            var transaction = new Transaction<TEntity>
+            {
+                Id = transactionId,
+                TimeStamp = timeStamp,
+                Source = source,
+                Commands = _transactionCommands.ToImmutableArray<ITransactionCommand<TEntity>>(),
+            };
 
             _transactionCommands.Clear();
 

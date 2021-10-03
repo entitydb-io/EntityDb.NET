@@ -5,18 +5,18 @@ using System;
 namespace EntityDb.Common.Transactions
 {
     /// <inheritdoc cref="ITransactionSessionOptions"/>
-    public sealed class TransactionSessionOptions : ITransactionSessionOptions
+    public sealed record TransactionSessionOptions : ITransactionSessionOptions
     {
         /// <inheritdoc/>
-        public bool ReadOnly { get; set; }
+        public bool ReadOnly { get; init; }
 
         /// <inheritdoc/>
-        public bool SecondaryPreferred { get; set; }
+        public bool SecondaryPreferred { get; init; }
 
         /// <inheritdoc/>
-        public TimeSpan? WriteTimeout { get; set; }
+        public TimeSpan? WriteTimeout { get; init; }
 
         /// <inheritdoc/>
-        public ILogger? LoggerOverride { get; set; }
+        public ILogger? LoggerOverride { get; init; }
     }
 }
