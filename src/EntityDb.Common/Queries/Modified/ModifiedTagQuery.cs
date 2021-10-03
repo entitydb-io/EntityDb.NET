@@ -5,11 +5,11 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedTagQuery(ITagQuery TagQuery, bool InvertFilter, bool ReverseSort, int? ReplaceSkip, int? ReplaceTake) : ModifiedQueryBase(TagQuery, ReplaceSkip, ReplaceTake), ITagQuery
+    internal sealed record ModifiedTagQuery(ITagQuery TagQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(TagQuery, ModifiedQueryOptions), ITagQuery
     {
         public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {
-            if (InvertFilter)
+            if (ModifiedQueryOptions.InvertFilter)
             {
                 return builder.Not
                 (
@@ -22,7 +22,7 @@ namespace EntityDb.Common.Queries.Modified
 
         public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
         {
-            if (ReverseSort)
+            if (ModifiedQueryOptions.ReverseSort)
             {
                 return TagQuery.GetSort(builder.Reverse());
             }

@@ -27,9 +27,9 @@ namespace EntityDb.TestImplementations.Facts
             {
                 tags.AddRange(entity.Tags);
             }
-            
+
             tags.Add(new CountTag(Number));
-            
+
             return entity with
             {
                 Leases = leases.ToArray(),

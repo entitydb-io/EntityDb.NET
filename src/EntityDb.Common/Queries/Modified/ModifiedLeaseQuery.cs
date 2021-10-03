@@ -5,11 +5,11 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedLeaseQuery(ILeaseQuery LeaseQuery, bool InvertFilter, bool ReverseSort, int? ReplaceSkip, int? ReplaceTake) : ModifiedQueryBase(LeaseQuery, ReplaceSkip, ReplaceTake), ILeaseQuery
+    internal sealed record ModifiedLeaseQuery(ILeaseQuery LeaseQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(LeaseQuery, ModifiedQueryOptions), ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
-            if (InvertFilter)
+            if (ModifiedQueryOptions.InvertFilter)
             {
                 return builder.Not
                 (
@@ -22,7 +22,7 @@ namespace EntityDb.Common.Queries.Modified
 
         public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
-            if (ReverseSort)
+            if (ModifiedQueryOptions.ReverseSort)
             {
                 return LeaseQuery.GetSort(builder.Reverse());
             }

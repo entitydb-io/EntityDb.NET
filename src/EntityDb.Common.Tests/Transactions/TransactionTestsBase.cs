@@ -10,6 +10,7 @@ using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Leases;
 using EntityDb.Common.Queries;
+using EntityDb.Common.Queries.Modified;
 using EntityDb.Common.Tags;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
@@ -63,7 +64,7 @@ namespace EntityDb.Common.Tests.Transactions
                 object source,
                 IEnumerable<ICommand<TransactionEntity>> commands,
                 IEnumerable<IFact<TransactionEntity>> facts,
-                IEnumerable<ILease> leases, 
+                IEnumerable<ILease> leases,
                 IEnumerable<ITag> tags
             )
             {
@@ -156,7 +157,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -176,7 +185,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -196,7 +213,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -216,7 +241,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -236,7 +269,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -256,7 +297,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -276,7 +325,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -296,7 +353,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -316,7 +381,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseSources : expectedObjects.TrueSources).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -336,7 +409,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseCommands : expectedObjects.TrueCommands).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -356,7 +437,15 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseFacts : expectedObjects.TrueFacts).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -376,14 +465,22 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseLeases : expectedObjects.TrueLeases).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedLeaseQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
-                        modifiedLeaseQuery = filter.Invoke(modifiedLeaseQuery);
+                        modifiedQuery = filter.Invoke(modifiedQuery);
                     }
 
-                    return transactionRepository.GetLeases(modifiedLeaseQuery);
+                    return transactionRepository.GetLeases(modifiedQuery);
                 }
             );
         }
@@ -396,14 +493,22 @@ namespace EntityDb.Common.Tests.Transactions
                 (invert) => (invert ? expectedObjects.FalseTags : expectedObjects.TrueTags).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    var modifiedTagQuery = query.Modify(invertFilter: invertFilter, reverseSort: reverseSort, replaceSkip: skip, replaceTake: take);
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take,
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
-                        modifiedTagQuery = filter.Invoke(modifiedTagQuery);
+                        modifiedQuery = filter.Invoke(modifiedQuery);
                     }
 
-                    return transactionRepository.GetTags(modifiedTagQuery);
+                    return transactionRepository.GetTags(modifiedQuery);
                 }
             );
         }
@@ -681,7 +786,7 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue()
         {
             // ARRANGE
-            
+
             var tag = new Tag("Foo", "Bar");
 
             var transaction = new Transaction<TransactionEntity>
@@ -725,7 +830,7 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
             };
-            
+
             await using var transactionRepository = await CreateRepository();
 
             // ACT
@@ -736,7 +841,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             transactionInserted.ShouldBeTrue();
         }
-        
+
         [Fact]
         public async Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse()
         {
@@ -830,7 +935,7 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags()
         {
             // ARRANGE
-            
+
             var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             var expectedInitialTags = new[]
@@ -847,9 +952,9 @@ namespace EntityDb.Common.Tests.Transactions
                 .Build(Guid.NewGuid(), new NoSource());
 
             await transactionRepository.PutTransaction(initialTransaction);
-            
+
             var tagQuery = new DeleteTagsQuery(entityId, expectedInitialTags);
-            
+
             // ACT
 
             var actualInitialTags = await transactionRepository.GetTags(tagQuery);
@@ -861,19 +966,19 @@ namespace EntityDb.Common.Tests.Transactions
             await transactionRepository.PutTransaction(finalTransaction);
 
             var actualFinalTags = await transactionRepository.GetTags(tagQuery);
-            
+
             // ASSERT
 
             expectedInitialTags.SequenceEqual(actualInitialTags).ShouldBeTrue();
-            
+
             actualFinalTags.ShouldBeEmpty();
         }
-        
+
         [Fact]
         public async Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases()
         {
             // ARRANGE
-            
+
             var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             var expectedInitialLeases = new[]
@@ -1026,7 +1131,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new CountLease(i),
                 };
-                
+
                 var tags = new[]
                 {
                     new CountTag(i),
@@ -1102,7 +1207,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new CountLease(i),
                 };
-                
+
                 var tags = new[]
                 {
                     new CountTag(i),
@@ -1173,7 +1278,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new CountLease(i),
                 };
-                
+
                 var tags = new[]
                 {
                     new CountTag(i),
@@ -1231,7 +1336,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new CountLease(i),
                 };
-                
+
                 var tags = new[]
                 {
                     new CountTag(i),
@@ -1285,7 +1390,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new CountLease(i),
                 };
-                
+
                 var tags = new[]
                 {
                     new CountTag(i),

@@ -71,70 +71,55 @@ namespace EntityDb.Common.Extensions
         /// Returns a new, modified <see cref="ISourceQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
         /// <param name="sourceQuery">The source query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ISourceQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="sourceQuery"/>. Otherwise, the new <see cref="ISourceQuery"/> will just return the same filter as <paramref name="sourceQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ISourceQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ISourceSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ISourceQuery"/> will just return the same sort as <paramref name="sourceQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="ISourceQuery"/> will null-coalesce this value with the skip of <paramref name="sourceQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="ISourceQuery"/> will null-coalesce this value with the take of <paramref name="sourceQuery"/>.</param>
+        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
         /// <returns>A new, modified <see cref="ISourceQuery"/>.</returns>
-        public static ISourceQuery Modify(this ISourceQuery sourceQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        public static ISourceQuery Modify(this ISourceQuery sourceQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedSourceQuery(sourceQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedSourceQuery(sourceQuery, modifiedQueryOptions);
         }
 
         /// <summary>
         /// Returns a new, modified <see cref="ICommandQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
         /// <param name="commandQuery">The command query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ICommandQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="commandQuery"/>. Otherwise, the new <see cref="ICommandQuery"/> will just return the same filter as <paramref name="commandQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ICommandQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ICommandSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ICommandQuery"/> will just return the same sort as <paramref name="commandQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="ICommandQuery"/> will null-coalesce this value with the skip of <paramref name="commandQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="ICommandQuery"/> will null-coalesce this value with the take of <paramref name="commandQuery"/>.</param>
+        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
         /// <returns>A new, modified <see cref="ICommandQuery"/>.</returns>
-        public static ICommandQuery Modify(this ICommandQuery commandQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        public static ICommandQuery Modify(this ICommandQuery commandQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedCommandQuery(commandQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedCommandQuery(commandQuery, modifiedQueryOptions);
         }
 
         /// <summary>
         /// Returns a new, modified <see cref="IFactQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
         /// <param name="factQuery">The fact query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="IFactQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="factQuery"/>. Otherwise, the new <see cref="IFactQuery"/> will just return the same filter as <paramref name="factQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="IFactQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="IFactSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="IFactQuery"/> will just return the same sort as <paramref name="factQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="IFactQuery"/> will null-coalesce this value with the skip of <paramref name="factQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="IFactQuery"/> will null-coalesce this value with the take of <paramref name="factQuery"/>.</param>
+        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
         /// <returns>A new, modified <see cref="IFactQuery"/>.</returns>
-        public static IFactQuery Modify(this IFactQuery factQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        public static IFactQuery Modify(this IFactQuery factQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedFactQuery(factQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedFactQuery(factQuery, modifiedQueryOptions);
         }
 
         /// <summary>
         /// Returns a new, modified <see cref="ILeaseQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
         /// <param name="leaseQuery">The lease query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ILeaseQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="leaseQuery"/>. Otherwise, the new <see cref="ILeaseQuery"/> will just return the same filter as <paramref name="leaseQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ILeaseQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ILeaseSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ILeaseQuery"/> will just return the same sort as <paramref name="leaseQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="ILeaseQuery"/> will null-coalesce this value with the skip of <paramref name="leaseQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="ILeaseQuery"/> will null-coalesce this value with the take of <paramref name="leaseQuery"/>.</param>
+        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
         /// <returns>A new, modified <see cref="ILeaseQuery"/>.</returns>
-        public static ILeaseQuery Modify(this ILeaseQuery leaseQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        public static ILeaseQuery Modify(this ILeaseQuery leaseQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedLeaseQuery(leaseQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedLeaseQuery(leaseQuery, modifiedQueryOptions);
         }
 
         /// <summary>
         /// Returns a new, modified <see cref="ITagQuery"/>. The way in which it is modified depends on the parameters of this extension method.
         /// </summary>
         /// <param name="tagQuery">The tag query.</param>
-        /// <param name="invertFilter">If <c>true</c>, then the new <see cref="ITagQuery"/> will return the value of <see cref="IFilterBuilder{TFilter}.Not(TFilter)"/> applied to the filter of <paramref name="tagQuery"/>. Otherwise, the new <see cref="ITagQuery"/> will just return the same filter as <paramref name="tagQuery"/>.</param>
-        /// <param name="reverseSort">If <c>true</c>, then the new <see cref="ITagQuery"/> will pass the opposite values of <c>ascending</c> to the <see cref="ITagSortBuilder{TSort}"/> methods (i.e., <c>true</c> becomes <c>false</c> and vice versa). Otherwise, the new <see cref="ITagQuery"/> will just return the same sort as <paramref name="tagQuery"/>. Note that <see cref="ISortBuilder{TSort}.Combine"/> is unaffected in either case.</param>
-        /// <param name="replaceSkip">The new <see cref="ITagQuery"/> will null-coalesce this value with the skip of <paramref name="tagQuery"/>.</param>
-        /// <param name="replaceTake">The new <see cref="ITagQuery"/> will null-coalesce this value with the take of <paramref name="tagQuery"/>.</param>
+        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
         /// <returns>A new, modified <see cref="ITagQuery"/>.</returns>
-        public static ITagQuery Modify(this ITagQuery tagQuery, bool invertFilter = false, bool reverseSort = false, int? replaceSkip = null, int? replaceTake = null)
+        public static ITagQuery Modify(this ITagQuery tagQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedTagQuery(tagQuery, invertFilter, reverseSort, replaceSkip, replaceTake);
+            return new ModifiedTagQuery(tagQuery, modifiedQueryOptions);
         }
     }
 }

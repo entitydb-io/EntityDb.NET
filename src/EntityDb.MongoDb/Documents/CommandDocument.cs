@@ -125,7 +125,7 @@ namespace EntityDb.MongoDb.Documents
                 }
             );
         }
-    
+
         public static Task<ICommand<TEntity>[]> GetData<TEntity>
         (
             IMongoDbSession mongoDbSession,
