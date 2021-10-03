@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EntityDb.Common.Tests\EntityDb.Common.Tests.csproj" />
+    <ProjectReference Include="..\EntityDb.MongoDb.Provisioner\EntityDb.MongoDb.Provisioner.csproj" />
     <ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj" />
     <ProjectReference Include="..\EntityDb.Redis\EntityDb.Redis.csproj" />
   </ItemGroup>

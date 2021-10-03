@@ -8,7 +8,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -34,32 +33,6 @@ namespace EntityDb.MongoDb.Documents
             nameof(Label),
             nameof(Value),
         };
-
-        public static Task ProvisionCollection
-        (
-            IMongoDatabase mongoDatabase
-        )
-        {
-            return ProvisionCollection
-            (
-                GetMongoCollection(mongoDatabase, CollectionName),
-                new[]
-                {
-                    new CreateIndexModel<BsonDocument>
-                    (
-                        keys: IndexKeys.Combine
-                        (
-                            IndexKeys.Descending(nameof(Label)),
-                            IndexKeys.Descending(nameof(Value))
-                        ),
-                        options: new CreateIndexOptions
-                        {
-                            Name = $"Lookup Index",
-                        }
-                    ),
-                }
-            );
-        }
 
         public static IReadOnlyCollection<TagDocument> BuildMany<TEntity>
         (
