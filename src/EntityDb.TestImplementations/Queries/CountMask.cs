@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
-using EntityDb.Common.Queries.Filtered;
+using EntityDb.Common.Queries.Filters;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Leases;
