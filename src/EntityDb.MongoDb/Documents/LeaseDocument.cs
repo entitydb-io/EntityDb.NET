@@ -82,7 +82,7 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static IEnumerable<LeaseDocument> BuildMany<TEntity>
+        public static IReadOnlyCollection<LeaseDocument> BuildMany<TEntity>
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
@@ -100,14 +100,15 @@ namespace EntityDb.MongoDb.Documents
                     insertLease.Label,
                     insertLease.Value,
                     BsonDocumentEnvelope.Deconstruct(insertLease, logger)
-                ));
+                ))
+                .ToArray();
         }
 
         public static async Task InsertMany
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            IEnumerable<LeaseDocument> leaseDocuments
+            IReadOnlyCollection<LeaseDocument> leaseDocuments
         )
         {
             await InsertMany
@@ -186,11 +187,6 @@ namespace EntityDb.MongoDb.Documents
             IReadOnlyCollection<ILease> deleteLeases
         )
         {
-            if (deleteLeases.Count == 0)
-            {
-                return;
-            }
-
             var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
 
             await DeleteMany

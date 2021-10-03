@@ -72,7 +72,7 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static IEnumerable<FactDocument> BuildMany<TEntity>
+        public static IReadOnlyCollection<FactDocument> BuildMany<TEntity>
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
@@ -88,14 +88,15 @@ namespace EntityDb.MongoDb.Documents
                     transactionCommand.ExpectedPreviousVersionNumber + 1,
                     transactionFact.SubversionNumber,
                     BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
-                ));
+                ))
+                .ToArray();
         }
 
         public static async Task InsertMany
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            IEnumerable<FactDocument> factDocuments
+            IReadOnlyCollection<FactDocument> factDocuments
         )
         {
             await InsertMany

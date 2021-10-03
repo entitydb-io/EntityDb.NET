@@ -68,17 +68,17 @@ namespace EntityDb.MongoDb.Documents
         (
             IClientSessionHandle clientSessionHandle,
             IMongoCollection<BsonDocument> mongoCollection,
-            IEnumerable<TDocument> documents
+            IReadOnlyCollection<TDocument> documents
         )
         {
-            var bsonDocuments = documents
-                .Select(document => document.ToBsonDocument())
-                .ToArray();
-
-            if (bsonDocuments.Length == 0)
+            if (documents.Count == 0)
             {
                 return;
             }
+
+            var bsonDocuments = documents
+                .Select(document => document.ToBsonDocument())
+                .ToArray();
 
             await mongoCollection
                 .InsertManyAsync

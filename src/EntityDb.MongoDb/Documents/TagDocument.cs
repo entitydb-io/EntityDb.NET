@@ -64,7 +64,7 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static IEnumerable<TagDocument> BuildMany<TEntity>
+        public static IReadOnlyCollection<TagDocument> BuildMany<TEntity>
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
@@ -81,14 +81,15 @@ namespace EntityDb.MongoDb.Documents
                     insertTag.Label,
                     insertTag.Value,
                     BsonDocumentEnvelope.Deconstruct(insertTag, logger)
-                ));
+                ))
+                .ToArray();
         }
 
         public static async Task InsertMany
         (
             IClientSessionHandle clientSessionHandle,
             IMongoDatabase mongoDatabase,
-            IEnumerable<TagDocument> tagDocuments
+            IReadOnlyCollection<TagDocument> tagDocuments
         )
         {
             await InsertMany
@@ -167,11 +168,6 @@ namespace EntityDb.MongoDb.Documents
             IReadOnlyCollection<ITag> deleteTags
         )
         {
-            if (deleteTags.Count == 0)
-            {
-                return;
-            }
-
             var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
 
             await DeleteMany
