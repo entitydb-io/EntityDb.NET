@@ -1,10 +1,12 @@
-﻿using EntityDb.Abstractions.Loggers;
+﻿using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -104,58 +106,64 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static TransactionIdQuery<FactDocument> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             IFactQuery factQuery
         )
         {
-            return new TransactionIdQuery<FactDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = factQuery.GetFilter(_factFilterBuilder),
-                Sort = factQuery.GetSort(_factSortBuilder),
-                DistinctSkip = factQuery.Skip,
-                DistinctLimit = factQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<FactDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = factQuery.GetFilter(_factFilterBuilder),
+                    Sort = factQuery.GetSort(_factSortBuilder),
+                    DistinctSkip = factQuery.Skip,
+                    DistinctLimit = factQuery.Take
+                }
+            );
         }
 
-        public static EntityIdQuery<FactDocument> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             IFactQuery factQuery
         )
         {
-            return new EntityIdQuery<FactDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = factQuery.GetFilter(_factFilterBuilder),
-                Sort = factQuery.GetSort(_factSortBuilder),
-                DistinctSkip = factQuery.Skip,
-                DistinctLimit = factQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new EntityIdQuery<FactDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = factQuery.GetFilter(_factFilterBuilder),
+                    Sort = factQuery.GetSort(_factSortBuilder),
+                    DistinctSkip = factQuery.Skip,
+                    DistinctLimit = factQuery.Take
+                }
+            );
         }
 
-        public static DataQuery<FactDocument> GetData
+        public static Task<IFact<TEntity>[]> GetData<TEntity>
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             IFactQuery factQuery
         )
         {
-            return new DataQuery<FactDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = factQuery.GetFilter(_factFilterBuilder),
-                Sort = factQuery.GetSort(_factSortBuilder),
-                Skip = factQuery.Skip,
-                Limit = factQuery.Take
-            };
+            return mongoDbSession.ExecuteDataQuery<FactDocument, IFact<TEntity>>
+            (
+                (clientSessionHandle, mongoDatabase) => new DataQuery<FactDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = factQuery.GetFilter(_factFilterBuilder),
+                    Sort = factQuery.GetSort(_factSortBuilder),
+                    Skip = factQuery.Skip,
+                    Limit = factQuery.Take
+                }
+            );
         }
     }
 }

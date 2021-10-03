@@ -45,12 +45,12 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
-        public Task<TModel[]> ExecuteDataQuery<TDocument, TModel>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument
+        public Task<TData[]> ExecuteDataQuery<TDocument, TData>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument
         {
             return Execute
             (
-                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase).GetModels<TModel>(_logger, _resolvingStrategyChain),
-                () => Task.FromResult(Array.Empty<TModel>())
+                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase).GetModels<TData>(_logger, _resolvingStrategyChain),
+                () => Task.FromResult(Array.Empty<TData>())
             );
         }
 

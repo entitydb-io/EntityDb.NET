@@ -9,7 +9,7 @@ namespace EntityDb.MongoDb.Sessions
 {
     internal interface IMongoDbSession : IDisposable, IAsyncDisposable
     {
-        Task<TModel[]> ExecuteDataQuery<TDocument, TModel>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument;
+        Task<TData[]> ExecuteDataQuery<TDocument, TData>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument;
         Task<Guid[]> ExecuteGuidQuery<TDocument>(Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder);
         Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command);
     }

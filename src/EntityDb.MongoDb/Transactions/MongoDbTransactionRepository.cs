@@ -1,19 +1,14 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -29,122 +24,77 @@ namespace EntityDb.MongoDb.Transactions
 
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, sourceQuery)
-            );
+            return SourceDocument.GetTransactionIds(_mongoDbSession, sourceQuery);
         }
 
         public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, commandQuery)
-            );
+            return CommandDocument.GetTransactionIds(_mongoDbSession, commandQuery);
         }
 
         public Task<Guid[]> GetTransactionIds(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, factQuery)
-            );
+            return FactDocument.GetTransactionIds(_mongoDbSession, factQuery);
         }
 
         public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, leaseQuery)
-            );
+            return LeaseDocument.GetTransactionIds(_mongoDbSession, leaseQuery);
         }
 
         public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => TagDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, tagQuery)
-            );
+            return TagDocument.GetTransactionIds(_mongoDbSession, tagQuery);
         }
 
         public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetEntityIds(clientSessionHandle, mongoDatabase, sourceQuery)
-            );
+            return SourceDocument.GetEntityIds(_mongoDbSession, sourceQuery);
         }
 
         public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetEntityIds(clientSessionHandle, mongoDatabase, commandQuery)
-            );
+            return CommandDocument.GetEntityIds(_mongoDbSession, commandQuery);
         }
 
         public Task<Guid[]> GetEntityIds(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetEntityIds(clientSessionHandle, mongoDatabase, factQuery)
-            );
+            return FactDocument.GetEntityIds(_mongoDbSession, factQuery);
         }
 
         public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery)
-            );
+            return LeaseDocument.GetEntityIds(_mongoDbSession, leaseQuery);
         }
 
         public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => TagDocument.GetEntityIds(clientSessionHandle, mongoDatabase, tagQuery)
-            );
+            return TagDocument.GetEntityIds(_mongoDbSession, tagQuery);
         }
 
         public Task<object[]> GetSources(ISourceQuery sourceQuery)
         {
-            return _mongoDbSession.ExecuteDataQuery<SourceDocument, object>
-            (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetData(clientSessionHandle, mongoDatabase, sourceQuery)
-            );
+            return SourceDocument.GetData(_mongoDbSession, sourceQuery);
         }
 
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
-            return _mongoDbSession.ExecuteDataQuery<CommandDocument, ICommand<TEntity>>
-            (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetData(clientSessionHandle, mongoDatabase, commandQuery)
-            );
+            return CommandDocument.GetData<TEntity>(_mongoDbSession, commandQuery);
         }
 
         public Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery)
         {
-            return _mongoDbSession.ExecuteDataQuery<FactDocument, IFact<TEntity>>
-            (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetData(clientSessionHandle, mongoDatabase, factQuery)
-            );
+            return FactDocument.GetData<TEntity>(_mongoDbSession, factQuery);
         }
 
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
-            return _mongoDbSession.ExecuteDataQuery<LeaseDocument, ILease>
-            (
-                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetData(clientSessionHandle, mongoDatabase, leaseQuery)
-            );
+            return LeaseDocument.GetData(_mongoDbSession, leaseQuery);
         }
 
         public Task<ITag[]> GetTags(ITagQuery tagQuery)
         {
-            return _mongoDbSession.ExecuteDataQuery<TagDocument, ITag>
-            (
-                (clientSessionHandle, mongoDatabase) => TagDocument.GetData(clientSessionHandle, mongoDatabase, tagQuery)
-            );
+            return TagDocument.GetData(_mongoDbSession, tagQuery);
         }
 
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)

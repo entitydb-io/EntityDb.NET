@@ -7,6 +7,7 @@ using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -98,58 +99,64 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static TransactionIdQuery<TagDocument> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ITagQuery tagQuery
         )
         {
-            return new TransactionIdQuery<TagDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                Sort = tagQuery.GetSort(_tagSortBuilder),
-                DistinctSkip = tagQuery.Skip,
-                DistinctLimit = tagQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<TagDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
+                    Sort = tagQuery.GetSort(_tagSortBuilder),
+                    DistinctSkip = tagQuery.Skip,
+                    DistinctLimit = tagQuery.Take
+                }
+            );
         }
 
-        public static EntityIdQuery<TagDocument> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ITagQuery tagQuery
         )
         {
-            return new EntityIdQuery<TagDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                Sort = tagQuery.GetSort(_tagSortBuilder),
-                DistinctSkip = tagQuery.Skip,
-                DistinctLimit = tagQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new EntityIdQuery<TagDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
+                    Sort = tagQuery.GetSort(_tagSortBuilder),
+                    DistinctSkip = tagQuery.Skip,
+                    DistinctLimit = tagQuery.Take
+                }
+            );
         }
 
-        public static DataQuery<TagDocument> GetData
+        public static Task<ITag[]> GetData
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ITagQuery tagQuery
         )
         {
-            return new DataQuery<TagDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                Sort = tagQuery.GetSort(_tagSortBuilder),
-                Skip = tagQuery.Skip,
-                Limit = tagQuery.Take
-            };
+            return mongoDbSession.ExecuteDataQuery<TagDocument, ITag>
+            (
+                (clientSessionHandle, mongoDatabase) => new DataQuery<TagDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
+                    Sort = tagQuery.GetSort(_tagSortBuilder),
+                    Skip = tagQuery.Skip,
+                    Limit = tagQuery.Take
+                }
+            );
         }
 
         public static async Task DeleteMany

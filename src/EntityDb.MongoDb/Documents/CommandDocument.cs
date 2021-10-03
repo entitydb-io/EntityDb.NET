@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Loggers;
+﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
@@ -6,6 +7,7 @@ using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -100,58 +102,64 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static TransactionIdQuery<CommandDocument> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ICommandQuery commandQuery
         )
         {
-            return new TransactionIdQuery<CommandDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = commandQuery.GetFilter(_commandFilterBuilder),
-                Sort = commandQuery.GetSort(_commandSortBuilder),
-                DistinctSkip = commandQuery.Skip,
-                DistinctLimit = commandQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<CommandDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                    Sort = commandQuery.GetSort(_commandSortBuilder),
+                    DistinctSkip = commandQuery.Skip,
+                    DistinctLimit = commandQuery.Take
+                }
+            );
         }
 
-        public static EntityIdQuery<CommandDocument> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ICommandQuery commandQuery
         )
         {
-            return new EntityIdQuery<CommandDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = commandQuery.GetFilter(_commandFilterBuilder),
-                Sort = commandQuery.GetSort(_commandSortBuilder),
-                DistinctSkip = commandQuery.Skip,
-                DistinctLimit = commandQuery.Take
-            };
+            return mongoDbSession.ExecuteGuidQuery
+            (
+                (clientSessionHandle, mongoDatabase) => new EntityIdQuery<CommandDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                    Sort = commandQuery.GetSort(_commandSortBuilder),
+                    DistinctSkip = commandQuery.Skip,
+                    DistinctLimit = commandQuery.Take
+                }
+            );
         }
     
-        public static DataQuery<CommandDocument> GetData
+        public static Task<ICommand<TEntity>[]> GetData<TEntity>
         (
-            IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase,
+            IMongoDbSession mongoDbSession,
             ICommandQuery commandQuery
         )
         {
-            return new DataQuery<CommandDocument>
-            {
-                ClientSessionHandle = clientSessionHandle,
-                MongoCollection = GetCollection(mongoDatabase),
-                Filter = commandQuery.GetFilter(_commandFilterBuilder),
-                Sort = commandQuery.GetSort(_commandSortBuilder),
-                Skip = commandQuery.Skip,
-                Limit = commandQuery.Take
-            };
+            return mongoDbSession.ExecuteDataQuery<CommandDocument, ICommand<TEntity>>
+            (
+                (clientSessionHandle, mongoDatabase) => new DataQuery<CommandDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetCollection(mongoDatabase),
+                    Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                    Sort = commandQuery.GetSort(_commandSortBuilder),
+                    Skip = commandQuery.Skip,
+                    Limit = commandQuery.Take
+                }
+            );
         }
 
         public static async Task<ulong> GetLastEntityVersionNumber
