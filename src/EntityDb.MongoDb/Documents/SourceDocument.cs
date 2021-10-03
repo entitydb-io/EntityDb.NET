@@ -14,21 +14,10 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record SourceDocument
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        Guid[] EntityIds,
-        BsonDocumentEnvelope Data,
-        ObjectId? _id = null
-    ) : DocumentBase
-    (
-        TransactionTimeStamp,
-        TransactionId,
-        Data,
-        _id
-    ), IEntitiesDocument
+    internal sealed record SourceDocument : DocumentBase, IEntitiesDocument
     {
+        public Guid[] EntityIds { get; init; } = default!;
+
         private static readonly SourceFilterBuilder _sourceFilterBuilder = new();
         private static readonly SourceSortBuilder _sourceSortBuilder = new();
 
@@ -68,12 +57,12 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new SourceDocument
-            (
-                transaction.TimeStamp,
-                transaction.Id,
-                transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
-                BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
-            );
+            {
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityIds = transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
+                Data = BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
+            };
         }
 
         public static Task InsertOne

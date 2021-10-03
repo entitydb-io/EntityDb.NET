@@ -437,27 +437,27 @@ namespace EntityDb.Common.Tests.Transactions
             // ARRANGE
 
             var transaction = new Transaction<TransactionEntity>
-            (
-                Guid.NewGuid(),
-                DateTime.UtcNow,
-                new NoSource(),
-                new[]
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
                 {
-                        new TransactionCommand<TransactionEntity>
-                        (
-                            default,
-                            default!,
-                            Guid.NewGuid(),
-                            0,
-                            new DoNothing(),
-                            ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                            ImmutableArray<ILease>.Empty, 
-                            ImmutableArray<ILease>.Empty,
-                            ImmutableArray<ITag>.Empty,
-                            ImmutableArray<ITag>.Empty
-                        ),
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            );
+                    new TransactionCommand<TransactionEntity>
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = Guid.NewGuid(),
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+            };
 
             await using var transactionRepository = await CreateRepository(readOnly: true);
 
@@ -476,27 +476,27 @@ namespace EntityDb.Common.Tests.Transactions
             static ITransaction<TransactionEntity> NewTransaction(Guid transactionId)
             {
                 return new Transaction<TransactionEntity>
-                (
-                    transactionId,
-                    DateTime.UtcNow,
-                    new NoSource(),
-                    new[]
+                {
+                    Id = transactionId,
+                    TimeStamp = DateTime.UtcNow,
+                    Source = new NoSource(),
+                    Commands = new[]
                     {
                         new TransactionCommand<TransactionEntity>
-                        (
-                            default,
-                            default!,
-                            Guid.NewGuid(),
-                            0,
-                            new DoNothing(),
-                            ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                            ImmutableArray<ILease>.Empty, 
-                            ImmutableArray<ILease>.Empty,
-                            ImmutableArray<ITag>.Empty,
-                            ImmutableArray<ITag>.Empty
-                        ),
-                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-                );
+                        {
+                            PreviousSnapshot = default,
+                            NextSnapshot = default!,
+                            EntityId = Guid.NewGuid(),
+                            ExpectedPreviousVersionNumber = 0,
+                            Command = new DoNothing(),
+                            Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                            DeleteLeases = ImmutableArray<ILease>.Empty,
+                            InsertLeases = ImmutableArray<ILease>.Empty,
+                            DeleteTags = ImmutableArray<ITag>.Empty,
+                            InsertTags = ImmutableArray<ITag>.Empty,
+                        },
+                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+                };
             }
 
             await using var transactionRepository = await CreateRepository();
@@ -521,40 +521,40 @@ namespace EntityDb.Common.Tests.Transactions
             ulong previousVersionNumber = 0;
 
             var transaction = new Transaction<TransactionEntity>
-            (
-                Guid.NewGuid(),
-                DateTime.UtcNow,
-                new NoSource(),
-                new[]
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
                 {
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        entityId,
-                        previousVersionNumber,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ILease>.Empty,
-                        ImmutableArray<ITag>.Empty,
-                        ImmutableArray<ITag>.Empty
-                    ),
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = entityId,
+                        ExpectedPreviousVersionNumber = previousVersionNumber,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        entityId,
-                        previousVersionNumber,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ILease>.Empty,
-                        ImmutableArray<ITag>.Empty,
-                        ImmutableArray<ITag>.Empty
-                    ),
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            );
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = entityId,
+                        ExpectedPreviousVersionNumber = previousVersionNumber,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+            };
 
             await using var transactionRepository = await CreateRepository();
 
@@ -579,27 +579,27 @@ namespace EntityDb.Common.Tests.Transactions
             static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong previousVersionNumber)
             {
                 return new Transaction<TransactionEntity>
-                (
-                    Guid.NewGuid(),
-                    DateTime.UtcNow,
-                    new NoSource(),
-                    new[]
+                {
+                    Id = Guid.NewGuid(),
+                    TimeStamp = DateTime.UtcNow,
+                    Source = new NoSource(),
+                    Commands = new[]
                     {
                         new TransactionCommand<TransactionEntity>
-                        (
-                            default,
-                            default!,
-                            entityId,
-                            previousVersionNumber,
-                            new DoNothing(),
-                            ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                            ImmutableArray<ILease>.Empty, 
-                            ImmutableArray<ILease>.Empty,
-                            ImmutableArray<ITag>.Empty,
-                            ImmutableArray<ITag>.Empty
-                        ),
-                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-                );
+                        {
+                            PreviousSnapshot = default,
+                            NextSnapshot = default!,
+                            EntityId = entityId,
+                            ExpectedPreviousVersionNumber = previousVersionNumber,
+                            Command = new DoNothing(),
+                            Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                            DeleteLeases = ImmutableArray<ILease>.Empty,
+                            InsertLeases = ImmutableArray<ILease>.Empty,
+                            DeleteTags = ImmutableArray<ITag>.Empty,
+                            InsertTags = ImmutableArray<ITag>.Empty,
+                        },
+                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+                };
             }
 
             var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
@@ -632,39 +632,39 @@ namespace EntityDb.Common.Tests.Transactions
             ulong subversionNumber = 0;
 
             var transaction = new Transaction<TransactionEntity>
-            (
-                Guid.NewGuid(),
-                DateTime.UtcNow,
-                new NoSource(),
-                new[]
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
                 {
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        entityId,
-                        0,
-                        new DoNothing(),
-                        new[]
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = entityId,
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = new[]
                         {
                             new TransactionFact<TransactionEntity>
-                            (
-                                subversionNumber,
-                                new NothingDone()
-                            ),
+                            {
+                                SubversionNumber = subversionNumber,
+                                Fact = new NothingDone(),
+                            },
                             new TransactionFact<TransactionEntity>
-                            (
-                                subversionNumber,
-                                new NothingDone()
-                            )
+                            {
+                                SubversionNumber = subversionNumber,
+                                Fact = new NothingDone(),
+                            },
                         }.ToImmutableArray<ITransactionFact<TransactionEntity>>(),
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ILease>.Empty,
-                        ImmutableArray<ITag>.Empty,
-                        ImmutableArray<ITag>.Empty
-                    )
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            );
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+            };
 
             await using var transactionRepository = await CreateRepository();
 
@@ -685,46 +685,46 @@ namespace EntityDb.Common.Tests.Transactions
             var tag = new Tag("Foo", "Bar");
 
             var transaction = new Transaction<TransactionEntity>
-            (
-                Guid.NewGuid(),
-                DateTime.UtcNow,
-                new NoSource(),
-                new[]
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
                 {
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        Guid.NewGuid(),
-                        0,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty, 
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ITag>.Empty,
-                        new[]
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = Guid.NewGuid(),
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = new[]
                         {
                             tag,
-                        }.ToImmutableArray<ITag>()
-                    ),
+                        }.ToImmutableArray<ITag>(),
+                    },
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        Guid.NewGuid(),
-                        0,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty, 
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ILease>.Empty, 
-                        ImmutableArray<ITag>.Empty,
-                        new[]
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = Guid.NewGuid(),
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = ImmutableArray<ILease>.Empty,
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = new[]
                         {
                             tag,
-                        }.ToImmutableArray<ITag>()
-                    ),
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            );
+                        }.ToImmutableArray<ITag>(),
+                    },
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+            };
             
             await using var transactionRepository = await CreateRepository();
 
@@ -745,46 +745,46 @@ namespace EntityDb.Common.Tests.Transactions
             var lease = new Lease("Foo", "Bar", "Baz");
 
             var transaction = new Transaction<TransactionEntity>
-            (
-                Guid.NewGuid(),
-                DateTime.UtcNow,
-                new NoSource(),
-                new[]
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
                 {
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        Guid.NewGuid(),
-                        0,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        ImmutableArray<ILease>.Empty,
-                        new[]
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = Guid.NewGuid(),
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = new[]
                         {
                             lease,
                         }.ToImmutableArray<ILease>(),
-                        ImmutableArray<ITag>.Empty,
-                        ImmutableArray<ITag>.Empty
-                    ),
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
                     new TransactionCommand<TransactionEntity>
-                    (
-                        default,
-                        default!,
-                        Guid.NewGuid(),
-                        0,
-                        new DoNothing(),
-                        ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
-                        ImmutableArray<ILease>.Empty,
-                        new[]
+                    {
+                        PreviousSnapshot = default,
+                        NextSnapshot = default!,
+                        EntityId = Guid.NewGuid(),
+                        ExpectedPreviousVersionNumber = 0,
+                        Command = new DoNothing(),
+                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
+                        DeleteLeases = ImmutableArray<ILease>.Empty,
+                        InsertLeases = new[]
                         {
                             lease,
                         }.ToImmutableArray<ILease>(),
-                        ImmutableArray<ITag>.Empty,
-                        ImmutableArray<ITag>.Empty
-                    ),
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            );
+                        DeleteTags = ImmutableArray<ITag>.Empty,
+                        InsertTags = ImmutableArray<ITag>.Empty,
+                    },
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>(),
+            };
 
             await using var transactionRepository = await CreateRepository();
 

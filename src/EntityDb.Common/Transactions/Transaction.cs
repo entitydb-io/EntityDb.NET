@@ -4,7 +4,11 @@ using System.Collections.Immutable;
 
 namespace EntityDb.Common.Transactions
 {
-    internal sealed record Transaction<TEntity>(Guid Id, DateTime TimeStamp, object Source, ImmutableArray<ITransactionCommand<TEntity>> Commands) : ITransaction<TEntity>
+    internal sealed record Transaction<TEntity> : ITransaction<TEntity>
     {
+        public Guid Id { get; init; }
+        public DateTime TimeStamp { get; init; }
+        public object Source { get; init; } = default!;
+        public ImmutableArray<ITransactionCommand<TEntity>> Commands { get; init; }
     }
 }

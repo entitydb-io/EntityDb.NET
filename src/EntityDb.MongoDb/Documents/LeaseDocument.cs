@@ -17,25 +17,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record LeaseDocument
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        Guid EntityId,
-        ulong EntityVersionNumber,
-        string Scope,
-        string Label,
-        string Value,
-        BsonDocumentEnvelope Data,
-        ObjectId? _id = null
-    ) : DocumentBase
-    (
-        TransactionTimeStamp,
-        TransactionId,
-        Data,
-        _id
-    ), IEntityDocument
+    internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     {
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+        public string Scope { get; init; } = default!;
+        public string Label { get; init; } = default!;
+        public string Value { get; init; } = default!;
+
         private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
         private static readonly LeaseSortBuilder _leaseSortBuilder = new();
 
@@ -86,16 +75,16 @@ namespace EntityDb.MongoDb.Documents
         {
             return transactionCommand.InsertLeases
                 .Select(insertLease => new LeaseDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    insertLease.Scope,
-                    insertLease.Label,
-                    insertLease.Value,
-                    BsonDocumentEnvelope.Deconstruct(insertLease, logger)
-                ))
+                {
+                    TransactionTimeStamp = transaction.TimeStamp,
+                    TransactionId = transaction.Id,
+                    EntityId = transactionCommand.EntityId,
+                    EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    Scope = insertLease.Scope,
+                    Label = insertLease.Label,
+                    Value = insertLease.Value,
+                    Data = BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+                })
                 .ToArray();
         }
 

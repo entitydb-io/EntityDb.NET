@@ -17,24 +17,13 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record TagDocument
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        Guid EntityId,
-        ulong EntityVersionNumber,
-        string Label,
-        string Value,
-        BsonDocumentEnvelope Data,
-        ObjectId? _id = null
-    ) : DocumentBase
-    (
-        TransactionTimeStamp,
-        TransactionId,
-        Data,
-        _id
-    ), IEntityDocument
+    internal sealed record TagDocument : DocumentBase, IEntityDocument
     {
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+        public string Label { get; init; } = default!;
+        public string Value { get; init; } = default!;
+
         private static readonly TagFilterBuilder _tagFilterBuilder = new();
         private static readonly TagSortBuilder _tagSortBuilder = new();
 
@@ -68,15 +57,15 @@ namespace EntityDb.MongoDb.Documents
         {
             return transactionCommand.InsertTags
                 .Select(insertTag => new TagDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    insertTag.Label,
-                    insertTag.Value,
-                    BsonDocumentEnvelope.Deconstruct(insertTag, logger)
-                ))
+                {
+                    TransactionTimeStamp = transaction.TimeStamp,
+                    TransactionId = transaction.Id,
+                    EntityId = transactionCommand.EntityId,
+                    EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    Label = insertTag.Label,
+                    Value = insertTag.Value,
+                    Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)
+                })
                 .ToArray();
         }
 
