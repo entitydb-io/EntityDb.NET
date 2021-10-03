@@ -16,22 +16,11 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record CommandDocument
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        Guid EntityId,
-        ulong EntityVersionNumber,
-        BsonDocumentEnvelope Data,
-        ObjectId? _id = null
-    ) : DocumentBase
-    (
-        TransactionTimeStamp,
-        TransactionId,
-        Data,
-        _id
-    ), IEntityDocument
+    internal sealed record CommandDocument : DocumentBase, IEntityDocument
     {
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+
         private static readonly CommandFilterBuilder _commandFilterBuilder = new();
         private static readonly CommandSortBuilder _commandSortBuilder = new();
 
@@ -73,13 +62,13 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new CommandDocument
-            (
-                transaction.TimeStamp,
-                transaction.Id,
-                transactionCommand.EntityId,
-                transactionCommand.ExpectedPreviousVersionNumber + 1,
-                BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
-            );
+            {
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = transactionCommand.EntityId,
+                EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
+                Data = BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger),
+            };
         }
 
         public static Task InsertOne

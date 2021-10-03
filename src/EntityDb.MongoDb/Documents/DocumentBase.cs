@@ -11,15 +11,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal abstract record DocumentBase
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        BsonDocumentEnvelope Data,
-        [property: BsonIgnoreIfNull]
-        ObjectId? _id
-    ) : ITransactionDocument
+    internal abstract record DocumentBase : ITransactionDocument
     {
+        [BsonIgnoreIfNull]
+        public ObjectId? _id { get; init; }
+        public DateTime TransactionTimeStamp { get; init; }
+        public Guid TransactionId { get; init; }
+        public BsonDocumentEnvelope Data { get; init; } = default!;
+
         protected static readonly IndexKeysDefinitionBuilder<BsonDocument> IndexKeys = Builders<BsonDocument>.IndexKeys;
 
         static DocumentBase()

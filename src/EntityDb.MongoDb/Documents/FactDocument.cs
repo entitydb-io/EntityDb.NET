@@ -16,23 +16,12 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal sealed record FactDocument
-    (
-        DateTime TransactionTimeStamp,
-        Guid TransactionId,
-        Guid EntityId,
-        ulong EntityVersionNumber,
-        ulong EntitySubversionNumber,
-        BsonDocumentEnvelope Data,
-        ObjectId? _id = null
-    ) : DocumentBase
-    (
-        TransactionTimeStamp,
-        TransactionId,
-        Data,
-        _id
-    ), IEntityDocument
+    internal sealed record FactDocument : DocumentBase, IEntityDocument
     {
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+        public ulong EntitySubversionNumber { get; init; }
+
         private static readonly FactFilterBuilder _factFilterBuilder = new();
         private static readonly FactSortBuilder _factSortBuilder = new();
 
@@ -76,14 +65,14 @@ namespace EntityDb.MongoDb.Documents
         {
             return transactionCommand.Facts
                 .Select(transactionFact => new FactDocument
-                (
-                    transaction.TimeStamp,
-                    transaction.Id,
-                    transactionCommand.EntityId,
-                    transactionCommand.ExpectedPreviousVersionNumber + 1,
-                    transactionFact.SubversionNumber,
-                    BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
-                ))
+                {
+                    TransactionTimeStamp = transaction.TimeStamp,
+                    TransactionId = transaction.Id,
+                    EntityId = transactionCommand.EntityId,
+                    EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    EntitySubversionNumber = transactionFact.SubversionNumber,
+                    Data = BsonDocumentEnvelope.Deconstruct(transactionFact.Fact, logger)
+                })
                 .ToArray();
         }
 
