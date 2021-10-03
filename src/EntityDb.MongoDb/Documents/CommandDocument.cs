@@ -7,7 +7,6 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -82,7 +81,7 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static GuidQuery<CommandDocument> GetTransactionIdsQuery
+        public static TransactionIdQuery<CommandDocument> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -90,17 +89,17 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new TransactionIdQuery<CommandDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                commandQuery.GetFilter(_commandFilterBuilder),
-                commandQuery.GetSort(_commandSortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                Sort = commandQuery.GetSort(_commandSortBuilder),
+                DistinctSkip = commandQuery.Skip,
+                DistinctLimit = commandQuery.Take
+            };
         }
 
-        public static GuidQuery<CommandDocument> GetEntityIdsQuery
+        public static EntityIdQuery<CommandDocument> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -108,17 +107,17 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new EntityIdQuery<CommandDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                commandQuery.GetFilter(_commandFilterBuilder),
-                commandQuery.GetSort(_commandSortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                Sort = commandQuery.GetSort(_commandSortBuilder),
+                DistinctSkip = commandQuery.Skip,
+                DistinctLimit = commandQuery.Take
+            };
         }
-
-        public static DataQuery<CommandDocument> GetDataQuery
+    
+        public static DataQuery<CommandDocument> GetData
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -126,14 +125,14 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new DataQuery<CommandDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                commandQuery.GetFilter(_commandFilterBuilder),
-                commandQuery.GetSort(_commandSortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                Sort = commandQuery.GetSort(_commandSortBuilder),
+                Skip = commandQuery.Skip,
+                Limit = commandQuery.Take
+            };
         }
 
         public static async Task<ulong> GetLastEntityVersionNumber
@@ -146,14 +145,14 @@ namespace EntityDb.MongoDb.Documents
             var commandQuery = new GetLastEntityVersionQuery(entityId);
 
             var query = new EntityVersionQuery<CommandDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                commandQuery.GetFilter(_commandFilterBuilder),
-                commandQuery.GetSort(_commandSortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                Sort = commandQuery.GetSort(_commandSortBuilder),
+                Skip = commandQuery.Skip,
+                Limit = commandQuery.Take
+            };
 
             var commandDocuments = await query.GetDocuments();
 

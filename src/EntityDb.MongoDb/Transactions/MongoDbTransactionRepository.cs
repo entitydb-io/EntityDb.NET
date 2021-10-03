@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, sourceQuery)
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
@@ -39,7 +39,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, commandQuery)
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
@@ -47,7 +47,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetTransactionIdsQuery(clientSessionHandle, mongoDatabase, factQuery)
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetTransactionIds(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
@@ -71,7 +71,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, sourceQuery)
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetEntityIds(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
@@ -79,7 +79,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, commandQuery)
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetEntityIds(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
@@ -87,7 +87,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, factQuery)
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetEntityIds(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
@@ -95,7 +95,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, leaseQuery)
+                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetEntityIds(clientSessionHandle, mongoDatabase, leaseQuery)
             );
         }
 
@@ -103,7 +103,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteGuidQuery
             (
-                (clientSessionHandle, mongoDatabase) => TagDocument.GetEntityIdsQuery(clientSessionHandle, mongoDatabase, tagQuery)
+                (clientSessionHandle, mongoDatabase) => TagDocument.GetEntityIds(clientSessionHandle, mongoDatabase, tagQuery)
             );
         }
 
@@ -111,7 +111,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteDataQuery<SourceDocument, object>
             (
-                (clientSessionHandle, mongoDatabase) => SourceDocument.GetDataQuery(clientSessionHandle, mongoDatabase, sourceQuery)
+                (clientSessionHandle, mongoDatabase) => SourceDocument.GetData(clientSessionHandle, mongoDatabase, sourceQuery)
             );
         }
 
@@ -119,7 +119,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteDataQuery<CommandDocument, ICommand<TEntity>>
             (
-                (clientSessionHandle, mongoDatabase) => CommandDocument.GetDataQuery(clientSessionHandle, mongoDatabase, commandQuery)
+                (clientSessionHandle, mongoDatabase) => CommandDocument.GetData(clientSessionHandle, mongoDatabase, commandQuery)
             );
         }
 
@@ -127,7 +127,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteDataQuery<FactDocument, IFact<TEntity>>
             (
-                (clientSessionHandle, mongoDatabase) => FactDocument.GetDataQuery(clientSessionHandle, mongoDatabase, factQuery)
+                (clientSessionHandle, mongoDatabase) => FactDocument.GetData(clientSessionHandle, mongoDatabase, factQuery)
             );
         }
 
@@ -135,7 +135,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteDataQuery<LeaseDocument, ILease>
             (
-                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetDataQuery(clientSessionHandle, mongoDatabase, leaseQuery)
+                (clientSessionHandle, mongoDatabase) => LeaseDocument.GetData(clientSessionHandle, mongoDatabase, leaseQuery)
             );
         }
 
@@ -143,7 +143,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             return _mongoDbSession.ExecuteDataQuery<TagDocument, ITag>
             (
-                (clientSessionHandle, mongoDatabase) => TagDocument.GetDataQuery(clientSessionHandle, mongoDatabase, tagQuery)
+                (clientSessionHandle, mongoDatabase) => TagDocument.GetData(clientSessionHandle, mongoDatabase, tagQuery)
             );
         }
 

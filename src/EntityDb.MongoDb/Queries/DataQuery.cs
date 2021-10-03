@@ -8,28 +8,10 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Queries
 {
-    internal record DataQuery<TDocument>
-    (
-        IClientSessionHandle? ClientSessionHandle,
-        IMongoCollection<BsonDocument> MongoCollection,
-        FilterDefinition<BsonDocument> Filter,
-        SortDefinition<BsonDocument>? Sort,
-        int? Skip,
-        int? Limit
-    )
-        : DocumentQuery<TDocument>
-    (
-        ClientSessionHandle,
-        MongoCollection,
-        Filter,
-        _projection,
-        Sort,
-        Skip,
-        Limit
-    )
+    internal record DataQuery<TDocument> : DocumentQuery<TDocument>
         where TDocument : ITransactionDocument
     {
-        private static readonly ProjectionDefinition<BsonDocument, TDocument> _projection = _projectionBuilder.Combine
+        public override ProjectionDefinition<BsonDocument, TDocument> Projection { get; init; } = _projectionBuilder.Combine
         (
             _projectionBuilder.Exclude(nameof(ITransactionDocument._id)),
             _projectionBuilder.Include(nameof(ITransactionDocument.Data))

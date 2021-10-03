@@ -6,7 +6,6 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -78,7 +77,7 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static GuidQuery<SourceDocument> GetTransactionIdsQuery
+        public static TransactionIdQuery<SourceDocument> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -86,17 +85,17 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new TransactionIdQuery<SourceDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                sourceQuery.GetFilter(_sourceFilterBuilder),
-                sourceQuery.GetSort(_sourceSortBuilder),
-                sourceQuery.Skip,
-                sourceQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
+                Sort = sourceQuery.GetSort(_sourceSortBuilder),
+                DistinctSkip = sourceQuery.Skip,
+                DistinctLimit = sourceQuery.Take
+            };
         }
 
-        public static GuidQuery<SourceDocument> GetEntityIdsQuery
+        public static EntityIdsQuery<SourceDocument> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -104,17 +103,17 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new EntityIdsQuery<SourceDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                sourceQuery.GetFilter(_sourceFilterBuilder),
-                sourceQuery.GetSort(_sourceSortBuilder),
-                sourceQuery.Skip,
-                sourceQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
+                Sort = sourceQuery.GetSort(_sourceSortBuilder),
+                DistinctSkip = sourceQuery.Skip,
+                DistinctLimit = sourceQuery.Take
+            };
         }
 
-        public static DataQuery<SourceDocument> GetDataQuery
+        public static DataQuery<SourceDocument> GetData
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
@@ -122,14 +121,14 @@ namespace EntityDb.MongoDb.Documents
         )
         {
             return new DataQuery<SourceDocument>
-            (
-                clientSessionHandle,
-                GetCollection(mongoDatabase),
-                sourceQuery.GetFilter(_sourceFilterBuilder),
-                sourceQuery.GetSort(_sourceSortBuilder),
-                sourceQuery.Skip,
-                sourceQuery.Take
-            );
+            {
+                ClientSessionHandle = clientSessionHandle,
+                MongoCollection = GetCollection(mongoDatabase),
+                Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
+                Sort = sourceQuery.GetSort(_sourceSortBuilder),
+                Skip = sourceQuery.Skip,
+                Limit = sourceQuery.Take
+            };
         }
     }
 }

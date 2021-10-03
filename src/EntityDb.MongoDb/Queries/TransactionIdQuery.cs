@@ -7,28 +7,10 @@ using System.Linq;
 
 namespace EntityDb.MongoDb.Queries
 {
-    internal record TransactionIdQuery<TDocument>
-    (
-        IClientSessionHandle? ClientSessionHandle,
-        IMongoCollection<BsonDocument> MongoCollection,
-        FilterDefinition<BsonDocument> Filter,
-        SortDefinition<BsonDocument>? Sort,
-        int? Skip,
-        int? Limit
-    )
-        : GuidQuery<TDocument>
-    (
-        ClientSessionHandle,
-        MongoCollection,
-        Filter,
-        _projection,
-        Sort,
-        Skip,
-        Limit
-    )
+    internal record TransactionIdQuery<TDocument> : GuidQuery<TDocument>
         where TDocument : ITransactionDocument
     {
-        protected static readonly ProjectionDefinition<BsonDocument> _projection = _projectionBuilder.Combine
+        public override ProjectionDefinition<BsonDocument, TDocument> Projection { get; init; } = _projectionBuilder.Combine
         (
             _projectionBuilder.Exclude(nameof(ITransactionDocument._id)),
             _projectionBuilder.Include(nameof(ITransactionDocument.TransactionId))
