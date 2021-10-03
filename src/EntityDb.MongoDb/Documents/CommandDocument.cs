@@ -20,22 +20,18 @@ namespace EntityDb.MongoDb.Documents
         ulong EntityVersionNumber,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : DocumentBase
+    ) : EntityDocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
+        EntityId,
+        EntityVersionNumber,
         Data,
         _id
     )
     {
         private static readonly CommandFilterBuilder _commandFilterBuilder = new();
         private static readonly CommandSortBuilder _commandSortBuilder = new();
-
-        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
-        (
-            Projection.Exclude(nameof(_id)),
-            Projection.Include(nameof(EntityId))
-        );
 
         private static readonly ProjectionDefinition<BsonDocument> _entityVersionNumberProjection = Projection.Combine
         (
@@ -93,70 +89,40 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task<Guid[]> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var commandDocuments = await GetMany<CommandDocument>
+            return GetTransactionIds<CommandDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
-                TransactionIdProjection
+                commandQuery.Skip,
+                commandQuery.Take
             );
-
-            var transactionIds = commandDocuments
-                .Select(commandDocument => commandDocument.TransactionId)
-                .Distinct();
-
-            if (commandQuery.Skip.HasValue)
-            {
-                transactionIds = transactionIds.Skip(commandQuery.Skip.Value);
-            }
-
-            if (commandQuery.Take.HasValue)
-            {
-                transactionIds = transactionIds.Take(commandQuery.Take.Value);
-            }
-
-            return transactionIds.ToArray();
         }
 
-        public static async Task<Guid[]> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ICommandQuery commandQuery
         )
         {
-            var commandDocuments = await GetMany<CommandDocument>
+            return GetEntityIds<CommandDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 commandQuery.GetFilter(_commandFilterBuilder),
                 commandQuery.GetSort(_commandSortBuilder),
-                _entityIdProjection
+                commandQuery.Skip,
+                commandQuery.Take
             );
-
-            var entityIds = commandDocuments
-                .Select(commandDocument => commandDocument.EntityId)
-                .Distinct();
-
-            if (commandQuery.Skip.HasValue)
-            {
-                entityIds = entityIds.Skip(commandQuery.Skip.Value);
-            }
-
-            if (commandQuery.Take.HasValue)
-            {
-                entityIds = entityIds.Take(commandQuery.Take.Value);
-            }
-
-            return entityIds.ToArray();
         }
 
         public static Task<List<CommandDocument>> GetMany

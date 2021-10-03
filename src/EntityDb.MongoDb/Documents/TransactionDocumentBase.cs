@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
-    internal abstract record DocumentBase
+    internal abstract record TransactionDocumentBase
     (
         DateTime TransactionTimeStamp,
         Guid TransactionId,
@@ -37,7 +37,7 @@ namespace EntityDb.MongoDb.Documents
             Projection.Include(nameof(Data))
         );
 
-        static DocumentBase()
+        static TransactionDocumentBase()
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
         }
@@ -104,6 +104,43 @@ namespace EntityDb.MongoDb.Documents
             }
 
             return query.ToListAsync();
+        }
+
+        protected static async Task<Guid[]> GetTransactionIds<TDocument>
+        (
+            IClientSessionHandle? clientSessionHandle,
+            IMongoCollection<BsonDocument> mongoCollection,
+            FilterDefinition<BsonDocument> filter,
+            SortDefinition<BsonDocument>? sort,
+            int? skip,
+            int? limit
+        )
+            where TDocument : TransactionDocumentBase
+        {
+            var documents = await GetMany<TDocument>
+            (
+                clientSessionHandle,
+                mongoCollection,
+                filter,
+                sort,
+                TransactionIdProjection
+            );
+
+            var transactionIds = documents
+                .Select(document => document.TransactionId)
+                .Distinct();
+
+            if (skip.HasValue)
+            {
+                transactionIds = transactionIds.Skip(skip.Value);
+            }
+
+            if (limit.HasValue)
+            {
+                transactionIds = transactionIds.Take(limit.Value);
+            }
+
+            return transactionIds.ToArray();
         }
 
         protected static Task InsertOne<TDocument>

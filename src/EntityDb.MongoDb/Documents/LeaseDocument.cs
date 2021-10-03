@@ -7,7 +7,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -23,22 +22,18 @@ namespace EntityDb.MongoDb.Documents
         string Value,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : DocumentBase
+    ) : EntityDocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
+        EntityId,
+        EntityVersionNumber,
         Data,
         _id
     )
     {
         private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
         private static readonly LeaseSortBuilder _leaseSortBuilder = new();
-
-        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
-        (
-            Projection.Exclude(nameof(_id)),
-            Projection.Include(nameof(EntityId))
-        );
 
         public const string CollectionName = "Leases";
 
@@ -90,81 +85,48 @@ namespace EntityDb.MongoDb.Documents
             IEnumerable<LeaseDocument> leaseDocuments
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-
             await InsertMany
             (
                 clientSessionHandle,
-                mongoCollection,
+                GetCollection(mongoDatabase),
                 leaseDocuments
             );
         }
 
-        public static async Task<Guid[]> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            var leaseDocuments = await GetMany<LeaseDocument>
+            return GetTransactionIds<LeaseDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
-                TransactionIdProjection
+                leaseQuery.Skip,
+                leaseQuery.Take
             );
-
-            var transactionIds = leaseDocuments
-                .Select(leaseDocument => leaseDocument.TransactionId)
-                .Distinct();
-
-            if (leaseQuery.Skip.HasValue)
-            {
-                transactionIds = transactionIds.Skip(leaseQuery.Skip.Value);
-            }
-
-            if (leaseQuery.Take.HasValue)
-            {
-                transactionIds = transactionIds.Take(leaseQuery.Take.Value);
-            }
-
-            return transactionIds.ToArray();
         }
 
-        public static async Task<Guid[]> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            var leaseDocuments = await GetMany<LeaseDocument>
+            return GetEntityIds<LeaseDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 leaseQuery.GetFilter(_leaseFilterBuilder),
                 leaseQuery.GetSort(_leaseSortBuilder),
-                _entityIdProjection
+                leaseQuery.Skip,
+                leaseQuery.Take
             );
-
-            var entityIds = leaseDocuments
-                .Select(leaseDocument => leaseDocument.EntityId)
-                .Distinct();
-
-            if (leaseQuery.Skip.HasValue)
-            {
-                entityIds = entityIds.Skip(leaseQuery.Skip.Value);
-            }
-
-            if (leaseQuery.Take.HasValue)
-            {
-                entityIds = entityIds.Take(leaseQuery.Take.Value);
-            }
-
-            return entityIds.ToArray();
         }
 
         public static Task<List<LeaseDocument>> GetMany

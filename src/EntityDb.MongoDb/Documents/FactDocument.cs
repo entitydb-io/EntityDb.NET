@@ -6,7 +6,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -20,22 +19,18 @@ namespace EntityDb.MongoDb.Documents
         ulong EntitySubversionNumber,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : DocumentBase
+    ) : EntityDocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
+        EntityId,
+        EntityVersionNumber,
         Data,
         _id
     )
     {
         private static readonly FactFilterBuilder _factFilterBuilder = new();
         private static readonly FactSortBuilder _factSortBuilder = new();
-
-        private static readonly ProjectionDefinition<BsonDocument> _entityIdProjection = Projection.Combine
-        (
-            Projection.Exclude(nameof(_id)),
-            Projection.Include(nameof(EntityId))
-        );
 
         public const string CollectionName = "Facts";
 
@@ -88,70 +83,40 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task<Guid[]> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var factDocuments = await GetMany<FactDocument>
+            return GetTransactionIds<FactDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
-                TransactionIdProjection
+                factQuery.Skip,
+                factQuery.Take
             );
-
-            var transactionIds = factDocuments
-                .Select(factDocument => factDocument.TransactionId)
-                .Distinct();
-
-            if (factQuery.Skip.HasValue)
-            {
-                transactionIds = transactionIds.Skip(factQuery.Skip.Value);
-            }
-
-            if (factQuery.Take.HasValue)
-            {
-                transactionIds = transactionIds.Take(factQuery.Take.Value);
-            }
-
-            return transactionIds.ToArray();
         }
 
-        public static async Task<Guid[]> GetEntityIds
+        public static Task<Guid[]> GetEntityIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             IFactQuery factQuery
         )
         {
-            var factDocuments = await GetMany<FactDocument>
+            return GetEntityIds<FactDocument>
             (
                 clientSessionHandle,
                 GetCollection(mongoDatabase),
                 factQuery.GetFilter(_factFilterBuilder),
                 factQuery.GetSort(_factSortBuilder),
-                _entityIdProjection
+                factQuery.Skip,
+                factQuery.Take
             );
-
-            var entityIds = factDocuments
-                .Select(factDocument => factDocument.EntityId)
-                .Distinct();
-
-            if (factQuery.Skip.HasValue)
-            {
-                entityIds = entityIds.Skip(factQuery.Skip.Value);
-            }
-
-            if (factQuery.Take.HasValue)
-            {
-                entityIds = entityIds.Take(factQuery.Take.Value);
-            }
-
-            return entityIds.ToArray();
         }
 
         public static Task<List<FactDocument>> GetMany

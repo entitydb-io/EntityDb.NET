@@ -18,7 +18,7 @@ namespace EntityDb.MongoDb.Documents
         Guid[] EntityIds,
         BsonDocumentEnvelope Data,
         ObjectId? _id = null
-    ) : DocumentBase
+    ) : TransactionDocumentBase
     (
         TransactionTimeStamp,
         TransactionId,
@@ -84,46 +84,22 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task<Guid[]> GetTransactionIds
+        public static Task<Guid[]> GetTransactionIds
         (
             IClientSessionHandle? clientSessionHandle,
             IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            var mongoCollection = GetCollection(mongoDatabase);
-
-            var filter = sourceQuery.GetFilter(_sourceFilterBuilder);
-            var sort = sourceQuery.GetSort(_sourceSortBuilder);
-            var skip = sourceQuery.Skip;
-            var take = sourceQuery.Take;
-
-            var sourceDocuments = await GetMany<SourceDocument>
+            return GetTransactionIds<SourceDocument>
             (
                 clientSessionHandle,
-                mongoCollection,
-                filter,
-                sort,
-                TransactionIdProjection,
-                null,
-                null
+                GetCollection(mongoDatabase),
+                sourceQuery.GetFilter(_sourceFilterBuilder),
+                sourceQuery.GetSort(_sourceSortBuilder),
+                sourceQuery.Skip,
+                sourceQuery.Take
             );
-
-            var transactionIds = sourceDocuments
-                .Select(sourceDocument => sourceDocument.TransactionId)
-                .Distinct();
-
-            if (skip.HasValue)
-            {
-                transactionIds = transactionIds.Skip(skip.Value);
-            }
-
-            if (take.HasValue)
-            {
-                transactionIds = transactionIds.Take(take.Value);
-            }
-
-            return transactionIds.ToArray();
         }
 
         public static async Task<Guid[]> GetEntityIds

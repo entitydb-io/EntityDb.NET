@@ -12,8 +12,8 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
     internal abstract class FilterBuilderBase : IFilterBuilder<FilterDefinition<BsonDocument>>
     {
         private static readonly FilterDefinitionBuilder<BsonDocument> _filter = Builders<BsonDocument>.Filter;
-        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
-        private static readonly string _dataValueFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
+        private static readonly string _dataTypeNameFieldName = $"{nameof(TransactionDocumentBase.Data)}.{nameof(TransactionDocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
+        private static readonly string _dataValueFieldName = $"{nameof(TransactionDocumentBase.Data)}.{nameof(TransactionDocumentBase.Data.Value)}";
 
         protected static FilterDefinition<BsonDocument> In<TValue>(string fieldName, TValue[] values)
         {
@@ -56,17 +56,17 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 
         public FilterDefinition<BsonDocument> TransactionTimeStampGte(DateTime timeStamp)
         {
-            return Gte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
+            return Gte(nameof(TransactionDocumentBase.TransactionTimeStamp), timeStamp);
         }
 
         public FilterDefinition<BsonDocument> TransactionTimeStampLte(DateTime timeStamp)
         {
-            return Lte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
+            return Lte(nameof(TransactionDocumentBase.TransactionTimeStamp), timeStamp);
         }
 
         public FilterDefinition<BsonDocument> TransactionIdIn(params Guid[] transactionIds)
         {
-            return In(nameof(DocumentBase.TransactionId), transactionIds);
+            return In(nameof(TransactionDocumentBase.TransactionId), transactionIds);
         }
 
         public FilterDefinition<BsonDocument> Not(FilterDefinition<BsonDocument> filter)

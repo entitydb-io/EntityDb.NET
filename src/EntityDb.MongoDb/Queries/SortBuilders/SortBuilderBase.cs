@@ -12,8 +12,8 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
     internal abstract class SortBuilderBase : ISortBuilder<SortDefinition<BsonDocument>>
     {
         private static readonly SortDefinitionBuilder<BsonDocument> _sort = Builders<BsonDocument>.Sort;
-        private static readonly string _dataTypeNameFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
-        private static readonly string _dataValueFieldName = $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
+        private static readonly string _dataTypeNameFieldName = $"{nameof(TransactionDocumentBase.Data)}.{nameof(TransactionDocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
+        private static readonly string _dataValueFieldName = $"{nameof(TransactionDocumentBase.Data)}.{nameof(TransactionDocumentBase.Data.Value)}";
 
         protected static SortDefinition<BsonDocument> Sort(bool ascending, string fieldName)
         {
@@ -43,12 +43,12 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
 
         public SortDefinition<BsonDocument> TransactionTimeStamp(bool ascending)
         {
-            return Sort(ascending, nameof(DocumentBase.TransactionTimeStamp));
+            return Sort(ascending, nameof(TransactionDocumentBase.TransactionTimeStamp));
         }
 
         public SortDefinition<BsonDocument> TransactionId(bool ascending)
         {
-            return Sort(ascending, nameof(DocumentBase.TransactionId));
+            return Sort(ascending, nameof(TransactionDocumentBase.TransactionId));
         }
 
         public SortDefinition<BsonDocument> Combine(params SortDefinition<BsonDocument>[] sorts)
