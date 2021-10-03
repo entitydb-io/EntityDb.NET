@@ -76,13 +76,13 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            var JsonElementEnvelope = new JsonElementEnvelope(default!, default!);
+            var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
             Should.Throw<DeserializeException>(() =>
             {
-                JsonElementEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
+                jsonElementEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
             });
         }
 
@@ -91,13 +91,13 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            var JsonElementEnvelope = new JsonElementEnvelope(default!, default!);
+            var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
             Should.Throw<SerializeException>(() =>
             {
-                JsonElementEnvelope.Serialize(_logger);
+                jsonElementEnvelope.Serialize(_logger);
             });
         }
 
