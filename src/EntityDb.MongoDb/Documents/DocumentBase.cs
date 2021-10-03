@@ -54,7 +54,7 @@ namespace EntityDb.MongoDb.Documents
                 await mongoCollection.Indexes.CreateManyAsync(indices);
             }
         }
-        
+
         protected static Task InsertOne<TDocument>
         (
             IClientSessionHandle clientSessionHandle,

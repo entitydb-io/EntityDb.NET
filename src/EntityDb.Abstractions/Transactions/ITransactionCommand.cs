@@ -2,7 +2,6 @@
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions

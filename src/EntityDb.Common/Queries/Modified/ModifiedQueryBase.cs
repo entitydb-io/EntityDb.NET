@@ -2,10 +2,10 @@
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal abstract record ModifiedQueryBase(IQuery Query, int? ReplaceSkip, int? ReplaceTake)
+    internal abstract record ModifiedQueryBase(IQuery Query, ModifiedQueryOptions ModifiedQueryOptions)
     {
-        public int? Skip => ReplaceSkip ?? Query.Skip;
+        public int? Skip => ModifiedQueryOptions.ReplaceSkip ?? Query.Skip;
 
-        public int? Take => ReplaceTake ?? Query.Take;
+        public int? Take => ModifiedQueryOptions.ReplaceTake ?? Query.Take;
     }
 }
