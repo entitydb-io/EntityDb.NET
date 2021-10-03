@@ -27,6 +27,15 @@ namespace EntityDb.MongoDb.Documents
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
         }
 
+        protected static IMongoCollection<BsonDocument> GetMongoCollection
+        (
+            IMongoDatabase mongoDatabase,
+            string collectionName
+        )
+        {
+            return mongoDatabase.GetCollection<BsonDocument>(collectionName);
+        }
+
         protected static async Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase,

@@ -46,11 +46,6 @@ namespace EntityDb.MongoDb.Documents
             nameof(Value),
         };
 
-        private static IMongoCollection<BsonDocument> GetCollection(IMongoDatabase mongoDatabase)
-        {
-            return mongoDatabase.GetCollection<BsonDocument>(CollectionName);
-        }
-
         public static Task ProvisionCollection
         (
             IMongoDatabase mongoDatabase
@@ -95,7 +90,7 @@ namespace EntityDb.MongoDb.Documents
             await InsertMany
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 tagDocuments
             );
         }
@@ -111,7 +106,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<TagDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = tagQuery.GetFilter(_tagFilterBuilder),
                     Sort = tagQuery.GetSort(_tagSortBuilder),
                     DistinctSkip = tagQuery.Skip,
@@ -131,7 +126,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new EntityIdQuery<TagDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = tagQuery.GetFilter(_tagFilterBuilder),
                     Sort = tagQuery.GetSort(_tagSortBuilder),
                     DistinctSkip = tagQuery.Skip,
@@ -151,7 +146,7 @@ namespace EntityDb.MongoDb.Documents
                 (clientSessionHandle, mongoDatabase) => new DataQuery<TagDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetCollection(mongoDatabase),
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
                     Filter = tagQuery.GetFilter(_tagFilterBuilder),
                     Sort = tagQuery.GetSort(_tagSortBuilder),
                     Skip = tagQuery.Skip,
@@ -178,7 +173,7 @@ namespace EntityDb.MongoDb.Documents
             await DeleteMany
             (
                 clientSessionHandle,
-                GetCollection(mongoDatabase),
+                GetMongoCollection(mongoDatabase, CollectionName),
                 deleteTagsQuery.GetFilter(_tagFilterBuilder)
             );
         }
