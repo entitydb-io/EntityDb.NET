@@ -7,11 +7,11 @@ namespace EntityDb.MongoDb.Queries
     internal record EntityVersionQuery<TDocument> : DocumentQuery<TDocument>
         where TDocument : IEntityDocument
     {
-        public override ProjectionDefinition<BsonDocument, TDocument> Projection { get; init; } =
-            _projectionBuilder.Combine
+        public override ProjectionDefinition<BsonDocument, TDocument> Projection =>
+            ProjectionBuilder.Combine
             (
-                _projectionBuilder.Exclude(nameof(IEntityDocument._id)),
-                _projectionBuilder.Include(nameof(IEntityDocument.EntityVersionNumber))
+                ProjectionBuilder.Exclude(nameof(IEntityDocument._id)),
+                ProjectionBuilder.Include(nameof(IEntityDocument.EntityVersionNumber))
             );
     }
 }

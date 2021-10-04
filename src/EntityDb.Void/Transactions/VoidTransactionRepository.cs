@@ -10,76 +10,79 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions
 {
-    internal sealed class VoidTransactionRepository<TEntity> : ITransactionRepository<TEntity>
+    internal class VoidTransactionRepository
     {
-        private static readonly Task<Guid[]> _emptyGuidArrayTask = Task.FromResult(Array.Empty<Guid>());
-        private static readonly Task<object[]> _emptyObjectArrayTask = Task.FromResult(Array.Empty<object>());
-
+        protected static readonly Task<Guid[]> EmptyGuidArrayTask = Task.FromResult(Array.Empty<Guid>());
+        protected static readonly Task<object[]> EmptyObjectArrayTask = Task.FromResult(Array.Empty<object>());
+        protected static readonly Task<ILease[]> EmptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
+        protected static readonly Task<ITag[]> EmptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
+        protected static readonly Task<bool> TrueTask = Task.FromResult(true);
+    }
+    
+    internal sealed class VoidTransactionRepository<TEntity> : VoidTransactionRepository,
+        ITransactionRepository<TEntity>
+    {
         private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
             Task.FromResult(Array.Empty<ICommand<TEntity>>());
 
         private static readonly Task<IFact<TEntity>[]> _emptyFactArrayTask =
             Task.FromResult(Array.Empty<IFact<TEntity>>());
 
-        private static readonly Task<ILease[]> _emptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
-        private static readonly Task<ITag[]> _emptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
-        private static readonly Task<bool> _trueTask = Task.FromResult(true);
-
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetTransactionIds(IFactQuery factQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetEntityIds(IFactQuery factQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
         {
-            return _emptyGuidArrayTask;
+            return EmptyGuidArrayTask;
         }
 
         public Task<object[]> GetSources(ISourceQuery sourceQuery)
         {
-            return _emptyObjectArrayTask;
+            return EmptyObjectArrayTask;
         }
-
+        
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
             return _emptyCommandArrayTask;
@@ -92,17 +95,17 @@ namespace EntityDb.Void.Transactions
 
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
-            return _emptyLeaseArrayTask;
+            return EmptyLeaseArrayTask;
         }
 
         public Task<ITag[]> GetTags(ITagQuery tagQuery)
         {
-            return _emptyTagArrayTask;
+            return EmptyTagArrayTask;
         }
 
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
-            return _trueTask;
+            return TrueTask;
         }
 
         [ExcludeFromCodeCoverage]

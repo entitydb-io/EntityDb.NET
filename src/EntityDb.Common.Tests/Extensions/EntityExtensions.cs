@@ -30,13 +30,11 @@ namespace EntityDb.Common.Tests.Extensions
                 .Returns(new[] { factMock.Object })
                 .Verifiable();
 
-            var command = commandMock.Object;
-
             var entity = new object();
 
             // ACT
 
-            entity.ExecuteAndReduce(Enumerable.Repeat(command, numberOfTimes));
+            entity.ExecuteAndReduce(Enumerable.Repeat(commandMock.Object, numberOfTimes));
 
             // ASSERT
 

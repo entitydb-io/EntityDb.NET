@@ -5,15 +5,18 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Queries
 {
-    internal record DocumentQuery<TDocument>
+    internal record DocumentQuery
     {
-        protected static readonly ProjectionDefinitionBuilder<BsonDocument> _projectionBuilder =
+        protected static readonly ProjectionDefinitionBuilder<BsonDocument> ProjectionBuilder =
             Builders<BsonDocument>.Projection;
-
+    }
+    
+    internal record DocumentQuery<TDocument> : DocumentQuery
+    {
         public IClientSessionHandle? ClientSessionHandle { get; init; }
         public IMongoCollection<BsonDocument> MongoCollection { get; init; } = default!;
         public FilterDefinition<BsonDocument> Filter { get; init; } = default!;
-        public virtual ProjectionDefinition<BsonDocument, TDocument> Projection { get; init; } = default!;
+        public virtual ProjectionDefinition<BsonDocument, TDocument> Projection => default!;
         public SortDefinition<BsonDocument>? Sort { get; init; }
         public int? Skip { get; init; }
         public int? Limit { get; init; }
