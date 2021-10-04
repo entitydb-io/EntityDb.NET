@@ -854,7 +854,8 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityRepository = new EntityRepository<TransactionEntity>(_serviceProvider, transactionRepository);
 
-            var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(), new ICommand<TransactionEntity>[] { new DoNothing() });
+            var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(),
+                new ICommand<TransactionEntity>[] { new DoNothing() });
 
             await transactionRepository.PutTransaction(transaction);
 
