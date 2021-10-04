@@ -9,11 +9,6 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 {
     internal sealed class LeaseFilterBuilder : FilterBuilderBase, ILeaseFilterBuilder<FilterDefinition<BsonDocument>>
     {
-        protected override string[] GetHoistedFieldNames()
-        {
-            return LeaseDocument.HoistedFieldNames;
-        }
-
         public FilterDefinition<BsonDocument> EntityIdIn(params Guid[] entityIds)
         {
             return In(nameof(LeaseDocument.EntityId), entityIds);
@@ -37,6 +32,11 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
         public FilterDefinition<BsonDocument> LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
         {
             return DataValueMatches(leaseExpression);
+        }
+
+        protected override string[] GetHoistedFieldNames()
+        {
+            return LeaseDocument.HoistedFieldNames;
         }
     }
 }

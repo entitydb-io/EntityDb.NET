@@ -13,7 +13,8 @@ namespace EntityDb.MongoDb.Envelopes
 {
     internal sealed record BsonDocumentEnvelope
     (
-        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)] Dictionary<string, string> Headers,
+        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)]
+        Dictionary<string, string> Headers,
         BsonDocument Value
     )
     {
@@ -80,7 +81,8 @@ namespace EntityDb.MongoDb.Envelopes
             }
         }
 
-        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger, bool removeTypeDiscriminatorProperty = true)
+        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger,
+            bool removeTypeDiscriminatorProperty = true)
         {
             try
             {

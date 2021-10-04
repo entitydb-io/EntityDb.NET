@@ -24,7 +24,8 @@ namespace EntityDb.Redis.Envelopes
         {
             try
             {
-                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(), resolvingStrategyChain.ResolveType(Headers))!;
+                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(),
+                    resolvingStrategyChain.ResolveType(Headers))!;
             }
             catch (Exception exception)
             {
@@ -70,11 +71,7 @@ namespace EntityDb.Redis.Envelopes
 
                 var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
-                return new JsonElementEnvelope
-                {
-                    Headers = headers,
-                    Value = jsonElement
-                };
+                return new JsonElementEnvelope { Headers = headers, Value = jsonElement };
             }
             catch (Exception exception)
             {

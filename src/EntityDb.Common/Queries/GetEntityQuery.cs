@@ -16,7 +16,7 @@ namespace EntityDb.Common.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

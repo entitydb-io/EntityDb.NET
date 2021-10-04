@@ -19,10 +19,7 @@ namespace EntityDb.TestImplementations.Facts
 
             leases.Add(new Lease(LeaseScope, LeaseLabel, LeaseValue));
 
-            return entity with
-            {
-                Leases = leases.ToArray(),
-            };
+            return entity with { Leases = leases.ToArray() };
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using EntityDb.Common.Tests.Snapshots;
 using System;
 
-namespace EntityDb.Redis.Tests
+namespace EntityDb.Redis.Tests.Snapshots
 {
     public class SnapshotTests : SnapshotTestsBase
     {

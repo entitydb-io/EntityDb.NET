@@ -19,10 +19,7 @@ namespace EntityDb.TestImplementations.Facts
 
             tags.Add(new Tag(TagLabel, TagValue));
 
-            return entity with
-            {
-                Tags = tags.ToArray(),
-            };
+            return entity with { Tags = tags.ToArray() };
         }
     }
 }

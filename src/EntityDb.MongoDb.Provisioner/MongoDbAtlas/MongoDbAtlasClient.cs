@@ -14,17 +14,22 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
     {
         private static readonly HttpClient _httpClient = new();
 
-        private static DigestChallengeRequest? DigestChallengeRequest { get; set; }
-
         private readonly string _groupId;
-        private readonly string _publicKey;
         private readonly string _privateKey;
+        private readonly string _publicKey;
 
         private MongoDbAtlasClient(string groupId, string publicKey, string privateKey)
         {
             _groupId = groupId;
             _publicKey = publicKey;
             _privateKey = privateKey;
+        }
+
+        private static DigestChallengeRequest? DigestChallengeRequest { get; set; }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
 
         private static Uri GetUri(string route)
@@ -34,7 +39,8 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             return new Uri($"{baseUrl}/api/atlas/v1.0/{route}");
         }
 
-        private static async Task<HttpResponseMessage> GetResponse(string publicKey, string privateKey, Func<HttpRequestMessage> createRequest)
+        private static async Task<HttpResponseMessage> GetResponse(string publicKey, string privateKey,
+            Func<HttpRequestMessage> createRequest)
         {
             var request = createRequest.Invoke();
 
@@ -54,7 +60,8 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             return await _httpClient.SendAsync(request);
         }
 
-        private static async Task<HttpResponseMessage> Send(string publicKey, string privateKey, Func<HttpRequestMessage> createRequest)
+        private static async Task<HttpResponseMessage> Send(string publicKey, string privateKey,
+            Func<HttpRequestMessage> createRequest)
         {
             var firstResponse = await GetResponse(publicKey, privateKey, createRequest);
 
@@ -63,7 +70,8 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
                 return firstResponse;
             }
 
-            var wwwAuthenticateHeader = AuthenticationHeaderValue.Parse(firstResponse.Headers.WwwAuthenticate.ToString());
+            var wwwAuthenticateHeader =
+                AuthenticationHeaderValue.Parse(firstResponse.Headers.WwwAuthenticate.ToString());
 
             if (DigestChallengeRequest.TryParse(wwwAuthenticateHeader, out var digestChallengeRequest) == false)
             {
@@ -85,7 +93,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             var getUserResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = GetUri($"groups/{_groupId}/databaseUsers/{databaseName}/{username}"),
+                RequestUri = GetUri($"groups/{_groupId}/databaseUsers/{databaseName}/{username}")
             });
 
             if (getUserResponse.StatusCode == HttpStatusCode.OK)
@@ -105,8 +113,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         {
             var getRoleResponse = await Send(() => new HttpRequestMessage
             {
-                Method = HttpMethod.Get,
-                RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}"),
+                Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}")
             });
 
             if (getRoleResponse.StatusCode == HttpStatusCode.OK)
@@ -124,11 +131,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public async Task<bool> CreateRole(string roleName, MongoDbAtlasRoleAction[] actions)
         {
-            var jsonPayload = JsonSerializer.Serialize(new
-            {
-                actions,
-                roleName,
-            });
+            var jsonPayload = JsonSerializer.Serialize(new { actions, roleName });
 
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
@@ -136,7 +139,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             {
                 Method = HttpMethod.Post,
                 RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles"),
-                Content = content,
+                Content = content
             });
 
             if (createRoleResponse.IsSuccessStatusCode)
@@ -147,23 +150,16 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             throw new InvalidOperationException();
         }
 
-        public async Task<bool> CreateUser(string databaseName, string username, string password, MongoDbAtlastUserRole[] roles)
+        public async Task<bool> CreateUser(string databaseName, string username, string password,
+            MongoDbAtlastUserRole[] roles)
         {
-            var jsonPayload = JsonSerializer.Serialize(new
-            {
-                databaseName,
-                password,
-                roles,
-                username,
-            });
+            var jsonPayload = JsonSerializer.Serialize(new { databaseName, password, roles, username });
 
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             var createUserResponse = await Send(() => new HttpRequestMessage
             {
-                Method = HttpMethod.Post,
-                RequestUri = GetUri($"groups/{_groupId}/databaseUsers"),
-                Content = content,
+                Method = HttpMethod.Post, RequestUri = GetUri($"groups/{_groupId}/databaseUsers"), Content = content
             });
 
             if (createUserResponse.IsSuccessStatusCode)
@@ -178,8 +174,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         {
             var getClusterResponse = await Send(() => new HttpRequestMessage
             {
-                Method = HttpMethod.Get,
-                RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
+                Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
             });
 
             if (getClusterResponse.IsSuccessStatusCode)
@@ -194,17 +189,15 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public static async Task<MongoDbAtlasClient> Create(string groupName, string publicKey, string privateKey)
         {
-            var getGroupsResponse = await Send(publicKey, privateKey, () => new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = GetUri("groups")
-            });
+            var getGroupsResponse = await Send(publicKey, privateKey,
+                () => new HttpRequestMessage { Method = HttpMethod.Get, RequestUri = GetUri("groups") });
 
             if (getGroupsResponse.IsSuccessStatusCode)
             {
                 var responseStream = await getGroupsResponse.Content.ReadAsStreamAsync();
 
-                var listOfGroups = await JsonSerializer.DeserializeAsync<ListOf<Group>>(responseStream) ?? throw new InvalidOperationException();
+                var listOfGroups = await JsonSerializer.DeserializeAsync<ListOf<Group>>(responseStream) ??
+                                   throw new InvalidOperationException();
 
                 var group = listOfGroups
                     .Results
@@ -214,11 +207,6 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             }
 
             throw new InvalidOperationException();
-        }
-
-        public void Dispose()
-        {
-            _httpClient.Dispose();
         }
     }
 }

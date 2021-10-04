@@ -25,12 +25,13 @@ namespace EntityDb.MongoDb.Tests.Rewriters
                 ["Null"] = BsonNull.Value,
                 ["RegularExpression"] = BsonRegularExpression.Create(new Regex("$abc^")),
                 ["Symbol"] = BsonSymbol.Create(""),
-                ["Int32"] = BsonInt32.Create((int)0),
-                ["Timestamp"] = BsonTimestamp.Create(Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds)),
+                ["Int32"] = BsonInt32.Create(0),
+                ["Timestamp"] =
+                    BsonTimestamp.Create(Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds)),
                 ["Int64"] = BsonInt64.Create((long)0),
                 ["Decimal128"] = BsonDecimal128.Create((decimal)0.0),
                 ["MaxKey"] = BsonMaxKey.Value,
-                ["MinKey"] = BsonMinKey.Value,
+                ["MinKey"] = BsonMinKey.Value
             };
         }
 
@@ -42,11 +43,7 @@ namespace EntityDb.MongoDb.Tests.Rewriters
             var originalBsonDocument = new BsonDocument
             {
                 ["Document"] = CreateSubDocument(),
-                ["Array"] = new BsonArray
-                {
-                    CreateSubDocument(),
-                    CreateSubDocument(),
-                },
+                ["Array"] = new BsonArray { CreateSubDocument(), CreateSubDocument() }
             };
 
             var expectedBson = originalBsonDocument.ToBson();
@@ -76,7 +73,7 @@ namespace EntityDb.MongoDb.Tests.Rewriters
             var originalBsonDocument = new BsonDocument
             {
                 ["JavaScript"] = BsonJavaScript.Create("function() { return true; }"),
-                ["JavaScriptWithScope"] = BsonJavaScriptWithScope.Create("function(a) { return true; }"),
+                ["JavaScriptWithScope"] = BsonJavaScriptWithScope.Create("function(a) { return true; }")
             };
 
             var copyBsonDocument = new BsonDocument();

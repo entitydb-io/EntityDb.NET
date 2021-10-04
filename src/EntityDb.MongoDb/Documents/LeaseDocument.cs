@@ -18,23 +18,18 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     {
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-        public string Scope { get; init; } = default!;
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
+        public const string CollectionName = "Leases";
 
         private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
         private static readonly LeaseSortBuilder _leaseSortBuilder = new();
 
-        public const string CollectionName = "Leases";
+        public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
 
-        public static readonly string[] HoistedFieldNames = new[]
-        {
-            nameof(Scope),
-            nameof(Label),
-            nameof(Value),
-        };
+        public string Scope { get; init; } = default!;
+        public string Label { get; init; } = default!;
+        public string Value { get; init; } = default!;
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
 
         public static IReadOnlyCollection<LeaseDocument> BuildMany<TEntity>
         (

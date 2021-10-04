@@ -21,7 +21,8 @@ namespace EntityDb.Redis.Tests.Sessions
         [Fact]
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteQuery_ThenReturnDefault()
         {
-            var snapshotRepositoryFactory = await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            var snapshotRepositoryFactory =
+                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
@@ -31,7 +32,9 @@ namespace EntityDb.Redis.Tests.Sessions
 
                 // ACT
 
-                var result = await redisSession.ExecuteQuery<object?>((logger, resolvingStrategyChain, redisDatabase) => throw new Exception(), default);
+                var result =
+                    await redisSession.ExecuteQuery<object?>(
+                        (_, _, _) => throw new Exception(), default);
 
                 // ASSERT
 
@@ -47,7 +50,8 @@ namespace EntityDb.Redis.Tests.Sessions
         [Fact]
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteComand_ThenReturnFalse()
         {
-            var snapshotRepositoryFactory = await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            var snapshotRepositoryFactory =
+                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
@@ -57,7 +61,8 @@ namespace EntityDb.Redis.Tests.Sessions
 
                 // ACT
 
-                var executed = await redisSession.ExecuteCommand((serviceProvider, redisTransaction) => throw new Exception());
+                var executed =
+                    await redisSession.ExecuteCommand((_, _) => throw new Exception());
 
                 // ASSERT
 

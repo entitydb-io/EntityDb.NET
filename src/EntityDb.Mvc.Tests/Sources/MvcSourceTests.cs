@@ -38,10 +38,7 @@ namespace EntityDb.Mvc.Tests.Sources
             string claimValue
         )
         {
-            var headers = new Dictionary<string, StringValues>
-            {
-                [headerName] = new StringValues(headerValue),
-            };
+            var headers = new Dictionary<string, StringValues> { [headerName] = new(headerValue) };
 
             var claimsPrincipal = new ClaimsPrincipal();
             var claimsIdentity = new ClaimsIdentity();
@@ -102,7 +99,8 @@ namespace EntityDb.Mvc.Tests.Sources
         }
 
         [Theory]
-        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role,
+            "TestRole")]
         [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
         public void GivenHttpContext_ThenBuildMvcSource
         (
@@ -119,7 +117,8 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             // ARRANGE
 
-            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
+            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort,
+                localIpAddress, localPort, claimType, claimValue);
 
             // ACT
 
@@ -140,7 +139,8 @@ namespace EntityDb.Mvc.Tests.Sources
         }
 
         [Theory]
-        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role,
+            "TestRole")]
         [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
         public void CanDeconstructMvcSourceAsBsonDocumentEnvelope
         (
@@ -157,7 +157,8 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             // ARRANGE
 
-            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
+            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort,
+                localIpAddress, localPort, claimType, claimValue);
 
             var originalMvcSource = MvcSource.FromHttpContext(httpContext);
 

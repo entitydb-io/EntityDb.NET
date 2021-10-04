@@ -18,15 +18,18 @@ namespace EntityDb.MongoDb.Provisioner.Commands
             AddEntityNameArgumentTo(createCollections);
             AddEntityPasswordArgumentTo(createCollections);
 
-            createCollections.Handler = CommandHandler.Create(async (string groupName, string publicKey, string privateKey, string clusterName, string entityName, string entityPassword) =>
-            {
-                await Execute(groupName, publicKey, privateKey, clusterName, entityName, entityPassword);
-            });
+            createCollections.Handler = CommandHandler.Create(
+                async (string groupName, string publicKey, string privateKey, string clusterName, string entityName,
+                    string entityPassword) =>
+                {
+                    await Execute(groupName, publicKey, privateKey, clusterName, entityName, entityPassword);
+                });
 
             rootCommand.AddCommand(createCollections);
         }
 
-        public static async Task Execute(string groupName, string publicKey, string privateKey, string clusterName, string entityName, string entityPassword)
+        public static async Task Execute(string groupName, string publicKey, string privateKey, string clusterName,
+            string entityName, string entityPassword)
         {
             const string protocol = "mongodb+srv://";
 
@@ -39,7 +42,9 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                 throw new InvalidOperationException();
             }
 
-            var mongoClient = new MongoClient($"{protocol}{entityName}:{entityPassword}@{cluster.SrvAddress[protocol.Length..]}/admin");
+            var mongoClient =
+                new MongoClient(
+                    $"{protocol}{entityName}:{entityPassword}@{cluster.SrvAddress[protocol.Length..]}/admin");
 
             await mongoClient.ProvisionCollections(entityName);
         }

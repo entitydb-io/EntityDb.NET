@@ -9,11 +9,6 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
 {
     internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefinition<BsonDocument>>
     {
-        protected override string[] GetHoistedFieldNames()
-        {
-            return TagDocument.HoistedFieldNames;
-        }
-
         public SortDefinition<BsonDocument> EntityId(bool ascending)
         {
             return Sort(ascending, nameof(TagDocument.EntityId));
@@ -29,9 +24,15 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
             return SortDataType(ascending);
         }
 
-        public SortDefinition<BsonDocument> TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> leaseExpression)
+        public SortDefinition<BsonDocument> TagProperty<TTag>(bool ascending,
+            Expression<Func<TTag, object>> leaseExpression)
         {
             return SortDataValue(ascending, leaseExpression);
+        }
+
+        protected override string[] GetHoistedFieldNames()
+        {
+            return TagDocument.HoistedFieldNames;
         }
     }
 }

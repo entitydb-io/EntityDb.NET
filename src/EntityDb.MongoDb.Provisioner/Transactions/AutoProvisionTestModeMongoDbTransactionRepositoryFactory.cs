@@ -10,11 +10,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Transactions
 {
-    internal sealed class AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity> : TestModeMongoDbTransactionRepositoryFactory<TEntity>
+    internal sealed class
+        AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity> : TestModeMongoDbTransactionRepositoryFactory<
+            TEntity>
     {
         private bool _needToProvision = true;
-        
-        public AutoProvisionTestModeMongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName) : base(loggerFactory, resolvingStrategyChain, connectionString, databaseName)
+
+        public AutoProvisionTestModeMongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory,
+            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName) : base(
+            loggerFactory, resolvingStrategyChain, connectionString, databaseName)
         {
         }
 
@@ -28,13 +32,14 @@ namespace EntityDb.MongoDb.Provisioner.Transactions
             }
 
             _needToProvision = false;
-                
+
             await mongoClient.ProvisionCollections(_databaseName);
 
             return mongoClient;
         }
 
-        public static new AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider, string connectionString, string databaseName)
+        public static new AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity> Create(
+            IServiceProvider serviceProvider, string connectionString, string databaseName)
         {
             return ActivatorUtilities.CreateInstance<AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity>>
             (

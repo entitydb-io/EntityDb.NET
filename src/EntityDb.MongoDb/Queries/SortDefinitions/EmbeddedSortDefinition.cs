@@ -8,18 +8,20 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
 {
     internal class EmbeddedSortDefinition<TParentDocument, TEmbeddedDocument> : SortDefinition<TParentDocument>
     {
-        private readonly FieldDefinition<TParentDocument> _parentField;
         private readonly SortDefinition<TEmbeddedDocument> _childSort;
         private readonly string[] _hoistedFieldNames;
+        private readonly FieldDefinition<TParentDocument> _parentField;
 
-        public EmbeddedSortDefinition(FieldDefinition<TParentDocument> parentField, SortDefinition<TEmbeddedDocument> childSort, string[] hoistedFieldNames)
+        public EmbeddedSortDefinition(FieldDefinition<TParentDocument> parentField,
+            SortDefinition<TEmbeddedDocument> childSort, string[] hoistedFieldNames)
         {
             _parentField = parentField;
             _childSort = childSort;
             _hoistedFieldNames = hoistedFieldNames;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer, IBsonSerializerRegistry bsonSerializerRegistry)
+        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
+            IBsonSerializerRegistry bsonSerializerRegistry)
         {
             var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
 
@@ -31,7 +33,8 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
 
             using var bsonWriter = new BsonDocumentWriter(document);
 
-            var embeddedSortRewriter = new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+            var embeddedSortRewriter =
+                new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedSortRewriter.Rewrite(renderedChildSort);
 

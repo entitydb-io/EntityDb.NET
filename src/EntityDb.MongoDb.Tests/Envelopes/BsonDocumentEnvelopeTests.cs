@@ -21,14 +21,6 @@ namespace EntityDb.MongoDb.Tests.Envelopes
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        public interface IRecord
-        {
-        }
-
-        public record TestRecord<T>(T TestProperty) : IRecord
-        {
-        }
-
         [Fact]
         public void CanDeconstructAndReconstructGenericBsonDocumentEnvelope()
         {
@@ -42,7 +34,8 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, _logger);
 
-            var reconstructedTestRecord = reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+            var reconstructedTestRecord =
+                reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
@@ -114,7 +107,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: true);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger);
 
             // ASSERT
 
@@ -128,11 +121,17 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: false);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, false);
 
             // ASSERT
 
             bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelope.TypeDiscriminatorPropertyName).ShouldBe(true);
         }
+
+        public interface IRecord
+        {
+        }
+
+        public record TestRecord<T>(T TestProperty) : IRecord;
     }
 }

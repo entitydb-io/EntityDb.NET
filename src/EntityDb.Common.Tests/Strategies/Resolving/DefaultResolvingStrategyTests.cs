@@ -18,7 +18,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var expectedType = record.GetType();
 
-            var headers = EnvelopeHelper.GetTypeHeaders(expectedType, includeFullNames: true, includeMemberInfoName: false);
+            var headers = EnvelopeHelper.GetTypeHeaders(expectedType, true, false);
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
@@ -36,7 +36,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), includeFullNames: false, includeMemberInfoName: true);
+            var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), false);
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
@@ -56,10 +56,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var resolvingStrategy = new DefaultResolvingStrategy();
 
-            var headers = new Dictionary<string, string>
-            {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            };
+            var headers = new Dictionary<string, string> { [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform };
 
             // ACT
 
@@ -82,7 +79,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
                 [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
                 [EnvelopeHelper.AssemblyFullName] = "Garbage",
                 [EnvelopeHelper.TypeFullName] = "Garbage",
-                [EnvelopeHelper.MemberInfoName] = "Garbage",
+                [EnvelopeHelper.MemberInfoName] = "Garbage"
             };
 
             // ASSERT

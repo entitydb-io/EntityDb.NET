@@ -6,20 +6,23 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Queries.FilterDefinitions
 {
-    internal sealed class EmbeddedFilterDefinition<TParentDocument, TEmbeddedDocument> : FilterDefinition<TParentDocument>
+    internal sealed class
+        EmbeddedFilterDefinition<TParentDocument, TEmbeddedDocument> : FilterDefinition<TParentDocument>
     {
-        private readonly FieldDefinition<TParentDocument> _parentField;
         private readonly FilterDefinition<TEmbeddedDocument> _childFilter;
         private readonly string[] _hoistedFieldNames;
+        private readonly FieldDefinition<TParentDocument> _parentField;
 
-        public EmbeddedFilterDefinition(FieldDefinition<TParentDocument> parentField, FilterDefinition<TEmbeddedDocument> childFilter, string[] hoistedFieldNames)
+        public EmbeddedFilterDefinition(FieldDefinition<TParentDocument> parentField,
+            FilterDefinition<TEmbeddedDocument> childFilter, string[] hoistedFieldNames)
         {
             _parentField = parentField;
             _childFilter = childFilter;
             _hoistedFieldNames = hoistedFieldNames;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer, IBsonSerializerRegistry bsonSerializerRegistry)
+        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
+            IBsonSerializerRegistry bsonSerializerRegistry)
         {
             var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
 
@@ -31,7 +34,8 @@ namespace EntityDb.MongoDb.Queries.FilterDefinitions
 
             using var bsonWriter = new BsonDocumentWriter(document);
 
-            var embeddedFilterRewriter = new EmbeddedFilterRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+            var embeddedFilterRewriter =
+                new EmbeddedFilterRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedFilterRewriter.Rewrite(renderedChildFilter);
 

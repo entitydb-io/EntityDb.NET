@@ -30,11 +30,7 @@ namespace EntityDb.TestImplementations.Facts
 
             tags.Add(new CountTag(Number));
 
-            return entity with
-            {
-                Leases = leases.ToArray(),
-                Tags = tags.ToArray(),
-            };
+            return entity with { Leases = leases.ToArray(), Tags = tags.ToArray() };
         }
     }
 }

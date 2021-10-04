@@ -22,14 +22,12 @@ namespace EntityDb.Common.Tests.Snapshots
         {
             // ARRANGE
 
-            var expectedSnapshot = new TransactionEntity
-            {
-                VersionNumber = 300
-            };
+            var expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
 
             var entityId = Guid.NewGuid();
 
-            await using var snapshotRepository = await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            await using var snapshotRepository =
+                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             // ACT
 

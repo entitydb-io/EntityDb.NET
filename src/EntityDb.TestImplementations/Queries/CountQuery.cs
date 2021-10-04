@@ -11,45 +11,15 @@ using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-
-    public record CountQuery<TEntity>(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery, ITagQuery
+    public record CountQuery(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery,
+        ITagQuery
     {
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
-        {
-            return builder.SourceMatches((Counter counter) => Gte <= counter.Number && counter.Number <= Lte);
-        }
-
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
             return builder.CommandMatches((Count count) => Gte <= count.Number && count.Number <= Lte);
         }
 
-        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
-        {
-            return builder.FactMatches((Counted counted) => Gte <= counted.Number && counted.Number <= Lte);
-        }
-
-        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
-        {
-            return builder.LeaseMatches((CountLease countLease) => Gte <= countLease.Number && countLease.Number <= Lte);
-        }
-
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
-        {
-            return builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte);
-        }
-
-        public TSort? GetSort<TSort>(ISourceSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.EntityIds(true),
-                builder.SourceType(true),
-                builder.SourceProperty(true, (Counter counter) => counter.Number)
-            );
-        }
-
-        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -60,7 +30,12 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
+        {
+            return builder.FactMatches((Counted counted) => Gte <= counted.Number && counted.Number <= Lte);
+        }
+
+        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -72,7 +47,13 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
+        {
+            return builder.LeaseMatches((CountLease countLease) =>
+                Gte <= countLease.Number && countLease.Number <= Lte);
+        }
+
+        public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -84,7 +65,31 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        {
+            return builder.SourceMatches((Counter counter) => Gte <= counter.Number && counter.Number <= Lte);
+        }
+
+        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        {
+            return builder.Combine
+            (
+                builder.EntityIds(true),
+                builder.SourceType(true),
+                builder.SourceProperty(true, (Counter counter) => counter.Number)
+            );
+        }
+
+        public int? Skip => null;
+
+        public int? Take => null;
+
+        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        {
+            return builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte);
+        }
+
+        public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -95,9 +100,5 @@ namespace EntityDb.TestImplementations.Queries
                 builder.TagProperty(true, (Tag tag) => tag.Label)
             );
         }
-
-        public int? Skip => null;
-
-        public int? Take => null;
     }
 }

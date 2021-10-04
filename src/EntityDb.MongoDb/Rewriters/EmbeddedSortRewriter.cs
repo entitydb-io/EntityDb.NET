@@ -6,10 +6,11 @@ namespace EntityDb.MongoDb.Rewriters
 {
     internal sealed class EmbeddedSortRewriter : BsonDocumentRewriter
     {
-        private readonly string _parentFieldName;
         private readonly string[] _hoistedFieldNames;
+        private readonly string _parentFieldName;
 
-        public EmbeddedSortRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) : base(bsonWriter)
+        public EmbeddedSortRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
+            base(bsonWriter)
         {
             _parentFieldName = parentFieldName;
             _hoistedFieldNames = hoistedFieldNames;

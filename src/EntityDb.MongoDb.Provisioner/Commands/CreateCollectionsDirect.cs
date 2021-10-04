@@ -14,14 +14,16 @@ namespace EntityDb.MongoDb.Provisioner.Commands
 
             AddEntityNameArgumentTo(createCollectionsDirect);
 
-            var connectionStringArgument = new Argument<string>("connection-string", "The connection string to the mongodb instance.");
+            var connectionStringArgument =
+                new Argument<string>("connection-string", "The connection string to the mongodb instance.");
 
             createCollectionsDirect.AddArgument(connectionStringArgument);
 
-            createCollectionsDirect.Handler = CommandHandler.Create(async (string entityName, string connectionString) =>
-            {
-                await Execute(entityName, connectionString);
-            });
+            createCollectionsDirect.Handler = CommandHandler.Create(
+                async (string entityName, string connectionString) =>
+                {
+                    await Execute(entityName, connectionString);
+                });
 
             rootCommand.AddCommand(createCollectionsDirect);
         }

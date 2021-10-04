@@ -35,10 +35,8 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
                 .Setup(strategy => strategy.ResolveType(It.IsAny<Dictionary<string, string>>()))
                 .Throws(new Exception());
 
-            var resolvingStrategyChain = new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[]
-            {
-                resolvingStrategyMock.Object,
-            });
+            var resolvingStrategyChain =
+                new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[] { resolvingStrategyMock.Object });
 
             // ASSERT
 

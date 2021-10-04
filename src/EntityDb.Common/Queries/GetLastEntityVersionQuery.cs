@@ -12,7 +12,7 @@ namespace EntityDb.Common.Queries
             return builder.EntityIdIn(EntityId);
         }
 
-        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
             return builder.EntityVersionNumber(false);
         }

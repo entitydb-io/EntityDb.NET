@@ -20,14 +20,6 @@ namespace EntityDb.Redis.Tests.Envelopes
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        public interface IRecord
-        {
-        }
-
-        public record TestRecord<T>(T TestProperty) : IRecord
-        {
-        }
-
         [Fact]
         public void WhenGoingThroughFullCycle_ThenOriginalMatchesReconstructed()
         {
@@ -45,7 +37,8 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _logger);
 
-            var reconstructedTestRecord = reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+            var reconstructedTestRecord =
+                reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
@@ -111,5 +104,11 @@ namespace EntityDb.Redis.Tests.Envelopes
                 JsonElementEnvelope.Deconstruct(default!, _logger);
             });
         }
+
+        public interface IRecord
+        {
+        }
+
+        public record TestRecord<T>(T TestProperty) : IRecord;
     }
 }

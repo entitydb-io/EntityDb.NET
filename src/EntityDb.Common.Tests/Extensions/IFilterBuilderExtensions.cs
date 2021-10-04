@@ -9,9 +9,6 @@ namespace EntityDb.Common.Tests.Extensions
 {
     public class IFilterBuilderExtensionsTests
     {
-        private record SingleInput(bool Input1, bool ExpectedOutput);
-        private record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
-
         private IFilterBuilder<bool> GetFilterBuilder()
         {
             var filterBuilderMock = new Mock<IFilterBuilder<bool>>(MockBehavior.Strict);
@@ -36,11 +33,7 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new SingleInput[]
-            {
-                new(true, false),
-                new(false, true),
-            };
+            var truthTable = new SingleInput[] { new(true, false), new(false, true) };
 
             var filterBuilder = GetFilterBuilder();
 
@@ -63,10 +56,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, true),
+                new(false, false, false), new(false, true, false), new(true, false, false), new(true, true, true)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -91,10 +81,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, true)
+                new(false, false, false), new(false, true, true), new(true, false, true), new(true, true, true)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -118,10 +105,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, false),
+                new(false, false, true), new(false, true, true), new(true, false, true), new(true, true, false)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -145,10 +129,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, false),
+                new(false, false, true), new(false, true, false), new(true, false, false), new(true, true, false)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -173,10 +154,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, false),
+                new(false, false, false), new(false, true, true), new(true, false, true), new(true, true, false)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -200,10 +178,7 @@ namespace EntityDb.Common.Tests.Extensions
 
             var truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, true),
+                new(false, false, true), new(false, true, false), new(true, false, false), new(true, true, true)
             };
 
             var filterBuilder = GetFilterBuilder();
@@ -219,5 +194,9 @@ namespace EntityDb.Common.Tests.Extensions
                 actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
+
+        private record SingleInput(bool Input1, bool ExpectedOutput);
+
+        private record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
     }
 }

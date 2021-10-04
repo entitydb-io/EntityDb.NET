@@ -9,10 +9,7 @@ namespace EntityDb.TestImplementations.Facts
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            return entity with
-            {
-                Tags = Array.Empty<ITag>(),
-            };
+            return entity with { Tags = Array.Empty<ITag>() };
         }
     }
 }

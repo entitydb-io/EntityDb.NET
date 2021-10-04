@@ -11,7 +11,8 @@ namespace EntityDb.Common.Tests.Extensions
     {
         [Theory]
         [InlineData(2)]
-        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureExecuteAndReduceAreBothCalled(int numberOfTimes)
+        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureExecuteAndReduceAreBothCalled(
+            int numberOfTimes)
         {
             // ARRANGE
 

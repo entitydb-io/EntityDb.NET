@@ -25,21 +25,8 @@ namespace EntityDb.Redis.Sessions
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation, Func<Task<TResult>> catchResult)
-        {
-            try
-            {
-                return await tryOperation.Invoke();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
-
-                return await catchResult.Invoke();
-            }
-        }
-
-        public Task<TResult> ExecuteQuery<TResult>(Func<ILogger, IResolvingStrategyChain, IDatabase, Task<TResult>> query, TResult defaultResult)
+        public Task<TResult> ExecuteQuery<TResult>(
+            Func<ILogger, IResolvingStrategyChain, IDatabase, Task<TResult>> query, TResult defaultResult)
         {
             var redisDatabase = _connectionMultiplexer.GetDatabase();
 
@@ -82,6 +69,21 @@ namespace EntityDb.Redis.Sessions
             await Task.Yield();
 
             _connectionMultiplexer.Dispose();
+        }
+
+        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation,
+            Func<Task<TResult>> catchResult)
+        {
+            try
+            {
+                return await tryOperation.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed.");
+
+                return await catchResult.Invoke();
+            }
         }
     }
 }

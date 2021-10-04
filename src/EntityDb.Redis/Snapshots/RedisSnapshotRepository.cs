@@ -11,18 +11,13 @@ namespace EntityDb.Redis.Snapshots
     {
         private readonly string _keyNamespace;
 
-        public IRedisSession RedisSession { get; }
-
         public RedisSnapshotRepository(IRedisSession redisSession, string keyNamespace)
         {
             RedisSession = redisSession;
             _keyNamespace = keyNamespace;
         }
 
-        protected string GetKey(Guid entityId)
-        {
-            return $"{_keyNamespace}#{entityId}";
-        }
+        public IRedisSession RedisSession { get; }
 
         public virtual Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
@@ -70,9 +65,14 @@ namespace EntityDb.Redis.Snapshots
             DisposeAsync().AsTask().Wait();
         }
 
-        public async virtual ValueTask DisposeAsync()
+        public virtual async ValueTask DisposeAsync()
         {
             await RedisSession.DisposeAsync();
+        }
+
+        protected string GetKey(Guid entityId)
+        {
+            return $"{_keyNamespace}#{entityId}";
         }
     }
 }

@@ -6,14 +6,15 @@ namespace EntityDb.MongoDb.Rewriters
 {
     internal sealed class EmbeddedFilterRewriter : BsonDocumentRewriter
     {
-        private static readonly string[] _booleanOperators = new[] { "$not", "$and", "$or" };
-
-        private readonly string _parentFieldName;
+        private static readonly string[] _booleanOperators = { "$not", "$and", "$or" };
         private readonly string[] _hoistedFieldNames;
 
-        private bool FoundTopDocument = false;
+        private readonly string _parentFieldName;
 
-        public EmbeddedFilterRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) : base(bsonWriter)
+        private bool FoundTopDocument;
+
+        public EmbeddedFilterRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
+            base(bsonWriter)
         {
             _parentFieldName = parentFieldName;
             _hoistedFieldNames = hoistedFieldNames;

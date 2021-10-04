@@ -5,7 +5,9 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedLeaseQuery(ILeaseQuery LeaseQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(LeaseQuery, ModifiedQueryOptions), ILeaseQuery
+    internal sealed record ModifiedLeaseQuery
+        (ILeaseQuery LeaseQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(LeaseQuery,
+            ModifiedQueryOptions), ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {

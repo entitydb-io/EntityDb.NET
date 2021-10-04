@@ -1,7 +1,6 @@
 ﻿using EntityDb.MongoDb.Provisioner.Commands;
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner
