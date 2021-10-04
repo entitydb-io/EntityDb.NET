@@ -29,9 +29,9 @@ jobs:
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v1
       - name: Restore Dependencies
-        run: dotnet restore src\EntityDb.sln --locked-mode
+        run: dotnet restore src/EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test src\EntityDb.sln --no-restore -c Release --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test src/EntityDb.sln --no-restore -c Release --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Publish Coverage Results
         uses: codecov/codecov-action@v2
         with:
