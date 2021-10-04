@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Strategies.Resolving;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
@@ -14,17 +15,17 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var record = new object();
+            object? record = new object();
 
-            var expectedType = record.GetType();
+            Type? expectedType = record.GetType();
 
-            var headers = EnvelopeHelper.GetTypeHeaders(expectedType, includeFullNames: true, includeMemberInfoName: false);
+            Dictionary<string, string>? headers = EnvelopeHelper.GetTypeHeaders(expectedType, true, false);
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            DefaultResolvingStrategy? resolvingStrategy = new DefaultResolvingStrategy();
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -36,13 +37,13 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), includeFullNames: false, includeMemberInfoName: true);
+            Dictionary<string, string>? headers = EnvelopeHelper.GetTypeHeaders(typeof(object), false, true);
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            DefaultResolvingStrategy? resolvingStrategy = new DefaultResolvingStrategy();
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -54,16 +55,16 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            DefaultResolvingStrategy? resolvingStrategy = new DefaultResolvingStrategy();
 
-            var headers = new Dictionary<string, string>
+            Dictionary<string, string>? headers = new Dictionary<string, string>
             {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform
             };
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -75,14 +76,14 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            DefaultResolvingStrategy? resolvingStrategy = new DefaultResolvingStrategy();
 
-            var headers = new Dictionary<string, string>
+            Dictionary<string, string>? headers = new Dictionary<string, string>
             {
                 [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
                 [EnvelopeHelper.AssemblyFullName] = "Garbage",
                 [EnvelopeHelper.TypeFullName] = "Garbage",
-                [EnvelopeHelper.MemberInfoName] = "Garbage",
+                [EnvelopeHelper.MemberInfoName] = "Garbage"
             };
 
             // ASSERT

@@ -21,30 +21,24 @@ namespace EntityDb.MongoDb.Tests.Envelopes
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        public interface IRecord
-        {
-        }
-
-        public record TestRecord<T>(T TestProperty) : IRecord
-        {
-        }
-
         [Fact]
         public void CanDeconstructAndReconstructGenericBsonDocumentEnvelope()
         {
-            var originalTestRecord = new TestRecord<bool>(true);
+            TestRecord<bool>? originalTestRecord = new TestRecord<bool>(true);
 
             IRecord boxedTestRecord = originalTestRecord;
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, _logger);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, _logger);
 
-            var bsonBytes = bsonDocumentEnvelope.Serialize(_logger);
+            byte[]? bsonBytes = bsonDocumentEnvelope.Serialize(_logger);
 
-            var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, _logger);
+            BsonDocumentEnvelope? reconstructedBsonDocumentEnvelope =
+                BsonDocumentEnvelope.Deserialize(bsonBytes, _logger);
 
-            var reconstructedTestRecord = reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+            IRecord? reconstructedTestRecord =
+                reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
-            var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
+            TestRecord<bool>? unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
             unboxedTestRecord.TestProperty.ShouldBe(originalTestRecord.TestProperty);
         }
@@ -54,9 +48,9 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var invalidBson = "I AM A STRING VALUE, NOT BSON!";
+            string? invalidBson = "I AM A STRING VALUE, NOT BSON!";
 
-            var invalidBsonBytes = Encoding.UTF8.GetBytes(invalidBson);
+            byte[]? invalidBsonBytes = Encoding.UTF8.GetBytes(invalidBson);
 
             // ASSERT
 
@@ -71,7 +65,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 
@@ -86,7 +80,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 
@@ -112,9 +106,9 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var value = new TestRecord<bool>(true);
+            TestRecord<bool>? value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: true);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, true);
 
             // ASSERT
 
@@ -126,13 +120,21 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
-            var value = new TestRecord<bool>(true);
+            TestRecord<bool>? value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, removeTypeDiscriminatorProperty: false);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, false);
 
             // ASSERT
 
             bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelope.TypeDiscriminatorPropertyName).ShouldBe(true);
+        }
+
+        public interface IRecord
+        {
+        }
+
+        public record TestRecord<T>(T TestProperty) : IRecord
+        {
         }
     }
 }

@@ -10,7 +10,8 @@ namespace EntityDb.Redis.Snapshots
     {
         private readonly List<Guid> _disposeEntityIds = new();
 
-        public TestModeRedisSnapshotRepository(IRedisSession redisSession, string keyNamespace) : base(redisSession, keyNamespace)
+        public TestModeRedisSnapshotRepository(IRedisSession redisSession, string keyNamespace) : base(redisSession,
+            keyNamespace)
         {
         }
 
@@ -21,13 +22,13 @@ namespace EntityDb.Redis.Snapshots
             return base.PutSnapshot(entityId, entity);
         }
 
-        public async override ValueTask DisposeAsync()
+        public override async ValueTask DisposeAsync()
         {
             await RedisSession.ExecuteCommand
             (
                 (serviceProvider, redisTransaction) =>
                 {
-                    var tasks = _disposeEntityIds
+                    Task<bool>[]? tasks = _disposeEntityIds
                         .Select(GetKey)
                         .Select(key => redisTransaction.KeyDeleteAsync(key))
                         .ToArray();

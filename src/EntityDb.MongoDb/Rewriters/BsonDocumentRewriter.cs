@@ -48,7 +48,7 @@ namespace EntityDb.MongoDb.Rewriters
         {
             _bsonWriter.WriteStartDocument();
 
-            foreach (var bsonElement in bsonElements)
+            foreach (BsonElement bsonElement in bsonElements)
             {
                 _bsonWriter.WriteName(bsonElement.Name);
 

@@ -9,7 +9,9 @@ namespace EntityDb.Redis.Snapshots
 {
     internal sealed class TestModeRedisSnapshotRepositoryFactory<TEntity> : RedisSnapshotRepositoryFactory<TEntity>
     {
-        public TestModeRedisSnapshotRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace) : base(loggerFactory, resolvingStrategyChain, connectionString, keyNamespace)
+        public TestModeRedisSnapshotRepositoryFactory(ILoggerFactory loggerFactory,
+            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace) : base(
+            loggerFactory, resolvingStrategyChain, connectionString, keyNamespace)
         {
         }
 
@@ -18,7 +20,8 @@ namespace EntityDb.Redis.Snapshots
             return new TestModeRedisSnapshotRepository<TEntity>(redisSession, _keyNamespace);
         }
 
-        public static new TestModeRedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider, string connectionString, string keyNamespace)
+        public static new TestModeRedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
+            string connectionString, string keyNamespace)
         {
             return ActivatorUtilities.CreateInstance<TestModeRedisSnapshotRepositoryFactory<TEntity>>
             (

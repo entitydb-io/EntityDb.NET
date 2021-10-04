@@ -23,7 +23,7 @@ jobs:
     runs-on: windows-latest
     needs: extract
     env:
-      NOTES: ${{ needs.extract.outputs.notes }} 
+      NOTES: ${{ needs.extract.outputs.notes }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2

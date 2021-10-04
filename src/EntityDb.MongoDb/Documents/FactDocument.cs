@@ -17,14 +17,13 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record FactDocument : DocumentBase, IEntityDocument
     {
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-        public ulong EntitySubversionNumber { get; init; }
+        public const string CollectionName = "Facts";
 
         private static readonly FactFilterBuilder _factFilterBuilder = new();
         private static readonly FactSortBuilder _factSortBuilder = new();
-
-        public const string CollectionName = "Facts";
+        public ulong EntitySubversionNumber { get; init; }
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
 
         public static IReadOnlyCollection<FactDocument> BuildMany<TEntity>
         (

@@ -1,7 +1,6 @@
 ﻿using EntityDb.MongoDb.Provisioner.Commands;
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner
@@ -15,13 +14,13 @@ namespace EntityDb.MongoDb.Provisioner
             {
                 Console.Write("Please enter args: ");
 
-                var input = Console.ReadLine() ?? string.Empty;
+                string? input = Console.ReadLine() ?? string.Empty;
 
                 args = input.Split(' ');
             }
 #endif
 
-            var rootCommand = new RootCommand();
+            RootCommand? rootCommand = new RootCommand();
 
             CreateRole.AddTo(rootCommand);
             CreateUser.AddTo(rootCommand);

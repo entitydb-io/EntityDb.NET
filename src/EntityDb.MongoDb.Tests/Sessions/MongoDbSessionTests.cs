@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Loggers;
+﻿using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Sessions;
@@ -25,13 +26,14 @@ namespace EntityDb.MongoDb.Tests.Sessions
         {
             // ARRANGE
 
-            var mongoDbSession = new MongoDbSession(default!, default!, _logger, default!);
+            MongoDbSession? mongoDbSession = new MongoDbSession(default!, default!, _logger, default!);
 
-            var mongoDbRepository = new MongoDbTransactionRepository<TransactionEntity>(mongoDbSession);
+            MongoDbTransactionRepository<TransactionEntity>? mongoDbRepository =
+                new MongoDbTransactionRepository<TransactionEntity>(mongoDbSession);
 
             // ACT
 
-            var facts = await mongoDbRepository.GetFacts(new GetEntityQuery(Guid.NewGuid(), 0));
+            IFact<TransactionEntity>[]? facts = await mongoDbRepository.GetFacts(new GetEntityQuery(Guid.NewGuid(), 0));
 
             // ASSERT
 

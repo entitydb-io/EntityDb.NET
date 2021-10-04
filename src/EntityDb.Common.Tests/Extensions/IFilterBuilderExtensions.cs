@@ -9,12 +9,9 @@ namespace EntityDb.Common.Tests.Extensions
 {
     public class IFilterBuilderExtensionsTests
     {
-        private record SingleInput(bool Input1, bool ExpectedOutput);
-        private record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
-
         private IFilterBuilder<bool> GetFilterBuilder()
         {
-            var filterBuilderMock = new Mock<IFilterBuilder<bool>>(MockBehavior.Strict);
+            Mock<IFilterBuilder<bool>>? filterBuilderMock = new Mock<IFilterBuilder<bool>>(MockBehavior.Strict);
 
             filterBuilderMock
                 .Setup(builder => builder.Not(It.IsAny<bool>()))
@@ -36,19 +33,15 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new SingleInput[]
-            {
-                new(true, false),
-                new(false, true),
-            };
+            SingleInput[]? truthTable = new SingleInput[] { new(true, false), new(false, true) };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Not(entry.Input1);
+                bool actualOutput = filterBuilder.Not(entry.Input1);
 
                 // ASSERT
 
@@ -61,21 +54,18 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, true),
+                new(false, false, false), new(false, true, false), new(true, false, false), new(true, true, true)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.And(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.And(entry.Input1, entry.Input2);
 
                 // ASSERT
 
@@ -89,21 +79,18 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, true)
+                new(false, false, false), new(false, true, true), new(true, false, true), new(true, true, true)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Or(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.Or(entry.Input1, entry.Input2);
 
                 // ASSERT
 
@@ -116,21 +103,18 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, false),
+                new(false, false, true), new(false, true, true), new(true, false, true), new(true, true, false)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Nand(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.Nand(entry.Input1, entry.Input2);
 
                 // ASSERT
 
@@ -143,21 +127,18 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, false),
+                new(false, false, true), new(false, true, false), new(true, false, false), new(true, true, false)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Nor(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.Nor(entry.Input1, entry.Input2);
 
                 // ASSERT
 
@@ -171,21 +152,18 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, false),
-                new(false, true, true),
-                new(true, false, true),
-                new(true, true, false),
+                new(false, false, false), new(false, true, true), new(true, false, true), new(true, true, false)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Xor(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.Xor(entry.Input1, entry.Input2);
 
                 // ASSERT
 
@@ -198,26 +176,27 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            var truthTable = new DoubleInput[]
+            DoubleInput[]? truthTable = new DoubleInput[]
             {
-                new(false, false, true),
-                new(false, true, false),
-                new(true, false, false),
-                new(true, true, true),
+                new(false, false, true), new(false, true, false), new(true, false, false), new(true, true, true)
             };
 
-            var filterBuilder = GetFilterBuilder();
+            IFilterBuilder<bool>? filterBuilder = GetFilterBuilder();
 
             foreach (var entry in truthTable)
             {
                 // ACT
 
-                var actualOutput = filterBuilder.Xnor(entry.Input1, entry.Input2);
+                bool actualOutput = filterBuilder.Xnor(entry.Input1, entry.Input2);
 
                 // ASSERT
 
                 actualOutput.ShouldBe(entry.ExpectedOutput);
             }
         }
+
+        private record SingleInput(bool Input1, bool ExpectedOutput);
+
+        private record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
+using StackExchange.Redis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -11,18 +12,13 @@ namespace EntityDb.Redis.Snapshots
     {
         private readonly string _keyNamespace;
 
-        public IRedisSession RedisSession { get; }
-
         public RedisSnapshotRepository(IRedisSession redisSession, string keyNamespace)
         {
             RedisSession = redisSession;
             _keyNamespace = keyNamespace;
         }
 
-        protected string GetKey(Guid entityId)
-        {
-            return $"{_keyNamespace}#{entityId}";
-        }
+        public IRedisSession RedisSession { get; }
 
         public virtual Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
@@ -30,11 +26,11 @@ namespace EntityDb.Redis.Snapshots
             (
                 (serviceProvider, redisTransaction) =>
                 {
-                    var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, serviceProvider);
+                    JsonElementEnvelope? jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, serviceProvider);
 
-                    var snapshotValue = jsonElementEnvelope.Serialize(serviceProvider);
+                    byte[]? snapshotValue = jsonElementEnvelope.Serialize(serviceProvider);
 
-                    var key = GetKey(entityId);
+                    string? key = GetKey(entityId);
 
                     return redisTransaction.StringSetAsync(key, snapshotValue);
                 }
@@ -47,13 +43,14 @@ namespace EntityDb.Redis.Snapshots
             (
                 async (logger, resolvingStrategyChain, redisDatabase) =>
                 {
-                    var key = GetKey(entityId);
+                    string? key = GetKey(entityId);
 
-                    var snapshotValue = await redisDatabase.StringGetAsync(key);
+                    RedisValue snapshotValue = await redisDatabase.StringGetAsync(key);
 
                     if (snapshotValue.HasValue)
                     {
-                        var jsonElementEnvelope = JsonElementEnvelope.Deserialize(snapshotValue, logger);
+                        JsonElementEnvelope? jsonElementEnvelope =
+                            JsonElementEnvelope.Deserialize(snapshotValue, logger);
 
                         return jsonElementEnvelope.Reconstruct<TEntity>(logger, resolvingStrategyChain);
                     }
@@ -70,9 +67,14 @@ namespace EntityDb.Redis.Snapshots
             DisposeAsync().AsTask().Wait();
         }
 
-        public async virtual ValueTask DisposeAsync()
+        public virtual async ValueTask DisposeAsync()
         {
             await RedisSession.DisposeAsync();
+        }
+
+        protected string GetKey(Guid entityId)
+        {
+            return $"{_keyNamespace}#{entityId}";
         }
     }
 }

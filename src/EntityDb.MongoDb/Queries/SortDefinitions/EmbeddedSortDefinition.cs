@@ -8,30 +8,35 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
 {
     internal class EmbeddedSortDefinition<TParentDocument, TEmbeddedDocument> : SortDefinition<TParentDocument>
     {
-        private readonly FieldDefinition<TParentDocument> _parentField;
         private readonly SortDefinition<TEmbeddedDocument> _childSort;
         private readonly string[] _hoistedFieldNames;
+        private readonly FieldDefinition<TParentDocument> _parentField;
 
-        public EmbeddedSortDefinition(FieldDefinition<TParentDocument> parentField, SortDefinition<TEmbeddedDocument> childSort, string[] hoistedFieldNames)
+        public EmbeddedSortDefinition(FieldDefinition<TParentDocument> parentField,
+            SortDefinition<TEmbeddedDocument> childSort, string[] hoistedFieldNames)
         {
             _parentField = parentField;
             _childSort = childSort;
             _hoistedFieldNames = hoistedFieldNames;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer, IBsonSerializerRegistry bsonSerializerRegistry)
+        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
+            IBsonSerializerRegistry bsonSerializerRegistry)
         {
-            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
+            RenderedFieldDefinition? renderedParentField =
+                _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
 
-            var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
+            IBsonSerializer<TEmbeddedDocument>? childDocumentSerializer =
+                bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
 
-            var renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry);
+            BsonDocument? renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry);
 
-            var document = new BsonDocument();
+            BsonDocument? document = new BsonDocument();
 
-            using var bsonWriter = new BsonDocumentWriter(document);
+            using BsonDocumentWriter? bsonWriter = new BsonDocumentWriter(document);
 
-            var embeddedSortRewriter = new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+            EmbeddedSortRewriter? embeddedSortRewriter =
+                new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedSortRewriter.Rewrite(renderedChildSort);
 

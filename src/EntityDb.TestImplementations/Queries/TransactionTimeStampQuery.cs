@@ -5,9 +5,10 @@ using System;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery, ITagQuery
+    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : ISourceQuery, ICommandQuery, IFactQuery,
+        ILeaseQuery, ITagQuery
     {
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
@@ -16,12 +17,13 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
+        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
-            return builder.And
+            return builder.Combine
             (
-                builder.TransactionTimeStampGte(Gte),
-                builder.TransactionTimeStampLte(Lte)
+                builder.TransactionTimeStamp(true),
+                builder.EntityId(true),
+                builder.EntityVersionNumber(true)
             );
         }
 
@@ -34,6 +36,17 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
+        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        {
+            return builder.Combine
+            (
+                builder.TransactionTimeStamp(true),
+                builder.EntityId(true),
+                builder.EntityVersionNumber(true),
+                builder.EntitySubversionNumber(true)
+            );
+        }
+
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
             return builder.And
@@ -43,7 +56,17 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        {
+            return builder.Combine
+            (
+                builder.TransactionTimeStamp(true),
+                builder.EntityId(true),
+                builder.EntityVersionNumber(true)
+            );
+        }
+
+        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
@@ -60,34 +83,16 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.TransactionTimeStamp(true),
-                builder.EntityId(true),
-                builder.EntityVersionNumber(true)
-            );
-        }
+        public int? Skip => null;
 
-        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.TransactionTimeStamp(true),
-                builder.EntityId(true),
-                builder.EntityVersionNumber(true),
-                builder.EntitySubversionNumber(true)
-            );
-        }
+        public int? Take => null;
 
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {
-            return builder.Combine
+            return builder.And
             (
-                builder.TransactionTimeStamp(true),
-                builder.EntityId(true),
-                builder.EntityVersionNumber(true)
+                builder.TransactionTimeStampGte(Gte),
+                builder.TransactionTimeStampLte(Lte)
             );
         }
 
@@ -100,9 +105,5 @@ namespace EntityDb.TestImplementations.Queries
                 builder.EntityVersionNumber(true)
             );
         }
-
-        public int? Skip => null;
-
-        public int? Take => null;
     }
 }

@@ -5,7 +5,9 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedCommandQuery(ICommandQuery CommandQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(CommandQuery, ModifiedQueryOptions), ICommandQuery
+    internal sealed record ModifiedCommandQuery
+        (ICommandQuery CommandQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(CommandQuery,
+            ModifiedQueryOptions), ICommandQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {

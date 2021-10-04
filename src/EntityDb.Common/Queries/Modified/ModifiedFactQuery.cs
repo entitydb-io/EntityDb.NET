@@ -5,7 +5,9 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedFactQuery(IFactQuery FactQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(FactQuery, ModifiedQueryOptions), IFactQuery
+    internal sealed record ModifiedFactQuery
+        (IFactQuery FactQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(FactQuery,
+            ModifiedQueryOptions), IFactQuery
     {
         public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
         {

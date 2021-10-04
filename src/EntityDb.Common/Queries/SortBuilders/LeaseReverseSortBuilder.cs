@@ -4,7 +4,9 @@ using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders
 {
-    internal sealed record LeaseReverseSortBuilder<TSort>(ILeaseSortBuilder<TSort> LeaseSortBuilder) : ReverseSortBuilderBase<TSort>(LeaseSortBuilder), ILeaseSortBuilder<TSort>
+    internal sealed record LeaseReverseSortBuilder<TSort>
+        (ILeaseSortBuilder<TSort> LeaseSortBuilder) : ReverseSortBuilderBase<TSort>(LeaseSortBuilder),
+            ILeaseSortBuilder<TSort>
     {
         public TSort EntityId(bool ascending)
         {

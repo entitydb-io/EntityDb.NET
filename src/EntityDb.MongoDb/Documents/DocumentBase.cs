@@ -13,16 +13,17 @@ namespace EntityDb.MongoDb.Documents
 {
     internal abstract record DocumentBase : ITransactionDocument
     {
-        [BsonIgnoreIfNull]
-        public ObjectId? _id { get; init; }
-        public DateTime TransactionTimeStamp { get; init; }
-        public Guid TransactionId { get; init; }
-        public BsonDocumentEnvelope Data { get; init; } = default!;
-
         static DocumentBase()
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
         }
+
+        public DateTime TransactionTimeStamp { get; init; }
+
+        [BsonIgnoreIfNull] public ObjectId? _id { get; init; }
+
+        public Guid TransactionId { get; init; }
+        public BsonDocumentEnvelope Data { get; init; } = default!;
 
         public static IMongoCollection<BsonDocument> GetMongoCollection
         (
@@ -40,13 +41,13 @@ namespace EntityDb.MongoDb.Documents
             TDocument document
         )
         {
-            var bsonDocument = document.ToBsonDocument();
+            BsonDocument? bsonDocument = document.ToBsonDocument();
 
             return mongoCollection
                 .InsertOneAsync
                 (
-                    session: clientSessionHandle,
-                    document: bsonDocument
+                    clientSessionHandle,
+                    bsonDocument
                 );
         }
 
@@ -62,15 +63,15 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            var bsonDocuments = documents
+            BsonDocument[]? bsonDocuments = documents
                 .Select(document => document.ToBsonDocument())
                 .ToArray();
 
             await mongoCollection
                 .InsertManyAsync
                 (
-                    session: clientSessionHandle,
-                    documents: bsonDocuments
+                    clientSessionHandle,
+                    bsonDocuments
                 );
         }
 
@@ -84,8 +85,8 @@ namespace EntityDb.MongoDb.Documents
             return mongoCollection
                 .DeleteManyAsync
                 (
-                    session: clientSessionHandle,
-                    filter: documentFilter
+                    clientSessionHandle,
+                    documentFilter
                 );
         }
     }

@@ -7,7 +7,7 @@ namespace EntityDb.Common.Loggers
     {
         public void LogError(Exception exception, string message)
         {
-            var eventId = new EventId(exception.GetHashCode(), exception.GetType().Name);
+            EventId eventId = new EventId(exception.GetHashCode(), exception.GetType().Name);
 
             Logger.LogError(eventId, exception, message);
         }

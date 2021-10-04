@@ -25,23 +25,10 @@ namespace EntityDb.Redis.Sessions
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation, Func<Task<TResult>> catchResult)
+        public Task<TResult> ExecuteQuery<TResult>(
+            Func<ILogger, IResolvingStrategyChain, IDatabase, Task<TResult>> query, TResult defaultResult)
         {
-            try
-            {
-                return await tryOperation.Invoke();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
-
-                return await catchResult.Invoke();
-            }
-        }
-
-        public Task<TResult> ExecuteQuery<TResult>(Func<ILogger, IResolvingStrategyChain, IDatabase, Task<TResult>> query, TResult defaultResult)
-        {
-            var redisDatabase = _connectionMultiplexer.GetDatabase();
+            IDatabase? redisDatabase = _connectionMultiplexer.GetDatabase();
 
             return Execute
             (
@@ -52,13 +39,13 @@ namespace EntityDb.Redis.Sessions
 
         public virtual async Task<bool> ExecuteCommand(Func<ILogger, ITransaction, Task<bool>> command)
         {
-            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
+            ITransaction? redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
 
             return await Execute(TryCommit, Abort);
 
             async Task<bool> TryCommit()
             {
-                var commandTask = command.Invoke(_logger, redisTransaction);
+                Task<bool>? commandTask = command.Invoke(_logger, redisTransaction);
 
                 await redisTransaction.ExecuteAsync();
 
@@ -82,6 +69,21 @@ namespace EntityDb.Redis.Sessions
             await Task.Yield();
 
             _connectionMultiplexer.Dispose();
+        }
+
+        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation,
+            Func<Task<TResult>> catchResult)
+        {
+            try
+            {
+                return await tryOperation.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed.");
+
+                return await catchResult.Invoke();
+            }
         }
     }
 }

@@ -14,19 +14,20 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var expectedType = typeof(string);
+            Type? expectedType = typeof(string);
 
-            var headers = new Dictionary<string, string>
+            Dictionary<string, string>? headers = new Dictionary<string, string>
             {
                 [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-                [EnvelopeHelper.MemberInfoName] = expectedType.Name,
+                [EnvelopeHelper.MemberInfoName] = expectedType.Name
             };
 
-            var resolvingStrategy = new MemberInfoNameResolvingStrategy(new[] { expectedType });
+            MemberInfoNameResolvingStrategy? resolvingStrategy =
+                new MemberInfoNameResolvingStrategy(new[] { expectedType });
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -38,13 +39,14 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new MemberInfoNameResolvingStrategy(new[] { typeof(string) });
+            MemberInfoNameResolvingStrategy? resolvingStrategy =
+                new MemberInfoNameResolvingStrategy(new[] { typeof(string) });
 
-            var headers = new Dictionary<string, string>();
+            Dictionary<string, string>? headers = new Dictionary<string, string>();
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 
@@ -56,17 +58,17 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new MemberInfoNameResolvingStrategy(Array.Empty<Type>());
+            MemberInfoNameResolvingStrategy? resolvingStrategy =
+                new MemberInfoNameResolvingStrategy(Array.Empty<Type>());
 
-            var headers = new Dictionary<string, string>
+            Dictionary<string, string>? headers = new Dictionary<string, string>
             {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-                [EnvelopeHelper.MemberInfoName] = "",
+                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform, [EnvelopeHelper.MemberInfoName] = ""
             };
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            Type? actualType = resolvingStrategy.ResolveType(headers);
 
             // ASSERT
 

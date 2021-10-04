@@ -13,7 +13,8 @@ namespace EntityDb.MongoDb.Envelopes
 {
     internal sealed record BsonDocumentEnvelope
     (
-        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)] Dictionary<string, string> Headers,
+        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)]
+        Dictionary<string, string> Headers,
         BsonDocument Value
     )
     {
@@ -21,7 +22,7 @@ namespace EntityDb.MongoDb.Envelopes
 
         private static BsonDocument GetBsonDocument(dynamic? @object, bool removeTypeDiscriminatorProperty)
         {
-            var bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
+            dynamic? bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
 
             if (removeTypeDiscriminatorProperty && bsonDocument.Contains(TypeDiscriminatorPropertyName))
             {
@@ -68,7 +69,7 @@ namespace EntityDb.MongoDb.Envelopes
         {
             try
             {
-                var bsonDocument = new RawBsonDocument(bsonBytes);
+                RawBsonDocument? bsonDocument = new RawBsonDocument(bsonBytes);
 
                 return (BsonDocumentEnvelope)BsonSerializer.Deserialize(bsonDocument, typeof(BsonDocumentEnvelope));
             }
@@ -80,13 +81,14 @@ namespace EntityDb.MongoDb.Envelopes
             }
         }
 
-        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger, bool removeTypeDiscriminatorProperty = true)
+        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger,
+            bool removeTypeDiscriminatorProperty = true)
         {
             try
             {
-                var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
+                dynamic? bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
 
-                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+                Dictionary<string, string>? headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new BsonDocumentEnvelope
                 (

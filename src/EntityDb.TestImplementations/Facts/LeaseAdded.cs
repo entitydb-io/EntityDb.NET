@@ -10,7 +10,7 @@ namespace EntityDb.TestImplementations.Facts
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            var leases = new List<ILease>();
+            List<ILease>? leases = new List<ILease>();
 
             if (entity.Leases != null)
             {
@@ -19,10 +19,7 @@ namespace EntityDb.TestImplementations.Facts
 
             leases.Add(new Lease(LeaseScope, LeaseLabel, LeaseValue));
 
-            return entity with
-            {
-                Leases = leases.ToArray(),
-            };
+            return entity with { Leases = leases.ToArray() };
         }
     }
 }

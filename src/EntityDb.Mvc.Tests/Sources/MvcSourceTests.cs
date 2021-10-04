@@ -38,31 +38,31 @@ namespace EntityDb.Mvc.Tests.Sources
             string claimValue
         )
         {
-            var headers = new Dictionary<string, StringValues>
+            Dictionary<string, StringValues>? headers = new Dictionary<string, StringValues>
             {
-                [headerName] = new StringValues(headerValue),
+                [headerName] = new(headerValue)
             };
 
-            var claimsPrincipal = new ClaimsPrincipal();
-            var claimsIdentity = new ClaimsIdentity();
-            var claim = new Claim(claimType, claimValue);
+            ClaimsPrincipal? claimsPrincipal = new();
+            ClaimsIdentity? claimsIdentity = new();
+            Claim? claim = new(claimType, claimValue);
 
             claimsIdentity.AddClaim(claim);
             claimsPrincipal.AddIdentity(claimsIdentity);
 
-            var headerDictionaryMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
+            Mock<IHeaderDictionary>? headerDictionaryMock = new(MockBehavior.Strict);
 
             headerDictionaryMock
                 .Setup(dictionary => dictionary.GetEnumerator())
                 .Returns(headers.GetEnumerator());
 
-            var httpRequestMock = new Mock<HttpRequest>(MockBehavior.Strict);
+            Mock<HttpRequest>? httpRequestMock = new(MockBehavior.Strict);
 
             httpRequestMock
                 .SetupGet(request => request.Headers)
                 .Returns(headerDictionaryMock.Object);
 
-            var connectionInfoMock = new Mock<ConnectionInfo>(MockBehavior.Strict);
+            Mock<ConnectionInfo>? connectionInfoMock = new(MockBehavior.Strict);
 
             connectionInfoMock
                 .SetupGet(info => info.Id)
@@ -84,7 +84,7 @@ namespace EntityDb.Mvc.Tests.Sources
                 .SetupGet(info => info.LocalPort)
                 .Returns(localPort);
 
-            var httpContextMock = new Mock<HttpContext>(MockBehavior.Strict);
+            Mock<HttpContext>? httpContextMock = new(MockBehavior.Strict);
 
             httpContextMock
                 .SetupGet(context => context.Request)
@@ -102,7 +102,8 @@ namespace EntityDb.Mvc.Tests.Sources
         }
 
         [Theory]
-        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role,
+            "TestRole")]
         [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
         public void GivenHttpContext_ThenBuildMvcSource
         (
@@ -119,11 +120,12 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             // ARRANGE
 
-            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
+            HttpContext? httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress,
+                remotePort, localIpAddress, localPort, claimType, claimValue);
 
             // ACT
 
-            var mvcSource = MvcSource.FromHttpContext(httpContext);
+            MvcSource? mvcSource = MvcSource.FromHttpContext(httpContext);
 
             // ASSERT
 
@@ -140,7 +142,8 @@ namespace EntityDb.Mvc.Tests.Sources
         }
 
         [Theory]
-        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role, "TestRole")]
+        [InlineData("Content-Type", "application/json", "", "127.0.0.1", 80, "127.0.0.1", 80, ClaimTypes.Role,
+            "TestRole")]
         [InlineData("Content-Type", "application/json", "", null, 80, null, 80, ClaimTypes.Role, "TestRole")]
         public void CanDeconstructMvcSourceAsBsonDocumentEnvelope
         (
@@ -157,15 +160,17 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             // ARRANGE
 
-            var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort, localIpAddress, localPort, claimType, claimValue);
+            HttpContext? httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress,
+                remotePort, localIpAddress, localPort, claimType, claimValue);
 
-            var originalMvcSource = MvcSource.FromHttpContext(httpContext);
+            MvcSource? originalMvcSource = MvcSource.FromHttpContext(httpContext);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _logger);
+            BsonDocumentEnvelope? bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _logger);
 
             // ACT
 
-            var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(_logger, _resolvingStrategyChain);
+            MvcSource? reconstructedMvcSource =
+                bsonDocumentEnvelope.Reconstruct<MvcSource>(_logger, _resolvingStrategyChain);
 
             // ASSERT
 

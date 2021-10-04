@@ -1,9 +1,11 @@
 ﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,11 +15,6 @@ namespace EntityDb.Common.Entities
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ITransactionRepository<TEntity> _transactionRepository;
-        private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
-
-        public ITransactionRepository<TEntity> TransactionRepository => _transactionRepository;
-        public ISnapshotRepository<TEntity>? SnapshotRepository => _snapshotRepository;
 
         public EntityRepository
         (
@@ -27,26 +24,30 @@ namespace EntityDb.Common.Entities
         )
         {
             _serviceProvider = serviceProvider;
-            _transactionRepository = transactionRepository;
-            _snapshotRepository = snapshotRepository;
+            TransactionRepository = transactionRepository;
+            SnapshotRepository = snapshotRepository;
         }
+
+        public ITransactionRepository<TEntity> TransactionRepository { get; }
+
+        public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
         public async Task<TEntity> Get(Guid entityId)
         {
             TEntity? snapshot = default;
 
-            if (_snapshotRepository != null)
+            if (SnapshotRepository != null)
             {
-                snapshot = await _snapshotRepository.GetSnapshot(entityId);
+                snapshot = await SnapshotRepository.GetSnapshot(entityId);
             }
 
-            var entity = snapshot ?? _serviceProvider.Construct<TEntity>(entityId);
+            TEntity? entity = snapshot ?? _serviceProvider.Construct<TEntity>(entityId);
 
-            var versionNumber = _serviceProvider.GetVersionNumber(entity);
+            ulong versionNumber = _serviceProvider.GetVersionNumber(entity);
 
-            var factQuery = new GetEntityQuery(entityId, versionNumber);
+            GetEntityQuery? factQuery = new GetEntityQuery(entityId, versionNumber);
 
-            var facts = await _transactionRepository.GetFacts(factQuery);
+            IFact<TEntity>[]? facts = await TransactionRepository.GetFacts(factQuery);
 
             entity = entity.Reduce(facts);
 
@@ -55,9 +56,9 @@ namespace EntityDb.Common.Entities
 
         public Task<bool> Put(ITransaction<TEntity> transaction)
         {
-            if (_snapshotRepository != null)
+            if (SnapshotRepository != null)
             {
-                var lastCommands = transaction.Commands
+                IEnumerable<ITransactionCommand<TEntity>>? lastCommands = transaction.Commands
                     .GroupBy(command => command.EntityId)
                     .Select(group => group.Last());
 
@@ -65,12 +66,12 @@ namespace EntityDb.Common.Entities
                 {
                     if (_serviceProvider.ShouldPutSnapshot(lastCommand.PreviousSnapshot, lastCommand.NextSnapshot))
                     {
-                        _snapshotRepository.PutSnapshot(lastCommand.EntityId, lastCommand.NextSnapshot);
+                        SnapshotRepository.PutSnapshot(lastCommand.EntityId, lastCommand.NextSnapshot);
                     }
                 }
             }
 
-            return _transactionRepository.PutTransaction(transaction);
+            return TransactionRepository.PutTransaction(transaction);
         }
 
         [ExcludeFromCodeCoverage]
@@ -81,11 +82,11 @@ namespace EntityDb.Common.Entities
 
         public async ValueTask DisposeAsync()
         {
-            await _transactionRepository.DisposeAsync();
+            await TransactionRepository.DisposeAsync();
 
-            if (_snapshotRepository != null)
+            if (SnapshotRepository != null)
             {
-                await _snapshotRepository.DisposeAsync();
+                await SnapshotRepository.DisposeAsync();
             }
         }
     }

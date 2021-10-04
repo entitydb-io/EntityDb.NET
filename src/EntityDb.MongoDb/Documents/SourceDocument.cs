@@ -15,12 +15,11 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record SourceDocument : DocumentBase, IEntitiesDocument
     {
-        public Guid[] EntityIds { get; init; } = default!;
+        public const string CollectionName = "Sources";
 
         private static readonly SourceFilterBuilder _sourceFilterBuilder = new();
         private static readonly SourceSortBuilder _sourceSortBuilder = new();
-
-        public const string CollectionName = "Sources";
+        public Guid[] EntityIds { get; init; } = default!;
 
         public static SourceDocument BuildOne<TEntity>
         (

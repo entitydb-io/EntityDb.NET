@@ -7,7 +7,8 @@ using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders
 {
-    internal sealed class CommandFilterBuilder : FilterBuilderBase, ICommandFilterBuilder<FilterDefinition<BsonDocument>>
+    internal sealed class CommandFilterBuilder : FilterBuilderBase,
+        ICommandFilterBuilder<FilterDefinition<BsonDocument>>
     {
         public FilterDefinition<BsonDocument> EntityIdIn(params Guid[] entityIds)
         {
@@ -29,7 +30,8 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
             return DataTypeIn(commandTypes);
         }
 
-        public FilterDefinition<BsonDocument> CommandMatches<TCommand>(Expression<Func<TCommand, bool>> commandExpression)
+        public FilterDefinition<BsonDocument> CommandMatches<TCommand>(
+            Expression<Func<TCommand, bool>> commandExpression)
         {
             return DataValueMatches(commandExpression);
         }

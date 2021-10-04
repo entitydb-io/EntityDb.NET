@@ -29,7 +29,8 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
-        public override async Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
+        public override async Task<bool> ExecuteCommand(
+            Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
         {
             if (_clientSessionHandle == null)
             {

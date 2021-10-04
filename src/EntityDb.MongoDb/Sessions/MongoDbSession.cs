@@ -13,8 +13,8 @@ namespace EntityDb.MongoDb.Sessions
     internal class MongoDbSession : IMongoDbSession
     {
         protected readonly IClientSessionHandle? _clientSessionHandle;
-        protected readonly IMongoDatabase _mongoDatabase;
         protected readonly ILogger _logger;
+        protected readonly IMongoDatabase _mongoDatabase;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
 
         public MongoDbSession
@@ -31,30 +31,20 @@ namespace EntityDb.MongoDb.Sessions
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation, Func<Task<TResult>> catchResult)
-        {
-            try
-            {
-                return await tryOperation.Invoke();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
-
-                return await catchResult.Invoke();
-            }
-        }
-
-        public Task<TData[]> ExecuteDataQuery<TDocument, TData>(Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder) where TDocument : ITransactionDocument
+        public Task<TData[]> ExecuteDataQuery<TDocument, TData>(
+            Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder)
+            where TDocument : ITransactionDocument
         {
             return Execute
             (
-                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase).GetModels<TData>(_logger, _resolvingStrategyChain),
+                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase)
+                    .GetModels<TData>(_logger, _resolvingStrategyChain),
                 () => Task.FromResult(Array.Empty<TData>())
             );
         }
 
-        public Task<Guid[]> ExecuteGuidQuery<TDocument>(Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder)
+        public Task<Guid[]> ExecuteGuidQuery<TDocument>(
+            Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder)
         {
             return Execute
             (
@@ -64,7 +54,8 @@ namespace EntityDb.MongoDb.Sessions
         }
 
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
-        public virtual async Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
+        public virtual async Task<bool> ExecuteCommand(
+            Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command)
         {
             if (_clientSessionHandle == null)
             {
@@ -107,6 +98,21 @@ namespace EntityDb.MongoDb.Sessions
             if (_clientSessionHandle != null)
             {
                 _clientSessionHandle.Dispose();
+            }
+        }
+
+        protected async Task<TResult> Execute<TResult>(Func<Task<TResult>> tryOperation,
+            Func<Task<TResult>> catchResult)
+        {
+            try
+            {
+                return await tryOperation.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed.");
+
+                return await catchResult.Invoke();
             }
         }
     }

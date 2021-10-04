@@ -1,4 +1,5 @@
-﻿using EntityDb.Common.Extensions;
+﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Shouldly;
@@ -22,20 +23,18 @@ namespace EntityDb.Common.Tests.Snapshots
         {
             // ARRANGE
 
-            var expectedSnapshot = new TransactionEntity
-            {
-                VersionNumber = 300
-            };
+            TransactionEntity? expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
 
-            var entityId = Guid.NewGuid();
+            Guid entityId = Guid.NewGuid();
 
-            await using var snapshotRepository = await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            await using ISnapshotRepository<TransactionEntity>? snapshotRepository =
+                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             // ACT
 
-            var snapshotInserted = await snapshotRepository.PutSnapshot(entityId, expectedSnapshot);
+            bool snapshotInserted = await snapshotRepository.PutSnapshot(entityId, expectedSnapshot);
 
-            var actualSnapshot = await snapshotRepository.GetSnapshot(entityId);
+            TransactionEntity? actualSnapshot = await snapshotRepository.GetSnapshot(entityId);
 
             // ASSERT
 
