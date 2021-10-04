@@ -13,9 +13,10 @@ namespace EntityDb.MongoDb.Transactions
 {
     internal class MongoDbTransactionRepositoryFactory<TEntity> : ITransactionRepositoryFactory<TEntity>
     {
+        private readonly string _connectionString;
+
         protected readonly ILogger _logger;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
-        protected readonly string _connectionString;
         protected readonly string _databaseName;
 
         public MongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
@@ -39,31 +40,35 @@ namespace EntityDb.MongoDb.Transactions
             });
         }
 
-        private IMongoClient CreateClient(ITransactionSessionOptions transactionSessionOptions)
+        protected virtual Task<IMongoClient> CreateClient(ITransactionSessionOptions transactionSessionOptions)
         {
-            var mongoClient = new MongoClient(_connectionString);
+            IMongoClient mongoClient = new MongoClient(_connectionString);
 
             if (transactionSessionOptions.SecondaryPreferred)
             {
-                return mongoClient
+                mongoClient = mongoClient
                     .WithReadPreference(ReadPreference.SecondaryPreferred)
                     .WithReadConcern(ReadConcern.Available);
             }
+            else
+            {
+                mongoClient = mongoClient
+                    .WithReadPreference(ReadPreference.Primary)
+                    .WithReadConcern(ReadConcern.Majority);
+            }
 
-            return mongoClient
-                .WithReadPreference(ReadPreference.Primary)
-                .WithReadConcern(ReadConcern.Majority);
+            return Task.FromResult(mongoClient);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
-        internal virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
+        protected virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
         {
             return new MongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger, _resolvingStrategyChain);
         }
 
-        public async Task<IMongoDbSession> CreateSession(ITransactionSessionOptions transactionSessionOptions)
+        private async Task<IMongoDbSession> CreateSession(ITransactionSessionOptions transactionSessionOptions)
         {
-            var mongoClient = CreateClient(transactionSessionOptions);
+            var mongoClient = await CreateClient(transactionSessionOptions);
 
             var mongoDatabase = mongoClient.GetDatabase(_databaseName);
 
