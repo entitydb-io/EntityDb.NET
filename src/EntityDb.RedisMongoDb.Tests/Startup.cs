@@ -1,15 +1,10 @@
 ﻿using EntityDb.Common.Extensions;
-using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mongo2Go;
-using MongoDB.Driver;
-using Redis2Go;
-using System.Threading.Tasks;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 
@@ -20,24 +15,6 @@ namespace EntityDb.RedisMongoDb.Tests
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddDefaultLogger();
-
-            serviceCollection.AddSingleton((serviceProvider) => RedisRunner.Start());
-
-            serviceCollection.AddSingleton((serviceProvider) =>
-            {
-                var mongoDbRunner = MongoDbRunner.Start(singleNodeReplSet: true);
-
-                var provisionTask = Task.Run(async () =>
-                {
-                    var mongoClient = new MongoClient(mongoDbRunner.ConnectionString);
-
-                    await mongoClient.ProvisionCollections(TransactionEntity.MongoCollectionName);
-                });
-
-                provisionTask.Wait();
-
-                return mongoDbRunner;
-            });
 
             serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
@@ -50,19 +27,17 @@ namespace EntityDb.RedisMongoDb.Tests
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
 
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>(TransactionEntity.RedisKeyNamespace, (serviceProvider) =>
-            {
-                var redisRunner = serviceProvider.GetRequiredService<RedisRunner>();
+            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
+            (
+                TransactionEntity.RedisKeyNamespace,
+                _ => "127.0.0.1:6379"
+            );
 
-                return $"127.0.0.1:{redisRunner.Port}";
-            });
-
-            serviceCollection.AddTestModeMongoDbTransactions<TransactionEntity>(TransactionEntity.MongoCollectionName, (serviceProvider) =>
-            {
-                var mongoDbRunner = serviceProvider.GetRequiredService<MongoDbRunner>();
-
-                return mongoDbRunner.ConnectionString;
-            });
+            serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
+            (
+                TransactionEntity.MongoCollectionName,
+                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb"
+            );
         }
 
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)

@@ -3,7 +3,6 @@ using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Redis2Go;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 
@@ -15,25 +14,15 @@ namespace EntityDb.Redis.Tests
         {
             serviceCollection.AddDefaultLogger();
 
-            serviceCollection.AddSingleton((serviceProvider) =>
-            {
-                var task = RedisRunner.StartAsync();
-
-                task.Wait();
-
-                return task.Result;
-            });
-
             serviceCollection.AddDefaultResolvingStrategy();
 
             serviceCollection.AddLifoResolvingStrategyChain();
 
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>(TransactionEntity.RedisKeyNamespace, (serviceProvider) =>
-            {
-                var redisRunner = serviceProvider.GetRequiredService<RedisRunner>();
-
-                return $"127.0.0.1:{redisRunner.Port}";
-            });
+            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
+            (
+                TransactionEntity.RedisKeyNamespace,
+                _ => "127.0.0.1:6379"
+            );
         }
 
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)
