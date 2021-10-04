@@ -5,8 +5,7 @@ using EntityDb.Common.Queries.Filters;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredCommandQuery
-        (ICommandQuery CommandQuery, ICommandFilter CommandFilter) : FilteredQueryBase(CommandQuery), ICommandQuery
+    internal sealed record FilteredCommandQuery(ICommandQuery CommandQuery, ICommandFilter CommandFilter) : FilteredQueryBase(CommandQuery), ICommandQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {

@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Snapshots
 {
-    /// <inheritdoc cref="ISnapshotSessionOptions" />
+    /// <inheritdoc cref="ISnapshotSessionOptions"/>
     public sealed class SnapshotSessionOptions : ISnapshotSessionOptions
     {
     }

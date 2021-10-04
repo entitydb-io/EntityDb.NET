@@ -14,13 +14,12 @@ namespace EntityDb.MongoDb.Transactions
     internal class MongoDbTransactionRepositoryFactory<TEntity> : ITransactionRepositoryFactory<TEntity>
     {
         private readonly string _connectionString;
-        protected readonly string _databaseName;
 
         protected readonly ILogger _logger;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
+        protected readonly string _databaseName;
 
-        public MongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
+        public MongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
         {
             _logger = loggerFactory.CreateLogger<TEntity>();
             _resolvingStrategyChain = resolvingStrategyChain;
@@ -28,24 +27,16 @@ namespace EntityDb.MongoDb.Transactions
             _databaseName = databaseName;
         }
 
-        public async Task<ITransactionRepository<TEntity>> CreateRepository(
-            ITransactionSessionOptions transactionSessionOptions)
-        {
-            IMongoDbSession? mongoDbSession = await CreateSession(transactionSessionOptions);
-
-            return new MongoDbTransactionRepository<TEntity>(mongoDbSession);
-        }
-
-        private static async Task<IClientSessionHandle> CreateClientSessionHandle(IMongoClient mongoClient,
-            ITransactionSessionOptions transactionSessionOptions)
+        private static async Task<IClientSessionHandle> CreateClientSessionHandle(IMongoClient mongoClient, ITransactionSessionOptions transactionSessionOptions)
         {
             return await mongoClient.StartSessionAsync(new ClientSessionOptions
             {
                 CausalConsistency = true,
-                DefaultTransactionOptions = new TransactionOptions(
+                DefaultTransactionOptions = new
+                (
                     writeConcern: WriteConcern.WMajority,
                     maxCommitTime: transactionSessionOptions.WriteTimeout
-                )
+                ),
             });
         }
 
@@ -70,32 +61,35 @@ namespace EntityDb.MongoDb.Transactions
         }
 
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
-        protected virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase, ILogger? loggerOverride)
+        protected virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
         {
-            return new MongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger,
-                _resolvingStrategyChain);
+            return new MongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger, _resolvingStrategyChain);
         }
 
         private async Task<IMongoDbSession> CreateSession(ITransactionSessionOptions transactionSessionOptions)
         {
-            IMongoClient? mongoClient = await CreateClient(transactionSessionOptions);
+            var mongoClient = await CreateClient(transactionSessionOptions);
 
-            IMongoDatabase? mongoDatabase = mongoClient.GetDatabase(_databaseName);
+            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
 
             if (transactionSessionOptions.ReadOnly)
             {
                 return CreateSession(null, mongoDatabase, transactionSessionOptions.LoggerOverride);
             }
 
-            IClientSessionHandle? clientSessionHandle =
-                await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
+            var clientSessionHandle = await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
 
             return CreateSession(clientSessionHandle, mongoDatabase, transactionSessionOptions.LoggerOverride);
         }
 
-        public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
-            string connectionString, string databaseName)
+        public async Task<ITransactionRepository<TEntity>> CreateRepository(ITransactionSessionOptions transactionSessionOptions)
+        {
+            var mongoDbSession = await CreateSession(transactionSessionOptions);
+
+            return new MongoDbTransactionRepository<TEntity>(mongoDbSession);
+        }
+
+        public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider, string connectionString, string databaseName)
         {
             return ActivatorUtilities.CreateInstance<MongoDbTransactionRepositoryFactory<TEntity>>
             (

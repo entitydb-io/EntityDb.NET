@@ -1,17 +1,17 @@
 ﻿namespace EntityDb.Abstractions.Queries
 {
     /// <summary>
-    ///     Abstracts a query for an object repository. Possible objects include: sources, commands, facts, and leases.
+    /// Abstracts a query for an object repository. Possible objects include: sources, commands, facts, and leases.
     /// </summary>
     public interface IQuery
     {
         /// <summary>
-        ///     The number of objects to skip.
+        /// The number of objects to skip.
         /// </summary>
         int? Skip { get; }
 
         /// <summary>
-        ///     The number of objects to take.
+        /// The number of objects to take.
         /// </summary>
         int? Take { get; }
     }

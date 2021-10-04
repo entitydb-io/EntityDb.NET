@@ -24,8 +24,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
             return SortDataType(ascending);
         }
 
-        public SortDefinition<BsonDocument> CommandProperty<TCommand>(bool ascending,
-            Expression<Func<TCommand, object>> commandExpression)
+        public SortDefinition<BsonDocument> CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression)
         {
             return SortDataValue(ascending, commandExpression);
         }

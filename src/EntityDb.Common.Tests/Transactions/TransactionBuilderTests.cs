@@ -1,13 +1,10 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Facts;
-using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Facts;
@@ -31,33 +28,26 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            Mock<IAuthorizingStrategy<TransactionEntity>>? authorizingStrategyMock = new(MockBehavior.Strict);
+            var authorizingStrategyMock = new Mock<IAuthorizingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
             authorizingStrategyMock
-                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
+                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(), It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
                 .Returns(false);
 
-            IAuthorizingStrategy<TransactionEntity>? authorizingStrategy = authorizingStrategyMock.Object;
+            var authorizingStrategy = authorizingStrategyMock.Object;
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[]
-                    {
-                        new NothingDone(), new VersionNumberSet<TransactionEntity>(1)
-                    }));
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new NothingDone(), new VersionNumberSet<TransactionEntity>(1) }));
 
-                serviceCollection.AddScoped(serviceProvider => authorizingStrategy);
+                serviceCollection.AddScoped((serviceProvider) => authorizingStrategy);
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using IEntityRepository<TransactionEntity>? entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
@@ -76,27 +66,24 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            Mock<IAuthorizingStrategy<TransactionEntity>>? authorizingStrategyMock = new(MockBehavior.Strict);
+            var authorizingStrategyMock = new Mock<IAuthorizingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
             authorizingStrategyMock
-                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
+                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(), It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
                 .Returns(false);
 
-            IAuthorizingStrategy<TransactionEntity>? authorizingStrategy = authorizingStrategyMock.Object;
+            var authorizingStrategy = authorizingStrategyMock.Object;
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new NothingDone() }));
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new NothingDone() }));
 
-                serviceCollection.AddScoped(serviceProvider => authorizingStrategy);
+                serviceCollection.AddScoped((serviceProvider) => authorizingStrategy);
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             // ASSERT
 
@@ -111,16 +98,14 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             // ASSERT
 
@@ -135,16 +120,14 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             // ACT
 
@@ -163,20 +146,16 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory(
-                        new IFact<TransactionEntity>[] { new VersionNumberSet<TransactionEntity>(1) }));
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new VersionNumberSet<TransactionEntity>(1) }));
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using IEntityRepository<TransactionEntity>? entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
@@ -195,19 +174,16 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using IEntityRepository<TransactionEntity>? entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ASSERT
 
@@ -224,16 +200,14 @@ namespace EntityDb.Common.Tests.Transactions
 
             const ulong NumberOfVersionsToTest = 10;
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             // ACT
 
@@ -244,7 +218,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionBuilder.Append(entityId, new DoNothing());
             }
 
-            ITransaction<TransactionEntity>? transaction = transactionBuilder.Build(default!, default!);
+            var transaction = transactionBuilder.Build(default!, default!);
 
             // ASSERT
 
@@ -259,32 +233,26 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddScoped(serviceProvider =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[]
-                    {
-                        new NothingDone(), new VersionNumberSet<TransactionEntity>(1)
-                    }));
+                serviceCollection.AddScoped((serviceProvider) => GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new NothingDone(), new VersionNumberSet<TransactionEntity>(1) }));
             });
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            await using IEntityRepository<TransactionEntity>? entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
 
             // ACT
 
-            TransactionEntity? entity = await entityRepository.Get(entityId);
+            var entity = await entityRepository.Get(entityId);
 
             await transactionBuilder.Load(entityId, entityRepository);
 
             transactionBuilder.Append(entityId, new DoNothing());
 
-            ITransaction<TransactionEntity>? transaction = transactionBuilder.Build(default!, default!);
+            var transaction = transactionBuilder.Build(default!, default!);
 
             // ASSERT
 

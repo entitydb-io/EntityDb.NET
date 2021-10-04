@@ -18,17 +18,21 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record TagDocument : DocumentBase, IEntityDocument
     {
-        public const string CollectionName = "Tags";
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+        public string Label { get; init; } = default!;
+        public string Value { get; init; } = default!;
 
         private static readonly TagFilterBuilder _tagFilterBuilder = new();
         private static readonly TagSortBuilder _tagSortBuilder = new();
 
-        public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
+        public const string CollectionName = "Tags";
 
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
+        public static readonly string[] HoistedFieldNames = new[]
+        {
+            nameof(Label),
+            nameof(Value),
+        };
 
         public static IReadOnlyCollection<TagDocument> BuildMany<TEntity>
         (
@@ -139,7 +143,7 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            DeleteTagsQuery? deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
+            var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
 
             await DeleteMany
             (

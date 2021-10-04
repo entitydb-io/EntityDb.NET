@@ -20,27 +20,34 @@ namespace EntityDb.Redis.Tests.Envelopes
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
+        public interface IRecord
+        {
+        }
+
+        public record TestRecord<T>(T TestProperty) : IRecord
+        {
+        }
+
         [Fact]
         public void WhenGoingThroughFullCycle_ThenOriginalMatchesReconstructed()
         {
             // ARRANGE
 
-            TestRecord<bool>? originalTestRecord = new TestRecord<bool>(true);
+            var originalTestRecord = new TestRecord<bool>(true);
 
             IRecord boxedTestRecord = originalTestRecord;
 
             // ACT
 
-            JsonElementEnvelope? jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, _logger);
+            var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, _logger);
 
-            byte[]? json = jsonElementEnvelope.Serialize(_logger);
+            var json = jsonElementEnvelope.Serialize(_logger);
 
-            JsonElementEnvelope? reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _logger);
+            var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _logger);
 
-            IRecord? reconstructedTestRecord =
-                reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+            var reconstructedTestRecord = reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
 
-            TestRecord<bool>? unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
+            var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
             // ASSERT
 
@@ -52,9 +59,9 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            string? invalidJson = "I AM A STRING VALUE, NOT JSON!";
+            var invalidJson = "I AM A STRING VALUE, NOT JSON!";
 
-            byte[]? invalidJsonBytes = Encoding.UTF8.GetBytes(invalidJson);
+            var invalidJsonBytes = Encoding.UTF8.GetBytes(invalidJson);
 
             // ACT
 
@@ -69,7 +76,7 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            JsonElementEnvelope? jsonElementEnvelope = new JsonElementEnvelope();
+            var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
@@ -84,7 +91,7 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
-            JsonElementEnvelope? jsonElementEnvelope = new JsonElementEnvelope();
+            var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
@@ -103,14 +110,6 @@ namespace EntityDb.Redis.Tests.Envelopes
             {
                 JsonElementEnvelope.Deconstruct(default!, _logger);
             });
-        }
-
-        public interface IRecord
-        {
-        }
-
-        public record TestRecord<T>(T TestProperty) : IRecord
-        {
         }
     }
 }

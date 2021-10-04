@@ -18,18 +18,23 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     {
-        public const string CollectionName = "Leases";
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
+        public string Scope { get; init; } = default!;
+        public string Label { get; init; } = default!;
+        public string Value { get; init; } = default!;
 
         private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
         private static readonly LeaseSortBuilder _leaseSortBuilder = new();
 
-        public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
+        public const string CollectionName = "Leases";
 
-        public string Scope { get; init; } = default!;
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
+        public static readonly string[] HoistedFieldNames = new[]
+        {
+            nameof(Scope),
+            nameof(Label),
+            nameof(Value),
+        };
 
         public static IReadOnlyCollection<LeaseDocument> BuildMany<TEntity>
         (
@@ -141,7 +146,7 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            DeleteLeasesQuery? deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
+            var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
 
             await DeleteMany
             (

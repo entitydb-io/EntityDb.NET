@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Leases
 {
-    /// <inheritdoc cref="ILease" />
+    /// <inheritdoc cref="ILease"/>
     public sealed record Lease(string Scope, string Label, string Value) : ILease
     {
     }

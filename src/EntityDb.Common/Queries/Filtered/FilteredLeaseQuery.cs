@@ -5,8 +5,7 @@ using EntityDb.Common.Queries.Filters;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredLeaseQuery
-        (ILeaseQuery LeaseQuery, ILeaseFilter LeaseFilter) : FilteredQueryBase(LeaseQuery), ILeaseQuery
+    internal sealed record FilteredLeaseQuery(ILeaseQuery LeaseQuery, ILeaseFilter LeaseFilter) : FilteredQueryBase(LeaseQuery), ILeaseQuery
     {
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {

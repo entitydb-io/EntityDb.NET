@@ -22,7 +22,7 @@ namespace EntityDb.Common.Strategies.Resolving
                 return null;
             }
 
-            EnvelopeHelper.TryGetMemberInfoName(headers, out string? memberInfoName);
+            EnvelopeHelper.TryGetMemberInfoName(headers, out var memberInfoName);
 
             if (memberInfoName != null && _typeDictionary.TryGetValue(memberInfoName, out var resolvedType))
             {

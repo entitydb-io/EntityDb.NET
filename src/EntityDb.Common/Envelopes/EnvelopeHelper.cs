@@ -18,8 +18,7 @@ namespace EntityDb.Common.Envelopes
             return headers.TryGetValue(Platform, out var platform) == false || platform != ThisPlatform;
         }
 
-        public static bool TryGetAssemblyFullName(IReadOnlyDictionary<string, string> headers,
-            out string? assemblyFullName)
+        public static bool TryGetAssemblyFullName(IReadOnlyDictionary<string, string> headers, out string? assemblyFullName)
         {
             return headers.TryGetValue(AssemblyFullName, out assemblyFullName);
         }
@@ -41,21 +40,22 @@ namespace EntityDb.Common.Envelopes
             bool includeMemberInfoName = true
         )
         {
-            Dictionary<string, string>? headers = new Dictionary<string, string>
+            var headers = new Dictionary<string, string>
             {
-                [Platform] = ThisPlatform, [Type] = type.Name
+                [Platform] = ThisPlatform,
+                [Type] = type.Name,
             };
 
             if (includeFullNames)
             {
-                string? assemblyFullName = type.Assembly.FullName;
+                var assemblyFullName = type.Assembly.FullName;
 
                 if (assemblyFullName != null)
                 {
                     headers.Add(AssemblyFullName, assemblyFullName);
                 }
 
-                string? typeFullName = type.FullName;
+                var typeFullName = type.FullName;
 
                 if (typeFullName != null)
                 {

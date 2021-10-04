@@ -17,7 +17,10 @@ namespace EntityDb.Common.Tests
             serviceCollection.AddDefaultResolvingStrategy();
 
             // This is only here to add coverage
-            serviceCollection.AddMemberInfoNameResolvingStrategy(new[] { typeof(object) });
+            serviceCollection.AddMemberInfoNameResolvingStrategy(new[]
+            {
+                typeof(object),
+            });
 
             serviceCollection.AddLifoResolvingStrategyChain();
 

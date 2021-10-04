@@ -9,21 +9,16 @@ namespace EntityDb.MongoDb.Transactions
 {
     internal class TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactory<TEntity>
     {
-        public TestModeMongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName) : base(
-            loggerFactory, resolvingStrategyChain, connectionString, databaseName)
+        public TestModeMongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName) : base(loggerFactory, resolvingStrategyChain, connectionString, databaseName)
         {
         }
 
-        protected override IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase, ILogger? loggerOverride)
+        protected override IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
         {
-            return new TestModeMongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger,
-                _resolvingStrategyChain);
+            return new TestModeMongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger, _resolvingStrategyChain);
         }
 
-        public static new TestModeMongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
-            string connectionString, string databaseName)
+        public static new TestModeMongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider, string connectionString, string databaseName)
         {
             return ActivatorUtilities.CreateInstance<TestModeMongoDbTransactionRepositoryFactory<TEntity>>
             (

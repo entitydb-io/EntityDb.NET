@@ -5,8 +5,7 @@ using EntityDb.Common.Queries.Filters;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredFactQuery
-        (IFactQuery FactQuery, IFactFilter FactFilter) : FilteredQueryBase(FactQuery), IFactQuery
+    internal sealed record FilteredFactQuery(IFactQuery FactQuery, IFactFilter FactFilter) : FilteredQueryBase(FactQuery), IFactQuery
     {
         public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
         {

@@ -29,8 +29,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
             return SortDataType(ascending);
         }
 
-        public SortDefinition<BsonDocument> FactProperty<TFact>(bool ascending,
-            Expression<Func<TFact, object>> factExpression)
+        public SortDefinition<BsonDocument> FactProperty<TFact>(bool ascending, Expression<Func<TFact, object>> factExpression)
         {
             return SortDataValue(ascending, factExpression);
         }

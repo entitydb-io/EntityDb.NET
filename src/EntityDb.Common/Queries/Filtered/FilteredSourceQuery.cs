@@ -5,8 +5,7 @@ using EntityDb.Common.Queries.Filters;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredSourceQuery
-        (ISourceQuery SourceQuery, ISourceFilter SourceFilter) : FilteredQueryBase(SourceQuery), ISourceQuery
+    internal sealed record FilteredSourceQuery(ISourceQuery SourceQuery, ISourceFilter SourceFilter) : FilteredQueryBase(SourceQuery), ISourceQuery
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {

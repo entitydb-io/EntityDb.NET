@@ -7,14 +7,14 @@ using EntityDb.Common.Leases;
 namespace EntityDb.Common.Queries
 {
     /// <summary>
-    ///     A query for the exact lease.
+    /// A query for the exact lease.
     /// </summary>
     public sealed record ExactLeaseQuery(ILease Lease) : ILeaseQuery
     {
         /// <inheritdoc cref="ILeaseQuery.GetFilter{TFilter}(ILeaseFilterBuilder{TFilter})" />
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
-            return builder.LeaseMatches<Lease>(x =>
+            return builder.LeaseMatches<Lease>((x) =>
                 x.Scope == Lease.Scope &&
                 x.Label == Lease.Label &&
                 x.Value == Lease.Value);

@@ -5,8 +5,7 @@ using EntityDb.Common.Queries.Filters;
 
 namespace EntityDb.Common.Queries.Filtered
 {
-    internal sealed record FilteredTagQuery(ITagQuery TagQuery, ITagFilter TagFilter) : FilteredQueryBase(TagQuery),
-        ITagQuery
+    internal sealed record FilteredTagQuery(ITagQuery TagQuery, ITagFilter TagFilter) : FilteredQueryBase(TagQuery), ITagQuery
     {
         public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {

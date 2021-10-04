@@ -4,19 +4,19 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
-    /// <inheritdoc cref="ITransactionSessionOptions" />
+    /// <inheritdoc cref="ITransactionSessionOptions"/>
     public sealed record TransactionSessionOptions : ITransactionSessionOptions
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public bool ReadOnly { get; init; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public bool SecondaryPreferred { get; init; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public TimeSpan? WriteTimeout { get; init; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ILogger? LoggerOverride { get; init; }
     }
 }

@@ -10,7 +10,6 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,12 +17,13 @@ namespace EntityDb.MongoDb.Documents
 {
     internal sealed record CommandDocument : DocumentBase, IEntityDocument
     {
-        public const string CollectionName = "Commands";
+        public Guid EntityId { get; init; }
+        public ulong EntityVersionNumber { get; init; }
 
         private static readonly CommandFilterBuilder _commandFilterBuilder = new();
         private static readonly CommandSortBuilder _commandSortBuilder = new();
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
+
+        public const string CollectionName = "Commands";
 
         public static CommandDocument BuildOne<TEntity>
         (
@@ -38,7 +38,7 @@ namespace EntityDb.MongoDb.Documents
                 TransactionId = transaction.Id,
                 EntityId = transactionCommand.EntityId,
                 EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
-                Data = BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
+                Data = BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger),
             };
         }
 
@@ -124,9 +124,9 @@ namespace EntityDb.MongoDb.Documents
             Guid entityId
         )
         {
-            GetLastEntityVersionQuery? commandQuery = new GetLastEntityVersionQuery(entityId);
+            var commandQuery = new GetLastEntityVersionQuery(entityId);
 
-            EntityVersionQuery<CommandDocument>? query = new EntityVersionQuery<CommandDocument>
+            var query = new EntityVersionQuery<CommandDocument>
             {
                 ClientSessionHandle = clientSessionHandle,
                 MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
@@ -136,9 +136,9 @@ namespace EntityDb.MongoDb.Documents
                 Limit = commandQuery.Take
             };
 
-            List<CommandDocument>? commandDocuments = await query.GetDocuments();
+            var commandDocuments = await query.GetDocuments();
 
-            CommandDocument? lastCommandDocument = commandDocuments.SingleOrDefault();
+            var lastCommandDocument = commandDocuments.SingleOrDefault();
 
             if (lastCommandDocument == null)
             {

@@ -14,13 +14,8 @@ namespace EntityDb.Void.Transactions
     {
         private static readonly Task<Guid[]> _emptyGuidArrayTask = Task.FromResult(Array.Empty<Guid>());
         private static readonly Task<object[]> _emptyObjectArrayTask = Task.FromResult(Array.Empty<object>());
-
-        private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
-            Task.FromResult(Array.Empty<ICommand<TEntity>>());
-
-        private static readonly Task<IFact<TEntity>[]> _emptyFactArrayTask =
-            Task.FromResult(Array.Empty<IFact<TEntity>>());
-
+        private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask = Task.FromResult(Array.Empty<ICommand<TEntity>>());
+        private static readonly Task<IFact<TEntity>[]> _emptyFactArrayTask = Task.FromResult(Array.Empty<IFact<TEntity>>());
         private static readonly Task<ILease[]> _emptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
         private static readonly Task<ITag[]> _emptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
         private static readonly Task<bool> _trueTask = Task.FromResult(true);

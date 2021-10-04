@@ -11,28 +11,27 @@ namespace EntityDb.Common.Tests.Extensions
     {
         [Theory]
         [InlineData(2)]
-        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureExecuteAndReduceAreBothCalled(
-            int numberOfTimes)
+        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureExecuteAndReduceAreBothCalled(int numberOfTimes)
         {
             // ARRANGE
 
-            Mock<IFact<object>>? factMock = new Mock<IFact<object>>(MockBehavior.Strict);
+            var factMock = new Mock<IFact<object>>(MockBehavior.Strict);
 
             factMock
                 .Setup(fact => fact.Reduce(It.IsAny<object>()))
                 .Returns((object @object) => @object)
                 .Verifiable();
 
-            Mock<ICommand<object>>? commandMock = new Mock<ICommand<object>>(MockBehavior.Strict);
+            var commandMock = new Mock<ICommand<object>>(MockBehavior.Strict);
 
             commandMock
                 .Setup(command => command.Execute(It.IsAny<object>()))
                 .Returns(new[] { factMock.Object })
                 .Verifiable();
 
-            ICommand<object>? command = commandMock.Object;
+            var command = commandMock.Object;
 
-            object? entity = new object();
+            var entity = new object();
 
             // ACT
 

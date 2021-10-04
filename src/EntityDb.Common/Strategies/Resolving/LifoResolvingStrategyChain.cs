@@ -13,8 +13,7 @@ namespace EntityDb.Common.Strategies.Resolving
         private readonly ILogger _logger;
         private readonly IResolvingStrategy[] _resolvingStrategies;
 
-        public LifoResolvingStrategyChain(ILoggerFactory loggerFactory,
-            IEnumerable<IResolvingStrategy> resolvingStrategies)
+        public LifoResolvingStrategyChain(ILoggerFactory loggerFactory, IEnumerable<IResolvingStrategy> resolvingStrategies)
         {
             _logger = loggerFactory.CreateLogger<LifoResolvingStrategyChain>();
             _resolvingStrategies = resolvingStrategies.Reverse().ToArray();
@@ -26,7 +25,7 @@ namespace EntityDb.Common.Strategies.Resolving
             {
                 try
                 {
-                    Type? resolvedType = resolvingStrategy.ResolveType(headers);
+                    var resolvedType = resolvingStrategy.ResolveType(headers);
 
                     if (resolvedType != null)
                     {
@@ -35,8 +34,7 @@ namespace EntityDb.Common.Strategies.Resolving
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogError(exception,
-                        "Resolving strategy threw an exception. Moving on to next resolving strategy.");
+                    _logger.LogError(exception, "Resolving strategy threw an exception. Moving on to next resolving strategy.");
                 }
             }
 

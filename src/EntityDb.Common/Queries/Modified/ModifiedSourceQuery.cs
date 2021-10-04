@@ -5,9 +5,7 @@ using EntityDb.Common.Extensions;
 
 namespace EntityDb.Common.Queries.Modified
 {
-    internal sealed record ModifiedSourceQuery
-        (ISourceQuery SourceQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(SourceQuery,
-            ModifiedQueryOptions), ISourceQuery
+    internal sealed record ModifiedSourceQuery(ISourceQuery SourceQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(SourceQuery, ModifiedQueryOptions), ISourceQuery
     {
         public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
         {

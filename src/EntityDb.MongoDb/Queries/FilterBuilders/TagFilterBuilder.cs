@@ -9,6 +9,11 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 {
     internal sealed class TagFilterBuilder : FilterBuilderBase, ITagFilterBuilder<FilterDefinition<BsonDocument>>
     {
+        protected override string[] GetHoistedFieldNames()
+        {
+            return TagDocument.HoistedFieldNames;
+        }
+
         public FilterDefinition<BsonDocument> EntityIdIn(params Guid[] entityIds)
         {
             return In(nameof(TagDocument.EntityId), entityIds);
@@ -32,11 +37,6 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
         public FilterDefinition<BsonDocument> TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
         {
             return DataValueMatches(tagExpression);
-        }
-
-        protected override string[] GetHoistedFieldNames()
-        {
-            return TagDocument.HoistedFieldNames;
         }
     }
 }

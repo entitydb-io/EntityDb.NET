@@ -19,8 +19,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
             return SortDataType(ascending);
         }
 
-        public SortDefinition<BsonDocument> SourceProperty<TSource>(bool ascending,
-            Expression<Func<TSource, object>> sourceExpression)
+        public SortDefinition<BsonDocument> SourceProperty<TSource>(bool ascending, Expression<Func<TSource, object>> sourceExpression)
         {
             return SortDataValue(ascending, sourceExpression);
         }

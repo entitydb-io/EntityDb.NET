@@ -22,11 +22,9 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
         {
         }
 
-        private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to,
-            IServiceProvider serviceProvider, IEntityRepository<TransactionEntity>? entityRepository = null)
+        private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to, IServiceProvider serviceProvider, IEntityRepository<TransactionEntity>? entityRepository = null)
         {
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             if (entityRepository != null)
             {
@@ -47,45 +45,38 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
         [Theory]
         [InlineData(10, 20)]
-        public async Task GivenCachingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
-            ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
+        public async Task GivenCachingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
         {
             // ARRANGE
 
-            Mock<ISnapshottingStrategy<TransactionEntity>>? cachingStrategyMock = new(MockBehavior.Strict);
+            var cachingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
             cachingStrategyMock
-                .Setup(strategy =>
-                    strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
-                .Returns((TransactionEntity? previousEntity, TransactionEntity nextEntity) =>
-                    nextEntity.VersionNumber == expectedSnapshotVersion);
+                .Setup(strategy => strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
+                .Returns((TransactionEntity? previousEntity, TransactionEntity nextEntity) => nextEntity.VersionNumber == expectedSnapshotVersion);
 
-            IServiceProvider? serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            var serviceProvider = GetServiceProviderWithOverrides((serviceCollection) =>
             {
-                serviceCollection.AddSingleton(serviceProvider => cachingStrategyMock.Object);
+                serviceCollection.AddSingleton((serviceProvider) => cachingStrategyMock.Object);
             });
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            await using IEntityRepository<TransactionEntity>? entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(new TransactionSessionOptions(),
-                    new SnapshotSessionOptions());
+            await using var entityRepository = await serviceProvider.CreateEntityRepository<TransactionEntity>(new TransactionSessionOptions(), new SnapshotSessionOptions());
 
-            ITransaction<TransactionEntity>? firstTransaction =
-                await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
+            var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 
             await entityRepository.Put(firstTransaction);
 
-            ITransaction<TransactionEntity>? secondTransaction = await BuildTransaction(entityId,
-                expectedSnapshotVersion, expectedCurrentVersion, serviceProvider, entityRepository);
+            var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion, serviceProvider, entityRepository);
 
             await entityRepository.Put(secondTransaction);
 
             // ACT
 
-            TransactionEntity? current = await entityRepository.Get(entityId);
+            var current = await entityRepository.Get(entityId);
 
-            TransactionEntity? snapshot = await entityRepository.SnapshotRepository!.GetSnapshot(entityId);
+            var snapshot = await entityRepository.SnapshotRepository!.GetSnapshot(entityId);
 
             // ASSERT
 

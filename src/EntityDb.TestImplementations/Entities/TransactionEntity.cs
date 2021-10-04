@@ -33,6 +33,11 @@ namespace EntityDb.TestImplementations.Entities
             return true;
         }
 
+        public TransactionEntity WithVersionNumber(ulong versionNumber)
+        {
+            return this with { VersionNumber = versionNumber };
+        }
+
         public IEnumerable<ILease> GetLeases()
         {
             if (Leases != null)
@@ -51,11 +56,6 @@ namespace EntityDb.TestImplementations.Entities
             }
 
             return Enumerable.Empty<ITag>();
-        }
-
-        public TransactionEntity WithVersionNumber(ulong versionNumber)
-        {
-            return this with { VersionNumber = versionNumber };
         }
     }
 }

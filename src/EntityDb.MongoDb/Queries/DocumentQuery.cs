@@ -7,9 +7,6 @@ namespace EntityDb.MongoDb.Queries
 {
     internal record DocumentQuery<TDocument>
     {
-        protected static readonly ProjectionDefinitionBuilder<BsonDocument> _projectionBuilder =
-            Builders<BsonDocument>.Projection;
-
         public IClientSessionHandle? ClientSessionHandle { get; init; }
         public IMongoCollection<BsonDocument> MongoCollection { get; init; } = default!;
         public FilterDefinition<BsonDocument> Filter { get; init; } = default!;
@@ -18,9 +15,11 @@ namespace EntityDb.MongoDb.Queries
         public int? Skip { get; init; }
         public int? Limit { get; init; }
 
+        protected static readonly ProjectionDefinitionBuilder<BsonDocument> _projectionBuilder = Builders<BsonDocument>.Projection;
+
         public Task<List<TDocument>> GetDocuments()
         {
-            IFindFluent<BsonDocument, TDocument>? find = ClientSessionHandle != null
+            var find = ClientSessionHandle != null
                 ? MongoCollection.Find(ClientSessionHandle, Filter).Project(Projection)
                 : MongoCollection.Find(Filter).Project(Projection);
 

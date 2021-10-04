@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,9 +15,9 @@ namespace EntityDb.MongoDb.Queries
 
         public async Task<Guid[]> GetDistinctGuids()
         {
-            List<TDocument>? documents = await GetDocuments();
+            var documents = await GetDocuments();
 
-            IEnumerable<Guid>? guids = MapToGuids(documents).Distinct();
+            var guids = MapToGuids(documents).Distinct();
 
             if (DistinctSkip.HasValue)
             {
