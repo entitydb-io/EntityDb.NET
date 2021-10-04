@@ -726,6 +726,15 @@
           "System.Threading": "4.3.0"
         }
       },
+      "System.CommandLine": {
+        "type": "Transitive",
+        "resolved": "2.0.0-beta1.21216.1",
+        "contentHash": "Nbv/tW8sbOKN5T+4SSVBMdk4ADSIpJpY4UHMsj3VkcNtOckIT4iyzagjF+W5FEh2YBRvmvVQijOTIZbUJ1+1aA==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.4.1",
+          "system.memory": "4.5.4"
+        }
+      },
       "System.ComponentModel": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1884,6 +1893,13 @@
         "dependencies": {
           "EntityDb.Common": "1.0.0",
           "MongoDB.Driver": "2.13.1"
+        }
+      },
+      "entitydb.mongodb.provisioner": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.MongoDb": "1.0.0",
+          "System.CommandLine": "2.0.0-beta1.21216.1"
         }
       },
       "entitydb.testimplementations": {

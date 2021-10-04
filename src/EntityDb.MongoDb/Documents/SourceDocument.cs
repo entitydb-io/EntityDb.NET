@@ -6,7 +6,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Linq;
@@ -22,33 +21,6 @@ namespace EntityDb.MongoDb.Documents
         private static readonly SourceSortBuilder _sourceSortBuilder = new();
 
         public const string CollectionName = "Sources";
-
-        public static Task ProvisionCollection
-        (
-            IMongoDatabase mongoDatabase
-        )
-        {
-            return ProvisionCollection
-            (
-                mongoDatabase,
-                CollectionName,
-                new[]
-                {
-                    new CreateIndexModel<BsonDocument>
-                    (
-                        keys: IndexKeys.Combine
-                        (
-                            IndexKeys.Descending(nameof(TransactionId))
-                        ),
-                        options: new CreateIndexOptions
-                        {
-                            Name = $"Uniqueness Constraint",
-                            Unique = true,
-                        }
-                    ),
-                }
-            );
-        }
 
         public static SourceDocument BuildOne<TEntity>
         (

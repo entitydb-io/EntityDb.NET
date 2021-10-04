@@ -19,40 +19,18 @@ namespace EntityDb.MongoDb.Documents
         public Guid TransactionId { get; init; }
         public BsonDocumentEnvelope Data { get; init; } = default!;
 
-        protected static readonly IndexKeysDefinitionBuilder<BsonDocument> IndexKeys = Builders<BsonDocument>.IndexKeys;
-
         static DocumentBase()
         {
             BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
         }
 
-        protected static IMongoCollection<BsonDocument> GetMongoCollection
+        public static IMongoCollection<BsonDocument> GetMongoCollection
         (
             IMongoDatabase mongoDatabase,
             string collectionName
         )
         {
             return mongoDatabase.GetCollection<BsonDocument>(collectionName);
-        }
-
-        protected static async Task ProvisionCollection
-        (
-            IMongoDatabase mongoDatabase,
-            string collectionName,
-            CreateIndexModel<BsonDocument>[] indices
-        )
-        {
-            var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
-            var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
-
-            if (entityCollectionNames.Contains(collectionName) == false)
-            {
-                await mongoDatabase.CreateCollectionAsync(collectionName);
-
-                var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
-
-                await mongoCollection.Indexes.CreateManyAsync(indices);
-            }
         }
 
         protected static Task InsertOne<TDocument>
