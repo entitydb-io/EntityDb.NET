@@ -14,13 +14,13 @@ namespace EntityDb.MongoDb.Provisioner
             {
                 Console.Write("Please enter args: ");
 
-                string? input = Console.ReadLine() ?? string.Empty;
+                var input = Console.ReadLine() ?? string.Empty;
 
                 args = input.Split(' ');
             }
 #endif
 
-            RootCommand? rootCommand = new RootCommand();
+            var rootCommand = new RootCommand();
 
             CreateRole.AddTo(rootCommand);
             CreateUser.AddTo(rootCommand);

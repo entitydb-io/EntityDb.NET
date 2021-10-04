@@ -28,7 +28,7 @@ namespace EntityDb.Redis.Sessions
         public Task<TResult> ExecuteQuery<TResult>(
             Func<ILogger, IResolvingStrategyChain, IDatabase, Task<TResult>> query, TResult defaultResult)
         {
-            IDatabase? redisDatabase = _connectionMultiplexer.GetDatabase();
+            var redisDatabase = _connectionMultiplexer.GetDatabase();
 
             return Execute
             (
@@ -39,13 +39,13 @@ namespace EntityDb.Redis.Sessions
 
         public virtual async Task<bool> ExecuteCommand(Func<ILogger, ITransaction, Task<bool>> command)
         {
-            ITransaction? redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
+            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
 
             return await Execute(TryCommit, Abort);
 
             async Task<bool> TryCommit()
             {
-                Task<bool>? commandTask = command.Invoke(_logger, redisTransaction);
+                var commandTask = command.Invoke(_logger, redisTransaction);
 
                 await redisTransaction.ExecuteAsync();
 

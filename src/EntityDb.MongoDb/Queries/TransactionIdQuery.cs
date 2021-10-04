@@ -10,11 +10,11 @@ namespace EntityDb.MongoDb.Queries
     internal record TransactionIdQuery<TDocument> : GuidQuery<TDocument>
         where TDocument : ITransactionDocument
     {
-        public override ProjectionDefinition<BsonDocument, TDocument> Projection { get; init; } =
-            _projectionBuilder.Combine
+        public override ProjectionDefinition<BsonDocument, TDocument> Projection =>
+            ProjectionBuilder.Combine
             (
-                _projectionBuilder.Exclude(nameof(ITransactionDocument._id)),
-                _projectionBuilder.Include(nameof(ITransactionDocument.TransactionId))
+                ProjectionBuilder.Exclude(nameof(ITransactionDocument._id)),
+                ProjectionBuilder.Include(nameof(ITransactionDocument.TransactionId))
             );
 
         protected override IEnumerable<Guid> MapToGuids(IEnumerable<TDocument> documents)

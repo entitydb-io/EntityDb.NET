@@ -41,7 +41,7 @@ namespace EntityDb.MongoDb.Documents
             TDocument document
         )
         {
-            BsonDocument? bsonDocument = document.ToBsonDocument();
+            var bsonDocument = document.ToBsonDocument();
 
             return mongoCollection
                 .InsertOneAsync
@@ -63,7 +63,7 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            BsonDocument[]? bsonDocuments = documents
+            var bsonDocuments = documents
                 .Select(document => document.ToBsonDocument())
                 .ToArray();
 

@@ -11,7 +11,7 @@ using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountQuery<TEntity>(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery,
+    public record CountQuery(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery,
         ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -19,7 +19,7 @@ namespace EntityDb.TestImplementations.Queries
             return builder.CommandMatches((Count count) => Gte <= count.Number && count.Number <= Lte);
         }
 
-        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -35,7 +35,7 @@ namespace EntityDb.TestImplementations.Queries
             return builder.FactMatches((Counted counted) => Gte <= counted.Number && counted.Number <= Lte);
         }
 
-        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -53,7 +53,7 @@ namespace EntityDb.TestImplementations.Queries
                 Gte <= countLease.Number && countLease.Number <= Lte);
         }
 
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -70,7 +70,7 @@ namespace EntityDb.TestImplementations.Queries
             return builder.SourceMatches((Counter counter) => Gte <= counter.Number && counter.Number <= Lte);
         }
 
-        public TSort? GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -89,7 +89,7 @@ namespace EntityDb.TestImplementations.Queries
             return builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte);
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

@@ -141,7 +141,7 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            DeleteLeasesQuery? deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
+            var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
 
             await DeleteMany
             (

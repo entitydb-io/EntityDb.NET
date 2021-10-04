@@ -29,9 +29,9 @@ namespace EntityDb.Redis.Snapshots
 
         public async Task<ISnapshotRepository<TEntity>> CreateRepository(ISnapshotSessionOptions snapshotSessionOptions)
         {
-            ConnectionMultiplexer? connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
+            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
 
-            RedisSession? redisSession = new RedisSession(connectionMultiplexer, _logger, _resolvingStrategyChain);
+            var redisSession = new RedisSession(connectionMultiplexer, _logger, _resolvingStrategyChain);
 
             return CreateRepository(redisSession);
         }

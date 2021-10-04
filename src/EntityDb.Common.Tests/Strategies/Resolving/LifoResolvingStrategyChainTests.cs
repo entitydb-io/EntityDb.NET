@@ -17,25 +17,25 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            Mock<ILogger>? loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
             loggerMock
                 .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
                 .Verifiable();
 
-            Mock<ILoggerFactory>? loggerFactoryMock = new Mock<ILoggerFactory>();
+            var loggerFactoryMock = new Mock<ILoggerFactory>();
 
             loggerFactoryMock
                 .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
                 .Returns(loggerMock.Object);
 
-            Mock<IResolvingStrategy>? resolvingStrategyMock = new Mock<IResolvingStrategy>();
+            var resolvingStrategyMock = new Mock<IResolvingStrategy>();
 
             resolvingStrategyMock
                 .Setup(strategy => strategy.ResolveType(It.IsAny<Dictionary<string, string>>()))
                 .Throws(new Exception());
 
-            LifoResolvingStrategyChain? resolvingStrategyChain =
+            var resolvingStrategyChain =
                 new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[] { resolvingStrategyMock.Object });
 
             // ASSERT

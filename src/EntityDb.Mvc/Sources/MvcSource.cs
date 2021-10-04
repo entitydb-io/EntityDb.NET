@@ -25,8 +25,8 @@ namespace EntityDb.Mvc.Sources
         /// <returns>A new instance of <see cref="MvcSource" /> that is mapped from <paramref name="httpContext" />.</returns>
         public static MvcSource FromHttpContext(HttpContext httpContext)
         {
-            MvcSourceHeader[]? headers = MvcSourceHeader.FromHttpContext(httpContext);
-            MvcSourceConnection? connection = MvcSourceConnection.FromHttpContext(httpContext);
+            var headers = MvcSourceHeader.FromHttpContext(httpContext);
+            var connection = MvcSourceConnection.FromHttpContext(httpContext);
 
             return new MvcSource { Headers = headers, Connection = connection };
         }

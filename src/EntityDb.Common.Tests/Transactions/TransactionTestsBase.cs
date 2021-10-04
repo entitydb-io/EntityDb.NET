@@ -58,32 +58,30 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            TResult[]? expectedTrueResults = getExpectedResults.Invoke(false);
-            TResult[]? expectedFalseResults = getExpectedResults.Invoke(true);
-            TResult[]? reversedExpectedTrueResults = expectedTrueResults.Reverse().ToArray();
-            TResult[]? reversedExpectedFalseResults = expectedFalseResults.Reverse().ToArray();
-            IEnumerable<TResult>? expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
+            var expectedTrueResults = getExpectedResults.Invoke(false);
+            var expectedFalseResults = getExpectedResults.Invoke(true);
+            var reversedExpectedTrueResults = expectedTrueResults.Reverse().ToArray();
+            var reversedExpectedFalseResults = expectedFalseResults.Reverse().ToArray();
+            var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             foreach (var transaction in transactions)
             {
-                bool transactionInserted = await transactionRepository.PutTransaction(transaction);
+                var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
                 transactionInserted.ShouldBeTrue();
             }
 
             // ACT
 
-            TResult[]? actualTrueResults =
-                await getActualResults.Invoke(transactionRepository, false, false, null, null);
-            TResult[]? actualFalseResults =
-                await getActualResults.Invoke(transactionRepository, true, false, null, null);
-            TResult[]? reversedActualTrueResults =
+            var actualTrueResults = await getActualResults.Invoke(transactionRepository, false, false, null, null);
+            var actualFalseResults = await getActualResults.Invoke(transactionRepository, true, false, null, null);
+            var reversedActualTrueResults =
                 await getActualResults.Invoke(transactionRepository, false, true, null, null);
-            TResult[]? reversedActualFalseResults =
+            var reversedActualFalseResults =
                 await getActualResults.Invoke(transactionRepository, true, true, null, null);
-            TResult[]? actualSkipTakeResults = await getActualResults.Invoke(transactionRepository, false, false, 1, 1);
+            var actualSkipTakeResults = await getActualResults.Invoke(transactionRepository, false, false, 1, 1);
 
             // ASSERT
 
@@ -103,7 +101,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -111,7 +109,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ISourceQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -132,7 +130,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -140,7 +138,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ICommandQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -161,7 +159,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -169,7 +167,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    IFactQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -190,7 +188,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -198,7 +196,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ILeaseQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -219,7 +217,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -227,7 +225,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ISourceQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -248,7 +246,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -256,7 +254,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ICommandQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -277,7 +275,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -285,7 +283,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    IFactQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -306,7 +304,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -314,7 +312,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ILeaseQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -335,7 +333,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseSources : expectedObjects.TrueSources).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -343,7 +341,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ISourceQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -364,7 +362,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseCommands : expectedObjects.TrueCommands).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -372,7 +370,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ICommandQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -393,7 +391,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseFacts : expectedObjects.TrueFacts).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -401,7 +399,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    IFactQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -422,7 +420,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseLeases : expectedObjects.TrueLeases).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -430,7 +428,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ILeaseQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -451,7 +449,7 @@ namespace EntityDb.Common.Tests.Transactions
                 invert => (invert ? expectedObjects.FalseTags : expectedObjects.TrueTags).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
-                    ModifiedQueryOptions? modifiedQueryOptions = new()
+                    var modifiedQueryOptions = new ModifiedQueryOptions
                     {
                         InvertFilter = invertFilter,
                         ReverseSort = reverseSort,
@@ -459,7 +457,7 @@ namespace EntityDb.Common.Tests.Transactions
                         ReplaceTake = take
                     };
 
-                    ITagQuery? modifiedQuery = query.Modify(modifiedQueryOptions);
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
                     {
@@ -474,12 +472,11 @@ namespace EntityDb.Common.Tests.Transactions
         private ITransaction<TransactionEntity> BuildTransaction(Guid transactionId, Guid entityId, object source,
             ICommand<TransactionEntity>[] commands, DateTime? timeStampOverride = null)
         {
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
             transactionBuilder.Create(entityId, commands[0]);
 
-            for (int i = 1; i < commands.Length; i++)
+            for (var i = 1; i < commands.Length; i++)
             {
                 transactionBuilder.Append(entityId, commands[i]);
             }
@@ -501,7 +498,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Transaction<TransactionEntity>? transaction = new()
+            var transaction = new Transaction<TransactionEntity>
             {
                 Id = Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
@@ -522,7 +519,7 @@ namespace EntityDb.Common.Tests.Transactions
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
             };
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository(true);
+            await using var transactionRepository = await CreateRepository(true);
 
             // ASSERT
 
@@ -535,7 +532,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid transactionId = Guid.NewGuid();
+            var transactionId = Guid.NewGuid();
 
             static ITransaction<TransactionEntity> NewTransaction(Guid transactionId)
             {
@@ -561,12 +558,12 @@ namespace EntityDb.Common.Tests.Transactions
                 };
             }
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            bool firstTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
-            bool secondTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
+            var firstTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
+            var secondTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
 
             // ASSERT
 
@@ -579,10 +576,10 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
             ulong previousVersionNumber = 0;
 
-            Transaction<TransactionEntity>? transaction = new()
+            var transaction = new Transaction<TransactionEntity>
             {
                 Id = Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
@@ -614,11 +611,11 @@ namespace EntityDb.Common.Tests.Transactions
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
             };
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            bool transactionInserted = await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             // ASSERT
 
@@ -633,7 +630,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             const ulong previousVersionNumber = 0;
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
             static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong previousVersionNumber)
             {
@@ -659,20 +656,19 @@ namespace EntityDb.Common.Tests.Transactions
                 };
             }
 
-            Mock<ILogger>? loggerMock = new(MockBehavior.Strict);
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
             loggerMock
                 .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository =
-                await CreateRepository(loggerOverride: loggerMock.Object);
+            await using var transactionRepository = await CreateRepository(loggerOverride: loggerMock.Object);
 
             // ACT
 
-            bool firstTransactionInserted =
+            var firstTransactionInserted =
                 await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
-            bool secondTransactionInserted =
+            var secondTransactionInserted =
                 await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
 
             // ASSERT
@@ -688,10 +684,10 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
             ulong subversionNumber = 0;
 
-            Transaction<TransactionEntity>? transaction = new()
+            var transaction = new Transaction<TransactionEntity>
             {
                 Id = Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
@@ -722,11 +718,11 @@ namespace EntityDb.Common.Tests.Transactions
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
             };
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            bool transactionInserted = await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             // ASSERT
 
@@ -738,9 +734,9 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Tag? tag = new("Foo", "Bar");
+            var tag = new Tag("Foo", "Bar");
 
-            Transaction<TransactionEntity>? transaction = new()
+            var transaction = new Transaction<TransactionEntity>
             {
                 Id = Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
@@ -778,11 +774,11 @@ namespace EntityDb.Common.Tests.Transactions
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
             };
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            bool transactionInserted = await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             // ASSERT
 
@@ -794,9 +790,9 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Lease? lease = new("Foo", "Bar", "Baz");
+            var lease = new Lease("Foo", "Bar", "Baz");
 
-            Transaction<TransactionEntity>? transaction = new()
+            var transaction = new Transaction<TransactionEntity>
             {
                 Id = Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
@@ -834,11 +830,11 @@ namespace EntityDb.Common.Tests.Transactions
                 }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
             };
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            bool transactionInserted = await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             // ASSERT
 
@@ -850,22 +846,22 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            TransactionEntity? expectedEntity = new() { VersionNumber = 1 };
+            var expectedEntity = new TransactionEntity { VersionNumber = 1 };
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
-            EntityRepository<TransactionEntity>? entityRepository = new(_serviceProvider, transactionRepository);
+            var entityRepository = new EntityRepository<TransactionEntity>(_serviceProvider, transactionRepository);
 
-            ITransaction<TransactionEntity>? transaction =
-                BuildTransaction(Guid.NewGuid(), entityId, new NoSource(), new[] { new DoNothing() });
+            var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(),
+                new ICommand<TransactionEntity>[] { new DoNothing() });
 
             await transactionRepository.PutTransaction(transaction);
 
             // ACT
 
-            TransactionEntity? actualEntity = await entityRepository.Get(entityId);
+            var actualEntity = await entityRepository.Get(entityId);
 
             // ASSERT
 
@@ -877,34 +873,33 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            ImmutableArray<ITag> expectedInitialTags = new[] { new Tag("Foo", "Bar") }.ToImmutableArray<ITag>();
+            var expectedInitialTags = new[] { new Tag("Foo", "Bar") }.ToImmutableArray<ITag>();
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
-            ITransaction<TransactionEntity>? initialTransaction = transactionBuilder
+            var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
                 .Build(Guid.NewGuid(), new NoSource());
 
             await transactionRepository.PutTransaction(initialTransaction);
 
-            DeleteTagsQuery? tagQuery = new(entityId, expectedInitialTags);
+            var tagQuery = new DeleteTagsQuery(entityId, expectedInitialTags);
 
             // ACT
 
-            ITag[]? actualInitialTags = await transactionRepository.GetTags(tagQuery);
+            var actualInitialTags = await transactionRepository.GetTags(tagQuery);
 
-            ITransaction<TransactionEntity>? finalTransaction = transactionBuilder
+            var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllTags())
                 .Build(Guid.NewGuid(), new NoSource());
 
             await transactionRepository.PutTransaction(finalTransaction);
 
-            ITag[]? actualFinalTags = await transactionRepository.GetTags(tagQuery);
+            var actualFinalTags = await transactionRepository.GetTags(tagQuery);
 
             // ASSERT
 
@@ -918,35 +913,33 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            ImmutableArray<ILease> expectedInitialLeases =
-                new[] { new Lease("Foo", "Bar", "Baz") }.ToImmutableArray<ILease>();
+            var expectedInitialLeases = new[] { new Lease("Foo", "Bar", "Baz") }.ToImmutableArray<ILease>();
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            await using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
-            ITransaction<TransactionEntity>? initialTransaction = transactionBuilder
+            var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
                 .Build(Guid.NewGuid(), new NoSource());
 
             await transactionRepository.PutTransaction(initialTransaction);
 
-            DeleteLeasesQuery? leaseQuery = new(entityId, expectedInitialLeases);
+            var leaseQuery = new DeleteLeasesQuery(entityId, expectedInitialLeases);
 
             // ACT
 
-            ILease[]? actualInitialLeases = await transactionRepository.GetLeases(leaseQuery);
+            var actualInitialLeases = await transactionRepository.GetLeases(leaseQuery);
 
-            ITransaction<TransactionEntity>? finalTransaction = transactionBuilder
+            var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllLeases())
                 .Build(Guid.NewGuid(), new NoSource());
 
             await transactionRepository.PutTransaction(finalTransaction);
 
-            ILease[]? actualFinalLeases = await transactionRepository.GetLeases(leaseQuery);
+            var actualFinalLeases = await transactionRepository.GetLeases(leaseQuery);
 
             // ASSERT
 
@@ -960,23 +953,22 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Count? expectedCommand = new(1);
+            var expectedCommand = new Count(1);
 
-            ITransaction<TransactionEntity>? transaction = _serviceProvider
+            var transaction = _serviceProvider
                 .GetTransactionBuilder<TransactionEntity>()
                 .Create(Guid.NewGuid(), expectedCommand)
                 .Build(Guid.NewGuid(), new NoSource());
 
-            EntityVersionNumberQuery? versionOneCommandQuery = new(1, 1);
+            var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
-            using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            using var transactionRepository = await CreateRepository();
 
             // ACT
 
             await transactionRepository.PutTransaction(transaction);
 
-            ICommand<TransactionEntity>[]?
-                newCommands = await transactionRepository.GetCommands(versionOneCommandQuery);
+            var newCommands = await transactionRepository.GetCommands(versionOneCommandQuery);
 
             // ASSERT
 
@@ -995,24 +987,23 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            Count? expectedCommand = new(2);
+            var expectedCommand = new Count(2);
 
-            Guid entityId = Guid.NewGuid();
+            var entityId = Guid.NewGuid();
 
-            TransactionBuilder<TransactionEntity>? transactionBuilder =
-                _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
 
-            ITransaction<TransactionEntity>? firstTransaction = transactionBuilder
+            var firstTransaction = transactionBuilder
                 .Create(entityId, new Count(1))
                 .Build(Guid.NewGuid(), new NoSource());
 
-            ITransaction<TransactionEntity>? secondTransaction = transactionBuilder
+            var secondTransaction = transactionBuilder
                 .Append(entityId, expectedCommand)
                 .Build(Guid.NewGuid(), new NoSource());
 
-            EntityVersionNumberQuery? versionTwoCommandQuery = new(2, 2);
+            var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
-            using ITransactionRepository<TransactionEntity>? transactionRepository = await CreateRepository();
+            using var transactionRepository = await CreateRepository();
 
             await transactionRepository.PutTransaction(firstTransaction);
 
@@ -1020,8 +1011,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await transactionRepository.PutTransaction(secondTransaction);
 
-            ICommand<TransactionEntity>[]?
-                newCommands = await transactionRepository.GetCommands(versionTwoCommandQuery);
+            var newCommands = await transactionRepository.GetCommands(versionTwoCommandQuery);
 
             // ASSERT
 
@@ -1039,36 +1029,33 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(
             int timeSpanInMinutes, int gteInMinutes, int lteInMinutes)
         {
-            DateTime originTimeStamp = DateTime.UnixEpoch;
+            var originTimeStamp = DateTime.UnixEpoch;
 
-            List<ITransaction<TransactionEntity>>? transactions = new();
-            ExpectedObjects? expectedObjects = new();
+            var transactions = new List<ITransaction<TransactionEntity>>();
+            var expectedObjects = new ExpectedObjects();
 
-            Guid[]? transactionIds = GetSortedGuids(timeSpanInMinutes);
-            Guid[]? entityIds = GetSortedGuids(timeSpanInMinutes);
+            var transactionIds = GetSortedGuids(timeSpanInMinutes);
+            var entityIds = GetSortedGuids(timeSpanInMinutes);
 
             DateTime? gte = null;
             DateTime? lte = null;
 
-            for (int i = 1; i <= timeSpanInMinutes; i++)
+            for (var i = 1; i <= timeSpanInMinutes; i++)
             {
-                Guid currentTransactionId = transactionIds[i - 1];
-                Guid currentEntityId = entityIds[i - 1];
+                var currentTransactionId = transactionIds[i - 1];
+                var currentEntityId = entityIds[i - 1];
 
-                DateTime currentTimeStamp = originTimeStamp.AddMinutes(i);
+                var currentTimeStamp = originTimeStamp.AddMinutes(i);
 
-                Counter? source = new(i);
+                var source = new Counter(i);
 
-                ICommand<TransactionEntity>[]? commands = { new Count(i) };
+                var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                IFact<TransactionEntity>[]? facts =
-                {
-                    new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1)
-                };
+                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
 
-                CountLease[]? leases = { new(i) };
+                var leases = new[] { new CountLease(i) };
 
-                CountTag[]? tags = { new(i) };
+                var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(gteInMinutes <= i && i <= lteInMinutes, currentTransactionId, currentEntityId,
                     source, commands, facts, leases, tags);
@@ -1082,8 +1069,8 @@ namespace EntityDb.Common.Tests.Transactions
                     gte = currentTimeStamp;
                 }
 
-                ITransaction<TransactionEntity>? transaction = BuildTransaction(currentTransactionId, currentEntityId,
-                    source, commands, currentTimeStamp);
+                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands,
+                    currentTimeStamp);
 
                 transactions.Add(transaction);
             }
@@ -1091,7 +1078,7 @@ namespace EntityDb.Common.Tests.Transactions
             gte.ShouldNotBeNull();
             lte.ShouldNotBeNull();
 
-            TransactionTimeStampQuery? query = new(gte!.Value, lte!.Value);
+            var query = new TransactionTimeStampQuery(gte.Value, lte.Value);
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
@@ -1113,31 +1100,28 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(
             int numberOfTransactionIds, int whichTransactionId)
         {
-            List<ITransaction<TransactionEntity>>? transactions = new();
-            ExpectedObjects? expectedObjects = new();
+            var transactions = new List<ITransaction<TransactionEntity>>();
+            var expectedObjects = new ExpectedObjects();
 
             Guid? transactionId = null;
 
-            Guid[]? transactionIds = GetSortedGuids(numberOfTransactionIds);
-            Guid[]? entityIds = GetSortedGuids(numberOfTransactionIds);
+            var transactionIds = GetSortedGuids(numberOfTransactionIds);
+            var entityIds = GetSortedGuids(numberOfTransactionIds);
 
-            for (int i = 1; i <= numberOfTransactionIds; i++)
+            for (var i = 1; i <= numberOfTransactionIds; i++)
             {
-                Guid currentTransactionId = transactionIds[i - 1];
-                Guid currentEntityId = entityIds[i - 1];
+                var currentTransactionId = transactionIds[i - 1];
+                var currentEntityId = entityIds[i - 1];
 
-                Counter? source = new(i);
+                var source = new Counter(i);
 
-                ICommand<TransactionEntity>[]? commands = { new Count(i) };
+                var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                IFact<TransactionEntity>[]? facts =
-                {
-                    new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1)
-                };
+                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
 
-                CountLease[]? leases = { new(i) };
+                var leases = new[] { new CountLease(i) };
 
-                CountTag[]? tags = { new(i) };
+                var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, source, commands,
                     facts, leases, tags);
@@ -1147,15 +1131,14 @@ namespace EntityDb.Common.Tests.Transactions
                     transactionId = currentTransactionId;
                 }
 
-                ITransaction<TransactionEntity>? transaction =
-                    BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
 
             transactionId.ShouldNotBeNull();
 
-            TransactionIdQuery? query = new(transactionId!.Value);
+            var query = new TransactionIdQuery(transactionId.Value);
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
@@ -1177,31 +1160,28 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
             int numberOfEntityIds, int whichEntityId)
         {
-            List<ITransaction<TransactionEntity>>? transactions = new();
-            ExpectedObjects? expectedObjects = new();
+            var transactions = new List<ITransaction<TransactionEntity>>();
+            var expectedObjects = new ExpectedObjects();
 
             Guid? entityId = null;
 
-            Guid[]? transactionIds = GetSortedGuids(numberOfEntityIds);
-            Guid[]? entityIds = GetSortedGuids(numberOfEntityIds);
+            var transactionIds = GetSortedGuids(numberOfEntityIds);
+            var entityIds = GetSortedGuids(numberOfEntityIds);
 
-            for (int i = 1; i <= numberOfEntityIds; i++)
+            for (var i = 1; i <= numberOfEntityIds; i++)
             {
-                Guid currentTransactionId = transactionIds[i - 1];
-                Guid currentEntityId = entityIds[i - 1];
+                var currentTransactionId = transactionIds[i - 1];
+                var currentEntityId = entityIds[i - 1];
 
-                Counter? source = new(i);
+                var source = new Counter(i);
 
-                ICommand<TransactionEntity>[]? commands = { new Count(i) };
+                var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                IFact<TransactionEntity>[]? facts =
-                {
-                    new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1)
-                };
+                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
 
-                CountLease[]? leases = { new(i) };
+                var leases = new[] { new CountLease(i) };
 
-                CountTag[]? tags = { new(i) };
+                var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, source, commands, facts,
                     leases, tags);
@@ -1211,15 +1191,14 @@ namespace EntityDb.Common.Tests.Transactions
                     entityId = currentEntityId;
                 }
 
-                ITransaction<TransactionEntity>? transaction =
-                    BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
 
             entityId.ShouldNotBeNull();
 
-            EntityIdQuery? query = new(entityId!.Value);
+            var query = new EntityIdQuery(entityId.Value);
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
@@ -1241,21 +1220,21 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(
             int numberOfVersionNumbers, int gteAsInt, int lteAsInt)
         {
-            List<ICommand<TransactionEntity>>? commands = new();
-            ExpectedObjects? expectedObjects = new();
+            var commands = new List<ICommand<TransactionEntity>>();
+            var expectedObjects = new ExpectedObjects();
 
-            for (int i = 1; i <= numberOfVersionNumbers; i++)
+            for (var i = 1; i <= numberOfVersionNumbers; i++)
             {
-                Count? command = new(i);
+                var command = new Count(i);
 
-                IFact<TransactionEntity>[]? facts =
+                var facts = new[]
                 {
                     new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>((ulong)i)
                 };
 
-                CountLease[]? leases = { new(i) };
+                var leases = new[] { new CountLease(i) };
 
-                CountTag[]? tags = { new(i) };
+                var tags = new[] { new CountTag(i) };
 
                 commands.Add(command);
 
@@ -1263,12 +1242,11 @@ namespace EntityDb.Common.Tests.Transactions
                     facts, leases, tags);
             }
 
-            ITransaction<TransactionEntity>? transaction =
-                BuildTransaction(Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
+            var transaction = BuildTransaction(Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
 
-            List<ITransaction<TransactionEntity>>? transactions = new() { transaction };
+            var transactions = new List<ITransaction<TransactionEntity>> { transaction };
 
-            EntityVersionNumberQuery? query = new((ulong)gteAsInt, (ulong)lteAsInt);
+            var query = new EntityVersionNumberQuery((ulong)gteAsInt, (ulong)lteAsInt);
 
             await TestGetCommands(query, transactions, expectedObjects);
             await TestGetFacts(query, transactions, expectedObjects);
@@ -1281,32 +1259,31 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(int countTo,
             int gte, int lte)
         {
-            List<ITransaction<TransactionEntity>>? transactions = new();
-            ExpectedObjects? expectedObjects = new();
+            var transactions = new List<ITransaction<TransactionEntity>>();
+            var expectedObjects = new ExpectedObjects();
 
-            Guid[]? transactionIds = GetSortedGuids(countTo);
-            Guid[]? entityIds = GetSortedGuids(countTo);
+            var transactionIds = GetSortedGuids(countTo);
+            var entityIds = GetSortedGuids(countTo);
 
-            for (int i = 1; i <= countTo; i++)
+            for (var i = 1; i <= countTo; i++)
             {
-                Guid currentTransactionId = transactionIds[i - 1];
-                Guid currentEntityId = entityIds[i - 1];
+                var currentTransactionId = transactionIds[i - 1];
+                var currentEntityId = entityIds[i - 1];
 
-                Counter? source = new(i);
+                var source = new Counter(i);
 
-                ICommand<TransactionEntity>[]? commands = { new Count(i) };
+                var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                IFact<TransactionEntity>[]? facts = { new Counted(i) };
+                var facts = new IFact<TransactionEntity>[] { new Counted(i) };
 
-                CountLease[]? leases = { new(i) };
+                var leases = new[] { new CountLease(i) };
 
-                CountTag[]? tags = { new(i) };
+                var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, source, commands,
                     facts, leases, tags);
 
-                ITransaction<TransactionEntity>? transaction =
-                    BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
@@ -1336,7 +1313,7 @@ namespace EntityDb.Common.Tests.Transactions
                 return tagQuery.Filter(new CountFilter());
             }
 
-            CountQuery<TransactionEntity>? query = new(gte, lte);
+            var query = new CountQuery(gte, lte);
 
             await TestGetTransactionIds(query, transactions, expectedObjects, FilterSources);
             await TestGetTransactionIds(query, transactions, expectedObjects, FilterCommands);

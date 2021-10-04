@@ -17,7 +17,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ICommandSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -36,7 +36,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -56,7 +56,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -75,7 +75,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
@@ -96,7 +96,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

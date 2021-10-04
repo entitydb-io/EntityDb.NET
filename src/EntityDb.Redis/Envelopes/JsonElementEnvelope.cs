@@ -15,7 +15,7 @@ namespace EntityDb.Redis.Envelopes
 
         private static JsonElement GetJsonElement(dynamic? @object)
         {
-            dynamic? json = JsonSerializer.Serialize(@object);
+            var json = JsonSerializer.Serialize(@object);
 
             return JsonSerializer.Deserialize<JsonElement>(json);
         }
@@ -67,9 +67,9 @@ namespace EntityDb.Redis.Envelopes
         {
             try
             {
-                dynamic? jsonElement = GetJsonElement(@object);
+                var jsonElement = GetJsonElement(@object);
 
-                Dictionary<string, string>? headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new JsonElementEnvelope { Headers = headers, Value = jsonElement };
             }

@@ -95,15 +95,14 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
         /// </remarks>
         public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName)
         {
-            IMongoDatabase? mongoDatabase = mongoClient.GetDatabase(entityName);
+            var mongoDatabase = mongoClient.GetDatabase(entityName);
 
             foreach (var (collectionName, collectionIndices) in _collections)
             {
-                IMongoCollection<BsonDocument>? mongoCollection =
-                    DocumentBase.GetMongoCollection(mongoDatabase, collectionName);
+                var mongoCollection = DocumentBase.GetMongoCollection(mongoDatabase, collectionName);
 
-                IAsyncCursor<string>? entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
-                List<string>? entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
+                var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
+                var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
 
                 if (entityCollectionNames.Contains(collectionName) == false)
                 {

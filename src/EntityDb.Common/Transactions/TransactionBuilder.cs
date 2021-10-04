@@ -34,7 +34,7 @@ namespace EntityDb.Common.Transactions
 
         private static ImmutableArray<ITransactionFact<TEntity>> GetTransactionFacts(IEnumerable<IFact<TEntity>> facts)
         {
-            List<TransactionFact<TEntity>>? transactionFacts = new();
+            var transactionFacts = new List<TransactionFact<TEntity>>();
 
             ulong subversionNumber = default;
 
@@ -51,8 +51,8 @@ namespace EntityDb.Common.Transactions
         private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
             TEntity nextEntity, Func<TEntity, TMetaData[]> metaDataMapper)
         {
-            TMetaData[]? previousMetaData = metaDataMapper.Invoke(previousEntity);
-            TMetaData[]? nextMetaData = metaDataMapper.Invoke(nextEntity);
+            var previousMetaData = metaDataMapper.Invoke(previousEntity);
+            var nextMetaData = metaDataMapper.Invoke(nextEntity);
 
             return new TransactionMetaData<TMetaData>
             {
@@ -63,16 +63,16 @@ namespace EntityDb.Common.Transactions
 
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
-            TEntity? previousEntity = _knownEntities[entityId];
-            ulong previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
+            var previousEntity = _knownEntities[entityId];
+            var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
 
             CommandNotAuthorizedException.ThrowIfFalse(_serviceProvider.IsAuthorized(previousEntity, command));
 
-            List<IFact<TEntity>>? nextFacts = previousEntity.Execute(command);
+            var nextFacts = previousEntity.Execute(command);
 
             nextFacts.Add(_serviceProvider.GetVersionNumberFact<TEntity>(previousVersionNumber + 1));
 
-            TEntity? nextEntity = previousEntity.Reduce(nextFacts);
+            var nextEntity = previousEntity.Reduce(nextFacts);
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
@@ -106,7 +106,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityAlreadyLoadedException();
             }
 
-            TEntity? entity = await entityRepository.Get(entityId);
+            var entity = await entityRepository.Get(entityId);
 
             if (_serviceProvider.GetVersionNumber(entity) == 0)
             {
@@ -132,7 +132,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityAlreadyCreatedException();
             }
 
-            TEntity? entity = _serviceProvider.Construct<TEntity>(entityId);
+            var entity = _serviceProvider.Construct<TEntity>(entityId);
 
             _knownEntities.Add(entityId, entity);
 
@@ -171,14 +171,14 @@ namespace EntityDb.Common.Transactions
         /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
         public ITransaction<TEntity> Build(Guid transactionId, object source, DateTime? timeStampOverride = null)
         {
-            DateTime timeStamp = DateTime.UtcNow;
+            var timeStamp = DateTime.UtcNow;
 
             if (timeStampOverride.HasValue)
             {
                 timeStamp = timeStampOverride.Value.ToUniversalTime();
             }
 
-            Transaction<TEntity>? transaction = new()
+            var transaction = new Transaction<TEntity>
             {
                 Id = transactionId,
                 TimeStamp = timeStamp,

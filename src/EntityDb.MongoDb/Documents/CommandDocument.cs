@@ -10,7 +10,6 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -124,9 +123,9 @@ namespace EntityDb.MongoDb.Documents
             Guid entityId
         )
         {
-            GetLastEntityVersionQuery? commandQuery = new GetLastEntityVersionQuery(entityId);
+            var commandQuery = new GetLastEntityVersionQuery(entityId);
 
-            EntityVersionQuery<CommandDocument>? query = new EntityVersionQuery<CommandDocument>
+            var query = new EntityVersionQuery<CommandDocument>
             {
                 ClientSessionHandle = clientSessionHandle,
                 MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
@@ -136,9 +135,9 @@ namespace EntityDb.MongoDb.Documents
                 Limit = commandQuery.Take
             };
 
-            List<CommandDocument>? commandDocuments = await query.GetDocuments();
+            var commandDocuments = await query.GetDocuments();
 
-            CommandDocument? lastCommandDocument = commandDocuments.SingleOrDefault();
+            var lastCommandDocument = commandDocuments.SingleOrDefault();
 
             if (lastCommandDocument == null)
             {

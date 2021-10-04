@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -38,10 +37,10 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         public AuthenticationHeaderValue GetResponseHeader(string username, string password, string method,
             string digestUri)
         {
-            string? hash1 = Hash($"{username}:{Realm}:{password}");
-            string? hash2 = Hash($"{method}:{digestUri}");
+            var hash1 = Hash($"{username}:{Realm}:{password}");
+            var hash2 = Hash($"{method}:{digestUri}");
 
-            string? response = Hash($"{hash1}:{Nonce}:{NonceCount:D8}:{ClientNonce}:{Qop}:{hash2}");
+            var response = Hash($"{hash1}:{Nonce}:{NonceCount:D8}:{ClientNonce}:{Qop}:{hash2}");
 
             return AuthenticationHeaderValue.Parse(
                 $"Digest username=\"{username}\", realm=\"{Realm}\", nonce=\"{Nonce}\", uri=\"{digestUri}\", algorithm={Algorithm}, qop={Qop}, nc={NonceCount:D8}, cnonce=\"{ClientNonce}\", response=\"{response}\"");
@@ -59,14 +58,14 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
             try
             {
-                Dictionary<string, string?>? parts = DigestChallengeRequestRegex
+                var parts = DigestChallengeRequestRegex
                     .Matches(authorizationHeaderValue.Parameter)
                     .ToDictionary
                     (
                         match => match.Groups["key"].Value,
                         match =>
                         {
-                            string? value = match.Groups["value"].Value;
+                            var value = match.Groups["value"].Value;
 
                             if (value.StartsWith("\""))
                             {
@@ -77,12 +76,12 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
                         }
                     );
 
-                string? realm = parts["realm"];
-                string? domain = parts["domain"];
-                string? nonce = parts["nonce"];
-                string? algorithm = parts["algorithm"];
-                string? qop = parts["qop"];
-                string? stale = parts["stale"];
+                var realm = parts["realm"];
+                var domain = parts["domain"];
+                var nonce = parts["nonce"];
+                var algorithm = parts["algorithm"];
+                var qop = parts["qop"];
+                var stale = parts["stale"];
 
                 digestChallengeRequest = new DigestChallengeRequest(realm, domain, nonce, algorithm, qop, stale, 1,
                     NewClientNonce(), DateTime.UtcNow.AddHours(1));

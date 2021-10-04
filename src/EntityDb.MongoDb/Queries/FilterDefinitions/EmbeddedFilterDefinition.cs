@@ -24,19 +24,17 @@ namespace EntityDb.MongoDb.Queries.FilterDefinitions
         public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
             IBsonSerializerRegistry bsonSerializerRegistry)
         {
-            RenderedFieldDefinition? renderedParentField =
-                _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
+            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
 
-            IBsonSerializer<TEmbeddedDocument>? childDocumentSerializer =
-                bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
+            var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
 
-            BsonDocument? renderedChildFilter = _childFilter.Render(childDocumentSerializer, bsonSerializerRegistry);
+            var renderedChildFilter = _childFilter.Render(childDocumentSerializer, bsonSerializerRegistry);
 
-            BsonDocument? document = new BsonDocument();
+            var document = new BsonDocument();
 
-            using BsonDocumentWriter? bsonWriter = new BsonDocumentWriter(document);
+            using var bsonWriter = new BsonDocumentWriter(document);
 
-            EmbeddedFilterRewriter? embeddedFilterRewriter =
+            var embeddedFilterRewriter =
                 new EmbeddedFilterRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedFilterRewriter.Rewrite(renderedChildFilter);

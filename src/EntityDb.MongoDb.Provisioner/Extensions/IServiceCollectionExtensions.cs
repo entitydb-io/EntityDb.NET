@@ -25,7 +25,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
         {
             serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                string? connectionString = getConnectionString.Invoke(serviceProvider);
+                var connectionString = getConnectionString.Invoke(serviceProvider);
 
                 return AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider,
                     connectionString, databaseName);

@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Extensions
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                string? connectionString = getConnectionString.Invoke(serviceProvider);
+                var connectionString = getConnectionString.Invoke(serviceProvider);
 
                 return MongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     databaseName);
@@ -54,7 +54,7 @@ namespace EntityDb.MongoDb.Extensions
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                string? connectionString = getConnectionString.Invoke(serviceProvider);
+                var connectionString = getConnectionString.Invoke(serviceProvider);
 
                 return TestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     databaseName);

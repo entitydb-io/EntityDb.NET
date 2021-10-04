@@ -12,7 +12,7 @@ namespace EntityDb.TestImplementations.Facts
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            List<ILease>? leases = new List<ILease>();
+            var leases = new List<ILease>();
 
             if (entity.Leases != null)
             {
@@ -21,7 +21,7 @@ namespace EntityDb.TestImplementations.Facts
 
             leases.Add(new CountLease(Number));
 
-            List<ITag>? tags = new List<ITag>();
+            var tags = new List<ITag>();
 
             if (entity.Tags != null)
             {

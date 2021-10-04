@@ -10,11 +10,11 @@ namespace EntityDb.MongoDb.Provisioner.Commands
     {
         public static void AddTo(RootCommand rootCommand)
         {
-            Command? createCollectionsDirect = new Command("create-collections-direct");
+            var createCollectionsDirect = new Command("create-collections-direct");
 
             AddEntityNameArgumentTo(createCollectionsDirect);
 
-            Argument<string>? connectionStringArgument =
+            var connectionStringArgument =
                 new Argument<string>("connection-string", "The connection string to the mongodb instance.");
 
             createCollectionsDirect.AddArgument(connectionStringArgument);
@@ -30,7 +30,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
 
         public static async Task Execute(string entityName, string connectionString)
         {
-            MongoClient? mongoClient = new MongoClient(connectionString);
+            var mongoClient = new MongoClient(connectionString);
 
             await mongoClient.ProvisionCollections(entityName);
         }

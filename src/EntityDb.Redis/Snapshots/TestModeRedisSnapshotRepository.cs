@@ -26,9 +26,9 @@ namespace EntityDb.Redis.Snapshots
         {
             await RedisSession.ExecuteCommand
             (
-                (serviceProvider, redisTransaction) =>
+                (_, redisTransaction) =>
                 {
-                    Task<bool>[]? tasks = _disposeEntityIds
+                    var tasks = _disposeEntityIds
                         .Select(GetKey)
                         .Select(key => redisTransaction.KeyDeleteAsync(key))
                         .ToArray();

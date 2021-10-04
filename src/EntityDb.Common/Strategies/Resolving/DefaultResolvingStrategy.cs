@@ -15,8 +15,8 @@ namespace EntityDb.Common.Strategies.Resolving
                 return null;
             }
 
-            EnvelopeHelper.TryGetAssemblyFullName(headers, out string? assemblyFullName);
-            EnvelopeHelper.TryGetTypeFullName(headers, out string? typeFullName);
+            EnvelopeHelper.TryGetAssemblyFullName(headers, out var assemblyFullName);
+            EnvelopeHelper.TryGetTypeFullName(headers, out var typeFullName);
 
             if (assemblyFullName == null || typeFullName == null)
             {

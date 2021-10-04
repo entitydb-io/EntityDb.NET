@@ -54,7 +54,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
         protected SortDefinition<BsonDocument> SortDataValue<TData>(bool ascending,
             Expression<Func<TData, object>> dataExpression)
         {
-            SortDefinition<TData>? dataSort = ascending
+            var dataSort = ascending
                 ? Builders<TData>.Sort.Ascending(dataExpression)
                 : Builders<TData>.Sort.Descending(dataExpression);
 

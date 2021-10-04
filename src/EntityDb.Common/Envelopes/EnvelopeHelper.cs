@@ -41,21 +41,18 @@ namespace EntityDb.Common.Envelopes
             bool includeMemberInfoName = true
         )
         {
-            Dictionary<string, string>? headers = new Dictionary<string, string>
-            {
-                [Platform] = ThisPlatform, [Type] = type.Name
-            };
+            var headers = new Dictionary<string, string> { [Platform] = ThisPlatform, [Type] = type.Name };
 
             if (includeFullNames)
             {
-                string? assemblyFullName = type.Assembly.FullName;
+                var assemblyFullName = type.Assembly.FullName;
 
                 if (assemblyFullName != null)
                 {
                     headers.Add(AssemblyFullName, assemblyFullName);
                 }
 
-                string? typeFullName = type.FullName;
+                var typeFullName = type.FullName;
 
                 if (typeFullName != null)
                 {

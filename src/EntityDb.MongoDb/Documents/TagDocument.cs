@@ -139,7 +139,7 @@ namespace EntityDb.MongoDb.Documents
                 return;
             }
 
-            DeleteTagsQuery? deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
+            var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
 
             await DeleteMany
             (

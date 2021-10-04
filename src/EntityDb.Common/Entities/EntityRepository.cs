@@ -1,11 +1,9 @@
 ﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,13 +39,13 @@ namespace EntityDb.Common.Entities
                 snapshot = await SnapshotRepository.GetSnapshot(entityId);
             }
 
-            TEntity? entity = snapshot ?? _serviceProvider.Construct<TEntity>(entityId);
+            var entity = snapshot ?? _serviceProvider.Construct<TEntity>(entityId);
 
-            ulong versionNumber = _serviceProvider.GetVersionNumber(entity);
+            var versionNumber = _serviceProvider.GetVersionNumber(entity);
 
-            GetEntityQuery? factQuery = new GetEntityQuery(entityId, versionNumber);
+            var factQuery = new GetEntityQuery(entityId, versionNumber);
 
-            IFact<TEntity>[]? facts = await TransactionRepository.GetFacts(factQuery);
+            var facts = await TransactionRepository.GetFacts(factQuery);
 
             entity = entity.Reduce(facts);
 
@@ -58,7 +56,7 @@ namespace EntityDb.Common.Entities
         {
             if (SnapshotRepository != null)
             {
-                IEnumerable<ITransactionCommand<TEntity>>? lastCommands = transaction.Commands
+                var lastCommands = transaction.Commands
                     .GroupBy(command => command.EntityId)
                     .Select(group => group.Last());
 

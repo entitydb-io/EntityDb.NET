@@ -71,7 +71,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 
         protected static FilterDefinition<BsonDocument> DataTypeIn(params Type[] dataTypes)
         {
-            string[]? typeNames = dataTypes.GetTypeHeaderValues();
+            var typeNames = dataTypes.GetTypeHeaderValues();
 
             return _filter.In(_dataTypeNameFieldName, typeNames);
         }
@@ -83,7 +83,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
 
         protected FilterDefinition<BsonDocument> DataValueMatches<TData>(Expression<Func<TData, bool>> dataExpression)
         {
-            FilterDefinition<TData>? dataFilter = Builders<TData>.Filter.Where(dataExpression);
+            var dataFilter = Builders<TData>.Filter.Where(dataExpression);
 
             return new EmbeddedFilterDefinition<BsonDocument, TData>(_dataValueFieldName, dataFilter,
                 GetHoistedFieldNames());

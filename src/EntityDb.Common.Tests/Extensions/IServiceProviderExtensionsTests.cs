@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Common.Extensions;
+﻿using EntityDb.Common.Extensions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using Shouldly;
@@ -19,11 +18,11 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            IServiceProvider? serviceProvider = GetEmptyServiceProvider();
+            var serviceProvider = GetEmptyServiceProvider();
 
             // ACT
 
-            ILease[]? leases = serviceProvider.GetLeases(new TransactionEntity());
+            var leases = serviceProvider.GetLeases(new TransactionEntity());
 
             // ASSERT
 
@@ -35,11 +34,11 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            IServiceProvider? serviceProvider = GetEmptyServiceProvider();
+            var serviceProvider = GetEmptyServiceProvider();
 
             // ACT
 
-            bool isAuthorized = serviceProvider.IsAuthorized(new TransactionEntity(), new DoNothing());
+            var isAuthorized = serviceProvider.IsAuthorized(new TransactionEntity(), new DoNothing());
 
             // ASSERT
 
@@ -51,11 +50,11 @@ namespace EntityDb.Common.Tests.Extensions
         {
             // ARRANGE
 
-            IServiceProvider? serviceProvider = GetEmptyServiceProvider();
+            var serviceProvider = GetEmptyServiceProvider();
 
             // ACT
 
-            bool shouldCache = serviceProvider.ShouldPutSnapshot<TransactionEntity>(default, default!);
+            var shouldCache = serviceProvider.ShouldPutSnapshot<TransactionEntity>(default, default!);
 
             // ASSERT
 

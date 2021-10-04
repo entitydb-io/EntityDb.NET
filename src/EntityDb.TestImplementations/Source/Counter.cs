@@ -1,6 +1,4 @@
 ﻿namespace EntityDb.TestImplementations.Source
 {
-    public record Counter(int Number)
-    {
-    }
+    public record Counter(int Number);
 }

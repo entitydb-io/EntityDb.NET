@@ -1,7 +1,5 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Extensions;
+﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
-using EntityDb.Redis.Sessions;
 using EntityDb.Redis.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Shouldly;
@@ -23,20 +21,20 @@ namespace EntityDb.Redis.Tests.Sessions
         [Fact]
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteQuery_ThenReturnDefault()
         {
-            ISnapshotRepository<TransactionEntity>? snapshotRepositoryFactory =
+            var snapshotRepositoryFactory =
                 await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
                 // ARRANGE
 
-                IRedisSession? redisSession = redisSnapshotRepository.RedisSession;
+                var redisSession = redisSnapshotRepository.RedisSession;
 
                 // ACT
 
-                object? result =
+                var result =
                     await redisSession.ExecuteQuery<object?>(
-                        (logger, resolvingStrategyChain, redisDatabase) => throw new Exception(), default);
+                        (_, _, _) => throw new Exception(), default);
 
                 // ASSERT
 
@@ -52,19 +50,19 @@ namespace EntityDb.Redis.Tests.Sessions
         [Fact]
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteComand_ThenReturnFalse()
         {
-            ISnapshotRepository<TransactionEntity>? snapshotRepositoryFactory =
+            var snapshotRepositoryFactory =
                 await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
 
             if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
                 // ARRANGE
 
-                IRedisSession? redisSession = redisSnapshotRepository.RedisSession;
+                var redisSession = redisSnapshotRepository.RedisSession;
 
                 // ACT
 
-                bool executed =
-                    await redisSession.ExecuteCommand((serviceProvider, redisTransaction) => throw new Exception());
+                var executed =
+                    await redisSession.ExecuteCommand((_, _) => throw new Exception());
 
                 // ASSERT
 

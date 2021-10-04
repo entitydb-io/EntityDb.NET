@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
-using StackExchange.Redis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -26,11 +25,11 @@ namespace EntityDb.Redis.Snapshots
             (
                 (serviceProvider, redisTransaction) =>
                 {
-                    JsonElementEnvelope? jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, serviceProvider);
+                    var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, serviceProvider);
 
-                    byte[]? snapshotValue = jsonElementEnvelope.Serialize(serviceProvider);
+                    var snapshotValue = jsonElementEnvelope.Serialize(serviceProvider);
 
-                    string? key = GetKey(entityId);
+                    var key = GetKey(entityId);
 
                     return redisTransaction.StringSetAsync(key, snapshotValue);
                 }
@@ -43,14 +42,13 @@ namespace EntityDb.Redis.Snapshots
             (
                 async (logger, resolvingStrategyChain, redisDatabase) =>
                 {
-                    string? key = GetKey(entityId);
+                    var key = GetKey(entityId);
 
-                    RedisValue snapshotValue = await redisDatabase.StringGetAsync(key);
+                    var snapshotValue = await redisDatabase.StringGetAsync(key);
 
                     if (snapshotValue.HasValue)
                     {
-                        JsonElementEnvelope? jsonElementEnvelope =
-                            JsonElementEnvelope.Deserialize(snapshotValue, logger);
+                        var jsonElementEnvelope = JsonElementEnvelope.Deserialize(snapshotValue, logger);
 
                         return jsonElementEnvelope.Reconstruct<TEntity>(logger, resolvingStrategyChain);
                     }

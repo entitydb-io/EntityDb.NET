@@ -1,6 +1,4 @@
 ﻿using EntityDb.MongoDb.Provisioner.Extensions;
-using EntityDb.MongoDb.Provisioner.MongoDbAtlas;
-using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
 using MongoDB.Driver;
 using System;
 using System.CommandLine;
@@ -13,7 +11,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
     {
         public static void AddTo(RootCommand rootCommand)
         {
-            Command? createCollections = new Command("create-collections");
+            var createCollections = new Command("create-collections");
 
             AddMongoDbAtlasArgumentsTo(createCollections);
             AddClusterNameArgumentTo(createCollections);
@@ -35,16 +33,16 @@ namespace EntityDb.MongoDb.Provisioner.Commands
         {
             const string protocol = "mongodb+srv://";
 
-            MongoDbAtlasClient? mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
+            var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
 
-            Cluster? cluster = await mongoDbAtlasClient.GetCluster(clusterName);
+            var cluster = await mongoDbAtlasClient.GetCluster(clusterName);
 
             if (cluster == null || cluster.SrvAddress?.StartsWith(protocol) != true)
             {
                 throw new InvalidOperationException();
             }
 
-            MongoClient? mongoClient =
+            var mongoClient =
                 new MongoClient(
                     $"{protocol}{entityName}:{entityPassword}@{cluster.SrvAddress[protocol.Length..]}/admin");
 

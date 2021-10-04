@@ -43,7 +43,7 @@ namespace EntityDb.MongoDb.Rewriters
         {
             _bsonWriter.WriteStartDocument();
 
-            foreach (BsonElement bsonElement in bsonElements)
+            foreach (var bsonElement in bsonElements)
             {
                 if (_hoistedFieldNames.Contains(bsonElement.Name))
                 {

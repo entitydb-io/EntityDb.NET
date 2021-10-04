@@ -1,6 +1,4 @@
 ﻿namespace EntityDb.TestImplementations.Source
 {
-    public record NoSource
-    {
-    }
+    public record NoSource;
 }

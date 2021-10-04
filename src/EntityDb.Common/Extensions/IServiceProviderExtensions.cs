@@ -28,7 +28,7 @@ namespace EntityDb.Common.Extensions
         /// <returns></returns>
         public static IAgent GetAgent(this IServiceProvider serviceProvider)
         {
-            IAgentAccessor? agentAccessor = serviceProvider.GetRequiredService<IAgentAccessor>();
+            var agentAccessor = serviceProvider.GetRequiredService<IAgentAccessor>();
 
             return agentAccessor.GetAgent();
         }
@@ -53,8 +53,7 @@ namespace EntityDb.Common.Extensions
         public static Type ResolveType(this IServiceProvider serviceProvider,
             IReadOnlyDictionary<string, string> headers)
         {
-            IResolvingStrategyChain? resolvingStrategyChain =
-                serviceProvider.GetRequiredService<IResolvingStrategyChain>();
+            var resolvingStrategyChain = serviceProvider.GetRequiredService<IResolvingStrategyChain>();
 
             return resolvingStrategyChain.ResolveType(headers);
         }
@@ -69,7 +68,7 @@ namespace EntityDb.Common.Extensions
         public static Task<ITransactionRepository<TEntity>> CreateTransactionRepository<TEntity>(
             this IServiceProvider serviceProvider, ITransactionSessionOptions transactionSessionOptions)
         {
-            ITransactionRepositoryFactory<TEntity>? transactionRepositoryFactory =
+            var transactionRepositoryFactory =
                 serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TEntity>>();
 
             return transactionRepositoryFactory.CreateRepository(transactionSessionOptions);
@@ -85,8 +84,7 @@ namespace EntityDb.Common.Extensions
         public static Task<ISnapshotRepository<TEntity>> CreateSnapshotRepository<TEntity>(
             this IServiceProvider serviceProvider, ISnapshotSessionOptions snapshotSessionOptions)
         {
-            ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory =
-                serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
+            var snapshotRepositoryFactory = serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
 
             return snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
         }
@@ -103,22 +101,19 @@ namespace EntityDb.Common.Extensions
             this IServiceProvider serviceProvider, ITransactionSessionOptions transactionSessionOptions,
             ISnapshotSessionOptions? snapshotSessionOptions = null)
         {
-            ITransactionRepositoryFactory<TEntity>? transactionRepositoryFactory =
+            var transactionRepositoryFactory =
                 serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TEntity>>();
 
-            ITransactionRepository<TEntity>? transactionRepository =
-                await transactionRepositoryFactory.CreateRepository(transactionSessionOptions);
+            var transactionRepository = await transactionRepositoryFactory.CreateRepository(transactionSessionOptions);
 
             if (snapshotSessionOptions == null)
             {
                 return new EntityRepository<TEntity>(serviceProvider, transactionRepository);
             }
 
-            ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory =
-                serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
+            var snapshotRepositoryFactory = serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
 
-            ISnapshotRepository<TEntity>? snapshotRepository =
-                await snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
+            var snapshotRepository = await snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
 
             return new EntityRepository<TEntity>(serviceProvider, transactionRepository, snapshotRepository);
         }
@@ -132,8 +127,7 @@ namespace EntityDb.Common.Extensions
         /// <returns>A new instance of <typeparamref name="TEntity" />.</returns>
         public static TEntity Construct<TEntity>(this IServiceProvider serviceProvider, Guid entityId)
         {
-            IConstructingStrategy<TEntity>? constructingStrategy =
-                serviceProvider.GetRequiredService<IConstructingStrategy<TEntity>>();
+            var constructingStrategy = serviceProvider.GetRequiredService<IConstructingStrategy<TEntity>>();
 
             return constructingStrategy.Construct(entityId);
         }
@@ -147,8 +141,7 @@ namespace EntityDb.Common.Extensions
         /// <returns>The version number of <paramref name="entity" />.</returns>
         public static ulong GetVersionNumber<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
         {
-            IVersioningStrategy<TEntity>? versioningStrategy =
-                serviceProvider.GetRequiredService<IVersioningStrategy<TEntity>>();
+            var versioningStrategy = serviceProvider.GetRequiredService<IVersioningStrategy<TEntity>>();
 
             return versioningStrategy.GetVersionNumber(entity);
         }
@@ -163,8 +156,7 @@ namespace EntityDb.Common.Extensions
         public static IFact<TEntity> GetVersionNumberFact<TEntity>(this IServiceProvider serviceProvider,
             ulong versionNumber)
         {
-            IVersioningStrategy<TEntity>? versioningStrategy =
-                serviceProvider.GetRequiredService<IVersioningStrategy<TEntity>>();
+            var versioningStrategy = serviceProvider.GetRequiredService<IVersioningStrategy<TEntity>>();
 
             return versioningStrategy.GetVersionNumberFact(versionNumber);
         }
@@ -178,7 +170,7 @@ namespace EntityDb.Common.Extensions
         /// <returns>The leases for <paramref name="entity" />.</returns>
         public static ILease[] GetLeases<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
         {
-            ILeasingStrategy<TEntity>? leasingStrategy = serviceProvider.GetService<ILeasingStrategy<TEntity>>();
+            var leasingStrategy = serviceProvider.GetService<ILeasingStrategy<TEntity>>();
 
             if (leasingStrategy != null)
             {
@@ -197,7 +189,7 @@ namespace EntityDb.Common.Extensions
         /// <returns>The tags for <paramref name="entity" />.</returns>
         public static ITag[] GetTags<TEntity>(this IServiceProvider serviceProvider, TEntity entity)
         {
-            ITaggingStrategy<TEntity>? taggingStrategy = serviceProvider.GetService<ITaggingStrategy<TEntity>>();
+            var taggingStrategy = serviceProvider.GetService<ITaggingStrategy<TEntity>>();
 
             if (taggingStrategy != null)
             {
@@ -218,12 +210,11 @@ namespace EntityDb.Common.Extensions
         public static bool IsAuthorized<TEntity>(this IServiceProvider serviceProvider, TEntity entity,
             ICommand<TEntity> command)
         {
-            IAuthorizingStrategy<TEntity>? authorizingStrategy =
-                serviceProvider.GetService<IAuthorizingStrategy<TEntity>>();
+            var authorizingStrategy = serviceProvider.GetService<IAuthorizingStrategy<TEntity>>();
 
             if (authorizingStrategy != null)
             {
-                IAgent? agent = serviceProvider.GetAgent();
+                var agent = serviceProvider.GetAgent();
 
                 return authorizingStrategy.IsAuthorized(entity, command, agent);
             }
@@ -245,8 +236,7 @@ namespace EntityDb.Common.Extensions
         public static bool ShouldPutSnapshot<TEntity>(this IServiceProvider serviceProvider, TEntity? previousEntity,
             TEntity nextEntity)
         {
-            ISnapshottingStrategy<TEntity>? snapshottingStrategy =
-                serviceProvider.GetService<ISnapshottingStrategy<TEntity>>();
+            var snapshottingStrategy = serviceProvider.GetService<ISnapshottingStrategy<TEntity>>();
 
             if (snapshottingStrategy != null)
             {

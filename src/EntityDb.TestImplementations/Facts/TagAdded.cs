@@ -10,7 +10,7 @@ namespace EntityDb.TestImplementations.Facts
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            List<ITag>? tags = new List<ITag>();
+            var tags = new List<ITag>();
 
             if (entity.Tags != null)
             {

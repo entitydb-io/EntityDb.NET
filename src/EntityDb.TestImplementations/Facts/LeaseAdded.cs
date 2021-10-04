@@ -10,7 +10,7 @@ namespace EntityDb.TestImplementations.Facts
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            List<ILease>? leases = new List<ILease>();
+            var leases = new List<ILease>();
 
             if (entity.Leases != null)
             {

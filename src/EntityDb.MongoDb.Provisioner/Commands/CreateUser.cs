@@ -1,5 +1,4 @@
-﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas;
-using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
+﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
@@ -10,7 +9,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
     {
         public static void AddTo(RootCommand rootCommand)
         {
-            Command? createUser = new Command("create-user");
+            var createUser = new Command("create-user");
 
             AddMongoDbAtlasArgumentsTo(createUser);
             AddEntityNameArgumentTo(createUser);
@@ -29,18 +28,14 @@ namespace EntityDb.MongoDb.Provisioner.Commands
         public static async Task Execute(string groupName, string publicKey, string privateKey, string entityName,
             string entityPassword)
         {
-            using MongoDbAtlasClient? mongoDbAtlasClient =
-                await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
+            using var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
 
             if (await mongoDbAtlasClient.UserExists("admin", entityName))
             {
                 return;
             }
 
-            MongoDbAtlastUserRole[]? roles = new[]
-            {
-                new MongoDbAtlastUserRole { DatabaseName = "admin", RoleName = entityName }
-            };
+            var roles = new[] { new MongoDbAtlastUserRole { DatabaseName = "admin", RoleName = entityName } };
 
             await mongoDbAtlasClient.CreateUser("admin", entityName, entityPassword, roles);
         }

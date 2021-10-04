@@ -22,7 +22,7 @@ namespace EntityDb.MongoDb.Envelopes
 
         private static BsonDocument GetBsonDocument(dynamic? @object, bool removeTypeDiscriminatorProperty)
         {
-            dynamic? bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
+            var bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
 
             if (removeTypeDiscriminatorProperty && bsonDocument.Contains(TypeDiscriminatorPropertyName))
             {
@@ -69,7 +69,7 @@ namespace EntityDb.MongoDb.Envelopes
         {
             try
             {
-                RawBsonDocument? bsonDocument = new RawBsonDocument(bsonBytes);
+                var bsonDocument = new RawBsonDocument(bsonBytes);
 
                 return (BsonDocumentEnvelope)BsonSerializer.Deserialize(bsonDocument, typeof(BsonDocumentEnvelope));
             }
@@ -86,9 +86,9 @@ namespace EntityDb.MongoDb.Envelopes
         {
             try
             {
-                dynamic? bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
+                var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
 
-                Dictionary<string, string>? headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
 
                 return new BsonDocumentEnvelope
                 (

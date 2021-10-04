@@ -1,6 +1,5 @@
 ﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
 using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -35,7 +34,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         private static Uri GetUri(string route)
         {
-            string? baseUrl = "https://cloud.mongodb.com";
+            var baseUrl = "https://cloud.mongodb.com";
 
             return new Uri($"{baseUrl}/api/atlas/v1.0/{route}");
         }
@@ -43,7 +42,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         private static async Task<HttpResponseMessage> GetResponse(string publicKey, string privateKey,
             Func<HttpRequestMessage> createRequest)
         {
-            HttpRequestMessage? request = createRequest.Invoke();
+            var request = createRequest.Invoke();
 
             if (DigestChallengeRequest != null && DigestChallengeRequest.IsUsable)
             {
@@ -64,14 +63,14 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         private static async Task<HttpResponseMessage> Send(string publicKey, string privateKey,
             Func<HttpRequestMessage> createRequest)
         {
-            HttpResponseMessage? firstResponse = await GetResponse(publicKey, privateKey, createRequest);
+            var firstResponse = await GetResponse(publicKey, privateKey, createRequest);
 
             if (firstResponse.StatusCode != HttpStatusCode.Unauthorized)
             {
                 return firstResponse;
             }
 
-            AuthenticationHeaderValue? wwwAuthenticateHeader =
+            var wwwAuthenticateHeader =
                 AuthenticationHeaderValue.Parse(firstResponse.Headers.WwwAuthenticate.ToString());
 
             if (DigestChallengeRequest.TryParse(wwwAuthenticateHeader, out var digestChallengeRequest) == false)
@@ -91,7 +90,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public async Task<bool> UserExists(string databaseName, string username)
         {
-            HttpResponseMessage? getUserResponse = await Send(() => new HttpRequestMessage
+            var getUserResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
                 RequestUri = GetUri($"groups/{_groupId}/databaseUsers/{databaseName}/{username}")
@@ -112,7 +111,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public async Task<bool> RoleExists(string role)
         {
-            HttpResponseMessage? getRoleResponse = await Send(() => new HttpRequestMessage
+            var getRoleResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}")
             });
@@ -132,11 +131,11 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public async Task<bool> CreateRole(string roleName, MongoDbAtlasRoleAction[] actions)
         {
-            string? jsonPayload = JsonSerializer.Serialize(new { actions, roleName });
+            var jsonPayload = JsonSerializer.Serialize(new { actions, roleName });
 
-            StringContent? content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage? createRoleResponse = await Send(() => new HttpRequestMessage
+            var createRoleResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
                 RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles"),
@@ -154,11 +153,11 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         public async Task<bool> CreateUser(string databaseName, string username, string password,
             MongoDbAtlastUserRole[] roles)
         {
-            string? jsonPayload = JsonSerializer.Serialize(new { databaseName, password, roles, username });
+            var jsonPayload = JsonSerializer.Serialize(new { databaseName, password, roles, username });
 
-            StringContent? content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage? createUserResponse = await Send(() => new HttpRequestMessage
+            var createUserResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Post, RequestUri = GetUri($"groups/{_groupId}/databaseUsers"), Content = content
             });
@@ -173,14 +172,14 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public async Task<Cluster?> GetCluster(string clusterName)
         {
-            HttpResponseMessage? getClusterResponse = await Send(() => new HttpRequestMessage
+            var getClusterResponse = await Send(() => new HttpRequestMessage
             {
                 Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
             });
 
             if (getClusterResponse.IsSuccessStatusCode)
             {
-                Stream? responseStream = await getClusterResponse.Content.ReadAsStreamAsync();
+                var responseStream = await getClusterResponse.Content.ReadAsStreamAsync();
 
                 return await JsonSerializer.DeserializeAsync<Cluster>(responseStream);
             }
@@ -190,17 +189,17 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public static async Task<MongoDbAtlasClient> Create(string groupName, string publicKey, string privateKey)
         {
-            HttpResponseMessage? getGroupsResponse = await Send(publicKey, privateKey,
+            var getGroupsResponse = await Send(publicKey, privateKey,
                 () => new HttpRequestMessage { Method = HttpMethod.Get, RequestUri = GetUri("groups") });
 
             if (getGroupsResponse.IsSuccessStatusCode)
             {
-                Stream? responseStream = await getGroupsResponse.Content.ReadAsStreamAsync();
+                var responseStream = await getGroupsResponse.Content.ReadAsStreamAsync();
 
-                ListOf<Group>? listOfGroups = await JsonSerializer.DeserializeAsync<ListOf<Group>>(responseStream) ??
-                                              throw new InvalidOperationException();
+                var listOfGroups = await JsonSerializer.DeserializeAsync<ListOf<Group>>(responseStream) ??
+                                   throw new InvalidOperationException();
 
-                Group? group = listOfGroups
+                var group = listOfGroups
                     .Results
                     .Single(group => group.Name == groupName);
 

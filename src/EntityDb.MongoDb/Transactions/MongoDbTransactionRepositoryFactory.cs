@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Transactions
         public async Task<ITransactionRepository<TEntity>> CreateRepository(
             ITransactionSessionOptions transactionSessionOptions)
         {
-            IMongoDbSession? mongoDbSession = await CreateSession(transactionSessionOptions);
+            var mongoDbSession = await CreateSession(transactionSessionOptions);
 
             return new MongoDbTransactionRepository<TEntity>(mongoDbSession);
         }
@@ -79,17 +79,16 @@ namespace EntityDb.MongoDb.Transactions
 
         private async Task<IMongoDbSession> CreateSession(ITransactionSessionOptions transactionSessionOptions)
         {
-            IMongoClient? mongoClient = await CreateClient(transactionSessionOptions);
+            var mongoClient = await CreateClient(transactionSessionOptions);
 
-            IMongoDatabase? mongoDatabase = mongoClient.GetDatabase(_databaseName);
+            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
 
             if (transactionSessionOptions.ReadOnly)
             {
                 return CreateSession(null, mongoDatabase, transactionSessionOptions.LoggerOverride);
             }
 
-            IClientSessionHandle? clientSessionHandle =
-                await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
+            var clientSessionHandle = await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
 
             return CreateSession(clientSessionHandle, mongoDatabase, transactionSessionOptions.LoggerOverride);
         }

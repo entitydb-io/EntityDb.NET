@@ -24,7 +24,7 @@ namespace EntityDb.MongoDb.Provisioner.Transactions
 
         protected override async Task<IMongoClient> CreateClient(ITransactionSessionOptions transactionSessionOptions)
         {
-            IMongoClient? mongoClient = await base.CreateClient(transactionSessionOptions);
+            var mongoClient = await base.CreateClient(transactionSessionOptions);
 
             if (!_needToProvision)
             {

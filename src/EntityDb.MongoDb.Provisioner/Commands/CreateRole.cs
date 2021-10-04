@@ -1,5 +1,4 @@
 ﻿using EntityDb.MongoDb.Documents;
-using EntityDb.MongoDb.Provisioner.MongoDbAtlas;
 using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -11,7 +10,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
     {
         public static void AddTo(RootCommand rootCommand)
         {
-            Command? createRole = new Command("create-role");
+            var createRole = new Command("create-role");
 
             AddMongoDbAtlasArgumentsTo(createRole);
             AddEntityNameArgumentTo(createRole);
@@ -27,39 +26,32 @@ namespace EntityDb.MongoDb.Provisioner.Commands
 
         public static async Task Execute(string groupName, string publicKey, string privateKey, string entityName)
         {
-            using MongoDbAtlasClient? mongoDbAtlasClient =
-                await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
+            using var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
 
             if (await mongoDbAtlasClient.RoleExists(entityName))
             {
                 return;
             }
 
-            MongoDbAtlasResource? allClusterResources = new MongoDbAtlasResource { Cluster = true };
+            var allClusterResources = new MongoDbAtlasResource { Cluster = true };
 
-            MongoDbAtlasResource? allDbResources = new MongoDbAtlasResource { Db = entityName };
+            var allDbResources = new MongoDbAtlasResource { Db = entityName };
 
-            MongoDbAtlasResource? sourceResource = new MongoDbAtlasResource
+            var sourceResource = new MongoDbAtlasResource
             {
                 Db = entityName, Collection = SourceDocument.CollectionName
             };
 
-            MongoDbAtlasResource? commandResource = new MongoDbAtlasResource
+            var commandResource = new MongoDbAtlasResource
             {
                 Db = entityName, Collection = CommandDocument.CollectionName
             };
 
-            MongoDbAtlasResource? factResource = new MongoDbAtlasResource
-            {
-                Db = entityName, Collection = FactDocument.CollectionName
-            };
+            var factResource = new MongoDbAtlasResource { Db = entityName, Collection = FactDocument.CollectionName };
 
-            MongoDbAtlasResource? leaseResource = new MongoDbAtlasResource
-            {
-                Db = entityName, Collection = LeaseDocument.CollectionName
-            };
+            var leaseResource = new MongoDbAtlasResource { Db = entityName, Collection = LeaseDocument.CollectionName };
 
-            MongoDbAtlasRoleAction[]? roleActions = new[]
+            var roleActions = new[]
             {
                 new MongoDbAtlasRoleAction { Action = "LIST_DATABASES", Resources = new[] { allClusterResources } },
                 new MongoDbAtlasRoleAction { Action = "LIST_COLLECTIONS", Resources = new[] { allDbResources } },

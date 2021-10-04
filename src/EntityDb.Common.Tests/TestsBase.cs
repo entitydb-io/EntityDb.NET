@@ -24,7 +24,7 @@ namespace EntityDb.Common.Tests
 
         public IServiceProvider GetServiceProviderWithOverrides(Action<IServiceCollection> configureOverrides)
         {
-            ServiceCollection? overrideServiceCollection = new ServiceCollection();
+            var overrideServiceCollection = new ServiceCollection();
 
             configureOverrides.Invoke(overrideServiceCollection);
 
@@ -39,8 +39,7 @@ namespace EntityDb.Common.Tests
                 facts = Array.Empty<IFact<TEntity>>();
             }
 
-            Mock<ITransactionRepository<TEntity>>? transactionRepositoryMock =
-                new Mock<ITransactionRepository<TEntity>>(MockBehavior.Strict);
+            var transactionRepositoryMock = new Mock<ITransactionRepository<TEntity>>(MockBehavior.Strict);
 
             transactionRepositoryMock
                 .Setup(session => session.PutTransaction(It.IsAny<ITransaction<TEntity>>()))
@@ -55,7 +54,7 @@ namespace EntityDb.Common.Tests
                 .Setup(repository => repository.DisposeAsync())
                 .Returns(ValueTask.CompletedTask);
 
-            Mock<ITransactionRepositoryFactory<TEntity>>? transactionRepositoryFactoryMock =
+            var transactionRepositoryFactoryMock =
                 new Mock<ITransactionRepositoryFactory<TEntity>>(MockBehavior.Strict);
 
             transactionRepositoryFactoryMock

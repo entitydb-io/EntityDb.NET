@@ -40,25 +40,25 @@ namespace EntityDb.MongoDb.Tests.Rewriters
         {
             // ARRANGE
 
-            BsonDocument? originalBsonDocument = new BsonDocument
+            var originalBsonDocument = new BsonDocument
             {
                 ["Document"] = CreateSubDocument(),
                 ["Array"] = new BsonArray { CreateSubDocument(), CreateSubDocument() }
             };
 
-            byte[]? expectedBson = originalBsonDocument.ToBson();
+            var expectedBson = originalBsonDocument.ToBson();
 
-            BsonDocument? copyBsonDocument = new BsonDocument();
+            var copyBsonDocument = new BsonDocument();
 
-            using BsonDocumentWriter? bsonWriter = new BsonDocumentWriter(copyBsonDocument);
+            using var bsonWriter = new BsonDocumentWriter(copyBsonDocument);
 
-            BsonDocumentRewriter? bsonDocumentRewriter = new BsonDocumentRewriter(bsonWriter);
+            var bsonDocumentRewriter = new BsonDocumentRewriter(bsonWriter);
 
             // ACT
 
             bsonDocumentRewriter.Rewrite(originalBsonDocument);
 
-            byte[]? actualBson = copyBsonDocument.ToBson();
+            var actualBson = copyBsonDocument.ToBson();
 
             // ASSERT
 
@@ -70,17 +70,17 @@ namespace EntityDb.MongoDb.Tests.Rewriters
         {
             // ARRANGE
 
-            BsonDocument? originalBsonDocument = new BsonDocument
+            var originalBsonDocument = new BsonDocument
             {
                 ["JavaScript"] = BsonJavaScript.Create("function() { return true; }"),
                 ["JavaScriptWithScope"] = BsonJavaScriptWithScope.Create("function(a) { return true; }")
             };
 
-            BsonDocument? copyBsonDocument = new BsonDocument();
+            var copyBsonDocument = new BsonDocument();
 
-            using BsonDocumentWriter? bsonWriter = new BsonDocumentWriter(copyBsonDocument);
+            using var bsonWriter = new BsonDocumentWriter(copyBsonDocument);
 
-            BsonDocumentRewriter? bsonDocumentRewriter = new BsonDocumentRewriter(bsonWriter);
+            var bsonDocumentRewriter = new BsonDocumentRewriter(bsonWriter);
 
             // ASSERT
 

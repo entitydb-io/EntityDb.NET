@@ -8,7 +8,7 @@ namespace EntityDb.Common.Loggers
     {
         public ILogger CreateLogger(Type type)
         {
-            Microsoft.Extensions.Logging.ILogger? logger = LoggerFactory.CreateLogger(type);
+            var logger = LoggerFactory.CreateLogger(type);
 
             return new DefaultLogger(logger);
         }

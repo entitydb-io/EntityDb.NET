@@ -23,19 +23,17 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
         public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
             IBsonSerializerRegistry bsonSerializerRegistry)
         {
-            RenderedFieldDefinition? renderedParentField =
-                _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
+            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
 
-            IBsonSerializer<TEmbeddedDocument>? childDocumentSerializer =
-                bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
+            var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
 
-            BsonDocument? renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry);
+            var renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry);
 
-            BsonDocument? document = new BsonDocument();
+            var document = new BsonDocument();
 
-            using BsonDocumentWriter? bsonWriter = new BsonDocumentWriter(document);
+            using var bsonWriter = new BsonDocumentWriter(document);
 
-            EmbeddedSortRewriter? embeddedSortRewriter =
+            var embeddedSortRewriter =
                 new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedSortRewriter.Rewrite(renderedChildSort);

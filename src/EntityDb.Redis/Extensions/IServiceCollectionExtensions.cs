@@ -33,7 +33,7 @@ namespace EntityDb.Redis.Extensions
         {
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                string? connectionString = getConnectionString.Invoke(serviceProvider);
+                var connectionString = getConnectionString.Invoke(serviceProvider);
 
                 return RedisSnapshotRepositoryFactory<TEntity>.Create(serviceProvider, connectionString, keyNamespace);
             });
@@ -58,7 +58,7 @@ namespace EntityDb.Redis.Extensions
         {
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                string? connectionString = getConnectionString.Invoke(serviceProvider);
+                var connectionString = getConnectionString.Invoke(serviceProvider);
 
                 return TestModeRedisSnapshotRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     keyNamespace);
