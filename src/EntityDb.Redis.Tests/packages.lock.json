@@ -28,12 +28,6 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
       },
-      "Redis2Go.Alpha": {
-        "type": "Direct",
-        "requested": "[1.0.0.3, )",
-        "resolved": "1.0.0.3",
-        "contentHash": "w0GHVPXKgpwN7YjJ8QBbTEq9zsYnYlMMCNRpHYALYwaafoydRYeTu7/otdW+3gseX+X8WhSCTpUQauYTdXExGg=="
-      },
       "Shouldly": {
         "type": "Direct",
         "requested": "[4.0.3, )",

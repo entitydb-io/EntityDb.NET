@@ -7,13 +7,13 @@ using System;
 
 namespace EntityDb.MongoDb.Transactions
 {
-    internal sealed class TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactory<TEntity>
+    internal class TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactory<TEntity>
     {
         public TestModeMongoDbTransactionRepositoryFactory(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName) : base(loggerFactory, resolvingStrategyChain, connectionString, databaseName)
         {
         }
 
-        internal override IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
+        protected override IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle, IMongoDatabase mongoDatabase, ILogger? loggerOverride)
         {
             return new TestModeMongoDbSession(clientSessionHandle, mongoDatabase, loggerOverride ?? _logger, _resolvingStrategyChain);
         }
