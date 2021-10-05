@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Queries.Filters;
 using EntityDb.Common.Queries.Filtered;
-using EntityDb.Common.Queries.Filters;
 using EntityDb.Common.Queries.Modified;
 
 namespace EntityDb.Common.Extensions

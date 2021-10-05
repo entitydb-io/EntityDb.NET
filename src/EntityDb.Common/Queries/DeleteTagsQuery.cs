@@ -2,7 +2,6 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Tags;
-using EntityDb.Common.Queries.Filters;
 using EntityDb.Common.Tags;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Linq;
 
 namespace EntityDb.Common.Queries
 {
-    internal sealed record DeleteTagsQuery(Guid EntityId, IReadOnlyCollection<ITag> Tags) : ITagQuery, ITagFilter
+    internal sealed record DeleteTagsQuery(Guid EntityId, IReadOnlyCollection<ITag> Tags) : ITagQuery
     {
         public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {

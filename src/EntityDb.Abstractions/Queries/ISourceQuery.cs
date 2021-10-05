@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Queries.FilterBuilders;
+﻿using EntityDb.Abstractions.Queries.Filters;
 using EntityDb.Abstractions.Queries.SortBuilders;
 
 namespace EntityDb.Abstractions.Queries
@@ -6,16 +6,8 @@ namespace EntityDb.Abstractions.Queries
     /// <summary>
     ///     Abstracts a query on sources.
     /// </summary>
-    public interface ISourceQuery : IQuery
+    public interface ISourceQuery : IQuery, ISourceFilter
     {
-        /// <summary>
-        ///     Returns a <typeparamref name="TFilter" /> built from a source filter builder.
-        /// </summary>
-        /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-        /// <param name="builder">The source filter builder.</param>
-        /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
-        TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder);
-
         /// <summary>
         ///     Returns a <typeparamref name="TSort" /> built from a source sort builder.
         /// </summary>
