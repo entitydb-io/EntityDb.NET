@@ -852,7 +852,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await CreateRepository();
 
-            var entityRepository = new EntityRepository<TransactionEntity>(_serviceProvider, transactionRepository);
+            var entityRepository = EntityRepository<TransactionEntity>.Create(_serviceProvider, transactionRepository);
 
             var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(),
                 new ICommand<TransactionEntity>[] { new DoNothing() });
@@ -861,7 +861,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            var actualEntity = await entityRepository.Get(entityId);
+            var actualEntity = await entityRepository.GetCurrentOrConstruct(entityId);
 
             // ASSERT
 

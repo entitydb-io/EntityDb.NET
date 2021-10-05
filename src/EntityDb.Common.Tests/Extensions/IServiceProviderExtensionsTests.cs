@@ -44,21 +44,5 @@ namespace EntityDb.Common.Tests.Extensions
 
             isAuthorized.ShouldBeTrue();
         }
-
-        [Fact]
-        public void GivenNoCachingStrategy_WhenCheckingIfShouldCache_ThenReturnFalse()
-        {
-            // ARRANGE
-
-            var serviceProvider = GetEmptyServiceProvider();
-
-            // ACT
-
-            var shouldCache = serviceProvider.ShouldPutSnapshot<TransactionEntity>(default, default!);
-
-            // ASSERT
-
-            shouldCache.ShouldBeFalse();
-        }
     }
 }

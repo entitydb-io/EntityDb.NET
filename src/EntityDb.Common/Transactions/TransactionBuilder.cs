@@ -106,7 +106,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityAlreadyLoadedException();
             }
 
-            var entity = await entityRepository.Get(entityId);
+            var entity = await entityRepository.GetCurrentOrConstruct(entityId);
 
             if (_serviceProvider.GetVersionNumber(entity) == 0)
             {

@@ -72,18 +72,18 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 
-            await entityRepository.Put(firstTransaction);
+            await entityRepository.PutTransaction(firstTransaction);
 
             var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion,
                 serviceProvider, entityRepository);
 
-            await entityRepository.Put(secondTransaction);
+            await entityRepository.PutTransaction(secondTransaction);
 
             // ACT
 
-            var current = await entityRepository.Get(entityId);
+            var current = await entityRepository.GetCurrentOrConstruct(entityId);
 
-            var snapshot = await entityRepository.SnapshotRepository!.GetSnapshot(entityId);
+            var snapshot = await entityRepository.GetSnapshotOrConstruct(entityId);
 
             // ASSERT
 

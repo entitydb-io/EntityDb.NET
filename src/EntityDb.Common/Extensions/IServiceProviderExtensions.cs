@@ -108,14 +108,14 @@ namespace EntityDb.Common.Extensions
 
             if (snapshotSessionOptions == null)
             {
-                return new EntityRepository<TEntity>(serviceProvider, transactionRepository);
+                return EntityRepository<TEntity>.Create(serviceProvider, transactionRepository);
             }
 
             var snapshotRepositoryFactory = serviceProvider.GetRequiredService<ISnapshotRepositoryFactory<TEntity>>();
 
             var snapshotRepository = await snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
 
-            return new EntityRepository<TEntity>(serviceProvider, transactionRepository, snapshotRepository);
+            return EntityRepository<TEntity>.Create(serviceProvider, transactionRepository, snapshotRepository);
         }
 
         /// <summary>
@@ -220,30 +220,6 @@ namespace EntityDb.Common.Extensions
             }
 
             return true;
-        }
-
-        /// <summary>
-        ///     Determines if the next version of an entity should be put into snapshot storage.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="serviceProvider">The service provider.</param>
-        /// <param name="previousEntity">The previous version of the entity, if it exists.</param>
-        /// <param name="nextEntity">The next version of the entity.</param>
-        /// <returns>
-        ///     <c>true</c> if the next version of the entity should be cached, or <c>false</c> if the next version of the
-        ///     entity should not be put into snapshot storage.
-        /// </returns>
-        public static bool ShouldPutSnapshot<TEntity>(this IServiceProvider serviceProvider, TEntity? previousEntity,
-            TEntity nextEntity)
-        {
-            var snapshottingStrategy = serviceProvider.GetService<ISnapshottingStrategy<TEntity>>();
-
-            if (snapshottingStrategy != null)
-            {
-                return snapshottingStrategy.ShouldPutSnapshot(previousEntity, nextEntity);
-            }
-
-            return false;
         }
     }
 }
