@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Entities;
+using EntityDb.TestImplementations.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
@@ -18,7 +19,7 @@ namespace EntityDb.Redis.Tests
 
             serviceCollection.AddLifoResolvingStrategyChain();
 
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
+            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity, TransactionEntitySnapshottingStrategy>
             (
                 TransactionEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379"
