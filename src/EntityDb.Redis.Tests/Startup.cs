@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Entities;
+using EntityDb.TestImplementations.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
@@ -17,7 +18,9 @@ namespace EntityDb.Redis.Tests
             serviceCollection.AddDefaultResolvingStrategy();
 
             serviceCollection.AddLifoResolvingStrategyChain();
-
+            
+            serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
+            
             serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,

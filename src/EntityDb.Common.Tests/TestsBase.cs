@@ -2,8 +2,13 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Tests
@@ -17,18 +22,52 @@ namespace EntityDb.Common.Tests
             _serviceProvider = serviceProvider;
         }
 
-        public IServiceProvider GetEmptyServiceProvider()
+        private IServiceCollection GetParaisteServiceCollection(Type[]? omittedTypes = null)
         {
-            return new ServiceCollection().BuildServiceProvider();
-        }
+            var serviceCollection = new ServiceCollection();
+            
+            // Use reflection to get all service descriptors
+            
+            var engine = _serviceProvider.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Single(x => x.Name == "Engine")
+                .GetValue(_serviceProvider);
 
+            var callSiteFactory = engine!.GetType()
+                .GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Single(x => x.Name == "CallSiteFactory")
+                .GetValue(engine);
+            
+            var descriptors = (callSiteFactory!.GetType()
+                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Single(x => x.Name == "_descriptors")
+                .GetValue(callSiteFactory) as List<ServiceDescriptor>)!;
+            
+            foreach (var descriptor in descriptors)
+            {
+                if (omittedTypes?.Contains(descriptor.ServiceType) == true)
+                {
+                    continue;
+                }
+                
+                serviceCollection.Add(descriptor);
+            }
+
+            return serviceCollection;
+        }
+        
         public IServiceProvider GetServiceProviderWithOverrides(Action<IServiceCollection> configureOverrides)
         {
-            var overrideServiceCollection = new ServiceCollection();
+            var serviceCollection = GetParaisteServiceCollection();
 
-            configureOverrides.Invoke(overrideServiceCollection);
+            configureOverrides.Invoke(serviceCollection);
 
-            return new ServiceProviderWithOverrides(overrideServiceCollection.BuildServiceProvider(), _serviceProvider);
+            return serviceCollection.BuildServiceProvider();
+        }
+
+        public IServiceProvider GetServiceProviderWithOmission<TOmittedType>()
+        {
+            return GetParaisteServiceCollection(new[] { typeof(TOmittedType) }).BuildServiceProvider();
         }
 
         public static ITransactionRepositoryFactory<TEntity> GetMockedTransactionRepositoryFactory<TEntity>(
@@ -62,15 +101,6 @@ namespace EntityDb.Common.Tests
                 .ReturnsAsync(transactionRepositoryMock.Object);
 
             return transactionRepositoryFactoryMock.Object;
-        }
-
-        private record ServiceProviderWithOverrides(IServiceProvider OverrideServiceProvider,
-            IServiceProvider ServiceProvider) : IServiceProvider
-        {
-            public object? GetService(Type serviceType)
-            {
-                return OverrideServiceProvider.GetService(serviceType) ?? ServiceProvider.GetService(serviceType);
-            }
         }
     }
 }

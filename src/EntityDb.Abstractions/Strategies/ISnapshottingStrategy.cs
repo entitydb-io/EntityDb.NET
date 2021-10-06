@@ -4,7 +4,7 @@
     ///     Represents a type used to determine if the next version of an entity should be put into snapshot storage.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity that can be put into snapshot storage.</typeparam>
-    public interface ISnapshottingStrategy<TEntity>
+    public interface ISnapshottingStrategy<in TEntity>
     {
         /// <summary>
         ///     Determines if the next version of an entity should be put into snapshot storage.

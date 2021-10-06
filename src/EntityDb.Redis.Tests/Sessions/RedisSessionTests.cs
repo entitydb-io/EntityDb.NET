@@ -1,4 +1,5 @@
-﻿using EntityDb.Common.Extensions;
+﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Snapshots;
 using EntityDb.TestImplementations.Entities;
@@ -11,20 +12,20 @@ namespace EntityDb.Redis.Tests.Sessions
 {
     public class RedisSessionTests
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ISnapshotRepositoryFactory<TransactionEntity> _snapshotRepositoryFactory;
 
-        public RedisSessionTests(IServiceProvider serviceProvider)
+        public RedisSessionTests(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory)
         {
-            _serviceProvider = serviceProvider;
+            _snapshotRepositoryFactory = snapshotRepositoryFactory;
         }
 
         [Fact]
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteQuery_ThenReturnDefault()
         {
-            var snapshotRepositoryFactory =
-                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            var snapshotRepository =
+                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
 
-            if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
+            if (snapshotRepository is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
                 // ARRANGE
 
@@ -48,12 +49,12 @@ namespace EntityDb.Redis.Tests.Sessions
 
 
         [Fact]
-        public async Task GivenValidRedisSession_WhenThrowingDuringExecuteComand_ThenReturnFalse()
+        public async Task GivenValidRedisSession_WhenThrowingDuringExecuteCommand_ThenReturnFalse()
         {
-            var snapshotRepositoryFactory =
-                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+            var snapshotRepository =
+                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
 
-            if (snapshotRepositoryFactory is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
+            if (snapshotRepository is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
                 // ARRANGE
 

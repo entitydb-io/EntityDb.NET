@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Queries.FilterBuilders;
+﻿using EntityDb.Abstractions.Queries.Filters;
 using EntityDb.Abstractions.Queries.SortBuilders;
 
 namespace EntityDb.Abstractions.Queries
@@ -6,16 +6,8 @@ namespace EntityDb.Abstractions.Queries
     /// <summary>
     ///     Abstracts a query on facts.
     /// </summary>
-    public interface IFactQuery : IQuery
+    public interface IFactQuery : IQuery, IFactFilter
     {
-        /// <summary>
-        ///     Returns a <typeparamref name="TFilter" /> built from a fact filter builder.
-        /// </summary>
-        /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-        /// <param name="builder">The fact filter builder.</param>
-        /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
-        TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder);
-
         /// <summary>
         ///     Returns a <typeparamref name="TSort" /> built from a fact sort builder.
         /// </summary>

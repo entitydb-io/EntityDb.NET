@@ -10,7 +10,7 @@ namespace EntityDb.Common.Entities
     /// <typeparam name="TEntity">The type of the entity to be authorized.</typeparam>
     public interface IAuthorizedEntity<TEntity>
     {
-        /// <inheritdoc cref="IAuthorizingStrategy{TEntity}.IsAuthorized(TEntity, ICommand{TEntity}, IAgent)" />
+        /// <inheritdoc cref="IAuthorizingStrategy{TEntity}.IsAuthorized(TEntity, ICommand{TEntity})" />
         bool IsAuthorized(ICommand<TEntity> command, IAgent agent);
     }
 }

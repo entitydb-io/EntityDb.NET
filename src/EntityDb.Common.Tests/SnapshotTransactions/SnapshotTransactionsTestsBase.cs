@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
@@ -25,7 +24,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
         private static async Task<ITransaction<TransactionEntity>> BuildTransaction(Guid entityId, ulong from, ulong to,
             IServiceProvider serviceProvider, IEntityRepository<TransactionEntity>? entityRepository = null)
         {
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             if (entityRepository != null)
             {
@@ -46,14 +45,14 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
         [Theory]
         [InlineData(10, 20)]
-        public async Task GivenCachingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
+        public async Task GivenSnapshottingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
             ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
         {
             // ARRANGE
 
-            var cachingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
+            var snapshottingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
-            cachingStrategyMock
+            snapshottingStrategyMock
                 .Setup(strategy =>
                     strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
                 .Returns((TransactionEntity? _, TransactionEntity nextEntity) =>
@@ -61,29 +60,29 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
-                serviceCollection.AddSingleton(_ => cachingStrategyMock.Object);
+                serviceCollection.AddSingleton(_ => snapshottingStrategyMock.Object);
             });
 
             var entityId = Guid.NewGuid();
 
             await using var entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(new TransactionSessionOptions(),
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(new TransactionSessionOptions(),
                     new SnapshotSessionOptions());
 
             var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 
-            await entityRepository.Put(firstTransaction);
+            await entityRepository.PutTransaction(firstTransaction);
 
             var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion,
                 serviceProvider, entityRepository);
 
-            await entityRepository.Put(secondTransaction);
+            await entityRepository.PutTransaction(secondTransaction);
 
             // ACT
 
-            var current = await entityRepository.Get(entityId);
+            var current = await entityRepository.GetCurrentOrConstruct(entityId);
 
-            var snapshot = await entityRepository.SnapshotRepository!.GetSnapshot(entityId);
+            var snapshot = await entityRepository.GetSnapshotOrDefault(entityId);
 
             // ASSERT
 

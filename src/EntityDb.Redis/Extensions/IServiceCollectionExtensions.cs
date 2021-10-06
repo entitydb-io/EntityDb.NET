@@ -1,6 +1,11 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Transactions;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -20,8 +25,6 @@ namespace EntityDb.Redis.Extensions
         /// <param name="keyNamespace">The namespace used to build a Redis key.</param>
         /// <param name="getConnectionString">A function that retrieves the Redis connection string.</param>
         /// <remarks>
-        /// </remarks>
-        /// <remarks>
         ///     The production-ready implementation will store snapshots as they come in. If you need write an integration test,
         ///     consider using
         ///     <see cref="AddTestModeRedisSnapshots{TEntity}(IServiceCollection, string, Func{IServiceProvider, string})" />
@@ -31,6 +34,9 @@ namespace EntityDb.Redis.Extensions
         public static void AddRedisSnapshots<TEntity>(this IServiceCollection serviceCollection, string keyNamespace,
             Func<IServiceProvider, string> getConnectionString)
         {
+            serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
+                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, false));
+            
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
                 var connectionString = getConnectionString.Invoke(serviceProvider);
@@ -56,6 +62,9 @@ namespace EntityDb.Redis.Extensions
         public static void AddTestModeRedisSnapshots<TEntity>(this IServiceCollection serviceCollection,
             string keyNamespace, Func<IServiceProvider, string> getConnectionString)
         {
+            serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
+                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, true));
+            
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
                 var connectionString = getConnectionString.Invoke(serviceProvider);
