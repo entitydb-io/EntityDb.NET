@@ -4,7 +4,6 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Concurrent;
 
 namespace EntityDb.Redis.Snapshots
 {

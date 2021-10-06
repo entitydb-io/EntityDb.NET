@@ -1,7 +1,4 @@
-﻿using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Tests.Transactions;
-using EntityDb.TestImplementations.Entities;
+﻿using EntityDb.Common.Tests.Transactions;
 using System;
 
 namespace EntityDb.MongoDb.Tests.Transactions

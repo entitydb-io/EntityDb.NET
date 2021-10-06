@@ -10,7 +10,6 @@ using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace EntityDb.Common.Extensions
 {

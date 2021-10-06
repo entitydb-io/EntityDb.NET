@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Commands;
 
 namespace EntityDb.Abstractions.Strategies
 {

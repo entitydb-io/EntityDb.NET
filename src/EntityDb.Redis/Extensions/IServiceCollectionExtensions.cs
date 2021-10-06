@@ -1,11 +1,8 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Entities;
 using EntityDb.Common.Transactions;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 

@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Snapshots;
 using EntityDb.TestImplementations.Entities;

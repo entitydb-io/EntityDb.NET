@@ -1,11 +1,8 @@
-﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Strategies;
-using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Facts;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
