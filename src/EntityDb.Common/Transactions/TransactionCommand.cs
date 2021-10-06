@@ -9,7 +9,6 @@ namespace EntityDb.Common.Transactions
 {
     internal sealed record TransactionCommand<TEntity> : ITransactionCommand<TEntity>
     {
-        public TEntity? PreviousSnapshot { get; init; }
         public TEntity NextSnapshot { get; init; } = default!;
         public Guid EntityId { get; init; }
         public ulong ExpectedPreviousVersionNumber { get; init; }

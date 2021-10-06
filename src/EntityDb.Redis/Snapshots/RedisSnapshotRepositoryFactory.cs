@@ -13,18 +13,21 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
     {
-        protected readonly string _connectionString;
+        private readonly ILogger _logger;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
+        private readonly string _connectionString;
+        
         protected readonly string _keyNamespace;
-        protected ILogger _logger;
-        protected IResolvingStrategyChain _resolvingStrategyChain;
+        protected readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
 
         public RedisSnapshotRepositoryFactory(ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace)
+            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace, ISnapshottingStrategy<TEntity>? snapshottingStrategy = null)
         {
             _logger = loggerFactory.CreateLogger<TEntity>();
             _resolvingStrategyChain = resolvingStrategyChain;
             _connectionString = connectionString;
             _keyNamespace = keyNamespace;
+            _snapshottingStrategy = snapshottingStrategy;
         }
 
         public async Task<ISnapshotRepository<TEntity>> CreateRepository(ISnapshotSessionOptions snapshotSessionOptions)
@@ -39,7 +42,7 @@ namespace EntityDb.Redis.Snapshots
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
         internal virtual ISnapshotRepository<TEntity> CreateRepository(IRedisSession redisSession)
         {
-            return new RedisSnapshotRepository<TEntity>(redisSession, _keyNamespace);
+            return new RedisSnapshotRepository<TEntity>(redisSession, _keyNamespace, _snapshottingStrategy);
         }
 
         public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,

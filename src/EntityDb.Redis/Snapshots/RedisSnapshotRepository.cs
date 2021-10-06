@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using System;
@@ -10,18 +11,35 @@ namespace EntityDb.Redis.Snapshots
     internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {
         private readonly string _keyNamespace;
+        private readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
 
-        public RedisSnapshotRepository(IRedisSession redisSession, string keyNamespace)
+        public RedisSnapshotRepository
+        (
+            IRedisSession redisSession,
+            string keyNamespace,
+            ISnapshottingStrategy<TEntity>? snapshottingStrategy = null
+        )
         {
             RedisSession = redisSession;
             _keyNamespace = keyNamespace;
+            _snapshottingStrategy = snapshottingStrategy;
         }
 
         public IRedisSession RedisSession { get; }
 
-        public virtual Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+        public virtual async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
-            return RedisSession.ExecuteCommand
+            if (_snapshottingStrategy != null)
+            {
+                var previousSnapshot = await GetSnapshot(entityId);
+
+                if (_snapshottingStrategy.ShouldPutSnapshot(previousSnapshot, entity) == false)
+                {
+                    return false;
+                }
+            }
+            
+            return await RedisSession.ExecuteCommand
             (
                 (logger, redisTransaction) =>
                 {

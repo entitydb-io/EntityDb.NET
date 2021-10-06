@@ -1,4 +1,5 @@
-﻿using EntityDb.Redis.Sessions;
+﻿using EntityDb.Abstractions.Strategies;
+using EntityDb.Redis.Sessions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,27 +9,42 @@ namespace EntityDb.Redis.Snapshots
 {
     internal sealed class TestModeRedisSnapshotRepository<TEntity> : RedisSnapshotRepository<TEntity>
     {
-        private readonly List<Guid> _disposeEntityIds = new();
+        private readonly TestModeRedisSnapshotRepositoryDisposer _disposer;
 
-        public TestModeRedisSnapshotRepository(IRedisSession redisSession, string keyNamespace) : base(redisSession,
-            keyNamespace)
+        public TestModeRedisSnapshotRepository
+        (
+            TestModeRedisSnapshotRepositoryDisposer disposer,
+            IRedisSession redisSession,
+            string keyNamespace,
+            ISnapshottingStrategy<TEntity>? snapshottingStrategy = null
+        ) : base(redisSession, keyNamespace, snapshottingStrategy)
         {
+            _disposer = disposer;
+
+            _disposer.Lock();
         }
 
         public override Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
-            _disposeEntityIds.Add(entityId);
+            _disposer.AddDisposeId(entityId);
 
             return base.PutSnapshot(entityId, entity);
         }
 
         public override async ValueTask DisposeAsync()
         {
+            _disposer.Release();
+
+            if (_disposer.TryDispose(out var disposeIds) == false)
+            {
+                return;
+            }
+            
             await RedisSession.ExecuteCommand
             (
                 (_, redisTransaction) =>
                 {
-                    var tasks = _disposeEntityIds
+                    var tasks = disposeIds
                         .Select(GetKey)
                         .Select(key => redisTransaction.KeyDeleteAsync(key))
                         .ToArray();
