@@ -23,11 +23,11 @@ namespace EntityDb.Redis.Snapshots
         {
             return RedisSession.ExecuteCommand
             (
-                (serviceProvider, redisTransaction) =>
+                (logger, redisTransaction) =>
                 {
-                    var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, serviceProvider);
+                    var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, logger);
 
-                    var snapshotValue = jsonElementEnvelope.Serialize(serviceProvider);
+                    var snapshotValue = jsonElementEnvelope.Serialize(logger);
 
                     var key = GetKey(entityId);
 
