@@ -1,6 +1,9 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -19,17 +22,31 @@ namespace EntityDb.Common.Transactions
     /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
     public sealed class TransactionBuilder<TEntity>
     {
+        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
+        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
+        private readonly IAuthorizingStrategy<TEntity>? _authorizingStrategy;
+        private readonly ILeasingStrategy<TEntity>? _leasingStrategy;
+        private readonly ITaggingStrategy<TEntity>? _taggingStrategy;
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
-        private readonly IServiceProvider _serviceProvider;
         private readonly List<TransactionCommand<TEntity>> _transactionCommands = new();
 
         /// <summary>
         ///     Initializes a new instance of <see cref="TransactionBuilder{TEntity}" />.
         /// </summary>
-        /// <param name="serviceProvider">The service provider.</param>
-        public TransactionBuilder(IServiceProvider serviceProvider)
+        public TransactionBuilder
+        (
+            IConstructingStrategy<TEntity> constructingStrategy,
+            IVersioningStrategy<TEntity> versioningStrategy,
+            IAuthorizingStrategy<TEntity>? authorizingStrategy = null,
+            ILeasingStrategy<TEntity>? leasingStrategy = null,
+            ITaggingStrategy<TEntity>? taggingStrategy = null
+        )
         {
-            _serviceProvider = serviceProvider;
+            _constructingStrategy = constructingStrategy;
+            _versioningStrategy = versioningStrategy;
+            _authorizingStrategy = authorizingStrategy;
+            _leasingStrategy = leasingStrategy;
+            _taggingStrategy = taggingStrategy;
         }
 
         private static ImmutableArray<ITransactionFact<TEntity>> GetTransactionFacts(IEnumerable<IFact<TEntity>> facts)
@@ -61,34 +78,48 @@ namespace EntityDb.Common.Transactions
             };
         }
 
+        private bool IsAuthorized(TEntity entity, ICommand<TEntity> command)
+        {
+            return _authorizingStrategy?.IsAuthorized(entity, command) ?? true;
+        }
+        
+        private ILease[] GetLeases(TEntity entity)
+        {
+            return _leasingStrategy?.GetLeases(entity) ?? Array.Empty<ILease>();
+        }
+
+        private ITag[] GetTags(TEntity entity)
+        {
+            return _taggingStrategy?.GetTags(entity) ?? Array.Empty<ITag>();
+        }
+        
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
-            var previousVersionNumber = _serviceProvider.GetVersionNumber(previousEntity);
+            var previousVersionNumber = _versioningStrategy.GetVersionNumber(previousEntity);
 
-            CommandNotAuthorizedException.ThrowIfFalse(_serviceProvider.IsAuthorized(previousEntity, command));
+            CommandNotAuthorizedException.ThrowIfFalse(IsAuthorized(previousEntity, command));
 
             var nextFacts = previousEntity.Execute(command);
 
-            nextFacts.Add(_serviceProvider.GetVersionNumberFact<TEntity>(previousVersionNumber + 1));
+            nextFacts.Add(_versioningStrategy.GetVersionNumberFact(previousVersionNumber + 1));
 
             var nextEntity = previousEntity.Reduce(nextFacts);
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
-                PreviousSnapshot = previousEntity,
                 NextSnapshot = nextEntity,
                 EntityId = entityId,
                 ExpectedPreviousVersionNumber = previousVersionNumber,
                 Command = command,
                 Facts = GetTransactionFacts(nextFacts),
-                Leases = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetLeases),
-                Tags = GetTransactionMetaData(previousEntity, nextEntity, _serviceProvider.GetTags)
+                Leases = GetTransactionMetaData(previousEntity, nextEntity, GetLeases),
+                Tags = GetTransactionMetaData(previousEntity, nextEntity, GetTags)
             });
 
             _knownEntities[entityId] = nextEntity;
         }
-
+        
         /// <summary>
         ///     Loads an already-existing entity into the builder.
         /// </summary>
@@ -108,7 +139,7 @@ namespace EntityDb.Common.Transactions
 
             var entity = await entityRepository.GetCurrentOrConstruct(entityId);
 
-            if (_serviceProvider.GetVersionNumber(entity) == 0)
+            if (_versioningStrategy.GetVersionNumber(entity) == 0)
             {
                 throw new EntityNotCreatedException();
             }
@@ -132,7 +163,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityAlreadyCreatedException();
             }
 
-            var entity = _serviceProvider.Construct<TEntity>(entityId);
+            var entity = _constructingStrategy.Construct(entityId);
 
             _knownEntities.Add(entityId, entity);
 

@@ -1,4 +1,4 @@
-﻿using EntityDb.Common.Extensions;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Shouldly;
@@ -10,11 +10,11 @@ namespace EntityDb.Common.Tests.Snapshots
 {
     public abstract class SnapshotTestsBase
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ISnapshotRepositoryFactory<TransactionEntity> _snapshotRepositoryFactory;
 
-        public SnapshotTestsBase(IServiceProvider serviceProvider)
+        public SnapshotTestsBase(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory)
         {
-            _serviceProvider = serviceProvider;
+            _snapshotRepositoryFactory = snapshotRepositoryFactory;
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace EntityDb.Common.Tests.Snapshots
             var entityId = Guid.NewGuid();
 
             await using var snapshotRepository =
-                await _serviceProvider.CreateSnapshotRepository<TransactionEntity>(new SnapshotSessionOptions());
+                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
 
             // ACT
 

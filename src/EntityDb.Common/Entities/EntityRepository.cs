@@ -1,11 +1,13 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -13,39 +15,63 @@ namespace EntityDb.Common.Entities
 {
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
+        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
+        private readonly ILogger _logger;
+        private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
         private readonly ITransactionRepository<TEntity> _transactionRepository;
         private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
 
-        private EntityRepository
+        public EntityRepository
         (
-            IServiceProvider serviceProvider,
+            ILoggerFactory loggerFactory,
+            IConstructingStrategy<TEntity> constructingStrategy,
+            IVersioningStrategy<TEntity> versioningStrategy,
+            IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
             ITransactionRepository<TEntity> transactionRepository,
             ISnapshotRepository<TEntity>? snapshotRepository = null
         )
         {
-            _serviceProvider = serviceProvider;
+            _logger = loggerFactory.CreateLogger<EntityRepository<TEntity>>();
+            _constructingStrategy = constructingStrategy;
+            _versioningStrategy = versioningStrategy;
+            _transactionSubscribers = transactionSubscribers;
             _transactionRepository = transactionRepository;
             _snapshotRepository = snapshotRepository;
         }
         
-        public async Task<TEntity> GetSnapshotOrConstruct(Guid entityId)
+        private void Publish(ITransaction<TEntity> transaction)
         {
-            TEntity? snapshot = default;
-
+            foreach (var transactionSubscriber in _transactionSubscribers)
+            {
+                try
+                {
+                    transactionSubscriber.Notify(transaction);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, $"{transactionSubscriber.GetType()}.{nameof(transactionSubscriber.Notify)}({transaction.Id})");
+                }
+            }
+        }
+        
+        public async Task<TEntity?> GetSnapshotOrDefault(Guid entityId)
+        {
             if (_snapshotRepository != null)
             {
-                snapshot = await _snapshotRepository.GetSnapshot(entityId);
+                return await _snapshotRepository.GetSnapshot(entityId);
             }
 
-            return snapshot ?? _serviceProvider.Construct<TEntity>(entityId);
+            return default;
         }
 
         public async Task<TEntity> GetCurrentOrConstruct(Guid entityId)
         {
-            var entity = await GetSnapshotOrConstruct(entityId);
+            var snapshot = await GetSnapshotOrDefault(entityId);
 
-            var versionNumber = _serviceProvider.GetVersionNumber(entity);
+            var entity = snapshot ?? _constructingStrategy.Construct(entityId);
+            
+            var versionNumber = _versioningStrategy.GetVersionNumber(entity);
 
             var factQuery = new GetEntityQuery(entityId, versionNumber);
 
@@ -56,9 +82,18 @@ namespace EntityDb.Common.Entities
             return entity;
         }
 
-        public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+        public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
-            return _transactionRepository.PutTransaction(transaction);
+            var success = await _transactionRepository.PutTransaction(transaction);
+
+            if (success == false)
+            {
+                return false;
+            }
+
+            Publish(transaction);
+            
+            return true;
         }
 
         [ExcludeFromCodeCoverage]

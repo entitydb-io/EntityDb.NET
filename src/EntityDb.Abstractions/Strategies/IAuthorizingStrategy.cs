@@ -14,8 +14,7 @@ namespace EntityDb.Abstractions.Strategies
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="command">The command.</param>
-        /// <param name="agent">The agent.</param>
         /// <returns><c>true</c> if execution is authorized, or <c>false</c> if execution is not authorized.</returns>
-        bool IsAuthorized(TEntity entity, ICommand<TEntity> command, IAgent agent);
+        bool IsAuthorized(TEntity entity, ICommand<TEntity> command);
     }
 }

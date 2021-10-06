@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
@@ -20,6 +21,7 @@ using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
 using EntityDb.TestImplementations.Source;
 using EntityDb.TestImplementations.Tags;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
 using System;
@@ -43,7 +45,7 @@ namespace EntityDb.Common.Tests.Transactions
         private Task<ITransactionRepository<TransactionEntity>> CreateRepository(bool readOnly = false,
             bool tolerateLag = false, ILogger? loggerOverride = null)
         {
-            return _serviceProvider.CreateTransactionRepository<TransactionEntity>(new TransactionSessionOptions
+            return _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(new TransactionSessionOptions
             {
                 ReadOnly = readOnly, SecondaryPreferred = tolerateLag, LoggerOverride = loggerOverride
             });
@@ -472,7 +474,7 @@ namespace EntityDb.Common.Tests.Transactions
         private ITransaction<TransactionEntity> BuildTransaction(Guid transactionId, Guid entityId, object source,
             ICommand<TransactionEntity>[] commands, DateTime? timeStampOverride = null)
         {
-            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             transactionBuilder.Create(entityId, commands[0]);
 
@@ -507,7 +509,6 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
@@ -545,7 +546,6 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            PreviousSnapshot = default,
                             NextSnapshot = default!,
                             EntityId = Guid.NewGuid(),
                             ExpectedPreviousVersionNumber = 0,
@@ -588,7 +588,6 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = entityId,
                         ExpectedPreviousVersionNumber = previousVersionNumber,
@@ -599,7 +598,6 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = entityId,
                         ExpectedPreviousVersionNumber = previousVersionNumber,
@@ -643,7 +641,6 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            PreviousSnapshot = default,
                             NextSnapshot = default!,
                             EntityId = entityId,
                             ExpectedPreviousVersionNumber = previousVersionNumber,
@@ -696,7 +693,6 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = entityId,
                         ExpectedPreviousVersionNumber = 0,
@@ -745,7 +741,6 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
@@ -759,7 +754,6 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
@@ -801,7 +795,6 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
@@ -815,7 +808,6 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        PreviousSnapshot = default,
                         NextSnapshot = default!,
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
@@ -873,7 +865,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var expectedInitialTags = new[] { new Tag("Foo", "Bar") }.ToImmutableArray<ITag>();
 
@@ -913,7 +905,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var expectedInitialLeases = new[] { new Lease("Foo", "Bar", "Baz") }.ToImmutableArray<ILease>();
 
@@ -956,13 +948,13 @@ namespace EntityDb.Common.Tests.Transactions
             var expectedCommand = new Count(1);
 
             var transaction = _serviceProvider
-                .GetTransactionBuilder<TransactionEntity>()
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .Create(Guid.NewGuid(), expectedCommand)
                 .Build(Guid.NewGuid(), new NoSource());
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
-            using var transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             // ACT
 
@@ -991,7 +983,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityId = Guid.NewGuid();
 
-            var transactionBuilder = _serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var firstTransaction = transactionBuilder
                 .Create(entityId, new Count(1))
@@ -1003,7 +995,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
-            using var transactionRepository = await CreateRepository();
+            await using var transactionRepository = await CreateRepository();
 
             await transactionRepository.PutTransaction(firstTransaction);
 
@@ -1051,7 +1043,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
+                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
 
                 var leases = new[] { new CountLease(i) };
 
@@ -1117,7 +1109,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
+                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
 
                 var leases = new[] { new CountLease(i) };
 
@@ -1177,7 +1169,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>(1) };
+                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
 
                 var leases = new[] { new CountLease(i) };
 
@@ -1229,7 +1221,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var facts = new[]
                 {
-                    new Counted(i), _serviceProvider.GetVersionNumberFact<TransactionEntity>((ulong)i)
+                    new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact((ulong)i)
                 };
 
                 var leases = new[] { new CountLease(i) };

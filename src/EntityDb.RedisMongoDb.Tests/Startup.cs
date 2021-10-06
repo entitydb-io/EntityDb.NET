@@ -23,12 +23,11 @@ namespace EntityDb.RedisMongoDb.Tests
 
             serviceCollection.AddLifoResolvingStrategyChain();
 
-            serviceCollection.AddConstructingStrategy<TransactionEntity, TransactionEntityConstructingStrategy>();
-            serviceCollection.AddVersionedEntityVersioningStrategy<TransactionEntity>();
+            serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
 
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity, TransactionEntitySnapshottingStrategy>
+            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379"

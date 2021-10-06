@@ -1,10 +1,13 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Facts;
+using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Facts;
@@ -22,6 +25,24 @@ namespace EntityDb.Common.Tests.Transactions
         public TransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
+        
+        [Fact]
+        public void GivenNoAuthorizingStrategy_WhenExecutingUnauthorizedCommand_ThenBuildSucceeds()
+        {
+            // ARRANGE
+
+            var serviceProvider = GetServiceProviderWithOmission<IAuthorizingStrategy<TransactionEntity>>();
+
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+
+            var entityId = Guid.NewGuid();
+            
+            // ACT & ASSERT
+
+            Should.NotThrow(() => transactionBuilder
+                .Create(entityId, new SetRole("Foo"))
+                .Append(entityId, new DoNothing()));
+        }
 
         [Fact]
         public async Task GivenExistingEntityId_WhenExecutingUnauthorizedCommand_ThenAppendThrows()
@@ -34,7 +55,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             authorizingStrategyMock
                 .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
+                    It.IsAny<ICommand<TransactionEntity>>()))
                 .Returns(false);
 
             var authorizingStrategy = authorizingStrategyMock.Object;
@@ -50,10 +71,10 @@ namespace EntityDb.Common.Tests.Transactions
                 serviceCollection.AddScoped(_ => authorizingStrategy);
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
 
             // ACT
 
@@ -78,7 +99,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             authorizingStrategyMock
                 .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>(), It.IsAny<IAgent>()))
+                    It.IsAny<ICommand<TransactionEntity>>()))
                 .Returns(false);
 
             var authorizingStrategy = authorizingStrategyMock.Object;
@@ -91,7 +112,7 @@ namespace EntityDb.Common.Tests.Transactions
                 serviceCollection.AddScoped(_ => authorizingStrategy);
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             // ASSERT
 
@@ -114,7 +135,7 @@ namespace EntityDb.Common.Tests.Transactions
                     GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             // ASSERT
 
@@ -137,7 +158,7 @@ namespace EntityDb.Common.Tests.Transactions
                     GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             // ACT
 
@@ -152,6 +173,48 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
+        public void GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
+        {
+            // ARRANGE
+
+            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            
+            // ACT
+
+            var transaction = transactionBuilder
+                .Create(default, new AddLease(default!, default!, default!))
+                .Build(default, default!);
+            
+            // ASSERT
+
+            transaction.Commands.Length.ShouldBe(1);
+
+            transaction.Commands[0].Leases.Insert.ShouldNotBeEmpty();
+        }
+
+        [Fact]
+        public void GivenNoLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesNotInsertLeases()
+        {
+            // ARRANGE
+
+            var serviceProvider = GetServiceProviderWithOmission<ILeasingStrategy<TransactionEntity>>();
+
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            
+            // ACT
+
+            var transaction = transactionBuilder
+                .Create(default, new AddLease(default!, default!, default!))
+                .Build(default, default!);
+            
+            // ASSERT
+
+            transaction.Commands.Length.ShouldBe(1);
+
+            transaction.Commands[0].Leases.Insert.ShouldBeEmpty();
+        }
+        
+        [Fact]
         public async Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows()
         {
             // ARRANGE
@@ -165,10 +228,10 @@ namespace EntityDb.Common.Tests.Transactions
                         new IFact<TransactionEntity>[] { new VersionNumberSet<TransactionEntity>(1) }));
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
 
             // ACT
 
@@ -193,10 +256,10 @@ namespace EntityDb.Common.Tests.Transactions
                     GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
 
             // ASSERT
 
@@ -221,7 +284,7 @@ namespace EntityDb.Common.Tests.Transactions
                     GetMockedTransactionRepositoryFactory<TransactionEntity>());
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             // ACT
 
@@ -258,10 +321,10 @@ namespace EntityDb.Common.Tests.Transactions
                     }));
             });
 
-            var transactionBuilder = serviceProvider.GetTransactionBuilder<TransactionEntity>();
+            var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.CreateEntityRepository<TransactionEntity>(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
 
             // ACT
 

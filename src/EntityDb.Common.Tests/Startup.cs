@@ -1,6 +1,7 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
+using EntityDb.TestImplementations.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.DependencyInjection;
@@ -23,8 +24,8 @@ namespace EntityDb.Common.Tests
 
             serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
-            serviceCollection.AddConstructingStrategy<TransactionEntity, TransactionEntityConstructingStrategy>();
-            serviceCollection.AddVersionedEntityVersioningStrategy<TransactionEntity>();
+            serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
+            
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
         }
