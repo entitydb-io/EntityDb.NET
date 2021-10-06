@@ -115,6 +115,12 @@ namespace EntityDb.Common.Extensions
                 .AddSingleton<IAuthorizingStrategy<TEntity>, AuthorizedEntityAuthorizingStrategy<TEntity>>();
         }
 
+        /// <summary>
+        ///     Adds implementations of commonly needed interfaces. 
+        /// </summary>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TConstructingStrategy">The constructing strategy for the entity.</typeparam>
         public static void AddEntity<TEntity, TConstructingStrategy>(this IServiceCollection serviceCollection)
             where TEntity : IVersionedEntity<TEntity>
             where TConstructingStrategy : class, IConstructingStrategy<TEntity>
