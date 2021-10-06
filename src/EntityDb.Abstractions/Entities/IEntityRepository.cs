@@ -11,11 +11,11 @@ namespace EntityDb.Abstractions.Entities
     public interface IEntityRepository<TEntity> : IDisposable, IAsyncDisposable
     {
         /// <summary>
-        ///     Returns the most recent snapshot of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.
+        ///     Returns the most recent snapshot of a <typeparamref name="TEntity" /> or <c>default(<typeparamref name="TEntity" />)</c>.
         /// </summary>
         /// <param name="entityId">The id of the entity.</param>
         /// <returns>The most recent snapshot of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.</returns>
-        Task<TEntity> GetSnapshotOrConstruct(Guid entityId);
+        Task<TEntity?> GetSnapshotOrDefault(Guid entityId);
         
         /// <summary>
         ///     Returns the current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.

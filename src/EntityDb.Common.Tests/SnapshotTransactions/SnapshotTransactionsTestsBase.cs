@@ -83,7 +83,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             var current = await entityRepository.GetCurrentOrConstruct(entityId);
 
-            var snapshot = await entityRepository.GetSnapshotOrConstruct(entityId);
+            var snapshot = await entityRepository.GetSnapshotOrDefault(entityId);
 
             // ASSERT
 
