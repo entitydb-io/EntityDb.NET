@@ -25,6 +25,14 @@ namespace EntityDb.Abstractions.Entities
         Task<TEntity> GetCurrent(Guid entityId);
 
         /// <summary>
+        ///     Returns a previous state of <typeparamref name="TEntity" />.
+        /// </summary>
+        /// <param name="entityId">The id of the entity.</param>
+        /// <param name="lteVersionNumber">The version of the entity to fetch.</param>
+        /// <returns>A previous state of <typeparamref name="TEntity" />.</returns>
+        Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber);
+
+        /// <summary>
         ///     Inserts a single transaction with an atomic commit.
         /// </summary>
         /// <param name="transaction">The transaction.</param>

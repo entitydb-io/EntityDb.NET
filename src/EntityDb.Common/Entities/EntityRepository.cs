@@ -83,6 +83,17 @@ namespace EntityDb.Common.Entities
             return entity;
         }
 
+        public async Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber)
+        {
+            var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
+
+            var commands = await _transactionRepository.GetCommands(commandQuery);
+
+            return _constructingStrategy
+                .Construct(entityId)
+                .Reduce(commands);
+        }
+
         public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             var success = await _transactionRepository.PutTransaction(transaction);
