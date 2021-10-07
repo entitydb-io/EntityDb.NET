@@ -17,12 +17,12 @@ namespace EntityDb.MongoDb.Queries
                 ProjectionBuilder.Include(nameof(ITransactionDocument.Data))
             );
         
-        public async Task<TModel[]> GetModels<TModel>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public async Task<TData[]> GetModels<TData>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
         {
             var documents = await GetDocuments();
 
             return documents
-                .Select(document => document.Data.Reconstruct<TModel>(logger, resolvingStrategyChain))
+                .Select(document => document.Data.Reconstruct<TData>(logger, resolvingStrategyChain))
                 .ToArray();
         }
     }
