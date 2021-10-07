@@ -27,19 +27,20 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public IAnnotatedCommand<TEntity> GetAnnotatedCommand<TEntity>
+        private static IAnnotatedCommand<TEntity> ToAnnotatedCommand<TEntity>
         (
+            CommandDocument commandDocument,
             ILogger logger,
             IResolvingStrategyChain resolvingStrategyChain
         )
         {
             return new AnnotatedCommand<TEntity>
             {
-                TransactionId = TransactionId,
-                TransactionTimeStamp = TransactionTimeStamp,
-                EntityId = EntityId,
-                EntityVersionNumber = EntityVersionNumber,
-                Command = Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain),
+                TransactionId = commandDocument.TransactionId,
+                TransactionTimeStamp = commandDocument.TransactionTimeStamp,
+                EntityId = commandDocument.EntityId,
+                EntityVersionNumber = commandDocument.EntityVersionNumber,
+                Command = commandDocument.Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain),
             };
         }
 
@@ -135,13 +136,13 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static Task<List<CommandDocument>> Get
+        public static Task<IAnnotatedCommand<TEntity>[]> GetAnnotated<TEntity>
         (
             IMongoDbSession mongoDbSession,
             ICommandQuery commandQuery
         )
         {
-            return mongoDbSession.ExecuteDocumentQuery<CommandDocument>
+            return mongoDbSession.ExecuteDocumentQuery
             (
                 (clientSessionHandle, mongoDatabase) => new DocumentQuery<CommandDocument>
                 {
@@ -151,7 +152,8 @@ namespace EntityDb.MongoDb.Documents
                     Sort = commandQuery.GetSort(_commandSortBuilder),
                     Skip = commandQuery.Skip,
                     Limit = commandQuery.Take
-                }
+                },
+                ToAnnotatedCommand<TEntity>
             );
         }
 

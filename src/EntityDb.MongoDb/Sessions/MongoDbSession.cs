@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -32,15 +33,22 @@ namespace EntityDb.MongoDb.Sessions
             _resolvingStrategyChain = resolvingStrategyChain;
         }
 
-        public Task<List<TDocument>> ExecuteDocumentQuery<TDocument>(
-            Func<IClientSessionHandle?, IMongoDatabase, DocumentQuery<TDocument>> queryBuilder)
+        public Task<TOut[]> ExecuteDocumentQuery<TDocument, TOut>(
+            Func<IClientSessionHandle?, IMongoDatabase, DocumentQuery<TDocument>> queryBuilder,
+            Func<TDocument, ILogger, IResolvingStrategyChain, TOut> converter)
             where TDocument : ITransactionDocument
         {
             return Execute
             (
-                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase)
-                    .GetDocuments(),
-                () => Task.FromResult(new List<TDocument>(0))
+                async () =>
+                {
+                    return (await queryBuilder
+                            .Invoke(_clientSessionHandle, _mongoDatabase)
+                            .GetDocuments())
+                        .Select(document => converter.Invoke(document, _logger, _resolvingStrategyChain))
+                        .ToArray();
+                },
+                () => Task.FromResult(Array.Empty<TOut>())
             );
         }
 
