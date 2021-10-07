@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities
@@ -65,7 +66,7 @@ namespace EntityDb.Common.Entities
             return default;
         }
 
-        public async Task<TEntity> GetCurrentOrConstruct(Guid entityId)
+        public async Task<TEntity> GetCurrent(Guid entityId)
         {
             var snapshot = await GetSnapshotOrDefault(entityId);
 
@@ -73,7 +74,7 @@ namespace EntityDb.Common.Entities
             
             var versionNumber = _versioningStrategy.GetVersionNumber(entity);
 
-            var commandQuery = new GetEntityQuery(entityId, versionNumber);
+            var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
 
             var commands = await _transactionRepository.GetCommands(commandQuery);
 

@@ -761,7 +761,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await transactionRepository.PutTransaction(transaction);
 
-            var commandQuery = new GetEntityQuery(expectedEntityId, 0);
+            var commandQuery = new GetCurrentEntityQuery(expectedEntityId, 0);
 
             // ACT
 
@@ -799,7 +799,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            var actualEntity = await entityRepository.GetCurrentOrConstruct(entityId);
+            var actualEntity = await entityRepository.GetCurrent(entityId);
 
             // ASSERT
 

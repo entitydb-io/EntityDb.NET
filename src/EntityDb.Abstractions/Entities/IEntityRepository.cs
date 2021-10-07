@@ -22,7 +22,7 @@ namespace EntityDb.Abstractions.Entities
         /// </summary>
         /// <param name="entityId">The id of the entity.</param>
         /// <returns>The current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.</returns>
-        Task<TEntity> GetCurrentOrConstruct(Guid entityId);
+        Task<TEntity> GetCurrent(Guid entityId);
 
         /// <summary>
         ///     Inserts a single transaction with an atomic commit.
