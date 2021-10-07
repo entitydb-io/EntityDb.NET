@@ -81,6 +81,11 @@ namespace EntityDb.MongoDb.Transactions
             return TagDocument.GetData(_mongoDbSession, tagQuery);
         }
 
+        public Task<IAnnotatedCommand<TEntity>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+        {
+            return CommandDocument.GetAnnotated<TEntity>(_mongoDbSession, commandQuery);
+        }
+
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             return _mongoDbSession.ExecuteCommand
