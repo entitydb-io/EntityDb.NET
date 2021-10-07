@@ -1,7 +1,9 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Commands;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
@@ -24,6 +26,22 @@ namespace EntityDb.MongoDb.Documents
         private static readonly CommandSortBuilder _commandSortBuilder = new();
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
+
+        public IAnnotatedCommand<TEntity> GetAnnotatedCommand<TEntity>
+        (
+            ILogger logger,
+            IResolvingStrategyChain resolvingStrategyChain
+        )
+        {
+            return new AnnotatedCommand<TEntity>
+            {
+                TransactionId = TransactionId,
+                TransactionTimeStamp = TransactionTimeStamp,
+                EntityId = EntityId,
+                EntityVersionNumber = EntityVersionNumber,
+                Command = Data.Reconstruct<ICommand<TEntity>>(logger, resolvingStrategyChain),
+            };
+        }
 
         public static CommandDocument BuildOne<TEntity>
         (
