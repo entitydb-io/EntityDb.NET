@@ -92,13 +92,13 @@ namespace EntityDb.MongoDb.Transactions
 
                     foreach (var transactionCommand in transaction.Commands)
                     {
-                        var actualPreviousVersionNumber =
+                        VersionZeroReservedException.ThrowIfZero(transactionCommand.EntityVersionNumber);
+                        
+                        var previousVersionNumber =
                             await CommandDocument.GetLastEntityVersionNumber(clientSessionHandle, mongoDatabase,
                                 transactionCommand.EntityId);
 
-                        VersionZeroReservedException.ThrowIfZero(transactionCommand.EntityVersionNumber);
-                        OptimisticConcurrencyException.ThrowIfMismatch(transactionCommand.EntityVersionNumber - 1,
-                            actualPreviousVersionNumber);
+                        OptimisticConcurrencyException.ThrowIfDiscontinuous(previousVersionNumber, transactionCommand.EntityVersionNumber);
 
                         await CommandDocument.InsertOne(clientSessionHandle, mongoDatabase,
                             CommandDocument.BuildOne(logger, transaction, transactionCommand));

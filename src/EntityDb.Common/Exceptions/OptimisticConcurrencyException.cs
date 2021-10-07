@@ -7,8 +7,8 @@ namespace EntityDb.Common.Exceptions
     /// <summary>
     ///     The exception that is logged when an actor passes a <see cref="ITransaction{TEntity}" /> to an
     ///     <see cref="ITransactionRepository{TEntity}" /> with a
-    ///     <see cref="ITransactionCommand{TEntity}.ExpectedPreviousVersionNumber" /> unequal to the actual previous version
-    ///     number.
+    ///     <see cref="ITransactionCommand{TEntity}.EntityVersionNumber" /> that is not the next number
+    ///     after the previous version number.
     /// </summary>
     /// <remarks>
     ///     A program will not be able to catch this exception if it is thrown.
@@ -18,14 +18,14 @@ namespace EntityDb.Common.Exceptions
     public sealed class OptimisticConcurrencyException : Exception
     {
         /// <summary>
-        ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="expectedPreviousVersionNumber" /> is
-        ///     not equal to <paramref name="actualPreviousVersionNumber" />.
+        ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="nextVersionNumber" />
+        ///     is not the next number after <paramref name="previousVersionNumber" />.
         /// </summary>
-        /// <param name="expectedPreviousVersionNumber"></param>
-        /// <param name="actualPreviousVersionNumber"></param>
-        public static void ThrowIfMismatch(ulong expectedPreviousVersionNumber, ulong actualPreviousVersionNumber)
+        /// <param name="previousVersionNumber">The previous version number.</param>
+        /// <param name="nextVersionNumber">The next version number.</param>
+        public static void ThrowIfDiscontinuous(ulong previousVersionNumber, ulong nextVersionNumber)
         {
-            if (expectedPreviousVersionNumber != actualPreviousVersionNumber)
+            if (nextVersionNumber != previousVersionNumber + 1)
             {
                 throw new OptimisticConcurrencyException();
             }
