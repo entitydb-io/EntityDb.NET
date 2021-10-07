@@ -15,6 +15,9 @@ namespace EntityDb.Void.Transactions
         private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
             Task.FromResult(Array.Empty<ICommand<TEntity>>());
 
+        private static readonly Task<IAnnotatedCommand<TEntity>[]> _emptyAnnotatedCommandArrayTask =
+            Task.FromResult(Array.Empty<IAnnotatedCommand<TEntity>>());
+
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
             return EmptyGuidArrayTask;
@@ -73,6 +76,11 @@ namespace EntityDb.Void.Transactions
         public Task<ITag[]> GetTags(ITagQuery tagQuery)
         {
             return EmptyTagArrayTask;
+        }
+
+        public Task<IAnnotatedCommand<TEntity>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+        {
+            return _emptyAnnotatedCommandArrayTask;
         }
 
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
