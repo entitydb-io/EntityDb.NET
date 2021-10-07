@@ -571,7 +571,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            transactionInserted.ShouldBeTrue();
+            transactionInserted.ShouldBeFalse();
 
             loggerMock.Verify();
         }
