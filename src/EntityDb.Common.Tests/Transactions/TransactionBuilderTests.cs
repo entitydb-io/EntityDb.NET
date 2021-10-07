@@ -293,9 +293,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            for (ulong i = 0; i < NumberOfVersionsToTest; i++)
+            for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
-                transaction.Commands[(int)i].ExpectedPreviousVersionNumber.ShouldBe(i);
+                transaction.Commands[(int)(i-1)].EntityVersionNumber.ShouldBe(i);
             }
         }
 

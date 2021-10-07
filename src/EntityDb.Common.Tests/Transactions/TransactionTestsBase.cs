@@ -420,9 +420,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        ExpectedPreviousVersionNumber = 0,
+                        EntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
@@ -456,9 +456,9 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            NextSnapshot = default!,
+                            EntitySnapshot = default!,
                             EntityId = Guid.NewGuid(),
-                            ExpectedPreviousVersionNumber = 0,
+                            EntityVersionNumber = 1,
                             Command = new DoNothing(),
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
@@ -486,7 +486,7 @@ namespace EntityDb.Common.Tests.Transactions
             // ARRANGE
 
             var entityId = Guid.NewGuid();
-            ulong previousVersionNumber = 0;
+            const ulong entityVersionNumber = 1;
 
             var transaction = new Transaction<TransactionEntity>
             {
@@ -497,18 +497,18 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = entityId,
-                        ExpectedPreviousVersionNumber = previousVersionNumber,
+                        EntityVersionNumber = entityVersionNumber,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = entityId,
-                        ExpectedPreviousVersionNumber = previousVersionNumber,
+                        EntityVersionNumber = entityVersionNumber,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
@@ -529,15 +529,64 @@ namespace EntityDb.Common.Tests.Transactions
 
         [Fact]
         public async Task
+            GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged()
+        {
+            // ARRANGE
+
+            const ulong entityVersionNumber = 0;
+
+            var entityId = Guid.NewGuid();
+            
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+
+            loggerMock
+                .Setup(logger => logger.LogError(It.IsAny<VersionZeroReservedException>(), It.IsAny<string>()))
+                .Verifiable();
+
+            var transaction = new Transaction<TransactionEntity>
+            {
+                Id = Guid.NewGuid(),
+                TimeStamp = DateTime.UtcNow,
+                Source = new NoSource(),
+                Commands = new[]
+                {
+                    new TransactionCommand<TransactionEntity>
+                    {
+                        EntitySnapshot = default!,
+                        EntityId = entityId,
+                        EntityVersionNumber = entityVersionNumber,
+                        Command = new DoNothing(),
+                        Leases = new TransactionMetaData<ILease>(),
+                        Tags = new TransactionMetaData<ITag>()
+                    }
+                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
+            };
+
+            await using var transactionRepository = await CreateRepository(loggerOverride: loggerMock.Object);
+
+            // ACT
+
+            var transactionInserted =
+                await transactionRepository.PutTransaction(transaction);
+
+            // ASSERT
+
+            transactionInserted.ShouldBeTrue();
+
+            loggerMock.Verify();
+        }
+
+        [Fact]
+        public async Task
             GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged()
         {
             // ARRANGE
 
-            const ulong previousVersionNumber = 0;
+            const ulong entityVersionNumber = 1;
 
             var entityId = Guid.NewGuid();
 
-            static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong previousVersionNumber)
+            static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong entityVersionNumber)
             {
                 return new Transaction<TransactionEntity>
                 {
@@ -548,9 +597,9 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            NextSnapshot = default!,
+                            EntitySnapshot = default!,
                             EntityId = entityId,
-                            ExpectedPreviousVersionNumber = previousVersionNumber,
+                            EntityVersionNumber = entityVersionNumber,
                             Command = new DoNothing(),
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
@@ -570,9 +619,9 @@ namespace EntityDb.Common.Tests.Transactions
             // ACT
 
             var firstTransactionInserted =
-                await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
+                await transactionRepository.PutTransaction(NewTransaction(entityId, entityVersionNumber));
             var secondTransactionInserted =
-                await transactionRepository.PutTransaction(NewTransaction(entityId, previousVersionNumber));
+                await transactionRepository.PutTransaction(NewTransaction(entityId, entityVersionNumber));
 
             // ASSERT
 
@@ -598,9 +647,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        ExpectedPreviousVersionNumber = 0,
+                        EntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
@@ -610,9 +659,9 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        ExpectedPreviousVersionNumber = 0,
+                        EntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
@@ -650,9 +699,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        ExpectedPreviousVersionNumber = 0,
+                        EntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>
                         {
@@ -662,9 +711,9 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        NextSnapshot = default!,
+                        EntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        ExpectedPreviousVersionNumber = 0,
+                        EntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>
                         {
@@ -819,7 +868,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             transaction.Commands.Length.ShouldBe(1);
 
-            transaction.Commands[0].ExpectedPreviousVersionNumber.ShouldBe(default);
+            transaction.Commands[0].EntityVersionNumber.ShouldBe(1ul);
 
             newCommands.Length.ShouldBe(1);
 
@@ -862,7 +911,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             secondTransaction.Commands.Length.ShouldBe(1);
 
-            secondTransaction.Commands[0].ExpectedPreviousVersionNumber.ShouldBe(1ul);
+            secondTransaction.Commands[0].EntityVersionNumber.ShouldBe(2ul);
 
             newCommands.Length.ShouldBe(1);
 

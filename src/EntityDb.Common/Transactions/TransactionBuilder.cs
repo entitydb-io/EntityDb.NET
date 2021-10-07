@@ -79,17 +79,17 @@ namespace EntityDb.Common.Transactions
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
-            var previousVersionNumber = _versioningStrategy.GetVersionNumber(previousEntity);
 
             CommandNotAuthorizedException.ThrowIfFalse(IsAuthorized(previousEntity, command));
 
             var nextEntity = previousEntity.Reduce(command);
+            var nextEntityVersionNumber = _versioningStrategy.GetVersionNumber(nextEntity);
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
-                NextSnapshot = nextEntity,
+                EntitySnapshot = nextEntity,
                 EntityId = entityId,
-                ExpectedPreviousVersionNumber = previousVersionNumber,
+                EntityVersionNumber = nextEntityVersionNumber,
                 Command = command,
                 Leases = GetTransactionMetaData(previousEntity, nextEntity, GetLeases),
                 Tags = GetTransactionMetaData(previousEntity, nextEntity, GetTags)

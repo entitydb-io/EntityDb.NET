@@ -30,7 +30,7 @@ namespace EntityDb.Common.Transactions
             foreach (var commandGroup in commandGroups)
             {
                 var entityId = commandGroup.Key;
-                var nextSnapshot = commandGroup.Last().NextSnapshot;
+                var nextSnapshot = commandGroup.Last().EntitySnapshot;
             
                 await using var snapshotRepository =
                     await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptions);

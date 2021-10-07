@@ -96,7 +96,8 @@ namespace EntityDb.MongoDb.Transactions
                             await CommandDocument.GetLastEntityVersionNumber(clientSessionHandle, mongoDatabase,
                                 transactionCommand.EntityId);
 
-                        OptimisticConcurrencyException.ThrowIfMismatch(transactionCommand.ExpectedPreviousVersionNumber,
+                        VersionZeroReservedException.ThrowIfZero(transactionCommand.EntityVersionNumber);
+                        OptimisticConcurrencyException.ThrowIfMismatch(transactionCommand.EntityVersionNumber - 1,
                             actualPreviousVersionNumber);
 
                         await CommandDocument.InsertOne(clientSessionHandle, mongoDatabase,

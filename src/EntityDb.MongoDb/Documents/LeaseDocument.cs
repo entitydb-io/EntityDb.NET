@@ -44,7 +44,7 @@ namespace EntityDb.MongoDb.Documents
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
                     EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.ExpectedPreviousVersionNumber + 1,
+                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
                     Scope = insertLease.Scope,
                     Label = insertLease.Label,
                     Value = insertLease.Value,

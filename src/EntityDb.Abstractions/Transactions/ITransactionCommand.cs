@@ -14,7 +14,7 @@ namespace EntityDb.Abstractions.Transactions
         /// <summary>
         ///     A snapshot of the entity after the command.
         /// </summary>
-        TEntity NextSnapshot { get; }
+        TEntity EntitySnapshot { get; }
 
         /// <summary>
         ///     The id of the entity.
@@ -25,9 +25,9 @@ namespace EntityDb.Abstractions.Transactions
         ///     The previous version number of the entity.
         /// </summary>
         /// <remarks>
-        ///     The repository must use a VersionNumber equal to <see cref="ExpectedPreviousVersionNumber" /> + 1.
+        ///     The repository must expect the last command committed to have VersionNumber equal to <see cref="EntityVersionNumber" /> - 1.
         /// </remarks>
-        ulong ExpectedPreviousVersionNumber { get; }
+        ulong EntityVersionNumber { get; }
 
         /// <summary>
         ///     The intent.
