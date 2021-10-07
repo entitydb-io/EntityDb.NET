@@ -736,6 +736,50 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
+        public async Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand()
+        {
+            // ARRANGE
+
+            var transactionTimeStamp = DateTime.UtcNow;
+            
+            var expectedTransactionId = Guid.NewGuid();
+            var expectedEntityId = Guid.NewGuid();
+            var expectedCommand = new Count(5);
+            var expectedTransactionTimeStamps = new[]
+            {
+                transactionTimeStamp,
+                
+                // A .NET DateTime can be more precise than milliseconds.
+                // This allows for database types that cannot be more precise than milliseconds.
+                transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond),
+            };
+            
+            var transaction = BuildTransaction(expectedTransactionId, expectedEntityId, new NoSource(),
+                new ICommand<TransactionEntity>[] { expectedCommand }, transactionTimeStamp);
+            
+            await using var transactionRepository = await CreateRepository();
+
+            await transactionRepository.PutTransaction(transaction);
+
+            var commandQuery = new GetEntityQuery(expectedEntityId, 0);
+
+            // ACT
+
+            var annotatedCommands = await transactionRepository.GetAnnotatedCommands(commandQuery);
+            
+            // ASSERT
+
+            annotatedCommands.Length.ShouldBe(1);
+
+            annotatedCommands[0].TransactionId.ShouldBe(expectedTransactionId);
+            annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
+            annotatedCommands[0].EntityVersionNumber.ShouldBe(1ul);
+            annotatedCommands[0].Command.ShouldBe(expectedCommand);
+            
+            expectedTransactionTimeStamps.Contains(annotatedCommands[0].TransactionTimeStamp).ShouldBeTrue();
+        }
+        
+        [Fact]
         public async Task GivenEntityInserted_WhenGettingEntity_ThenReturnEntity()
         {
             // ARRANGE
