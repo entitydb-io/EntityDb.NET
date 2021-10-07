@@ -101,6 +101,13 @@ namespace EntityDb.Abstractions.Transactions
         Task<ITag[]> GetTags(ITagQuery tagQuery);
 
         /// <summary>
+        ///     Returns the annotated commands which are found by a command query.
+        /// </summary>
+        /// <param name="commandQuery">The command query.</param>
+        /// <returns>The annotated commands which are found by <paramref name="commandQuery" />.</returns>
+        Task<IAnnotatedCommand<TEntity>[]> GetAnnotatedCommands(ICommandQuery commandQuery);
+
+        /// <summary>
         ///     Inserts a single transaction with an atomic commit.
         /// </summary>
         /// <param name="transaction">The transaction.</param>
