@@ -43,19 +43,6 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
                     UniquenessConstraint
                 )
             },
-            [FactDocument.CollectionName] = new[]
-            {
-                new CreateIndexModel<BsonDocument>
-                (
-                    IndexKeys.Combine
-                    (
-                        IndexKeys.Ascending(nameof(FactDocument.EntityId)),
-                        IndexKeys.Ascending(nameof(FactDocument.EntityVersionNumber)),
-                        IndexKeys.Ascending(nameof(FactDocument.EntitySubversionNumber))
-                    ),
-                    UniquenessConstraint
-                )
-            },
             [LeaseDocument.CollectionName] = new[]
             {
                 new CreateIndexModel<BsonDocument>

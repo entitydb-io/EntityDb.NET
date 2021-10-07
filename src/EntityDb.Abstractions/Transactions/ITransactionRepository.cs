@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -32,13 +31,6 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery);
 
         /// <summary>
-        ///     Returns the transaction ids which are found by a fact query.
-        /// </summary>
-        /// <param name="factQuery">The fact query.</param>
-        /// <returns>The transaction ids which are found by <paramref name="factQuery" />.</returns>
-        Task<Guid[]> GetTransactionIds(IFactQuery factQuery);
-
-        /// <summary>
         ///     Returns the transaction ids which are found by a lease query.
         /// </summary>
         /// <param name="leaseQuery">The lease query.</param>
@@ -67,13 +59,6 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetEntityIds(ICommandQuery commandQuery);
 
         /// <summary>
-        ///     Returns the entity ids which are found by a fact query.
-        /// </summary>
-        /// <param name="factQuery">The fact query.</param>
-        /// <returns>The entity ids which are found by <paramref name="factQuery" />.</returns>
-        Task<Guid[]> GetEntityIds(IFactQuery factQuery);
-
-        /// <summary>
         ///     Returns the entity ids which are found by a lease query.
         /// </summary>
         /// <param name="leaseQuery">The lease query.</param>
@@ -100,13 +85,6 @@ namespace EntityDb.Abstractions.Transactions
         /// <param name="commandQuery">The command query.</param>
         /// <returns>The commands which are found by <paramref name="commandQuery" />.</returns>
         Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery);
-
-        /// <summary>
-        ///     Returns the facts which are found by a fact query.
-        /// </summary>
-        /// <param name="factQuery">The fact query.</param>
-        /// <returns>The facts which are found by <paramref name="factQuery" />.</returns>
-        Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery);
 
         /// <summary>
         ///     Returns the leases which are found by a lease query.

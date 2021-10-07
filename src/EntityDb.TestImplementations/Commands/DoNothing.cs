@@ -1,16 +1,13 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
-using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Commands
 {
     public record DoNothing : ICommand<TransactionEntity>
     {
-        public IEnumerable<IFact<TransactionEntity>> Execute(TransactionEntity entity)
+        public TransactionEntity Reduce(TransactionEntity entity)
         {
-            yield return new NothingDone();
+            return entity with { VersionNumber = entity.VersionNumber + 1 };
         }
     }
 }

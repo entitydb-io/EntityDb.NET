@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Tests.Sessions
 
             // ACT
 
-            var facts = await mongoDbRepository.GetFacts(new GetEntityQuery(Guid.NewGuid(), 0));
+            var facts = await mongoDbRepository.GetCommands(new GetEntityQuery(Guid.NewGuid(), 0));
 
             // ASSERT
 

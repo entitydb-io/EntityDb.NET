@@ -73,11 +73,11 @@ namespace EntityDb.Common.Entities
             
             var versionNumber = _versioningStrategy.GetVersionNumber(entity);
 
-            var factQuery = new GetEntityQuery(entityId, versionNumber);
+            var commandQuery = new GetEntityQuery(entityId, versionNumber);
 
-            var facts = await _transactionRepository.GetFacts(factQuery);
+            var commands = await _transactionRepository.GetCommands(commandQuery);
 
-            entity = entity.Reduce(facts);
+            entity = entity.Reduce(commands);
 
             return entity;
         }

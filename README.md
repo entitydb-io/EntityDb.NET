@@ -25,11 +25,10 @@ information on the statement. (If I'm wrong, you should consider getting a new b
 
 ## How does EntityDb.NET implement Event Sourcing?
 
-There are three core sets of data:
+There are two core sets of data:
 
 1. Sources
 2. Commands
-3. Facts
 
 ### Sources
 
@@ -41,15 +40,8 @@ record the headers and connection information of the request.
 A command represents the intent to perform some operation on the state. Going back to the bank account example, one
 command could be `PerformDeposit` while another could be `PerformWithdrawl`. The things that you can do are commands.
 
-### Facts
-
-A fact is the result of executing a command on the state. In our bank account example, the fact produced
-by `PerformDeposit` would be `DepositPerformed`; for `PerformWithdrawl` it would be `WithdrawlPerformed`. However,
-commands and facts **DO NOT** need to be one-to-one. A single command can yield as many facts as are needed. You should
-keep your facts _bite sized_/_small_.
-
 ### Tying it all together
 
-The source, commands, and facts, are all tied together under one transient object - the transaction. A transaction can
+The source and commands are all tied together under one transient object - the transaction. A transaction can
 have exactly one source and can have many commands; each command can have many facts. When you need to commit your
 changes, you commit the transaction - it's all or nothing.

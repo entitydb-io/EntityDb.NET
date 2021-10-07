@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
@@ -49,22 +48,6 @@ namespace EntityDb.Common.Transactions
             _taggingStrategy = taggingStrategy;
         }
 
-        private static ImmutableArray<ITransactionFact<TEntity>> GetTransactionFacts(IEnumerable<IFact<TEntity>> facts)
-        {
-            var transactionFacts = new List<TransactionFact<TEntity>>();
-
-            ulong subversionNumber = default;
-
-            foreach (var fact in facts)
-            {
-                transactionFacts.Add(new TransactionFact<TEntity> { SubversionNumber = subversionNumber, Fact = fact });
-
-                subversionNumber += 1;
-            }
-
-            return transactionFacts.ToImmutableArray<ITransactionFact<TEntity>>();
-        }
-
         private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
             TEntity nextEntity, Func<TEntity, TMetaData[]> metaDataMapper)
         {
@@ -100,11 +83,7 @@ namespace EntityDb.Common.Transactions
 
             CommandNotAuthorizedException.ThrowIfFalse(IsAuthorized(previousEntity, command));
 
-            var nextFacts = previousEntity.Execute(command);
-
-            nextFacts.Add(_versioningStrategy.GetVersionNumberFact(previousVersionNumber + 1));
-
-            var nextEntity = previousEntity.Reduce(nextFacts);
+            var nextEntity = previousEntity.Reduce(command);
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
@@ -112,7 +91,6 @@ namespace EntityDb.Common.Transactions
                 EntityId = entityId,
                 ExpectedPreviousVersionNumber = previousVersionNumber,
                 Command = command,
-                Facts = GetTransactionFacts(nextFacts),
                 Leases = GetTransactionMetaData(previousEntity, nextEntity, GetLeases),
                 Tags = GetTransactionMetaData(previousEntity, nextEntity, GetTags)
             });

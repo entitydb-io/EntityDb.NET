@@ -1,7 +1,5 @@
-﻿using EntityDb.Abstractions.Facts;
-using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Entities;
-using EntityDb.Common.Facts;
 
 namespace EntityDb.Common.Strategies
 {
@@ -11,11 +9,6 @@ namespace EntityDb.Common.Strategies
         public ulong GetVersionNumber(TEntity entity)
         {
             return entity.VersionNumber;
-        }
-
-        public IFact<TEntity> GetVersionNumberFact(ulong versionNumber)
-        {
-            return new VersionNumberSet<TEntity>(versionNumber);
         }
     }
 }

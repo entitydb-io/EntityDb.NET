@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -16,20 +15,12 @@ namespace EntityDb.Void.Transactions
         private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
             Task.FromResult(Array.Empty<ICommand<TEntity>>());
 
-        private static readonly Task<IFact<TEntity>[]> _emptyFactArrayTask =
-            Task.FromResult(Array.Empty<IFact<TEntity>>());
-
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
             return EmptyGuidArrayTask;
         }
 
         public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
-        {
-            return EmptyGuidArrayTask;
-        }
-
-        public Task<Guid[]> GetTransactionIds(IFactQuery factQuery)
         {
             return EmptyGuidArrayTask;
         }
@@ -54,11 +45,6 @@ namespace EntityDb.Void.Transactions
             return EmptyGuidArrayTask;
         }
 
-        public Task<Guid[]> GetEntityIds(IFactQuery factQuery)
-        {
-            return EmptyGuidArrayTask;
-        }
-
         public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
             return EmptyGuidArrayTask;
@@ -77,11 +63,6 @@ namespace EntityDb.Void.Transactions
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
             return _emptyCommandArrayTask;
-        }
-
-        public Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery)
-        {
-            return _emptyFactArrayTask;
         }
 
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)

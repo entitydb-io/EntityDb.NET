@@ -1,13 +1,10 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Facts;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
@@ -60,9 +57,9 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[]
+                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[]
                     {
-                        new NothingDone(), new VersionNumberSet<TransactionEntity>(1)
+                        new DoNothing()
                     }));
 
                 serviceCollection.AddScoped(_ => authorizingStrategy);
@@ -104,7 +101,7 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[] { new NothingDone() }));
+                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
 
                 serviceCollection.AddScoped(_ => authorizingStrategy);
             });
@@ -222,7 +219,7 @@ namespace EntityDb.Common.Tests.Transactions
             {
                 serviceCollection.AddScoped(_ =>
                     GetMockedTransactionRepositoryFactory(
-                        new IFact<TransactionEntity>[] { new VersionNumberSet<TransactionEntity>(1) }));
+                        new ICommand<TransactionEntity>[] { new DoNothing() }));
             });
 
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
@@ -312,9 +309,9 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new IFact<TransactionEntity>[]
+                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[]
                     {
-                        new NothingDone(), new VersionNumberSet<TransactionEntity>(1)
+                        new DoNothing(),
                     }));
             });
 

@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Facts;
+﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +21,7 @@ namespace EntityDb.Common.Tests
             _serviceProvider = serviceProvider;
         }
 
-        private IServiceCollection GetParaisteServiceCollection(Type[]? omittedTypes = null)
+        private IServiceCollection GetParasiteServiceCollection(Type[]? omittedTypes = null)
         {
             var serviceCollection = new ServiceCollection();
             
@@ -57,7 +57,7 @@ namespace EntityDb.Common.Tests
         
         public IServiceProvider GetServiceProviderWithOverrides(Action<IServiceCollection> configureOverrides)
         {
-            var serviceCollection = GetParaisteServiceCollection();
+            var serviceCollection = GetParasiteServiceCollection();
 
             configureOverrides.Invoke(serviceCollection);
 
@@ -66,15 +66,15 @@ namespace EntityDb.Common.Tests
 
         public IServiceProvider GetServiceProviderWithOmission<TOmittedType>()
         {
-            return GetParaisteServiceCollection(new[] { typeof(TOmittedType) }).BuildServiceProvider();
+            return GetParasiteServiceCollection(new[] { typeof(TOmittedType) }).BuildServiceProvider();
         }
 
         public static ITransactionRepositoryFactory<TEntity> GetMockedTransactionRepositoryFactory<TEntity>(
-            IFact<TEntity>[]? facts = null)
+            ICommand<TEntity>[]? commands = null)
         {
-            if (facts == null)
+            if (commands == null)
             {
-                facts = Array.Empty<IFact<TEntity>>();
+                commands = Array.Empty<ICommand<TEntity>>();
             }
 
             var transactionRepositoryMock = new Mock<ITransactionRepository<TEntity>>(MockBehavior.Strict);
@@ -85,8 +85,8 @@ namespace EntityDb.Common.Tests
                 .Verifiable();
 
             transactionRepositoryMock
-                .Setup(repository => repository.GetFacts(It.IsAny<IFactQuery>()))
-                .ReturnsAsync(facts);
+                .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
+                .ReturnsAsync(commands);
 
             transactionRepositoryMock
                 .Setup(repository => repository.DisposeAsync())

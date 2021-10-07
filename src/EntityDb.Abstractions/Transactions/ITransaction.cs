@@ -5,7 +5,7 @@ namespace EntityDb.Abstractions.Transactions
 {
     /// <summary>
     ///     Represents a set of objects which must be committed together or not at all. Possible objects include: sources,
-    ///     commands, facts, and leases.
+    ///     commands, leases, and tags.
     /// </summary>
     /// <typeparam name="TEntity">The type of entities to be modified.</typeparam>
     public interface ITransaction<TEntity>

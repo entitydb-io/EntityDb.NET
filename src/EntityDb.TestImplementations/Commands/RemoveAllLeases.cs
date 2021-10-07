@@ -1,16 +1,15 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Leases;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
-using System.Collections.Generic;
+using System;
 
 namespace EntityDb.TestImplementations.Commands
 {
     public record RemoveAllLeases : ICommand<TransactionEntity>
     {
-        public IEnumerable<IFact<TransactionEntity>> Execute(TransactionEntity entity)
+        public TransactionEntity Reduce(TransactionEntity entity)
         {
-            yield return new AllLeasesRemoved();
+            return entity with { VersionNumber = entity.VersionNumber + 1, Leases = Array.Empty<ILease>() };
         }
     }
 }

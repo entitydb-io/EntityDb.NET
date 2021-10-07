@@ -47,9 +47,9 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                 Db = entityName, Collection = CommandDocument.CollectionName
             };
 
-            var factResource = new MongoDbAtlasResource { Db = entityName, Collection = FactDocument.CollectionName };
-
             var leaseResource = new MongoDbAtlasResource { Db = entityName, Collection = LeaseDocument.CollectionName };
+
+            var tagResources = new MongoDbAtlasResource { Db = entityName, Collection = TagDocument.CollectionName };
 
             var roleActions = new[]
             {
@@ -58,19 +58,19 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                 new MongoDbAtlasRoleAction
                 {
                     Action = "FIND",
-                    Resources = new[] { sourceResource, commandResource, factResource, leaseResource }
+                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
                 },
                 new MongoDbAtlasRoleAction
                 {
                     Action = "INSERT",
-                    Resources = new[] { sourceResource, commandResource, factResource, leaseResource }
+                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
                 },
                 new MongoDbAtlasRoleAction
                 {
                     Action = "CREATE_INDEX",
-                    Resources = new[] { sourceResource, commandResource, factResource, leaseResource }
+                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
                 },
-                new MongoDbAtlasRoleAction { Action = "REMOVE", Resources = new[] { leaseResource } }
+                new MongoDbAtlasRoleAction { Action = "REMOVE", Resources = new[] { leaseResource, tagResources } }
             };
 
             await mongoDbAtlasClient.CreateRole(entityName, roleActions);

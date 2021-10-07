@@ -5,9 +5,9 @@ using System;
 
 namespace EntityDb.Common.Queries
 {
-    internal sealed record GetEntityQuery(Guid EntityId, ulong StartAfterVersionNumber) : IFactQuery
+    internal sealed record GetEntityQuery(Guid EntityId, ulong StartAfterVersionNumber) : ICommandQuery
     {
-        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
@@ -16,12 +16,11 @@ namespace EntityDb.Common.Queries
             );
         }
 
-        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
-                builder.EntityVersionNumber(true),
-                builder.EntitySubversionNumber(true)
+                builder.EntityVersionNumber(true)
             );
         }
 

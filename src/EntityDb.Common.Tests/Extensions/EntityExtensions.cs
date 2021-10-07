@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Common.Extensions;
 using Moq;
 using System.Linq;
@@ -11,36 +10,27 @@ namespace EntityDb.Common.Tests.Extensions
     {
         [Theory]
         [InlineData(2)]
-        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureExecuteAndReduceAreBothCalled(
+        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureReduceIsCalled(
             int numberOfTimes)
         {
             // ARRANGE
 
-            var factMock = new Mock<IFact<object>>(MockBehavior.Strict);
-
-            factMock
-                .Setup(fact => fact.Reduce(It.IsAny<object>()))
-                .Returns((object @object) => @object)
-                .Verifiable();
-
             var commandMock = new Mock<ICommand<object>>(MockBehavior.Strict);
 
             commandMock
-                .Setup(command => command.Execute(It.IsAny<object>()))
-                .Returns(new[] { factMock.Object })
+                .Setup(command => command.Reduce(It.IsAny<object>()))
+                .Returns((object @object) => @object)
                 .Verifiable();
 
             var entity = new object();
 
             // ACT
 
-            entity.ExecuteAndReduce(Enumerable.Repeat(commandMock.Object, numberOfTimes));
+            entity.Reduce(Enumerable.Repeat(commandMock.Object, numberOfTimes));
 
             // ASSERT
 
-            commandMock.Verify(command => command.Execute(It.IsAny<object>()), Times.Exactly(numberOfTimes));
-
-            factMock.Verify(fact => fact.Reduce(It.IsAny<object>()), Times.Exactly(numberOfTimes));
+            commandMock.Verify(command => command.Reduce(It.IsAny<object>()), Times.Exactly(numberOfTimes));
         }
     }
 }

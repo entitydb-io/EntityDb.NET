@@ -1,7 +1,4 @@
-﻿using EntityDb.Abstractions.Facts;
-using System.Collections.Generic;
-
-namespace EntityDb.Abstractions.Commands
+﻿namespace EntityDb.Abstractions.Commands
 {
     /// <summary>
     ///     Represents the intent to modify a <typeparamref name="TEntity" />.
@@ -10,10 +7,10 @@ namespace EntityDb.Abstractions.Commands
     public interface ICommand<TEntity>
     {
         /// <summary>
-        ///     Returns a new set of modifiers for an entity by this command.
+        ///     Returns a new <typeparamref name="TEntity" /> that incorporates the modification into an entity.
         /// </summary>
         /// <param name="entity">The entity to be modified.</param>
-        /// <returns>A new set of modifiers for <paramref name="entity" /> by this command.</returns>
-        IEnumerable<IFact<TEntity>> Execute(TEntity entity);
+        /// <returns>A new <typeparamref name="TEntity" /> that incorporates the modification of this command into <paramref name="entity" />.</returns>
+        TEntity Reduce(TEntity entity);
     }
 }

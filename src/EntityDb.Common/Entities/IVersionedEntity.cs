@@ -1,14 +1,12 @@
 ﻿using EntityDb.Abstractions.Strategies;
-using EntityDb.Common.Facts;
 
 namespace EntityDb.Common.Entities
 {
     /// <summary>
-    ///     Represents a type that can be used for an implementation of <see cref="IVersioningStrategy{TEntity}" /> which uses
-    ///     <see cref="VersionNumberSet{TEntity}" /> to modify the version number.
+    ///     Represents a type that can be used for an implementation of <see cref="IVersioningStrategy{TEntity}" />.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity that is versioned.</typeparam>
-    public interface IVersionedEntity<TEntity>
+    public interface IVersionedEntity<out TEntity>
     {
         /// <summary>
         ///     The version number.

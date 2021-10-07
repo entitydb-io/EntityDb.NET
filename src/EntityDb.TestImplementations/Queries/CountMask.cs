@@ -1,23 +1,17 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.Filters;
 using EntityDb.TestImplementations.Commands;
-using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Source;
 using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountFilter : ISourceFilter, ICommandFilter, IFactFilter, ILeaseFilter, ITagFilter
+    public record CountFilter : ISourceFilter, ICommandFilter, ILeaseFilter, ITagFilter
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
             return builder.CommandTypeIn(typeof(Count));
-        }
-
-        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
-        {
-            return builder.FactTypeIn(typeof(Counted));
         }
 
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)

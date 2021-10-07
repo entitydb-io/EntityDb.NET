@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
@@ -16,7 +15,6 @@ using EntityDb.Common.Tags;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
 using EntityDb.TestImplementations.Source;
@@ -152,35 +150,6 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetTransactionIds(IFactQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<IFactQuery, IFactQuery>? filter = null)
-        {
-            return TestGet
-            (
-                transactions,
-                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
-                {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTransactionIds(modifiedQuery);
-                }
-            );
-        }
-
         private Task TestGetTransactionIds(ILeaseQuery query, List<ITransaction<TransactionEntity>> transactions,
             ExpectedObjects expectedObjects, Func<ILeaseQuery, ILeaseQuery>? filter = null)
         {
@@ -241,35 +210,6 @@ namespace EntityDb.Common.Tests.Transactions
 
         private Task TestGetEntityIds(ICommandQuery query, List<ITransaction<TransactionEntity>> transactions,
             ExpectedObjects expectedObjects, Func<ICommandQuery, ICommandQuery>? filter = null)
-        {
-            return TestGet
-            (
-                transactions,
-                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
-                {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetEntityIds(modifiedQuery);
-                }
-            );
-        }
-
-        private Task TestGetEntityIds(IFactQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<IFactQuery, IFactQuery>? filter = null)
         {
             return TestGet
             (
@@ -384,35 +324,6 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetFacts(IFactQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<IFactQuery, IFactQuery>? filter = null)
-        {
-            return TestGet
-            (
-                transactions,
-                invert => (invert ? expectedObjects.FalseFacts : expectedObjects.TrueFacts).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
-                {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetFacts(modifiedQuery);
-                }
-            );
-        }
-
         private Task TestGetLeases(ILeaseQuery query, List<ITransaction<TransactionEntity>> transactions,
             ExpectedObjects expectedObjects, Func<ILeaseQuery, ILeaseQuery>? filter = null)
         {
@@ -513,7 +424,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
                     }
@@ -550,7 +460,6 @@ namespace EntityDb.Common.Tests.Transactions
                             EntityId = Guid.NewGuid(),
                             ExpectedPreviousVersionNumber = 0,
                             Command = new DoNothing(),
-                            Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
                         }
@@ -592,7 +501,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = entityId,
                         ExpectedPreviousVersionNumber = previousVersionNumber,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
                     },
@@ -602,7 +510,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = entityId,
                         ExpectedPreviousVersionNumber = previousVersionNumber,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
                     }
@@ -645,7 +552,6 @@ namespace EntityDb.Common.Tests.Transactions
                             EntityId = entityId,
                             ExpectedPreviousVersionNumber = previousVersionNumber,
                             Command = new DoNothing(),
-                            Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
                         }
@@ -677,55 +583,6 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
-        public async Task GivenNonUniqueSubversionNumbers_WhenInsertingFacts_ThenReturnFalse()
-        {
-            // ARRANGE
-
-            var entityId = Guid.NewGuid();
-            ulong subversionNumber = 0;
-
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextSnapshot = default!,
-                        EntityId = entityId,
-                        ExpectedPreviousVersionNumber = 0,
-                        Command = new DoNothing(),
-                        Facts = new[]
-                        {
-                            new TransactionFact<TransactionEntity>
-                            {
-                                SubversionNumber = subversionNumber, Fact = new NothingDone()
-                            },
-                            new TransactionFact<TransactionEntity>
-                            {
-                                SubversionNumber = subversionNumber, Fact = new NothingDone()
-                            }
-                        }.ToImmutableArray<ITransactionFact<TransactionEntity>>(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>()
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
-
-            await using var transactionRepository = await CreateRepository();
-
-            // ACT
-
-            var transactionInserted = await transactionRepository.PutTransaction(transaction);
-
-            // ASSERT
-
-            transactionInserted.ShouldBeFalse();
-        }
-
-        [Fact]
         public async Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue()
         {
             // ARRANGE
@@ -745,7 +602,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
                         {
@@ -758,7 +614,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
                         {
@@ -799,7 +654,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>
                         {
                             Insert = new[] { lease }.ToImmutableArray<ILease>()
@@ -812,7 +666,6 @@ namespace EntityDb.Common.Tests.Transactions
                         EntityId = Guid.NewGuid(),
                         ExpectedPreviousVersionNumber = 0,
                         Command = new DoNothing(),
-                        Facts = ImmutableArray<ITransactionFact<TransactionEntity>>.Empty,
                         Leases = new TransactionMetaData<ILease>
                         {
                             Insert = new[] { lease }.ToImmutableArray<ILease>()
@@ -1043,14 +896,12 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
-
                 var leases = new[] { new CountLease(i) };
 
                 var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(gteInMinutes <= i && i <= lteInMinutes, currentTransactionId, currentEntityId,
-                    source, commands, facts, leases, tags);
+                    source, commands, leases, tags);
 
                 if (i == lteInMinutes)
                 {
@@ -1074,15 +925,12 @@ namespace EntityDb.Common.Tests.Transactions
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetSources(query, transactions, expectedObjects);
             await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetFacts(query, transactions, expectedObjects);
             await TestGetLeases(query, transactions, expectedObjects);
             await TestGetTags(query, transactions, expectedObjects);
         }
@@ -1109,14 +957,12 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
-
                 var leases = new[] { new CountLease(i) };
 
                 var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, source, commands,
-                    facts, leases, tags);
+                    leases, tags);
 
                 if (i == whichTransactionId)
                 {
@@ -1134,15 +980,12 @@ namespace EntityDb.Common.Tests.Transactions
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetSources(query, transactions, expectedObjects);
             await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetFacts(query, transactions, expectedObjects);
             await TestGetLeases(query, transactions, expectedObjects);
             await TestGetTags(query, transactions, expectedObjects);
         }
@@ -1169,13 +1012,11 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new[] { new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact(1) };
-
                 var leases = new[] { new CountLease(i) };
 
                 var tags = new[] { new CountTag(i) };
 
-                expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, source, commands, facts,
+                expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, source, commands,
                     leases, tags);
 
                 if (i == whichEntityId)
@@ -1194,15 +1035,12 @@ namespace EntityDb.Common.Tests.Transactions
 
             await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as IFactQuery, transactions, expectedObjects);
             await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
             await TestGetSources(query, transactions, expectedObjects);
             await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetFacts(query, transactions, expectedObjects);
             await TestGetLeases(query, transactions, expectedObjects);
             await TestGetTags(query, transactions, expectedObjects);
         }
@@ -1219,11 +1057,6 @@ namespace EntityDb.Common.Tests.Transactions
             {
                 var command = new Count(i);
 
-                var facts = new[]
-                {
-                    new Counted(i), _serviceProvider.GetRequiredService<IVersioningStrategy<TransactionEntity>>().GetVersionNumberFact((ulong)i)
-                };
-
                 var leases = new[] { new CountLease(i) };
 
                 var tags = new[] { new CountTag(i) };
@@ -1231,7 +1064,7 @@ namespace EntityDb.Common.Tests.Transactions
                 commands.Add(command);
 
                 expectedObjects.Add(gteAsInt <= i && i <= lteAsInt, default, default, default!, new[] { command },
-                    facts, leases, tags);
+                    leases, tags);
             }
 
             var transaction = BuildTransaction(Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
@@ -1241,7 +1074,6 @@ namespace EntityDb.Common.Tests.Transactions
             var query = new EntityVersionNumberQuery((ulong)gteAsInt, (ulong)lteAsInt);
 
             await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetFacts(query, transactions, expectedObjects);
             await TestGetLeases(query, transactions, expectedObjects);
             await TestGetTags(query, transactions, expectedObjects);
         }
@@ -1266,14 +1098,12 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
-                var facts = new IFact<TransactionEntity>[] { new Counted(i) };
-
                 var leases = new[] { new CountLease(i) };
 
                 var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, source, commands,
-                    facts, leases, tags);
+                    leases, tags);
 
                 var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
 
@@ -1290,11 +1120,6 @@ namespace EntityDb.Common.Tests.Transactions
                 return commandQuery.Filter(new CountFilter());
             }
 
-            IFactQuery FilterFacts(IFactQuery factQuery)
-            {
-                return factQuery.Filter(new CountFilter());
-            }
-
             ILeaseQuery FilterLeases(ILeaseQuery leaseQuery)
             {
                 return leaseQuery.Filter(new CountFilter());
@@ -1309,15 +1134,12 @@ namespace EntityDb.Common.Tests.Transactions
 
             await TestGetTransactionIds(query, transactions, expectedObjects, FilterSources);
             await TestGetTransactionIds(query, transactions, expectedObjects, FilterCommands);
-            await TestGetTransactionIds(query, transactions, expectedObjects, FilterFacts);
             await TestGetTransactionIds(query, transactions, expectedObjects, FilterLeases);
             await TestGetEntityIds(query, transactions, expectedObjects, FilterSources);
             await TestGetEntityIds(query, transactions, expectedObjects, FilterCommands);
-            await TestGetEntityIds(query, transactions, expectedObjects, FilterFacts);
             await TestGetEntityIds(query, transactions, expectedObjects, FilterLeases);
             await TestGetSources(query, transactions, expectedObjects, FilterSources);
             await TestGetCommands(query, transactions, expectedObjects, FilterCommands);
-            await TestGetFacts(query, transactions, expectedObjects, FilterFacts);
             await TestGetLeases(query, transactions, expectedObjects, FilterLeases);
             await TestGetTags(query, transactions, expectedObjects, FilterTags);
         }
@@ -1326,22 +1148,15 @@ namespace EntityDb.Common.Tests.Transactions
         {
             public readonly List<ICommand<TransactionEntity>> FalseCommands = new();
             public readonly List<Guid> FalseEntityIds = new();
-            public readonly List<IFact<TransactionEntity>> FalseFacts = new();
             public readonly List<ILease> FalseLeases = new();
             public readonly List<object> FalseSources = new();
             public readonly List<ITag> FalseTags = new();
             public readonly List<Guid> FalseTransactionIds = new();
 
             public readonly List<ICommand<TransactionEntity>> TrueCommands = new();
-
             public readonly List<Guid> TrueEntityIds = new();
-
-            public readonly List<IFact<TransactionEntity>> TrueFacts = new();
-
             public readonly List<ILease> TrueLeases = new();
-
             public readonly List<object> TrueSources = new();
-
             public readonly List<ITag> TrueTags = new();
             public readonly List<Guid> TrueTransactionIds = new();
 
@@ -1352,7 +1167,6 @@ namespace EntityDb.Common.Tests.Transactions
                 Guid entityId,
                 object source,
                 IEnumerable<ICommand<TransactionEntity>> commands,
-                IEnumerable<IFact<TransactionEntity>> facts,
                 IEnumerable<ILease> leases,
                 IEnumerable<ITag> tags
             )
@@ -1363,7 +1177,6 @@ namespace EntityDb.Common.Tests.Transactions
                     TrueEntityIds.Add(entityId);
                     TrueSources.Add(source);
                     TrueCommands.AddRange(commands);
-                    TrueFacts.AddRange(facts);
                     TrueLeases.AddRange(leases);
                     TrueTags.AddRange(tags);
                 }
@@ -1373,7 +1186,6 @@ namespace EntityDb.Common.Tests.Transactions
                     FalseEntityIds.Add(entityId);
                     FalseSources.Add(source);
                     FalseCommands.AddRange(commands);
-                    FalseFacts.AddRange(facts);
                     FalseLeases.AddRange(leases);
                     FalseTags.AddRange(tags);
                 }

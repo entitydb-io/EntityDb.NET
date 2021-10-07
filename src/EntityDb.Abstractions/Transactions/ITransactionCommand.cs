@@ -2,7 +2,6 @@
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using System;
-using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions
 {
@@ -34,19 +33,6 @@ namespace EntityDb.Abstractions.Transactions
         ///     The intent.
         /// </summary>
         ICommand<TEntity> Command { get; }
-
-        /// <summary>
-        ///     The set of modifiers.
-        /// </summary>
-        /// <remarks>
-        ///     <see cref="Facts" /> does not need to be ordered, but each entry must have a unique
-        ///     <see cref="ITransactionFact{TEntity}.SubversionNumber" /> for the given
-        ///     <see cref="ExpectedPreviousVersionNumber" />.
-        ///     All though it may seem awkward, this provides two benefits.
-        ///     1. None of the repository implementations need to implement subversion number counting.
-        ///     2. The generic test suite can verify that the uniqueness constraint is satisfied.
-        /// </remarks>
-        ImmutableArray<ITransactionFact<TEntity>> Facts { get; }
 
         /// <summary>
         ///     The unique metadata properties.

@@ -1,16 +1,25 @@
 using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Tags;
+using EntityDb.Common.Tags;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
 using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Commands
 {
     public record AddTag(string TagLabel, string TagValue) : ICommand<TransactionEntity>
     {
-        public IEnumerable<IFact<TransactionEntity>> Execute(TransactionEntity entity)
+        public TransactionEntity Reduce(TransactionEntity entity)
         {
-            yield return new TagAdded(TagLabel, TagValue);
+            var tags = new List<ITag>();
+
+            if (entity.Tags != null)
+            {
+                tags.AddRange(entity.Tags);
+            }
+
+            tags.Add(new Tag(TagLabel, TagValue));
+
+            return entity with { VersionNumber = entity.VersionNumber + 1, Tags = tags.ToArray() };
         }
     }
 }

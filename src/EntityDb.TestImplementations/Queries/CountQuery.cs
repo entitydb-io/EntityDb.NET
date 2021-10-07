@@ -4,14 +4,13 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Common.Leases;
 using EntityDb.Common.Tags;
 using EntityDb.TestImplementations.Commands;
-using EntityDb.TestImplementations.Facts;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Source;
 using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountQuery(int Gte, int Lte) : ISourceQuery, ICommandQuery, IFactQuery, ILeaseQuery,
+    public record CountQuery(int Gte, int Lte) : ISourceQuery, ICommandQuery, ILeaseQuery,
         ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -27,23 +26,6 @@ namespace EntityDb.TestImplementations.Queries
                 builder.EntityVersionNumber(true),
                 builder.CommandType(true),
                 builder.CommandProperty(true, (Count count) => count.Number)
-            );
-        }
-
-        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
-        {
-            return builder.FactMatches((Counted counted) => Gte <= counted.Number && counted.Number <= Lte);
-        }
-
-        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.EntityId(true),
-                builder.EntityVersionNumber(true),
-                builder.EntitySubversionNumber(true),
-                builder.FactType(true),
-                builder.FactProperty(true, (Counted counted) => counted.Number)
             );
         }
 

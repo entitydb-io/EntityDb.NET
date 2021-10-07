@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -32,11 +31,6 @@ namespace EntityDb.MongoDb.Transactions
             return CommandDocument.GetTransactionIds(_mongoDbSession, commandQuery);
         }
 
-        public Task<Guid[]> GetTransactionIds(IFactQuery factQuery)
-        {
-            return FactDocument.GetTransactionIds(_mongoDbSession, factQuery);
-        }
-
         public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
         {
             return LeaseDocument.GetTransactionIds(_mongoDbSession, leaseQuery);
@@ -57,11 +51,6 @@ namespace EntityDb.MongoDb.Transactions
             return CommandDocument.GetEntityIds(_mongoDbSession, commandQuery);
         }
 
-        public Task<Guid[]> GetEntityIds(IFactQuery factQuery)
-        {
-            return FactDocument.GetEntityIds(_mongoDbSession, factQuery);
-        }
-
         public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
         {
             return LeaseDocument.GetEntityIds(_mongoDbSession, leaseQuery);
@@ -80,11 +69,6 @@ namespace EntityDb.MongoDb.Transactions
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
             return CommandDocument.GetData<TEntity>(_mongoDbSession, commandQuery);
-        }
-
-        public Task<IFact<TEntity>[]> GetFacts(IFactQuery factQuery)
-        {
-            return FactDocument.GetData<TEntity>(_mongoDbSession, factQuery);
         }
 
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
@@ -117,8 +101,6 @@ namespace EntityDb.MongoDb.Transactions
 
                         await CommandDocument.InsertOne(clientSessionHandle, mongoDatabase,
                             CommandDocument.BuildOne(logger, transaction, transactionCommand));
-                        await FactDocument.InsertMany(clientSessionHandle, mongoDatabase,
-                            FactDocument.BuildMany(logger, transaction, transactionCommand));
                         await LeaseDocument.DeleteMany(clientSessionHandle, mongoDatabase, transactionCommand.EntityId,
                             transactionCommand.Leases.Delete);
                         await LeaseDocument.InsertMany(clientSessionHandle, mongoDatabase,

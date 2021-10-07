@@ -39,21 +39,6 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Returns a <see cref="IFactSortBuilder{TSort}" /> that orders facts in the reverse order of another
-        ///     <see cref="IFactSortBuilder{TSort}" />.
-        /// </summary>
-        /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-        /// <param name="factSortBuilder">The fact sort builder.</param>
-        /// <returns>
-        ///     A <see cref="IFactSortBuilder{TSort}" /> that orders facts in the reverse order of
-        ///     <paramref name="factSortBuilder" />.
-        /// </returns>
-        public static IFactSortBuilder<TSort> Reverse<TSort>(this IFactSortBuilder<TSort> factSortBuilder)
-        {
-            return new FactReverseSortBuilder<TSort>(factSortBuilder);
-        }
-
-        /// <summary>
         ///     Returns a <see cref="ILeaseSortBuilder{TSort}" /> that orders leases in the reverse order of another
         ///     <see cref="ILeaseSortBuilder{TSort}" />.
         /// </summary>

@@ -41,21 +41,6 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Returns a new <see cref="IFactQuery" /> that "ands" a fact filter with the filter of a fact query. All other
-        ///     properties of the query are inherited.
-        /// </summary>
-        /// <param name="factQuery">The fact query.</param>
-        /// <param name="factFilter">The fact filter.</param>
-        /// <returns>
-        ///     A new <see cref="IFactQuery" /> that "ands" <paramref name="factFilter" /> with the filter of
-        ///     <paramref name="factQuery" />.
-        /// </returns>
-        public static IFactQuery Filter(this IFactQuery factQuery, IFactFilter factFilter)
-        {
-            return new FilteredFactQuery(factQuery, factFilter);
-        }
-
-        /// <summary>
         ///     Returns a new <see cref="ILeaseQuery" /> that "ands" a lease filter with the filter of a lease query. All other
         ///     properties of the query are inherited.
         /// </summary>
@@ -107,18 +92,6 @@ namespace EntityDb.Common.Extensions
         public static ICommandQuery Modify(this ICommandQuery commandQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
             return new ModifiedCommandQuery(commandQuery, modifiedQueryOptions);
-        }
-
-        /// <summary>
-        ///     Returns a new, modified <see cref="IFactQuery" />. The way in which it is modified depends on the parameters of
-        ///     this extension method.
-        /// </summary>
-        /// <param name="factQuery">The fact query.</param>
-        /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-        /// <returns>A new, modified <see cref="IFactQuery" />.</returns>
-        public static IFactQuery Modify(this IFactQuery factQuery, ModifiedQueryOptions modifiedQueryOptions)
-        {
-            return new ModifiedFactQuery(factQuery, modifiedQueryOptions);
         }
 
         /// <summary>

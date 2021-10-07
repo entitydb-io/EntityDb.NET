@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : ISourceQuery, ICommandQuery, IFactQuery,
+    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : ISourceQuery, ICommandQuery,
         ILeaseQuery, ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -24,26 +24,6 @@ namespace EntityDb.TestImplementations.Queries
                 builder.TransactionTimeStamp(true),
                 builder.EntityId(true),
                 builder.EntityVersionNumber(true)
-            );
-        }
-
-        public TFilter GetFilter<TFilter>(IFactFilterBuilder<TFilter> builder)
-        {
-            return builder.And
-            (
-                builder.TransactionTimeStampGte(Gte),
-                builder.TransactionTimeStampLte(Lte)
-            );
-        }
-
-        public TSort GetSort<TSort>(IFactSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.TransactionTimeStamp(true),
-                builder.EntityId(true),
-                builder.EntityVersionNumber(true),
-                builder.EntitySubversionNumber(true)
             );
         }
 

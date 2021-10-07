@@ -1,16 +1,25 @@
 ﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Facts;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Common.Leases;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Facts;
 using System.Collections.Generic;
 
 namespace EntityDb.TestImplementations.Commands
 {
     public record AddLease(string LeaseScope, string LeaseLabel, string LeaseValue) : ICommand<TransactionEntity>
     {
-        public IEnumerable<IFact<TransactionEntity>> Execute(TransactionEntity entity)
+        public TransactionEntity Reduce(TransactionEntity entity)
         {
-            yield return new LeaseAdded(LeaseScope, LeaseLabel, LeaseValue);
+            var leases = new List<ILease>();
+
+            if (entity.Leases != null)
+            {
+                leases.AddRange(entity.Leases);
+            }
+
+            leases.Add(new Lease(LeaseScope, LeaseLabel, LeaseValue));
+
+            return entity with { VersionNumber = entity.VersionNumber + 1, Leases = leases.ToArray() };
         }
     }
 }
