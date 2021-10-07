@@ -3,12 +3,17 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
 {
     internal interface IMongoDbSession : IDisposable, IAsyncDisposable
     {
+        Task<List<TDocument>> ExecuteDocumentQuery<TDocument>(
+            Func<IClientSessionHandle?, IMongoDatabase, DocumentQuery<TDocument>> queryBuilder)
+            where TDocument : ITransactionDocument;
+        
         Task<TData[]> ExecuteDataQuery<TDocument, TData>(
             Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder)
             where TDocument : ITransactionDocument;

@@ -5,6 +5,7 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -29,6 +30,18 @@ namespace EntityDb.MongoDb.Sessions
             _mongoDatabase = mongoDatabase;
             _logger = logger;
             _resolvingStrategyChain = resolvingStrategyChain;
+        }
+
+        public Task<List<TDocument>> ExecuteDocumentQuery<TDocument>(
+            Func<IClientSessionHandle?, IMongoDatabase, DocumentQuery<TDocument>> queryBuilder)
+            where TDocument : ITransactionDocument
+        {
+            return Execute
+            (
+                () => queryBuilder.Invoke(_clientSessionHandle, _mongoDatabase)
+                    .GetDocuments(),
+                () => Task.FromResult(new List<TDocument>(0))
+            );
         }
 
         public Task<TData[]> ExecuteDataQuery<TDocument, TData>(

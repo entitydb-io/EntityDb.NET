@@ -10,6 +10,7 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -105,6 +106,26 @@ namespace EntityDb.MongoDb.Documents
             return mongoDbSession.ExecuteDataQuery<CommandDocument, ICommand<TEntity>>
             (
                 (clientSessionHandle, mongoDatabase) => new DataQuery<CommandDocument>
+                {
+                    ClientSessionHandle = clientSessionHandle,
+                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
+                    Filter = commandQuery.GetFilter(_commandFilterBuilder),
+                    Sort = commandQuery.GetSort(_commandSortBuilder),
+                    Skip = commandQuery.Skip,
+                    Limit = commandQuery.Take
+                }
+            );
+        }
+
+        public static Task<List<CommandDocument>> Get
+        (
+            IMongoDbSession mongoDbSession,
+            ICommandQuery commandQuery
+        )
+        {
+            return mongoDbSession.ExecuteDocumentQuery<CommandDocument>
+            (
+                (clientSessionHandle, mongoDatabase) => new DocumentQuery<CommandDocument>
                 {
                     ClientSessionHandle = clientSessionHandle,
                     MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
