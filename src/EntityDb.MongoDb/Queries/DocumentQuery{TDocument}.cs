@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using EntityDb.MongoDb.Documents;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,11 +7,14 @@ using System.Threading.Tasks;
 namespace EntityDb.MongoDb.Queries
 {
     internal record DocumentQuery<TDocument> : DocumentQuery
+        where TDocument : ITransactionDocument
     {
+        protected virtual ProjectionDefinition<BsonDocument, TDocument> Projection =>
+            ProjectionBuilder.Exclude(nameof(ITransactionDocument._id));
+        
         public IClientSessionHandle? ClientSessionHandle { get; init; }
         public IMongoCollection<BsonDocument> MongoCollection { get; init; } = default!;
         public FilterDefinition<BsonDocument> Filter { get; init; } = default!;
-        public virtual ProjectionDefinition<BsonDocument, TDocument> Projection => default!;
         public SortDefinition<BsonDocument>? Sort { get; init; }
         public int? Skip { get; init; }
         public int? Limit { get; init; }

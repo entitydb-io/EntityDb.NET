@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.MongoDb.Documents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 namespace EntityDb.MongoDb.Queries
 {
     internal abstract record GuidQuery<TDocument> : DocumentQuery<TDocument>
+        where TDocument : ITransactionDocument
     {
         public int? DistinctSkip { get; init; }
         public int? DistinctLimit { get; init; }

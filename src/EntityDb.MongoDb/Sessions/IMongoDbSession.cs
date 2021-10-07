@@ -14,7 +14,8 @@ namespace EntityDb.MongoDb.Sessions
             where TDocument : ITransactionDocument;
 
         Task<Guid[]> ExecuteGuidQuery<TDocument>(
-            Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder);
+            Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder)
+            where TDocument : ITransactionDocument;
 
         Task<bool> ExecuteCommand(Func<ILogger, IClientSessionHandle, IMongoDatabase, Task> command);
     }

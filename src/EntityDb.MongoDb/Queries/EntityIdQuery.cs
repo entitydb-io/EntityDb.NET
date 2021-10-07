@@ -10,7 +10,7 @@ namespace EntityDb.MongoDb.Queries
     internal record EntityIdQuery<TDocument> : GuidQuery<TDocument>
         where TDocument : IEntityDocument
     {
-        public override ProjectionDefinition<BsonDocument, TDocument> Projection =>
+        protected override ProjectionDefinition<BsonDocument, TDocument> Projection =>
             ProjectionBuilder.Combine
             (
                 ProjectionBuilder.Exclude(nameof(IEntityDocument._id)),

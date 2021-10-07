@@ -11,11 +11,11 @@ namespace EntityDb.MongoDb.Queries
     internal record DataQuery<TDocument> : DocumentQuery<TDocument>
         where TDocument : ITransactionDocument
     {
-        public override ProjectionDefinition<BsonDocument, TDocument> Projection => ProjectionBuilder.Combine
-        (
-            ProjectionBuilder.Exclude(nameof(ITransactionDocument._id)),
-            ProjectionBuilder.Include(nameof(ITransactionDocument.Data))
-        );
+        protected override ProjectionDefinition<BsonDocument, TDocument> Projection => ProjectionBuilder.Combine
+            (
+                ProjectionBuilder.Exclude(nameof(ITransactionDocument._id)),
+                ProjectionBuilder.Include(nameof(ITransactionDocument.Data))
+            );
         
         public async Task<TModel[]> GetModels<TModel>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
         {

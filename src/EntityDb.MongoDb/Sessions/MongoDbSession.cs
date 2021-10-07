@@ -45,6 +45,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public Task<Guid[]> ExecuteGuidQuery<TDocument>(
             Func<IClientSessionHandle?, IMongoDatabase, GuidQuery<TDocument>> queryBuilder)
+            where TDocument : ITransactionDocument
         {
             return Execute
             (
