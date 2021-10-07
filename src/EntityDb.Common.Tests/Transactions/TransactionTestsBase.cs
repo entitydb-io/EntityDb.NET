@@ -420,9 +420,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        EntityVersionNumber = 1,
+                        NextEntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
@@ -456,9 +456,9 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            EntitySnapshot = default!,
+                            NextEntitySnapshot = default!,
                             EntityId = Guid.NewGuid(),
-                            EntityVersionNumber = 1,
+                            NextEntityVersionNumber = 1,
                             Command = new DoNothing(),
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
@@ -497,18 +497,18 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = entityId,
-                        EntityVersionNumber = entityVersionNumber,
+                        NextEntityVersionNumber = entityVersionNumber,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = entityId,
-                        EntityVersionNumber = entityVersionNumber,
+                        NextEntityVersionNumber = entityVersionNumber,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
@@ -552,9 +552,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = entityId,
-                        EntityVersionNumber = entityVersionNumber,
+                        NextEntityVersionNumber = entityVersionNumber,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>()
@@ -597,9 +597,9 @@ namespace EntityDb.Common.Tests.Transactions
                     {
                         new TransactionCommand<TransactionEntity>
                         {
-                            EntitySnapshot = default!,
+                            NextEntitySnapshot = default!,
                             EntityId = entityId,
-                            EntityVersionNumber = entityVersionNumber,
+                            NextEntityVersionNumber = entityVersionNumber,
                             Command = new DoNothing(),
                             Leases = new TransactionMetaData<ILease>(),
                             Tags = new TransactionMetaData<ITag>()
@@ -647,9 +647,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        EntityVersionNumber = 1,
+                        NextEntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
@@ -659,9 +659,9 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        EntityVersionNumber = 1,
+                        NextEntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>(),
                         Tags = new TransactionMetaData<ITag>
@@ -699,9 +699,9 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        EntityVersionNumber = 1,
+                        NextEntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>
                         {
@@ -711,9 +711,9 @@ namespace EntityDb.Common.Tests.Transactions
                     },
                     new TransactionCommand<TransactionEntity>
                     {
-                        EntitySnapshot = default!,
+                        NextEntitySnapshot = default!,
                         EntityId = Guid.NewGuid(),
-                        EntityVersionNumber = 1,
+                        NextEntityVersionNumber = 1,
                         Command = new DoNothing(),
                         Leases = new TransactionMetaData<ILease>
                         {
@@ -912,7 +912,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             transaction.Commands.Length.ShouldBe(1);
 
-            transaction.Commands[0].EntityVersionNumber.ShouldBe(1ul);
+            transaction.Commands[0].NextEntityVersionNumber.ShouldBe(1ul);
 
             newCommands.Length.ShouldBe(1);
 
@@ -955,7 +955,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             secondTransaction.Commands.Length.ShouldBe(1);
 
-            secondTransaction.Commands[0].EntityVersionNumber.ShouldBe(2ul);
+            secondTransaction.Commands[0].NextEntityVersionNumber.ShouldBe(2ul);
 
             newCommands.Length.ShouldBe(1);
 

@@ -79,6 +79,7 @@ namespace EntityDb.Common.Transactions
         private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
+            var previousEntityVersionNumber = _versioningStrategy.GetVersionNumber(previousEntity);
 
             CommandNotAuthorizedException.ThrowIfFalse(IsAuthorized(previousEntity, command));
 
@@ -87,9 +88,11 @@ namespace EntityDb.Common.Transactions
 
             _transactionCommands.Add(new TransactionCommand<TEntity>
             {
-                EntitySnapshot = nextEntity,
+                PreviousEntitySnapshot = previousEntity,
+                PreviousEntityVersionNumber = previousEntityVersionNumber,
+                NextEntitySnapshot = nextEntity,
+                NextEntityVersionNumber = nextEntityVersionNumber,
                 EntityId = entityId,
-                EntityVersionNumber = nextEntityVersionNumber,
                 Command = command,
                 Leases = GetTransactionMetaData(previousEntity, nextEntity, GetLeases),
                 Tags = GetTransactionMetaData(previousEntity, nextEntity, GetTags)

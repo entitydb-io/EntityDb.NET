@@ -8,9 +8,11 @@ namespace EntityDb.Common.Transactions
 {
     internal sealed record TransactionCommand<TEntity> : ITransactionCommand<TEntity>
     {
-        public TEntity EntitySnapshot { get; init; } = default!;
+        public TEntity PreviousEntitySnapshot { get; init; } = default!;
+        public ulong PreviousEntityVersionNumber { get; init; }
+        public TEntity NextEntitySnapshot { get; init; } = default!;
+        public ulong NextEntityVersionNumber { get; init; }
         public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
         public ICommand<TEntity> Command { get; init; } = default!;
         public ITransactionMetaData<ILease> Leases { get; init; } = default!;
         public ITransactionMetaData<ITag> Tags { get; init; } = default!;

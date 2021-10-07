@@ -12,22 +12,29 @@ namespace EntityDb.Abstractions.Transactions
     public interface ITransactionCommand<TEntity>
     {
         /// <summary>
+        ///     A snapshot of the entity before the command.
+        /// </summary>
+        TEntity PreviousEntitySnapshot { get; }
+        
+        /// <summary>
+        ///     The previous version number of the entity.
+        /// </summary>
+        ulong PreviousEntityVersionNumber { get; }
+        
+        /// <summary>
         ///     A snapshot of the entity after the command.
         /// </summary>
-        TEntity EntitySnapshot { get; }
+        TEntity NextEntitySnapshot { get; }
+
+        /// <summary>
+        ///     The next version number of the entity.
+        /// </summary>
+        ulong NextEntityVersionNumber { get; }
 
         /// <summary>
         ///     The id of the entity.
         /// </summary>
         Guid EntityId { get; }
-
-        /// <summary>
-        ///     The previous version number of the entity.
-        /// </summary>
-        /// <remarks>
-        ///     The repository must expect the last command committed to have VersionNumber equal to <see cref="EntityVersionNumber" /> - 1.
-        /// </remarks>
-        ulong EntityVersionNumber { get; }
 
         /// <summary>
         ///     The intent.

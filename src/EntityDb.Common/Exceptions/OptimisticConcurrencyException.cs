@@ -7,8 +7,8 @@ namespace EntityDb.Common.Exceptions
     /// <summary>
     ///     The exception that is logged when an actor passes a <see cref="ITransaction{TEntity}" /> to an
     ///     <see cref="ITransactionRepository{TEntity}" /> with a
-    ///     <see cref="ITransactionCommand{TEntity}.EntityVersionNumber" /> that is not the next number
-    ///     after the previous version number.
+    ///     <see cref="ITransactionCommand{TEntity}.PreviousEntityVersionNumber" /> that is not the actual
+    ///     previous version number.
     /// </summary>
     /// <remarks>
     ///     A program will not be able to catch this exception if it is thrown.
@@ -18,14 +18,14 @@ namespace EntityDb.Common.Exceptions
     public sealed class OptimisticConcurrencyException : Exception
     {
         /// <summary>
-        ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="nextVersionNumber" />
-        ///     is not the next number after <paramref name="previousVersionNumber" />.
+        ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="actualPreviousVersionNumber" />
+        ///     is not equal to <paramref name="expectedPreviousVersionNumber" />.
         /// </summary>
-        /// <param name="previousVersionNumber">The previous version number.</param>
-        /// <param name="nextVersionNumber">The next version number.</param>
-        public static void ThrowIfDiscontinuous(ulong previousVersionNumber, ulong nextVersionNumber)
+        /// <param name="expectedPreviousVersionNumber">The expected previous version number.</param>
+        /// <param name="actualPreviousVersionNumber">The actual previous version number.</param>
+        public static void ThrowIfMismatch(ulong expectedPreviousVersionNumber, ulong actualPreviousVersionNumber)
         {
-            if (nextVersionNumber != previousVersionNumber + 1)
+            if (expectedPreviousVersionNumber != actualPreviousVersionNumber)
             {
                 throw new OptimisticConcurrencyException();
             }

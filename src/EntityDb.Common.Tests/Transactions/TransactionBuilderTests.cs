@@ -295,7 +295,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
-                transaction.Commands[(int)(i-1)].EntityVersionNumber.ShouldBe(i);
+                transaction.Commands[(int)(i-1)].NextEntityVersionNumber.ShouldBe(i);
             }
         }
 

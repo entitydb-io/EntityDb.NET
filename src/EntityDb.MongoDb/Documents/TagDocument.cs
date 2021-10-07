@@ -43,7 +43,7 @@ namespace EntityDb.MongoDb.Documents
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
                     EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                    EntityVersionNumber = transactionCommand.NextEntityVersionNumber,
                     Label = insertTag.Label,
                     Value = insertTag.Value,
                     Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)

@@ -56,7 +56,7 @@ namespace EntityDb.MongoDb.Documents
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
                 EntityId = transactionCommand.EntityId,
-                EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                EntityVersionNumber = transactionCommand.NextEntityVersionNumber,
                 Data = BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
             };
         }
