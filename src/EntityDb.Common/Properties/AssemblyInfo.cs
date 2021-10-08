@@ -6,3 +6,4 @@
 [assembly: InternalsVisibleTo("EntityDb.Redis")]
 [assembly: InternalsVisibleTo("EntityDb.Mvc.Tests")]
 [assembly: InternalsVisibleTo("EntityDb.Redis.Tests")]
+[assembly: InternalsVisibleTo("EntityDb.TestImplementations")]

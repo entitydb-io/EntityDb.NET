@@ -2,7 +2,6 @@
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
@@ -17,6 +16,7 @@ using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
+using EntityDb.TestImplementations.Seeders;
 using EntityDb.TestImplementations.Source;
 using EntityDb.TestImplementations.Tags;
 using Microsoft.Extensions.DependencyInjection;
@@ -411,24 +411,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = Guid.NewGuid(),
-                        NextEntityVersionNumber = 1,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>()
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
+            var transaction = TransactionSeeder.Create(1, 1);
 
             await using var transactionRepository = await CreateRepository(true);
 
@@ -445,34 +428,15 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionId = Guid.NewGuid();
 
-            static ITransaction<TransactionEntity> NewTransaction(Guid transactionId)
-            {
-                return new Transaction<TransactionEntity>
-                {
-                    Id = transactionId,
-                    TimeStamp = DateTime.UtcNow,
-                    Source = new NoSource(),
-                    Commands = new[]
-                    {
-                        new TransactionCommand<TransactionEntity>
-                        {
-                            NextEntitySnapshot = default!,
-                            EntityId = Guid.NewGuid(),
-                            NextEntityVersionNumber = 1,
-                            Command = new DoNothing(),
-                            Leases = new TransactionMetaData<ILease>(),
-                            Tags = new TransactionMetaData<ITag>()
-                        }
-                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-                };
-            }
+            var firstTransaction = TransactionSeeder.Create(1, 1, transactionId: transactionId);
+            var secondTransaction = TransactionSeeder.Create(1, 1, transactionId: transactionId);
 
             await using var transactionRepository = await CreateRepository();
 
             // ACT
 
-            var firstTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
-            var secondTransactionInserted = await transactionRepository.PutTransaction(NewTransaction(transactionId));
+            var firstTransactionInserted = await transactionRepository.PutTransaction(firstTransaction);
+            var secondTransactionInserted = await transactionRepository.PutTransaction(secondTransaction);
 
             // ASSERT
 
@@ -485,36 +449,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var entityId = Guid.NewGuid();
-            const ulong entityVersionNumber = 1;
-
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = entityId,
-                        NextEntityVersionNumber = entityVersionNumber,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>()
-                    },
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = entityId,
-                        NextEntityVersionNumber = entityVersionNumber,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>()
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
+            var transaction = TransactionSeeder.Create(1, 2);
 
             await using var transactionRepository = await CreateRepository();
 
@@ -533,34 +468,13 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            const ulong entityVersionNumber = 0;
-
-            var entityId = Guid.NewGuid();
-            
             var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
             loggerMock
                 .Setup(logger => logger.LogError(It.IsAny<VersionZeroReservedException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = entityId,
-                        NextEntityVersionNumber = entityVersionNumber,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>()
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
+            var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
 
             await using var transactionRepository = await CreateRepository(loggerOverride: loggerMock.Object);
 
@@ -582,31 +496,10 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            const ulong entityVersionNumber = 1;
-
             var entityId = Guid.NewGuid();
 
-            static ITransaction<TransactionEntity> NewTransaction(Guid entityId, ulong entityVersionNumber)
-            {
-                return new Transaction<TransactionEntity>
-                {
-                    Id = Guid.NewGuid(),
-                    TimeStamp = DateTime.UtcNow,
-                    Source = new NoSource(),
-                    Commands = new[]
-                    {
-                        new TransactionCommand<TransactionEntity>
-                        {
-                            NextEntitySnapshot = default!,
-                            EntityId = entityId,
-                            NextEntityVersionNumber = entityVersionNumber,
-                            Command = new DoNothing(),
-                            Leases = new TransactionMetaData<ILease>(),
-                            Tags = new TransactionMetaData<ITag>()
-                        }
-                    }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-                };
-            }
+            var firstTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
+            var secondTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
 
             var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
@@ -619,11 +512,17 @@ namespace EntityDb.Common.Tests.Transactions
             // ACT
 
             var firstTransactionInserted =
-                await transactionRepository.PutTransaction(NewTransaction(entityId, entityVersionNumber));
+                await transactionRepository.PutTransaction(firstTransaction);
             var secondTransactionInserted =
-                await transactionRepository.PutTransaction(NewTransaction(entityId, entityVersionNumber));
+                await transactionRepository.PutTransaction(secondTransaction);
 
             // ASSERT
+            
+            firstTransaction.Commands.Length.ShouldBe(1);
+            secondTransaction.Commands.Length.ShouldBe(1);
+            
+            firstTransaction.Commands[0].EntityId.ShouldBe(secondTransaction.Commands[0].EntityId);
+            firstTransaction.Commands[0].NextEntityVersionNumber.ShouldBe(secondTransaction.Commands[0].NextEntityVersionNumber);
 
             firstTransactionInserted.ShouldBeTrue();
             secondTransactionInserted.ShouldBeFalse();
@@ -636,41 +535,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var tag = new Tag("Foo", "Bar");
-
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = Guid.NewGuid(),
-                        NextEntityVersionNumber = 1,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>
-                        {
-                            Insert = new[] { tag }.ToImmutableArray<ITag>()
-                        }
-                    },
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = Guid.NewGuid(),
-                        NextEntityVersionNumber = 1,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>(),
-                        Tags = new TransactionMetaData<ITag>
-                        {
-                            Insert = new[] { tag }.ToImmutableArray<ITag>()
-                        }
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
+            var transaction = TransactionSeeder.Create(2, 1, insertTag: true);
 
             await using var transactionRepository = await CreateRepository();
 
@@ -688,41 +553,7 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var lease = new Lease("Foo", "Bar", "Baz");
-
-            var transaction = new Transaction<TransactionEntity>
-            {
-                Id = Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                Source = new NoSource(),
-                Commands = new[]
-                {
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = Guid.NewGuid(),
-                        NextEntityVersionNumber = 1,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>
-                        {
-                            Insert = new[] { lease }.ToImmutableArray<ILease>()
-                        },
-                        Tags = new TransactionMetaData<ITag>()
-                    },
-                    new TransactionCommand<TransactionEntity>
-                    {
-                        NextEntitySnapshot = default!,
-                        EntityId = Guid.NewGuid(),
-                        NextEntityVersionNumber = 1,
-                        Command = new DoNothing(),
-                        Leases = new TransactionMetaData<ILease>
-                        {
-                            Insert = new[] { lease }.ToImmutableArray<ILease>()
-                        },
-                        Tags = new TransactionMetaData<ITag>()
-                    }
-                }.ToImmutableArray<ITransactionCommand<TransactionEntity>>()
-            };
+            var transaction = TransactionSeeder.Create(2, 1, insertLease: true);
 
             await using var transactionRepository = await CreateRepository();
 

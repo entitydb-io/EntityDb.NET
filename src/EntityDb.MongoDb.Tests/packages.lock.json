@@ -76,6 +76,11 @@
         "resolved": "2.4.3",
         "contentHash": "kZZSmOmKA8OBlAJaquPXnJJLM9RwQ27H7BMVqfMLUcTi9xHinWGJiWksa3D4NEtz0wZ/nxd2mogObvBgJKCRhQ=="
       },
+      "Bogus": {
+        "type": "Transitive",
+        "resolved": "33.1.1",
+        "contentHash": "k3zLOajCV2iaus75RFqtC3PhHfJHuP2/jTN5Yl1Gixr0jTzrKiufm6oovpn6Nhbjw/zr5CTIzYioUS6HRhEi1w=="
+      },
       "Castle.Core": {
         "type": "Transitive",
         "resolved": "4.4.0",
@@ -1889,6 +1894,7 @@
       "entitydb.testimplementations": {
         "type": "Project",
         "dependencies": {
+          "Bogus": "33.1.1",
           "EntityDb.Common": "1.0.0"
         }
       }

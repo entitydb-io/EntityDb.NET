@@ -5,7 +5,7 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class TestModeRedisSnapshotRepositoryDisposer
     {
-        private uint _locks = 0;
+        private uint _locks;
         private readonly List<Guid> _disposeIds = new();
 
         public void Lock()
