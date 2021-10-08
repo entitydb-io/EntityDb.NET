@@ -518,11 +518,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
             
-            firstTransaction.Commands.Length.ShouldBe(1);
-            secondTransaction.Commands.Length.ShouldBe(1);
+            firstTransaction.Steps.Length.ShouldBe(1);
+            secondTransaction.Steps.Length.ShouldBe(1);
             
-            firstTransaction.Commands[0].EntityId.ShouldBe(secondTransaction.Commands[0].EntityId);
-            firstTransaction.Commands[0].NextEntityVersionNumber.ShouldBe(secondTransaction.Commands[0].NextEntityVersionNumber);
+            firstTransaction.Steps[0].EntityId.ShouldBe(secondTransaction.Steps[0].EntityId);
+            firstTransaction.Steps[0].NextEntityVersionNumber.ShouldBe(secondTransaction.Steps[0].NextEntityVersionNumber);
 
             firstTransactionInserted.ShouldBeTrue();
             secondTransactionInserted.ShouldBeFalse();
@@ -741,9 +741,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            transaction.Commands.Length.ShouldBe(1);
+            transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Commands[0].NextEntityVersionNumber.ShouldBe(1ul);
+            transaction.Steps[0].NextEntityVersionNumber.ShouldBe(1ul);
 
             newCommands.Length.ShouldBe(1);
 
@@ -784,9 +784,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            secondTransaction.Commands.Length.ShouldBe(1);
+            secondTransaction.Steps.Length.ShouldBe(1);
 
-            secondTransaction.Commands[0].NextEntityVersionNumber.ShouldBe(2ul);
+            secondTransaction.Steps[0].NextEntityVersionNumber.ShouldBe(2ul);
 
             newCommands.Length.ShouldBe(1);
 

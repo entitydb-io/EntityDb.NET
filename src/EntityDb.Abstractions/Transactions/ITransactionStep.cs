@@ -9,7 +9,7 @@ namespace EntityDb.Abstractions.Transactions
     ///     Represents a set of modifiers for a single entity.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity to be modified.</typeparam>
-    public interface ITransactionCommand<TEntity>
+    public interface ITransactionStep<TEntity>
     {
         /// <summary>
         ///     A snapshot of the entity before the command.

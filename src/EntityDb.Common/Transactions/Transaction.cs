@@ -9,6 +9,6 @@ namespace EntityDb.Common.Transactions
         public Guid Id { get; init; }
         public DateTime TimeStamp { get; init; }
         public object Source { get; init; } = default!;
-        public ImmutableArray<ITransactionCommand<TEntity>> Commands { get; init; }
+        public ImmutableArray<ITransactionStep<TEntity>> Steps { get; init; }
     }
 }

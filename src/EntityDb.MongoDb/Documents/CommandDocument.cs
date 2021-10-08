@@ -47,16 +47,16 @@ namespace EntityDb.MongoDb.Documents
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
+            ITransactionStep<TEntity> transactionStep
         )
         {
             return new CommandDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = transactionCommand.EntityId,
-                EntityVersionNumber = transactionCommand.NextEntityVersionNumber,
-                Data = BsonDocumentEnvelope.Deconstruct(transactionCommand.Command, logger)
+                EntityId = transactionStep.EntityId,
+                EntityVersionNumber = transactionStep.NextEntityVersionNumber,
+                Data = BsonDocumentEnvelope.Deconstruct(transactionStep.Command, logger)
             };
         }
 

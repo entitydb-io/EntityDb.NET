@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace EntityDb.TestImplementations.Seeders
 {
-    public static class TransactionCommandSeeder
+    public static class TransactionStepSeeder
     {
-        public static ImmutableArray<ITransactionCommand<TransactionEntity>> Create
+        public static ImmutableArray<ITransactionStep<TransactionEntity>> Create
         (
             int generateCount,
             int repeatCount,
@@ -24,54 +24,54 @@ namespace EntityDb.TestImplementations.Seeders
             bool deleteTag = false
         )
         {
-            var faker = new Faker<TransactionCommand<TransactionEntity>>()
+            var faker = new Faker<TransactionStep<TransactionEntity>>()
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.PreviousEntityVersionNumber,
+                    transactionStep => transactionStep.PreviousEntityVersionNumber,
                     () => previousEntityVersionNumber ?? default
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.PreviousEntitySnapshot,
-                    (_, transactionCommand) => new TransactionEntity().Reduce(Enumerable.Repeat(CommandSeeder.Create(), (int)transactionCommand.PreviousEntityVersionNumber))
+                    transactionStep => transactionStep.PreviousEntitySnapshot,
+                    (_, transactionStep) => new TransactionEntity().Reduce(Enumerable.Repeat(CommandSeeder.Create(), (int)transactionStep.PreviousEntityVersionNumber))
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.Command,
+                    transactionStep => transactionStep.Command,
                     () => CommandSeeder.Create()
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.NextEntityVersionNumber,
-                    (_, transactionCommand) => wellBehavedNextEntityVersionNumber
-                        ? transactionCommand.PreviousEntityVersionNumber + 1
-                        : transactionCommand.PreviousEntityVersionNumber
+                    transactionStep => transactionStep.NextEntityVersionNumber,
+                    (_, transactionStep) => wellBehavedNextEntityVersionNumber
+                        ? transactionStep.PreviousEntityVersionNumber + 1
+                        : transactionStep.PreviousEntityVersionNumber
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.NextEntitySnapshot,
-                    (_, transactionCommand) =>transactionCommand.PreviousEntitySnapshot.Reduce(transactionCommand.Command)
+                    transactionStep => transactionStep.NextEntitySnapshot,
+                    (_, transactionStep) =>transactionStep.PreviousEntitySnapshot.Reduce(transactionStep.Command)
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.EntityId,
+                    transactionStep => transactionStep.EntityId,
                     () => entityId ?? Guid.NewGuid()
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.Leases,
+                    transactionStep => transactionStep.Leases,
                     () => TransactionMetaDataSeeder.ForLease(insertLease, deleteLease)
                 )
                 .RuleFor
                 (
-                    transactionCommand => transactionCommand.Tags,
+                    transactionStep => transactionStep.Tags,
                     () => TransactionMetaDataSeeder.ForTag(insertTag, deleteTag)
                 );
 
             return Enumerable
                 .Repeat(faker.Generate(generateCount), repeatCount)
                 .SelectMany(x => x)
-                .ToImmutableArray<ITransactionCommand<TransactionEntity>>();
+                .ToImmutableArray<ITransactionStep<TransactionEntity>>();
         }
     }
 }

@@ -181,9 +181,9 @@ namespace EntityDb.Common.Tests.Transactions
             
             // ASSERT
 
-            transaction.Commands.Length.ShouldBe(1);
+            transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Commands[0].Leases.Insert.ShouldNotBeEmpty();
+            transaction.Steps[0].Leases.Insert.ShouldNotBeEmpty();
         }
 
         [Fact]
@@ -203,9 +203,9 @@ namespace EntityDb.Common.Tests.Transactions
             
             // ASSERT
 
-            transaction.Commands.Length.ShouldBe(1);
+            transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Commands[0].Leases.Insert.ShouldBeEmpty();
+            transaction.Steps[0].Leases.Insert.ShouldBeEmpty();
         }
         
         [Fact]
@@ -295,7 +295,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
-                transaction.Commands[(int)(i-1)].NextEntityVersionNumber.ShouldBe(i);
+                transaction.Steps[(int)(i-1)].NextEntityVersionNumber.ShouldBe(i);
             }
         }
 
@@ -330,9 +330,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            transaction.Commands.Length.ShouldBe(1);
+            transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Commands[0].Command.ShouldBeEquivalentTo(new DoNothing());
+            transaction.Steps[0].Command.ShouldBeEquivalentTo(new DoNothing());
         }
     }
 }

@@ -34,16 +34,16 @@ namespace EntityDb.MongoDb.Documents
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
+            ITransactionStep<TEntity> transactionStep
         )
         {
-            return transactionCommand.Tags.Insert
+            return transactionStep.Tags.Insert
                 .Select(insertTag => new TagDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.NextEntityVersionNumber,
+                    EntityId = transactionStep.EntityId,
+                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
                     Label = insertTag.Label,
                     Value = insertTag.Value,
                     Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)

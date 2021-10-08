@@ -35,16 +35,16 @@ namespace EntityDb.MongoDb.Documents
         (
             ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionCommand<TEntity> transactionCommand
+            ITransactionStep<TEntity> transactionStep
         )
         {
-            return transactionCommand.Leases.Insert
+            return transactionStep.Leases.Insert
                 .Select(insertLease => new LeaseDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.NextEntityVersionNumber,
+                    EntityId = transactionStep.EntityId,
+                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
                     Scope = insertLease.Scope,
                     Label = insertLease.Label,
                     Value = insertLease.Value,

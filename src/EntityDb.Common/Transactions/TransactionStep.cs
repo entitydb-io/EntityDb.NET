@@ -6,7 +6,7 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
-    internal sealed record TransactionCommand<TEntity> : ITransactionCommand<TEntity>
+    internal sealed record TransactionStep<TEntity> : ITransactionStep<TEntity>
     {
         public TEntity PreviousEntitySnapshot { get; init; } = default!;
         public ulong PreviousEntityVersionNumber { get; init; }

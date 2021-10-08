@@ -27,7 +27,7 @@ namespace EntityDb.Common.Transactions
         private readonly ILeasingStrategy<TEntity>? _leasingStrategy;
         private readonly ITaggingStrategy<TEntity>? _taggingStrategy;
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
-        private readonly List<TransactionCommand<TEntity>> _transactionCommands = new();
+        private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
 
         /// <summary>
         ///     Initializes a new instance of <see cref="TransactionBuilder{TEntity}" />.
@@ -76,7 +76,7 @@ namespace EntityDb.Common.Transactions
             return _taggingStrategy?.GetTags(entity) ?? Array.Empty<ITag>();
         }
         
-        private void AddTransactionCommand(Guid entityId, ICommand<TEntity> command)
+        private void AddTransactionStep(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
             var previousEntityVersionNumber = _versioningStrategy.GetVersionNumber(previousEntity);
@@ -86,7 +86,7 @@ namespace EntityDb.Common.Transactions
             var nextEntity = previousEntity.Reduce(command);
             var nextEntityVersionNumber = _versioningStrategy.GetVersionNumber(nextEntity);
 
-            _transactionCommands.Add(new TransactionCommand<TEntity>
+            _transactionSteps.Add(new TransactionStep<TEntity>
             {
                 PreviousEntitySnapshot = previousEntity,
                 PreviousEntityVersionNumber = previousEntityVersionNumber,
@@ -148,7 +148,7 @@ namespace EntityDb.Common.Transactions
 
             _knownEntities.Add(entityId, entity);
 
-            AddTransactionCommand(entityId, command);
+            AddTransactionStep(entityId, command);
 
             return this;
         }
@@ -166,7 +166,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityNotLoadedException();
             }
 
-            AddTransactionCommand(entityId, command);
+            AddTransactionStep(entityId, command);
 
             return this;
         }
@@ -195,10 +195,10 @@ namespace EntityDb.Common.Transactions
                 Id = transactionId,
                 TimeStamp = timeStamp,
                 Source = source,
-                Commands = _transactionCommands.ToImmutableArray<ITransactionCommand<TEntity>>()
+                Steps = _transactionSteps.ToImmutableArray<ITransactionStep<TEntity>>()
             };
 
-            _transactionCommands.Clear();
+            _transactionSteps.Clear();
 
             return transaction;
         }

@@ -24,7 +24,7 @@ namespace EntityDb.Common.Transactions
 
         protected override async Task NotifyAsync(ITransaction<TEntity> transaction)
         {
-            var commandGroups = transaction.Commands
+            var commandGroups = transaction.Steps
                 .GroupBy(command => command.EntityId);
                 
             foreach (var commandGroup in commandGroups)

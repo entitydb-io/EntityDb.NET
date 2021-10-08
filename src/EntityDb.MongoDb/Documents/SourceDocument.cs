@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Documents
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityIds = transaction.Commands.Select(command => command.EntityId).Distinct().ToArray(),
+                EntityIds = transaction.Steps.Select(command => command.EntityId).Distinct().ToArray(),
                 Data = BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
             };
         }

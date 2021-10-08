@@ -6,7 +6,7 @@ namespace EntityDb.Common.Exceptions
     /// <summary>
     ///     The exception that is thrown when an actor passes an <see cref="ITransaction{TEntity}" /> to
     ///     <see cref="ITransactionRepository{TEntity}.PutTransaction(ITransaction{TEntity})" /> with any
-    ///     <see cref="ITransactionCommand{TEntity}.NextEntityVersionNumber"/> equal to zero.
+    ///     <see cref="ITransactionStep{TEntity}.NextEntityVersionNumber"/> equal to zero.
     /// </summary>
     /// <remarks>
     ///     Version Zero is reserved for an entity that has not yet been created/persisted.

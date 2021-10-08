@@ -29,8 +29,8 @@ namespace EntityDb.Abstractions.Transactions
         ///     A series of sets of modifiers for a set of entities.
         /// </summary>
         /// <remarks>
-        ///     <see cref="Commands" /> must be handled in the order they are given.
+        ///     <see cref="Steps" /> must be handled in the order they are given.
         /// </remarks>
-        ImmutableArray<ITransactionCommand<TEntity>> Commands { get; }
+        ImmutableArray<ITransactionStep<TEntity>> Steps { get; }
     }
 }
