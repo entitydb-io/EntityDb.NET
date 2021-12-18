@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Provisioner.Transactions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -21,11 +22,13 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
         /// </remarks>
         public static void AddAutoProvisionTestModeMongoDbTransactions<TEntity>(
             this IServiceCollection serviceCollection, string databaseName,
-            Func<IServiceProvider, string> getConnectionString)
+            Func<IConfiguration, string> getConnectionString)
         {
             serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                var connectionString = getConnectionString.Invoke(serviceProvider);
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+                var connectionString = getConnectionString.Invoke(configuration);
 
                 return AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider,
                     connectionString, databaseName);

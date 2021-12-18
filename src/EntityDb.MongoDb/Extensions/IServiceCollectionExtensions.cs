@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Transactions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -22,16 +23,18 @@ namespace EntityDb.MongoDb.Extensions
         /// <remarks>
         ///     The production-ready implementation will commit transactions as they are passed in. If you need write an
         ///     integration test, consider using
-        ///     <see cref="AddTestModeMongoDbTransactions{TEntity}(IServiceCollection, string, Func{IServiceProvider, string})" />
+        ///     <see cref="AddTestModeMongoDbTransactions{TEntity}(IServiceCollection, string, Func{IConfiguration, string})" />
         ///     instead.
         /// </remarks>
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
         public static void AddMongoDbTransactions<TEntity>(this IServiceCollection serviceCollection,
-            string databaseName, Func<IServiceProvider, string> getConnectionString)
+            string databaseName, Func<IConfiguration, string> getConnectionString)
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                var connectionString = getConnectionString.Invoke(serviceProvider);
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+                var connectionString = getConnectionString.Invoke(configuration);
 
                 return MongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     databaseName);
@@ -50,11 +53,13 @@ namespace EntityDb.MongoDb.Extensions
         ///     <see cref="ITransactionRepository{TEntity}" /> is disposed.
         /// </remarks>
         public static void AddTestModeMongoDbTransactions<TEntity>(this IServiceCollection serviceCollection,
-            string databaseName, Func<IServiceProvider, string> getConnectionString)
+            string databaseName, Func<IConfiguration, string> getConnectionString)
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                var connectionString = getConnectionString.Invoke(serviceProvider);
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+                var connectionString = getConnectionString.Invoke(configuration);
 
                 return TestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     databaseName);

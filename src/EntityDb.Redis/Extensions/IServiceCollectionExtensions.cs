@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using EntityDb.Redis.Snapshots;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -24,19 +25,21 @@ namespace EntityDb.Redis.Extensions
         /// <remarks>
         ///     The production-ready implementation will store snapshots as they come in. If you need write an integration test,
         ///     consider using
-        ///     <see cref="AddTestModeRedisSnapshots{TEntity}(IServiceCollection, string, Func{IServiceProvider, string})" />
+        ///     <see cref="AddTestModeRedisSnapshots{TEntity}(IServiceCollection, string, Func{IConfiguration, string})" />
         ///     instead.
         /// </remarks>
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
         public static void AddRedisSnapshots<TEntity>(this IServiceCollection serviceCollection, string keyNamespace,
-            Func<IServiceProvider, string> getConnectionString)
+            Func<IConfiguration, string> getConnectionString)
         {
             serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
                 SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, false));
             
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                var connectionString = getConnectionString.Invoke(serviceProvider);
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+                var connectionString = getConnectionString.Invoke(configuration);
 
                 return RedisSnapshotRepositoryFactory<TEntity>.Create(serviceProvider, connectionString, keyNamespace);
             });
@@ -57,14 +60,16 @@ namespace EntityDb.Redis.Extensions
         ///     when the repository is disposed.
         /// </remarks>
         public static void AddTestModeRedisSnapshots<TEntity>(this IServiceCollection serviceCollection,
-            string keyNamespace, Func<IServiceProvider, string> getConnectionString)
+            string keyNamespace, Func<IConfiguration, string> getConnectionString)
         {
             serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
                 SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, true));
             
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
-                var connectionString = getConnectionString.Invoke(serviceProvider);
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+
+                var connectionString = getConnectionString.Invoke(configuration);
 
                 return TestModeRedisSnapshotRepositoryFactory<TEntity>.Create(serviceProvider, connectionString,
                     keyNamespace);
