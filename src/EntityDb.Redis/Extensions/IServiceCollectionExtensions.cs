@@ -22,18 +22,19 @@ namespace EntityDb.Redis.Extensions
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="keyNamespace">The namespace used to build a Redis key.</param>
         /// <param name="getConnectionString">A function that retrieves the Redis connection string.</param>
+        /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
         /// <remarks>
         ///     The production-ready implementation will store snapshots as they come in. If you need write an integration test,
         ///     consider using
-        ///     <see cref="AddTestModeRedisSnapshots{TEntity}(IServiceCollection, string, Func{IConfiguration, string})" />
+        ///     <see cref="AddTestModeRedisSnapshots{TEntity}(IServiceCollection, string, Func{IConfiguration, string}, bool)" />
         ///     instead.
         /// </remarks>
         [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
         public static void AddRedisSnapshots<TEntity>(this IServiceCollection serviceCollection, string keyNamespace,
-            Func<IConfiguration, string> getConnectionString)
+            Func<IConfiguration, string> getConnectionString, bool synchronousMode = false)
         {
             serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
-                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, false));
+                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, synchronousMode));
             
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {
@@ -55,15 +56,16 @@ namespace EntityDb.Redis.Extensions
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="keyNamespace">The namespace used to build a Redis key.</param>
         /// <param name="getConnectionString">A function that retrieves the Redis connection string.</param>
+        /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
         /// <remarks>
         ///     The test-mode implementation will store snapshots as they come in, but the snapshots will be automatically removed
         ///     when the repository is disposed.
         /// </remarks>
         public static void AddTestModeRedisSnapshots<TEntity>(this IServiceCollection serviceCollection,
-            string keyNamespace, Func<IConfiguration, string> getConnectionString)
+            string keyNamespace, Func<IConfiguration, string> getConnectionString, bool synchronousMode = true)
         {
             serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
-                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, true));
+                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, synchronousMode));
             
             serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
             {

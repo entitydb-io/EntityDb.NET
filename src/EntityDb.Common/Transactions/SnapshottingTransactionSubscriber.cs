@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions
 {
-    internal class SnapshottingTransactionSubscriber<TEntity> : AsyncTransactionSubscriber<TEntity>
+    internal class SnapshottingTransactionSubscriber<TEntity> : TransactionSubscriber<TEntity>
     {
         private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
         private readonly ISnapshotSessionOptions _snapshotSessionOptions = new SnapshotSessionOptions();
@@ -16,8 +16,8 @@ namespace EntityDb.Common.Transactions
         public SnapshottingTransactionSubscriber
         (
             ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
-            bool testMode
-        ) : base(testMode)
+            bool synchronous
+        ) : base(synchronous)
         {
             _snapshotRepositoryFactory = snapshotRepositoryFactory;
         }
@@ -39,10 +39,10 @@ namespace EntityDb.Common.Transactions
             }
         }
 
-        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider, bool testMode)
+        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider, bool synchronousMode)
         {
             return ActivatorUtilities.CreateInstance<SnapshottingTransactionSubscriber<TEntity>>(serviceProvider,
-                testMode);
+                synchronousMode);
         }
     }
 }
