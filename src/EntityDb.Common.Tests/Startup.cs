@@ -27,7 +27,7 @@ namespace EntityDb.Common.Tests
             serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
 
             serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
-            
+
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
         }

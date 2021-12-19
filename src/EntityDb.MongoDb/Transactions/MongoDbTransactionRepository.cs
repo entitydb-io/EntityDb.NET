@@ -98,7 +98,7 @@ namespace EntityDb.MongoDb.Transactions
                     foreach (var transactionStep in transaction.Steps)
                     {
                         VersionZeroReservedException.ThrowIfZero(transactionStep.NextEntityVersionNumber);
-                        
+
                         var previousVersionNumber =
                             await CommandDocument.GetLastEntityVersionNumber(clientSessionHandle, mongoDatabase,
                                 transactionStep.EntityId);

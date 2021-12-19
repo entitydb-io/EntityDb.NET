@@ -50,7 +50,7 @@ namespace EntityDb.TestImplementations.Seeders
                 .RuleFor
                 (
                     transactionStep => transactionStep.NextEntitySnapshot,
-                    (_, transactionStep) =>transactionStep.PreviousEntitySnapshot.Reduce(transactionStep.Command)
+                    (_, transactionStep) => transactionStep.PreviousEntitySnapshot.Reduce(transactionStep.Command)
                 )
                 .RuleFor
                 (

@@ -39,7 +39,7 @@ namespace EntityDb.Common.Entities
             _transactionRepository = transactionRepository;
             _snapshotRepository = snapshotRepository;
         }
-        
+
         private void Publish(ITransaction<TEntity> transaction)
         {
             foreach (var transactionSubscriber in _transactionSubscribers)
@@ -54,7 +54,7 @@ namespace EntityDb.Common.Entities
                 }
             }
         }
-        
+
         public async Task<TEntity?> GetSnapshotOrDefault(Guid entityId)
         {
             if (_snapshotRepository != null)
@@ -70,7 +70,7 @@ namespace EntityDb.Common.Entities
             var snapshot = await GetSnapshotOrDefault(entityId);
 
             var entity = snapshot ?? _constructingStrategy.Construct(entityId);
-            
+
             var versionNumber = _versioningStrategy.GetVersionNumber(entity);
 
             var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
@@ -103,7 +103,7 @@ namespace EntityDb.Common.Entities
             }
 
             Publish(transaction);
-            
+
             return true;
         }
 
@@ -134,7 +134,7 @@ namespace EntityDb.Common.Entities
             {
                 return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository);
             }
-            
+
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository,
                 snapshotRepository);
         }

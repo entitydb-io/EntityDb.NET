@@ -39,12 +39,14 @@ namespace EntityDb.MongoDb.Provisioner.Commands
 
             var sourceResource = new MongoDbAtlasResource
             {
-                Db = entityName, Collection = SourceDocument.CollectionName
+                Db = entityName,
+                Collection = SourceDocument.CollectionName
             };
 
             var commandResource = new MongoDbAtlasResource
             {
-                Db = entityName, Collection = CommandDocument.CollectionName
+                Db = entityName,
+                Collection = CommandDocument.CollectionName
             };
 
             var leaseResource = new MongoDbAtlasResource { Db = entityName, Collection = LeaseDocument.CollectionName };

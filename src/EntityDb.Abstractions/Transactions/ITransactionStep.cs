@@ -15,12 +15,12 @@ namespace EntityDb.Abstractions.Transactions
         ///     A snapshot of the entity before the command.
         /// </summary>
         TEntity PreviousEntitySnapshot { get; }
-        
+
         /// <summary>
         ///     The previous version number of the entity.
         /// </summary>
         ulong PreviousEntityVersionNumber { get; }
-        
+
         /// <summary>
         ///     A snapshot of the entity after the command.
         /// </summary>

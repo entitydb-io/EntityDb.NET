@@ -11,7 +11,7 @@ namespace EntityDb.MongoDb.Queries
     {
         protected virtual ProjectionDefinition<BsonDocument, TDocument> Projection =>
             ProjectionBuilder.Exclude(nameof(ITransactionDocument._id));
-        
+
         public IClientSessionHandle? ClientSessionHandle { get; init; }
         public IMongoCollection<BsonDocument> MongoCollection { get; init; } = default!;
         public FilterDefinition<BsonDocument> Filter { get; init; } = default!;

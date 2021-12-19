@@ -24,9 +24,9 @@ namespace EntityDb.Common.Tests
         private IServiceCollection GetParasiteServiceCollection(Type[]? omittedTypes = null)
         {
             var serviceCollection = new ServiceCollection();
-            
+
             // Use reflection to get all service descriptors
-            
+
             var engine = _serviceProvider.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Single(x => x.Name == "Engine")
@@ -36,25 +36,25 @@ namespace EntityDb.Common.Tests
                 .GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Single(x => x.Name == "CallSiteFactory")
                 .GetValue(engine);
-            
+
             var descriptors = (callSiteFactory!.GetType()
                 .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Single(x => x.Name == "_descriptors")
                 .GetValue(callSiteFactory) as List<ServiceDescriptor>)!;
-            
+
             foreach (var descriptor in descriptors)
             {
                 if (omittedTypes?.Contains(descriptor.ServiceType) == true)
                 {
                     continue;
                 }
-                
+
                 serviceCollection.Add(descriptor);
             }
 
             return serviceCollection;
         }
-        
+
         public IServiceProvider GetServiceProviderWithOverrides(Action<IServiceCollection> configureOverrides)
         {
             var serviceCollection = GetParasiteServiceCollection();

@@ -20,7 +20,7 @@ namespace EntityDb.Redis.Snapshots
         private readonly ILoggerFactory _loggerFactory;
         private readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly string _connectionString;
-        
+
         protected readonly string _keyNamespace;
         protected readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
 

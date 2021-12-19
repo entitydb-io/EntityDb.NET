@@ -60,7 +60,8 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var headers = new Dictionary<string, string>
             {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform, [EnvelopeHelper.MemberInfoName] = ""
+                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+                [EnvelopeHelper.MemberInfoName] = ""
             };
 
             // ACT

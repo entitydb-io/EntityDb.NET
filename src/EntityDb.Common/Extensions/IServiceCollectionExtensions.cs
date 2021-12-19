@@ -140,7 +140,7 @@ namespace EntityDb.Common.Extensions
             where TConstructingStrategy : class, IConstructingStrategy<TEntity>
         {
             serviceCollection.AddTransient<TransactionBuilder<TEntity>>();
-            
+
             serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
 
             serviceCollection.AddSingleton<IConstructingStrategy<TEntity>, TConstructingStrategy>();

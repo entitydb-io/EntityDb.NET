@@ -25,7 +25,7 @@ namespace EntityDb.TestImplementations.Seeders
 
             return faker.Generate();
         }
-        
+
         public static ITransactionMetaData<ITag> ForTag(bool insert, bool delete)
         {
             var faker = new Faker<TransactionMetaData<ITag>>()

@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;

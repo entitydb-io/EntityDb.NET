@@ -65,7 +65,7 @@ namespace EntityDb.Common.Transactions
         {
             return _authorizingStrategy?.IsAuthorized(entity, command) ?? true;
         }
-        
+
         private ILease[] GetLeases(TEntity entity)
         {
             return _leasingStrategy?.GetLeases(entity) ?? Array.Empty<ILease>();
@@ -75,7 +75,7 @@ namespace EntityDb.Common.Transactions
         {
             return _taggingStrategy?.GetTags(entity) ?? Array.Empty<ITag>();
         }
-        
+
         private void AddTransactionStep(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
@@ -100,7 +100,7 @@ namespace EntityDb.Common.Transactions
 
             _knownEntities[entityId] = nextEntity;
         }
-        
+
         /// <summary>
         ///     Loads an already-existing entity into the builder.
         /// </summary>

@@ -38,7 +38,7 @@ namespace EntityDb.Redis.Snapshots
                     return false;
                 }
             }
-            
+
             return await RedisSession.ExecuteCommand
             (
                 (logger, redisTransaction) =>

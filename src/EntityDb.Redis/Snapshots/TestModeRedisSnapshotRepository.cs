@@ -38,7 +38,7 @@ namespace EntityDb.Redis.Snapshots
             {
                 return;
             }
-            
+
             await RedisSession.ExecuteCommand
             (
                 (_, redisTransaction) =>

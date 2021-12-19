@@ -15,7 +15,7 @@ namespace EntityDb.Redis.Snapshots
                 _locks += 1;
             }
         }
-        
+
         public void AddDisposeId(Guid disposeId)
         {
             lock (this)

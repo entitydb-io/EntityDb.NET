@@ -18,9 +18,9 @@ namespace EntityDb.Redis.Tests
             serviceCollection.AddDefaultResolvingStrategy();
 
             serviceCollection.AddLifoResolvingStrategyChain();
-            
+
             serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
-            
+
             serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,

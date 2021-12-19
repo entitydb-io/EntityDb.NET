@@ -12,22 +12,22 @@ namespace EntityDb.Abstractions.Commands
         ///     The transaction id associated with the command.
         /// </summary>
         Guid TransactionId { get; }
-        
+
         /// <summary>
         ///     The transaction timestamp associated with the command.
         /// </summary>
         DateTime TransactionTimeStamp { get; }
-        
+
         /// <summary>
         ///     The entity id associated with the command.
         /// </summary>
         Guid EntityId { get; }
-        
+
         /// <summary>
         ///     The entity version number associated with the command.
         /// </summary>
         ulong EntityVersionNumber { get; }
-        
+
         /// <summary>
         ///     The command itself.
         /// </summary>

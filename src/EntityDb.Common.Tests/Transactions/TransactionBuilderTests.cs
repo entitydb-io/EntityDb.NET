@@ -19,7 +19,7 @@ namespace EntityDb.Common.Tests.Transactions
         public TransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
-        
+
         [Fact]
         public void GivenNoAuthorizingStrategy_WhenExecutingUnauthorizedCommand_ThenBuildSucceeds()
         {
@@ -30,7 +30,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var entityId = Guid.NewGuid();
-            
+
             // ACT & ASSERT
 
             Should.NotThrow(() => transactionBuilder
@@ -172,13 +172,13 @@ namespace EntityDb.Common.Tests.Transactions
             // ARRANGE
 
             var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
-            
+
             // ACT
 
             var transaction = transactionBuilder
                 .Create(default, new AddLease(default!, default!, default!))
                 .Build(default, default!);
-            
+
             // ASSERT
 
             transaction.Steps.Length.ShouldBe(1);
@@ -194,20 +194,20 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOmission<ILeasingStrategy<TransactionEntity>>();
 
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
-            
+
             // ACT
 
             var transaction = transactionBuilder
                 .Create(default, new AddLease(default!, default!, default!))
                 .Build(default, default!);
-            
+
             // ASSERT
 
             transaction.Steps.Length.ShouldBe(1);
 
             transaction.Steps[0].Leases.Insert.ShouldBeEmpty();
         }
-        
+
         [Fact]
         public async Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows()
         {
@@ -295,7 +295,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
-                transaction.Steps[(int)(i-1)].NextEntityVersionNumber.ShouldBe(i);
+                transaction.Steps[(int)(i - 1)].NextEntityVersionNumber.ShouldBe(i);
             }
         }
 

@@ -18,7 +18,7 @@ namespace EntityDb.Common.Strategies
         public bool IsAuthorized(TEntity entity, ICommand<TEntity> command)
         {
             var agent = _agentAccessor.GetAgent();
-            
+
             return entity.IsAuthorized(command, agent);
         }
     }

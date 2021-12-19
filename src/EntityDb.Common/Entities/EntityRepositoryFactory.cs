@@ -33,7 +33,7 @@ namespace EntityDb.Common.Entities
             }
 
             var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
-                
+
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider, transactionRepository, snapshotRepository);
         }
     }

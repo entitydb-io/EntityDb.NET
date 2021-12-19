@@ -16,7 +16,7 @@ namespace EntityDb.MongoDb.Queries
                 ProjectionBuilder.Exclude(nameof(ITransactionDocument._id)),
                 ProjectionBuilder.Include(nameof(ITransactionDocument.Data))
             );
-        
+
         public async Task<TData[]> GetModels<TData>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
         {
             var documents = await GetDocuments();

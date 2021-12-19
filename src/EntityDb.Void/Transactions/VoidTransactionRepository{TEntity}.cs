@@ -62,7 +62,7 @@ namespace EntityDb.Void.Transactions
         {
             return EmptyObjectArrayTask;
         }
-        
+
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
         {
             return _emptyCommandArrayTask;

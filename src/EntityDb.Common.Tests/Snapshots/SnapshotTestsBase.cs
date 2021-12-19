@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Shouldly;
 using System;

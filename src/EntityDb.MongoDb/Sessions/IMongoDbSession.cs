@@ -14,7 +14,7 @@ namespace EntityDb.MongoDb.Sessions
             Func<IClientSessionHandle?, IMongoDatabase, DocumentQuery<TDocument>> queryBuilder,
             Func<TDocument, ILogger, IResolvingStrategyChain, TOut> converter)
             where TDocument : ITransactionDocument;
-        
+
         Task<TData[]> ExecuteDataQuery<TDocument, TData>(
             Func<IClientSessionHandle?, IMongoDatabase, DataQuery<TDocument>> queryBuilder)
             where TDocument : ITransactionDocument;
