@@ -96,7 +96,7 @@ namespace EntityDb.Common.Tests
                 new Mock<ITransactionRepositoryFactory<TEntity>>(MockBehavior.Strict);
 
             transactionRepositoryFactoryMock
-                .Setup(factory => factory.CreateRepository(It.IsAny<ITransactionSessionOptions>()))
+                .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
                 .ReturnsAsync(transactionRepositoryMock.Object);
 
             return transactionRepositoryFactoryMock.Object;

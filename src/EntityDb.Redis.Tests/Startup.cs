@@ -21,11 +21,13 @@ namespace EntityDb.Redis.Tests
             
             serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
             
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
+            serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379"
             );
+
+            Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);
         }
 
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)

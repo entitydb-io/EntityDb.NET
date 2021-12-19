@@ -11,15 +11,17 @@ namespace EntityDb.Common.Transactions
     internal class SnapshottingTransactionSubscriber<TEntity> : TransactionSubscriber<TEntity>
     {
         private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
-        private readonly ISnapshotSessionOptions _snapshotSessionOptions = new SnapshotSessionOptions();
+        private readonly string _snapshotSessionOptionsName;
 
         public SnapshottingTransactionSubscriber
         (
             ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
-            bool synchronous
-        ) : base(synchronous)
+            string snapshotSessionOptionsName,
+            bool synchronousMode
+        ) : base(synchronousMode)
         {
             _snapshotRepositoryFactory = snapshotRepositoryFactory;
+            _snapshotSessionOptionsName = snapshotSessionOptionsName;
         }
 
         protected override async Task NotifyAsync(ITransaction<TEntity> transaction)
@@ -33,15 +35,15 @@ namespace EntityDb.Common.Transactions
                 var nextSnapshot = commandGroup.Last().NextEntitySnapshot;
             
                 await using var snapshotRepository =
-                    await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptions);
+                    await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
             
                 await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
             }
         }
 
-        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider, bool synchronousMode)
+        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider, string snapshotSessionOptionsName, bool synchronousMode)
         {
-            return ActivatorUtilities.CreateInstance<SnapshottingTransactionSubscriber<TEntity>>(serviceProvider,
+            return ActivatorUtilities.CreateInstance<SnapshottingTransactionSubscriber<TEntity>>(serviceProvider, snapshotSessionOptionsName,
                 synchronousMode);
         }
     }

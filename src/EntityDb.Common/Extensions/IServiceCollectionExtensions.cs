@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
 using EntityDb.Common.Strategies;
@@ -145,6 +146,20 @@ namespace EntityDb.Common.Extensions
             serviceCollection.AddSingleton<IConstructingStrategy<TEntity>, TConstructingStrategy>();
 
             serviceCollection.AddSingleton<IVersioningStrategy<TEntity>, VersionedEntityVersioningStrategy<TEntity>>();
+        }
+
+        /// <summary>
+        ///     Adds a transaction subscriber that records snapshots.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity</typeparam>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
+        /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
+        public static void AddSnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection, string snapshotSessionOptionsName, bool synchronousMode = false)
+        {
+            serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
+                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName, synchronousMode));
+
         }
     }
 }

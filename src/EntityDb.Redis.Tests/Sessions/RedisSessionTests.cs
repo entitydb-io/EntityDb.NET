@@ -22,7 +22,7 @@ namespace EntityDb.Redis.Tests.Sessions
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteQuery_ThenReturnDefault()
         {
             var snapshotRepository =
-                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
+                await _snapshotRepositoryFactory.CreateRepository("TestWrite");
 
             if (snapshotRepository is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {
@@ -51,7 +51,7 @@ namespace EntityDb.Redis.Tests.Sessions
         public async Task GivenValidRedisSession_WhenThrowingDuringExecuteCommand_ThenReturnFalse()
         {
             var snapshotRepository =
-                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
+                await _snapshotRepositoryFactory.CreateRepository("TestWrite");
 
             if (snapshotRepository is RedisSnapshotRepository<TransactionEntity> redisSnapshotRepository)
             {

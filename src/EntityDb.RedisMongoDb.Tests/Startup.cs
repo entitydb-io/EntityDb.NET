@@ -27,7 +27,7 @@ namespace EntityDb.RedisMongoDb.Tests
             serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
             serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
 
-            serviceCollection.AddTestModeRedisSnapshots<TransactionEntity>
+            serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379"
@@ -38,6 +38,10 @@ namespace EntityDb.RedisMongoDb.Tests
                 TransactionEntity.MongoCollectionName,
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb"
             );
+
+            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>("TestWrite", synchronousMode: true);
+
+            Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);
         }
 
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)

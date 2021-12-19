@@ -11,8 +11,8 @@ namespace EntityDb.Abstractions.Snapshots
         /// <summary>
         ///     Create a new instance of <see cref="ISnapshotRepository{TEntity}" />
         /// </summary>
-        /// <param name="snapshotSessionOptions">The agent's use case for the repository.</param>
+        /// <param name="snapshotSessionOptionsName">The agent's use case for the repository.</param>
         /// <returns>A new instance of <see cref="ISnapshotRepository{TEntity}" />.</returns>
-        Task<ISnapshotRepository<TEntity>> CreateRepository(ISnapshotSessionOptions snapshotSessionOptions);
+        Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName);
     }
 }

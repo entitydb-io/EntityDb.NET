@@ -4,19 +4,38 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
-    /// <inheritdoc cref="ITransactionSessionOptions" />
-    public sealed record TransactionSessionOptions : ITransactionSessionOptions
+    /// <summary>
+    ///     Represents the agent's use case for the transaction repository.
+    /// </summary>
+    public sealed class TransactionSessionOptions
     {
-        /// <inheritdoc />
-        public bool ReadOnly { get; init; }
+        /// <summary>
+        ///     If <c>true</c>, indicates that all transactions should be reverted when the repository is disposed.
+        /// </summary>
+        public bool TestMode { get; set; }
 
-        /// <inheritdoc />
-        public bool SecondaryPreferred { get; init; }
+        /// <summary>
+        ///     If <c>true</c>, indicates the agent only intends to execute queries.
+        /// </summary>
+        /// <remarks>
+        ///     <see cref="ITransactionRepository{TEntity}.PutTransaction(ITransaction{TEntity})" /> should always return
+        ///     <c>false</c> if this is <c>true</c>.
+        /// </remarks>
+        public bool ReadOnly { get; set; }
 
-        /// <inheritdoc />
-        public TimeSpan? WriteTimeout { get; init; }
+        /// <summary>
+        ///     If <c>true</c>, indicates the agent can tolerate replication lag for queries.
+        /// </summary>
+        public bool SecondaryPreferred { get; set; }
 
-        /// <inheritdoc />
-        public ILogger? LoggerOverride { get; init; }
+        /// <summary>
+        ///     Determines how long to wait before a command should be automatically aborted.
+        /// </summary>
+        public TimeSpan? WriteTimeout { get; set; }
+
+        /// <summary>
+        ///     Overrides the logger for the session.
+        /// </summary>
+        public ILogger? LoggerOverride { get; set; }
     }
 }

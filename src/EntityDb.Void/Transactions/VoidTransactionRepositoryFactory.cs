@@ -9,7 +9,7 @@ namespace EntityDb.Void.Transactions
             Task.FromResult(new VoidTransactionRepository<TEntity>() as ITransactionRepository<TEntity>);
 
         public Task<ITransactionRepository<TEntity>> CreateRepository(
-            ITransactionSessionOptions transactionSessionOptions)
+            string transactionSessionOptionsName)
         {
             return _voidTransactionRepositoryTask;
         }

@@ -30,7 +30,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
                 var connectionString = getConnectionString.Invoke(configuration);
 
-                return AutoProvisionTestModeMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider,
+                return AutoProvisionMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider,
                     connectionString, databaseName);
             });
         }

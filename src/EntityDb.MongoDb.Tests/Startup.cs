@@ -32,6 +32,8 @@ namespace EntityDb.MongoDb.Tests
                 TransactionEntity.MongoCollectionName,
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb"
             );
+
+            Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);
         }
 
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)

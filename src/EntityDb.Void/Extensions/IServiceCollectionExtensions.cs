@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Void.Transactions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Void.Extensions
 {
@@ -19,7 +18,6 @@ namespace EntityDb.Void.Extensions
         /// <remarks>
         ///     This repository does not do anything.
         /// </remarks>
-        [ExcludeFromCodeCoverage(Justification = "Tests use TestMode.")]
         public static void AddVoidTransactions<TEntity>(this IServiceCollection serviceCollection)
         {
             serviceCollection

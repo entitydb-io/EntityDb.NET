@@ -21,18 +21,18 @@ namespace EntityDb.Common.Entities
             _snapshotRepositoryFactory = snapshotRepositoryFactory;
         }
 
-        public async Task<IEntityRepository<TEntity>> CreateRepository(ITransactionSessionOptions transactionSessionOptions,
-            ISnapshotSessionOptions? snapshotSessionOptions = null)
+        public async Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
+            string? snapshotSessionOptionsName = null)
         {
-            var transactionRepository = await _transactionRepositoryFactory.CreateRepository(transactionSessionOptions);
+            var transactionRepository = await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName);
 
-            if (_snapshotRepositoryFactory == null || snapshotSessionOptions == null)
+            if (_snapshotRepositoryFactory == null || snapshotSessionOptionsName == null)
             {
                 return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider,
                     transactionRepository);
             }
 
-            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptions);
+            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
                 
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider, transactionRepository, snapshotRepository);
         }

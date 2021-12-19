@@ -66,8 +66,8 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
             var entityId = Guid.NewGuid();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(new TransactionSessionOptions(),
-                    new SnapshotSessionOptions());
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite",
+                    "TestWrite");
 
             var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 

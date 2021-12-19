@@ -11,8 +11,8 @@ namespace EntityDb.Abstractions.Transactions
         /// <summary>
         ///     Creates a new instance of <see cref="ITransactionRepository{TEntity}" />.
         /// </summary>
-        /// <param name="transactionSessionOptions">The agent's use case for the repository.</param>
+        /// <param name="transactionSessionOptionsName">The agent's use case for the repository.</param>
         /// <returns>A new instance of <see cref="ITransactionRepository{TEntity}" />.</returns>
-        Task<ITransactionRepository<TEntity>> CreateRepository(ITransactionSessionOptions transactionSessionOptions);
+        Task<ITransactionRepository<TEntity>> CreateRepository(string transactionSessionOptionsName);
     }
 }

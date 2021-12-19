@@ -91,6 +91,7 @@ namespace EntityDb.Void.Transactions
         [ExcludeFromCodeCoverage]
         public void Dispose()
         {
+            // Nothing To Dispose
         }
 
         public ValueTask DisposeAsync()

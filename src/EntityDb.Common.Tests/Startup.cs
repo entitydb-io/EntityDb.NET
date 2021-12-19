@@ -1,4 +1,6 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Snapshots;
+using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Strategies;
@@ -33,6 +35,25 @@ namespace EntityDb.Common.Tests
         public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor testOutputHelperAccessor)
         {
             loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelperAccessor));
+        }
+
+        public static void ConfigureTestsBaseServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", (options) =>
+            {
+                options.TestMode = true;
+            });
+
+            serviceCollection.Configure<TransactionSessionOptions>("TestWrite", (options) =>
+            {
+                options.TestMode = true;
+            });
+
+            serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", (options) =>
+            {
+                options.TestMode = true;
+                options.ReadOnly = true;
+            });
         }
     }
 }

@@ -27,7 +27,7 @@ namespace EntityDb.Common.Tests.Snapshots
             var entityId = Guid.NewGuid();
 
             await using var snapshotRepository =
-                await _snapshotRepositoryFactory.CreateRepository(new SnapshotSessionOptions());
+                await _snapshotRepositoryFactory.CreateRepository("TestWrite");
 
             // ACT
 
