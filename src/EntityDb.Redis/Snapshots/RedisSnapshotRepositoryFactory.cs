@@ -39,11 +39,6 @@ namespace EntityDb.Redis.Snapshots
         {
             var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
-            if (snapshotSessionOptions.TestMode == false)
-            {
-                throw new Exception("Do not expect tests to run in non-test mode.");
-            }
-
             var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
 
             var redisSession = new RedisSession
@@ -62,8 +57,6 @@ namespace EntityDb.Redis.Snapshots
             {
                 return new TestModeRedisSnapshotRepository<TEntity>(_disposer, redisSession, _keyNamespace, _snapshottingStrategy);
             }
-
-            throw new Exception("Do not expect tests to run in non-test mode.");
 
             return new RedisSnapshotRepository<TEntity>(redisSession, _keyNamespace, _snapshottingStrategy);
         }
