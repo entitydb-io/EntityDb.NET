@@ -1,14 +1,13 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using Xunit.DependencyInjection;
 
 namespace EntityDb.Common.Tests
 {
@@ -21,52 +20,31 @@ namespace EntityDb.Common.Tests
             _serviceProvider = serviceProvider;
         }
 
-        private IServiceCollection GetParasiteServiceCollection(Type[]? omittedTypes = null)
+        public IServiceScope GetServiceScopeWithOverrides<TStartup>(Action<IServiceCollection> configureServices)
+            where TStartup : ITestStartup, new()
         {
             var serviceCollection = new ServiceCollection();
 
-            // Use reflection to get all service descriptors
+            var startup = new TStartup();
 
-            var engine = _serviceProvider.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Single(x => x.Name == "Engine")
-                .GetValue(_serviceProvider);
+            var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
+            var testOutputHelperAccessor = _serviceProvider.GetRequiredService<ITestOutputHelperAccessor>();
 
-            var callSiteFactory = engine!.GetType()
-                .GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Single(x => x.Name == "CallSiteFactory")
-                .GetValue(engine);
+            serviceCollection.AddSingleton(configuration);
 
-            var descriptors = (callSiteFactory!.GetType()
-                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Single(x => x.Name == "_descriptors")
-                .GetValue(callSiteFactory) as List<ServiceDescriptor>)!;
+            startup.ConfigureServices(serviceCollection);
 
-            foreach (var descriptor in descriptors)
-            {
-                if (omittedTypes?.Contains(descriptor.ServiceType) == true)
-                {
-                    continue;
-                }
+            configureServices.Invoke(serviceCollection);
 
-                serviceCollection.Add(descriptor);
-            }
+            var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            return serviceCollection;
-        }
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
-        public IServiceProvider GetServiceProviderWithOverrides(Action<IServiceCollection> configureOverrides)
-        {
-            var serviceCollection = GetParasiteServiceCollection();
+            startup.Configure(loggerFactory, testOutputHelperAccessor);
 
-            configureOverrides.Invoke(serviceCollection);
+            var serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
-            return serviceCollection.BuildServiceProvider();
-        }
-
-        public IServiceProvider GetServiceProviderWithOmission<TOmittedType>()
-        {
-            return GetParasiteServiceCollection(new[] { typeof(TOmittedType) }).BuildServiceProvider();
+            return serviceScopeFactory.CreateScope();
         }
 
         public static ITransactionRepositoryFactory<TEntity> GetMockedTransactionRepositoryFactory<TEntity>(
@@ -98,6 +76,9 @@ namespace EntityDb.Common.Tests
             transactionRepositoryFactoryMock
                 .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
                 .ReturnsAsync(transactionRepositoryMock.Object);
+
+            transactionRepositoryFactoryMock
+                .Setup(factory => factory.Dispose());
 
             return transactionRepositoryFactoryMock.Object;
         }

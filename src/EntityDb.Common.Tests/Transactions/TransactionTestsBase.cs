@@ -31,24 +31,11 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions
 {
-    public abstract class TransactionTestsBase : TestsBase
+    public abstract class TransactionTestsBase<TStartup> : TestsBase
+        where TStartup : ITestStartup, new()
     {
         protected TransactionTestsBase(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-        }
-
-        private Task<ITransactionRepository<TransactionEntity>> CreateRepository(string transactionSessionOptionsName,
-            Action<IServiceCollection>? configureOverrides = null)
-        {
-            var serviceProvider = _serviceProvider;
-
-            if (configureOverrides != null)
-            {
-                serviceProvider = GetServiceProviderWithOverrides(configureOverrides);
-            }
-
-            return serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository(transactionSessionOptionsName);
         }
 
         private async Task TestGet<TResult>
@@ -66,7 +53,7 @@ namespace EntityDb.Common.Tests.Transactions
             var reversedExpectedFalseResults = expectedFalseResults.Reverse().ToArray();
             var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             foreach (var transaction in transactions)
             {
@@ -421,13 +408,18 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(1, 1);
 
-            await using var transactionRepository = await CreateRepository("TestReadOnly", serviceCollection =>
+            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
             {
-                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", options =>
+                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnlyWithLoggerOverride", options =>
                 {
                     options.LoggerOverride = loggerMock.Object;
+                    options.ReadOnly = true;
                 });
             });
+
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestReadOnlyWithLoggerOverride");
 
             // ACT
 
@@ -450,7 +442,7 @@ namespace EntityDb.Common.Tests.Transactions
             var firstTransaction = TransactionSeeder.Create(1, 1, transactionId);
             var secondTransaction = TransactionSeeder.Create(1, 1, transactionId);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -470,7 +462,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(1, 2);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -496,14 +488,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
 
-            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride",
-                serviceCollection =>
+            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            {
+                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
                 {
-                    serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
-                    {
-                        options.LoggerOverride = loggerMock.Object;
-                    });
+                    options.LoggerOverride = loggerMock.Object;
                 });
+            });
+
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWriteWithLoggerOverride");
 
             // ACT
 
@@ -534,14 +529,18 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride",
-                serviceCollection =>
+            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            {
+                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
                 {
-                    serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
-                    {
-                        options.LoggerOverride = loggerMock.Object;
-                    });
+                    options.LoggerOverride = loggerMock.Object;
                 });
+            });
+
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWriteWithLoggerOverride");
+
 
             // ACT
 
@@ -572,7 +571,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(2, 1, insertTag: true);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -590,7 +589,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(2, 1, insertLease: true);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -623,7 +622,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = BuildTransaction(expectedTransactionId, expectedEntityId, new NoSource(),
                 new ICommand<TransactionEntity>[] { expectedCommand }, transactionTimeStamp);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             await transactionRepository.PutTransaction(transaction);
 
@@ -654,7 +653,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             var entityRepository = EntityRepository<TransactionEntity>.Create(_serviceProvider, transactionRepository);
 
@@ -683,7 +682,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
@@ -723,7 +722,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
@@ -766,7 +765,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -807,7 +806,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
-            await using var transactionRepository = await CreateRepository("TestWrite");
+            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             await transactionRepository.PutTransaction(firstTransaction);
 

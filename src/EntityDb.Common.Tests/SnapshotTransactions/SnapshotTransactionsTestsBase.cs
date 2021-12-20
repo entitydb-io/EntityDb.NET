@@ -14,7 +14,8 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.SnapshotTransactions
 {
-    public abstract class SnapshotTransactionsTestsBase : TestsBase
+    public abstract class SnapshotTransactionsTestsBase<TStartup> : TestsBase
+        where TStartup : ITestStartup, new()
     {
         protected SnapshotTransactionsTestsBase(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -58,24 +59,24 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
                 .Returns((TransactionEntity? _, TransactionEntity nextEntity) =>
                     nextEntity.VersionNumber == expectedSnapshotVersion);
 
-            var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
+            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
             {
                 serviceCollection.AddSingleton(_ => snapshottingStrategyMock.Object);
             });
 
             var entityId = Guid.NewGuid();
 
-            await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            await using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
                     .CreateRepository("TestWrite",
                         "TestWrite");
 
-            var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
+            var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceScope.ServiceProvider);
 
             var firstTransactionInserted = await entityRepository.PutTransaction(firstTransaction);
 
             var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion,
-                serviceProvider, entityRepository);
+                serviceScope.ServiceProvider, entityRepository);
 
             var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
 

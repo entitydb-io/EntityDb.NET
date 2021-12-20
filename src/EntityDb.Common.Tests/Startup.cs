@@ -11,7 +11,7 @@ using Xunit.DependencyInjection.Logging;
 
 namespace EntityDb.Common.Tests
 {
-    public class Startup
+    public class Startup : ITestStartup
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {

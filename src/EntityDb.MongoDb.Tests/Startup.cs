@@ -1,4 +1,5 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.TestImplementations.Agents;
@@ -11,7 +12,7 @@ using Xunit.DependencyInjection.Logging;
 
 namespace EntityDb.MongoDb.Tests
 {
-    public class Startup
+    public class Startup : ITestStartup
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {

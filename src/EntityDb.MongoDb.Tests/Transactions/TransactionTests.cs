@@ -3,7 +3,7 @@ using System;
 
 namespace EntityDb.MongoDb.Tests.Transactions
 {
-    public class TransactionTests : TransactionTestsBase
+    public class TransactionTests : TransactionTestsBase<Startup>
     {
         public TransactionTests(IServiceProvider serviceProvider) : base(serviceProvider)
         {

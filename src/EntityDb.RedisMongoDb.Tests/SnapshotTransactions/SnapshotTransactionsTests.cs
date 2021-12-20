@@ -3,7 +3,7 @@ using System;
 
 namespace EntityDb.RedisMongoDb.Tests.SnapshotTransactions
 {
-    public class SnapshotTransactionsTests : SnapshotTransactionsTestsBase
+    public class SnapshotTransactionsTests : SnapshotTransactionsTestsBase<Startup>
     {
         public SnapshotTransactionsTests(IServiceProvider serviceProvider) : base(serviceProvider)
         {
