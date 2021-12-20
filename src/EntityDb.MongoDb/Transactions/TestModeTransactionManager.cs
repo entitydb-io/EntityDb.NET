@@ -4,7 +4,7 @@ namespace EntityDb.MongoDb.Transactions
 {
     internal class TestModeTransactionManager
     {
-        private List<string> _holds = new();
+        private readonly List<string> _holds = new();
 
         public void Hold(string id)
         {
