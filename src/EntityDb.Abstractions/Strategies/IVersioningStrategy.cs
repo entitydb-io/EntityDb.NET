@@ -4,7 +4,7 @@
     ///     Represents a type used to manage versioning for a <typeparamref name="TEntity" />.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity to be versioned.</typeparam>
-    public interface IVersioningStrategy<TEntity>
+    public interface IVersioningStrategy<in TEntity>
     {
         /// <summary>
         ///     Returns the version number of a <typeparamref name="TEntity" />.
