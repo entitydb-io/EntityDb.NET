@@ -80,12 +80,12 @@ namespace EntityDb.MongoDb.Documents
         {
             return new DocumentQuery<LeaseDocument>
             (
-                MongoSession: mongoSession,
-                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
-                Filter: leaseQuery.GetFilter(_filterBuilder),
-                Sort: leaseQuery.GetSort(_sortBuilder),
-                Skip: leaseQuery.Skip,
-                Limit: leaseQuery.Take
+                mongoSession,
+                GetMongoCollection(mongoDatabase, CollectionName),
+                leaseQuery.GetFilter(_filterBuilder),
+                leaseQuery.GetSort(_sortBuilder),
+                leaseQuery.Skip,
+                leaseQuery.Take
             );
         }
 

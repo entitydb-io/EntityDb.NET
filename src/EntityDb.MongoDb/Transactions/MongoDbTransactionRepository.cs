@@ -19,9 +19,9 @@ namespace EntityDb.MongoDb.Transactions
 {
     internal class MongoDbTransactionRepository<TEntity> : ITransactionRepository<TEntity>
     {
-        protected readonly IMongoSession? _mongoSession;
-        protected readonly IMongoDatabase _mongoDatabase;
         protected readonly ILogger _logger;
+        protected readonly IMongoDatabase _mongoDatabase;
+        protected readonly IMongoSession? _mongoSession;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
 
         public MongoDbTransactionRepository
@@ -107,6 +107,7 @@ namespace EntityDb.MongoDb.Transactions
                 .GetDocumentQuery(_mongoSession, _mongoDatabase, commandQuery)
                 .GetData<CommandDocument, ICommand<TEntity>>(_logger, _resolvingStrategyChain);
         }
+
         public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
         {
             return LeaseDocument
@@ -145,17 +146,24 @@ namespace EntityDb.MongoDb.Transactions
                 {
                     VersionZeroReservedException.ThrowIfZero(transactionStep.NextEntityVersionNumber);
 
-                    var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, _mongoDatabase, transactionStep.EntityId);
+                    var previousVersionNumber =
+                        await CommandDocument.GetLastEntityVersionNumber(_mongoSession, _mongoDatabase,
+                            transactionStep.EntityId);
 
-                    OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, transactionStep.PreviousEntityVersionNumber);
+                    OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber,
+                        transactionStep.PreviousEntityVersionNumber);
 
-                    await CommandDocument.InsertOne(_mongoSession, _mongoDatabase, _logger, transaction, transactionStep);
+                    await CommandDocument.InsertOne(_mongoSession, _mongoDatabase, _logger, transaction,
+                        transactionStep);
 
-                    await LeaseDocument.DeleteMany(_mongoSession, _mongoDatabase, transactionStep.EntityId, transactionStep.Leases.Delete);
+                    await LeaseDocument.DeleteMany(_mongoSession, _mongoDatabase, transactionStep.EntityId,
+                        transactionStep.Leases.Delete);
 
-                    await LeaseDocument.InsertMany(_mongoSession, _mongoDatabase, _logger, transaction, transactionStep);
+                    await LeaseDocument.InsertMany(_mongoSession, _mongoDatabase, _logger, transaction,
+                        transactionStep);
 
-                    await TagDocument.DeleteMany(_mongoSession, _mongoDatabase, transactionStep.EntityId, transactionStep.Tags.Delete);
+                    await TagDocument.DeleteMany(_mongoSession, _mongoDatabase, transactionStep.EntityId,
+                        transactionStep.Tags.Delete);
 
                     await TagDocument.InsertMany(_mongoSession, _mongoDatabase, _logger, transaction, transactionStep);
                 }

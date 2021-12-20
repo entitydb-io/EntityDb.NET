@@ -10,10 +10,11 @@ namespace EntityDb.Common.Entities
     internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ITransactionRepositoryFactory<TEntity> _transactionRepositoryFactory;
         private readonly ISnapshotRepositoryFactory<TEntity>? _snapshotRepositoryFactory;
+        private readonly ITransactionRepositoryFactory<TEntity> _transactionRepositoryFactory;
 
-        public EntityRepositoryFactory(IServiceProvider serviceProvider, ITransactionRepositoryFactory<TEntity> transactionRepositoryFactory,
+        public EntityRepositoryFactory(IServiceProvider serviceProvider,
+            ITransactionRepositoryFactory<TEntity> transactionRepositoryFactory,
             ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory = null)
         {
             _serviceProvider = serviceProvider;
@@ -24,7 +25,8 @@ namespace EntityDb.Common.Entities
         public async Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
             string? snapshotSessionOptionsName = null)
         {
-            var transactionRepository = await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName);
+            var transactionRepository =
+                await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName);
 
             if (_snapshotRepositoryFactory == null || snapshotSessionOptionsName == null)
             {
@@ -34,7 +36,8 @@ namespace EntityDb.Common.Entities
 
             var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
 
-            return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider, transactionRepository, snapshotRepository);
+            return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider, transactionRepository,
+                snapshotRepository);
         }
     }
 }

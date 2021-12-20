@@ -12,11 +12,11 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {
+        protected readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly string _keyNamespace;
+        protected readonly ILogger _logger;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
-        protected readonly IConnectionMultiplexer _connectionMultiplexer;
-        protected readonly ILogger _logger;
 
         public RedisSnapshotRepository
         (
@@ -32,11 +32,6 @@ namespace EntityDb.Redis.Snapshots
             _snapshottingStrategy = snapshottingStrategy;
             _connectionMultiplexer = connectionMultiplexer;
             _logger = logger;
-        }
-
-        public RedisKey GetSnapshotKey(Guid entityId)
-        {
-            return $"{_keyNamespace}#{entityId}";
         }
 
         public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
@@ -112,6 +107,11 @@ namespace EntityDb.Redis.Snapshots
             await Task.Yield();
 
             _connectionMultiplexer.Dispose();
+        }
+
+        public RedisKey GetSnapshotKey(Guid entityId)
+        {
+            return $"{_keyNamespace}#{entityId}";
         }
     }
 }

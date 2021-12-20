@@ -6,8 +6,8 @@ namespace EntityDb.Common.Snapshots
 {
     internal class TestModeSnapshotDisposer
     {
-        private uint _holds;
         private readonly List<Guid> _entityIds = new();
+        private uint _holds;
 
         public void Hold()
         {

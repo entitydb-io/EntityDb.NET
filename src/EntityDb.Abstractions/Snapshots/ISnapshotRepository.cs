@@ -25,7 +25,7 @@ namespace EntityDb.Abstractions.Snapshots
         Task<bool> PutSnapshot(Guid entityId, TEntity entity);
 
         /// <summary>
-        ///     Deletes multiple <typeparamref name="TEntity"/> snapshots.
+        ///     Deletes multiple <typeparamref name="TEntity" /> snapshots.
         /// </summary>
         /// <param name="entityIds">The id of the entitie snapshots to delete.</param>
         /// <returns><c>true</c> if the deletes all succeeded, or <c>false</c> if any deletes failed.</returns>

@@ -14,16 +14,18 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
     {
-        private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly string _connectionString;
 
         protected readonly string _keyNamespace;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
         protected readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
 
-        public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory, ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace, ISnapshottingStrategy<TEntity>? snapshottingStrategy = null)
+        public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
+            ILoggerFactory loggerFactory,
+            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace,
+            ISnapshottingStrategy<TEntity>? snapshottingStrategy = null)
         {
             _optionsFactory = optionsFactory;
             _loggerFactory = loggerFactory;
@@ -53,17 +55,6 @@ namespace EntityDb.Redis.Snapshots
             return redisSnapshotRepository.UseTryCatch(logger);
         }
 
-        public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
-            string connectionString, string keyNamespace)
-        {
-            return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TEntity>>
-            (
-                serviceProvider,
-                connectionString,
-                keyNamespace
-            );
-        }
-
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
@@ -73,6 +64,17 @@ namespace EntityDb.Redis.Snapshots
         public ValueTask DisposeAsync()
         {
             return ValueTask.CompletedTask;
+        }
+
+        public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
+            string connectionString, string keyNamespace)
+        {
+            return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TEntity>>
+            (
+                serviceProvider,
+                connectionString,
+                keyNamespace
+            );
         }
     }
 }

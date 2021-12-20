@@ -9,7 +9,9 @@ namespace EntityDb.MongoDb.Transactions
         private readonly TestModeTransactionManager _testModeTransactionManager;
         private readonly TransactionTestMode _transactionTestMode;
 
-        public TestModeMongoDbTransactionRepository(ITransactionRepository<TEntity> transactionRepository, TestModeTransactionManager testModeTransactionManager, TransactionTestMode transactionTestMode) : base(transactionRepository)
+        public TestModeMongoDbTransactionRepository(ITransactionRepository<TEntity> transactionRepository,
+            TestModeTransactionManager testModeTransactionManager, TransactionTestMode transactionTestMode) : base(
+            transactionRepository)
         {
             _testModeTransactionManager = testModeTransactionManager;
             _transactionTestMode = transactionTestMode;

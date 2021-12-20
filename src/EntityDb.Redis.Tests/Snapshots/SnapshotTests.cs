@@ -6,7 +6,8 @@ namespace EntityDb.Redis.Tests.Snapshots
 {
     public class SnapshotTests : SnapshotTestsBase
     {
-        public SnapshotTests(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory) : base(snapshotRepositoryFactory)
+        public SnapshotTests(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory) : base(
+            snapshotRepositoryFactory)
         {
         }
     }

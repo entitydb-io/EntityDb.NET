@@ -13,7 +13,8 @@ namespace EntityDb.MongoDb.Extensions
             TransactionTestMode transactionTestMode
         )
         {
-            return new TestModeMongoDbTransactionRepository<TEntity>(transactionRepository, testModeTransactionManager, transactionTestMode);
+            return new TestModeMongoDbTransactionRepository<TEntity>(transactionRepository, testModeTransactionManager,
+                transactionTestMode);
         }
     }
 }

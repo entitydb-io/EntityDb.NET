@@ -78,12 +78,12 @@ namespace EntityDb.MongoDb.Documents
         {
             return new DocumentQuery<TagDocument>
             (
-                MongoSession: mongoSession,
-                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
-                Filter: tagQuery.GetFilter(_filterBuilder),
-                Sort: tagQuery.GetSort(_sortBuilder),
-                Skip: tagQuery.Skip,
-                Limit: tagQuery.Take
+                mongoSession,
+                GetMongoCollection(mongoDatabase, CollectionName),
+                tagQuery.GetFilter(_filterBuilder),
+                tagQuery.GetSort(_sortBuilder),
+                tagQuery.Skip,
+                tagQuery.Take
             );
         }
 

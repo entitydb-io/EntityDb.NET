@@ -40,9 +40,11 @@ namespace EntityDb.Common.Transactions
             }
         }
 
-        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider, string snapshotSessionOptionsName, bool synchronousMode)
+        public static SnapshottingTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
+            string snapshotSessionOptionsName, bool synchronousMode)
         {
-            return ActivatorUtilities.CreateInstance<SnapshottingTransactionSubscriber<TEntity>>(serviceProvider, snapshotSessionOptionsName,
+            return ActivatorUtilities.CreateInstance<SnapshottingTransactionSubscriber<TEntity>>(serviceProvider,
+                snapshotSessionOptionsName,
                 synchronousMode);
         }
     }

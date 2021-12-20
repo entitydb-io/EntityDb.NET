@@ -26,7 +26,8 @@ namespace EntityDb.TestImplementations.Seeders
                 Id = transactionId ?? Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
                 Source = SourceSeeder.Create(),
-                Steps = TransactionStepSeeder.Create(generateCount, repeatCount, previousEntityVersionNumber, wellBehavedNextEntityVersionNumber, entityId, insertLease, deleteLease, insertTag, deleteTag)
+                Steps = TransactionStepSeeder.Create(generateCount, repeatCount, previousEntityVersionNumber,
+                    wellBehavedNextEntityVersionNumber, entityId, insertLease, deleteLease, insertTag, deleteTag)
             };
         }
     }

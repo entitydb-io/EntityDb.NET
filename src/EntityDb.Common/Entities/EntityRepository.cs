@@ -16,11 +16,11 @@ namespace EntityDb.Common.Entities
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         private readonly IConstructingStrategy<TEntity> _constructingStrategy;
-        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
         private readonly ILogger _logger;
-        private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
-        private readonly ITransactionRepository<TEntity> _transactionRepository;
         private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
+        private readonly ITransactionRepository<TEntity> _transactionRepository;
+        private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
+        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
 
         public EntityRepository
         (
@@ -38,21 +38,6 @@ namespace EntityDb.Common.Entities
             _transactionSubscribers = transactionSubscribers;
             _transactionRepository = transactionRepository;
             _snapshotRepository = snapshotRepository;
-        }
-
-        private void Publish(ITransaction<TEntity> transaction)
-        {
-            foreach (var transactionSubscriber in _transactionSubscribers)
-            {
-                try
-                {
-                    transactionSubscriber.Notify(transaction);
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(exception, $"{transactionSubscriber.GetType()}.{nameof(transactionSubscriber.Notify)}({transaction.Id})");
-                }
-            }
         }
 
         public async Task<TEntity?> GetSnapshotOrDefault(Guid entityId)
@@ -123,6 +108,22 @@ namespace EntityDb.Common.Entities
             }
         }
 
+        private void Publish(ITransaction<TEntity> transaction)
+        {
+            foreach (var transactionSubscriber in _transactionSubscribers)
+            {
+                try
+                {
+                    transactionSubscriber.Notify(transaction);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception,
+                        $"{transactionSubscriber.GetType()}.{nameof(transactionSubscriber.Notify)}({transaction.Id})");
+                }
+            }
+        }
+
         public static EntityRepository<TEntity> Create
         (
             IServiceProvider serviceProvider,
@@ -132,7 +133,8 @@ namespace EntityDb.Common.Entities
         {
             if (snapshotRepository == null)
             {
-                return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository);
+                return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider,
+                    transactionRepository);
             }
 
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository,

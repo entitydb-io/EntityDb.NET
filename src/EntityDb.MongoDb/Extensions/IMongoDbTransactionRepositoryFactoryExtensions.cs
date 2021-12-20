@@ -5,11 +5,14 @@ namespace EntityDb.MongoDb.Extensions
 {
     internal static class IMongoDbTransactionRepositoryFactoryExtensions
     {
-        public static IMongoDbTransactionRepositoryFactory<TEntity> UseTestMode<TEntity>(this IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory, TransactionTestMode? transactionTestMode)
+        public static IMongoDbTransactionRepositoryFactory<TEntity> UseTestMode<TEntity>(
+            this IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory,
+            TransactionTestMode? transactionTestMode)
         {
             if (transactionTestMode.HasValue)
             {
-                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory, transactionTestMode.Value);
+                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory,
+                    transactionTestMode.Value);
             }
 
             return mongoDbTransactionRepositoryFactory;

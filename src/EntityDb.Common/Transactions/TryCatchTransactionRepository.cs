@@ -9,7 +9,8 @@ namespace EntityDb.Common.Transactions
     {
         private readonly ILogger _logger;
 
-        public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) : base(transactionRepository)
+        public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) :
+            base(transactionRepository)
         {
             _logger = logger;
         }

@@ -4,7 +4,6 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
-
     /// <summary>
     ///     Represents the agent's use case for the transaction repository.
     /// </summary>

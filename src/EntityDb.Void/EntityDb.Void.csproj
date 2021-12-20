@@ -30,7 +30,7 @@
         <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
         <Description>An implementation of the EntityDb Transaction Repository interface, specifically made for non-persistent history.</Description>
         <PackageIcon>ICON.png</PackageIcon>
-        <PackageIconUrl />
+        <PackageIconUrl/>
     </PropertyGroup>
 
     <ItemGroup>
@@ -41,11 +41,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
     </ItemGroup>
 
 </Project>

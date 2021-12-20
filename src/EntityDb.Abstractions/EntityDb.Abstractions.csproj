@@ -30,7 +30,7 @@
         <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
         <Description>An abstraction layer for the EntityDb suite of packages.</Description>
         <PackageIcon>ICON.png</PackageIcon>
-        <PackageIconUrl />
+        <PackageIconUrl/>
     </PropertyGroup>
 
     <ItemGroup>

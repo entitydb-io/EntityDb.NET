@@ -69,11 +69,7 @@ namespace EntityDb.MongoDb.Extensions
             var skip = documentQuery.Skip;
             var limit = documentQuery.Limit;
 
-            documentQuery = documentQuery with
-            {
-                Skip = null,
-                Limit = null
-            };
+            documentQuery = documentQuery with { Skip = null, Limit = null };
 
             var documents = await documentQuery.Execute(projection);
 
@@ -94,7 +90,8 @@ namespace EntityDb.MongoDb.Extensions
             return guids.ToArray();
         }
 
-        public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(this DocumentQuery<TDocument> documentQuery, ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(
+            this DocumentQuery<TDocument> documentQuery, ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
             where TDocument : IEntityDocument
         {
             var documents = await documentQuery.Execute(NoDocumentIdProjection);
@@ -104,17 +101,18 @@ namespace EntityDb.MongoDb.Extensions
                 {
                     return new EntityAnnotation<TData>
                     (
-                        TransactionId: document.TransactionId,
-                        TransactionTimeStamp: document.TransactionTimeStamp,
-                        EntityId: document.EntityId,
-                        EntityVersionNumber: document.EntityVersionNumber,
-                        Data: document.Data.Reconstruct<TData>(logger, resolvingStrategyChain)
+                        document.TransactionId,
+                        document.TransactionTimeStamp,
+                        document.EntityId,
+                        document.EntityVersionNumber,
+                        document.Data.Reconstruct<TData>(logger, resolvingStrategyChain)
                     );
                 })
                 .ToArray<IEntityAnnotation<TData>>();
         }
 
-        public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery, ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery,
+            ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
             where TDocument : ITransactionDocument
         {
             var documents = await documentQuery.Execute(DataProjection);
@@ -130,7 +128,7 @@ namespace EntityDb.MongoDb.Extensions
             return documentQuery.GetGuids
             (
                 EntityIdProjection,
-                (documents) => documents.Select(document => document.EntityId)
+                documents => documents.Select(document => document.EntityId)
             );
         }
 
@@ -140,7 +138,7 @@ namespace EntityDb.MongoDb.Extensions
             return documentQuery.GetGuids
             (
                 EntityIdsProjection,
-                (documents) => documents.SelectMany(document => document.EntityIds)
+                documents => documents.SelectMany(document => document.EntityIds)
             );
         }
 
@@ -150,7 +148,7 @@ namespace EntityDb.MongoDb.Extensions
             return documentQuery.GetGuids
             (
                 TransactionIdProjection,
-                (documents) => documents.Select(document => document.TransactionId)
+                documents => documents.Select(document => document.TransactionId)
             );
         }
     }

@@ -19,6 +19,6 @@
         /// <remarks>
         ///     This is the preferred option when a test is creating a service provider that will only be used by that test.
         /// </remarks>
-        RepositoryFactoryDisposed,
+        RepositoryFactoryDisposed
     }
 }

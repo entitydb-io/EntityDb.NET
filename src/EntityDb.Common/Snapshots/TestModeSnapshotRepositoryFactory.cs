@@ -24,7 +24,8 @@ namespace EntityDb.Common.Snapshots
         {
             var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
 
-            return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _snapshotTestMode, _testModeSnapshotDisposer);
+            return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _snapshotTestMode,
+                _testModeSnapshotDisposer);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
@@ -35,7 +36,8 @@ namespace EntityDb.Common.Snapshots
 
         public async ValueTask DisposeAsync()
         {
-            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed && _testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
+            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed &&
+                _testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
             {
                 var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
 

@@ -22,7 +22,8 @@ namespace EntityDb.MongoDb.Extensions
         /// <param name="getConnectionString">A function that retrieves the MongoDB connection string.</param>
         /// <param name="transactionTestMode">Modifies the behavior of the repository to accomodate tests.</param>
         public static void AddMongoDbTransactions<TEntity>(this IServiceCollection serviceCollection,
-            string databaseName, Func<IConfiguration, string> getConnectionString, TransactionTestMode? transactionTestMode = null)
+            string databaseName, Func<IConfiguration, string> getConnectionString,
+            TransactionTestMode? transactionTestMode = null)
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {

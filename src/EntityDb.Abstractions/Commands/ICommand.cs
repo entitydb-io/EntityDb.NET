@@ -10,7 +10,10 @@
         ///     Returns a new <typeparamref name="TEntity" /> that incorporates the modification into an entity.
         /// </summary>
         /// <param name="entity">The entity to be modified.</param>
-        /// <returns>A new <typeparamref name="TEntity" /> that incorporates the modification of this command into <paramref name="entity" />.</returns>
+        /// <returns>
+        ///     A new <typeparamref name="TEntity" /> that incorporates the modification of this command into
+        ///     <paramref name="entity" />.
+        /// </returns>
         TEntity Reduce(TEntity entity);
     }
 }

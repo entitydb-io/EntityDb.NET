@@ -19,9 +19,9 @@ namespace EntityDb.MongoDb.Queries
         public Task<List<TDocument>> Execute(ProjectionDefinition<BsonDocument, TDocument> projection)
         {
             var find = (
-                MongoSession != null
-                    ? MongoSession.Find(MongoCollection, Filter)
-                    : MongoCollection.Find(Filter)
+                    MongoSession != null
+                        ? MongoSession.Find(MongoCollection, Filter)
+                        : MongoCollection.Find(Filter)
                 )
                 .Project(projection);
 

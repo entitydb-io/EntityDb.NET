@@ -19,10 +19,6 @@ namespace EntityDb.Common.Transactions
             _transactionRepository = transactionRepository;
         }
 
-        protected virtual Task<T[]> WrapQuery<T>(Task<T[]> task) => task;
-
-        protected virtual Task<bool> WrapCommand(Task<bool> task) => task;
-
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
             return WrapQuery(_transactionRepository.GetTransactionIds(sourceQuery));
@@ -102,6 +98,16 @@ namespace EntityDb.Common.Transactions
         public virtual ValueTask DisposeAsync()
         {
             return _transactionRepository.DisposeAsync();
+        }
+
+        protected virtual Task<T[]> WrapQuery<T>(Task<T[]> task)
+        {
+            return task;
+        }
+
+        protected virtual Task<bool> WrapCommand(Task<bool> task)
+        {
+            return task;
         }
     }
 }

@@ -42,6 +42,6 @@ command could be `PerformDeposit` while another could be `PerformWithdrawl`. The
 
 ### Tying it all together
 
-The source and commands are all tied together under one transient object - the transaction. A transaction can
-have exactly one source and can have many commands; each command can have many facts. When you need to commit your
-changes, you commit the transaction - it's all or nothing.
+The source and commands are all tied together under one transient object - the transaction. A transaction can have
+exactly one source and can have many commands; each command can have many facts. When you need to commit your changes,
+you commit the transaction - it's all or nothing.

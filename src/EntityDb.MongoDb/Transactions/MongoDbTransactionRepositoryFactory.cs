@@ -17,16 +17,15 @@ namespace EntityDb.MongoDb.Transactions
 
     internal class MongoDbTransactionRepositoryFactory<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
     {
-        private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly string _connectionString;
 
         protected readonly string _databaseName;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
 
-        public string DatabaseName => _databaseName;
-
-        public MongoDbTransactionRepositoryFactory(IOptionsFactory<TransactionSessionOptions> optionsFactory, ILoggerFactory loggerFactory,
+        public MongoDbTransactionRepositoryFactory(IOptionsFactory<TransactionSessionOptions> optionsFactory,
+            ILoggerFactory loggerFactory,
             IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
         {
             _optionsFactory = optionsFactory;
@@ -36,6 +35,8 @@ namespace EntityDb.MongoDb.Transactions
 
             _databaseName = databaseName;
         }
+
+        public string DatabaseName => _databaseName;
 
         public IMongoClient CreatePrimaryClient()
         {
@@ -98,10 +99,10 @@ namespace EntityDb.MongoDb.Transactions
             {
                 if (transactionSessionOptions.SecondaryPreferred)
                 {
-                    return new(null, CreateSecondaryClient());
+                    return new MongoDbTransactionObjects(null, CreateSecondaryClient());
                 }
 
-                return new(null, CreatePrimaryClient());
+                return new MongoDbTransactionObjects(null, CreatePrimaryClient());
             }
 
             var clientSessionHandle = await CreateClientSessionHandle();
@@ -110,18 +111,7 @@ namespace EntityDb.MongoDb.Transactions
 
             var mongoSession = new MongoSession(clientSessionHandle);
 
-            return new(mongoSession, mongoClient);
-        }
-
-        public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
-            string connectionString, string databaseName)
-        {
-            return ActivatorUtilities.CreateInstance<MongoDbTransactionRepositoryFactory<TEntity>>
-            (
-                serviceProvider,
-                connectionString,
-                databaseName
-            );
+            return new MongoDbTransactionObjects(mongoSession, mongoClient);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
@@ -133,6 +123,17 @@ namespace EntityDb.MongoDb.Transactions
         public ValueTask DisposeAsync()
         {
             return ValueTask.CompletedTask;
+        }
+
+        public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
+            string connectionString, string databaseName)
+        {
+            return ActivatorUtilities.CreateInstance<MongoDbTransactionRepositoryFactory<TEntity>>
+            (
+                serviceProvider,
+                connectionString,
+                databaseName
+            );
         }
     }
 }

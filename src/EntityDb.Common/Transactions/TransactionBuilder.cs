@@ -21,13 +21,13 @@ namespace EntityDb.Common.Transactions
     /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
     public sealed class TransactionBuilder<TEntity>
     {
-        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
-        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
         private readonly IAuthorizingStrategy<TEntity>? _authorizingStrategy;
+        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
+        private readonly Dictionary<Guid, TEntity> _knownEntities = new();
         private readonly ILeasingStrategy<TEntity>? _leasingStrategy;
         private readonly ITaggingStrategy<TEntity>? _taggingStrategy;
-        private readonly Dictionary<Guid, TEntity> _knownEntities = new();
         private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
+        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
 
         /// <summary>
         ///     Initializes a new instance of <see cref="TransactionBuilder{TEntity}" />.

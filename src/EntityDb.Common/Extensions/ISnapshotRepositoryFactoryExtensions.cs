@@ -13,7 +13,8 @@ namespace EntityDb.Common.Extensions
         {
             if (snapshotTestMode.HasValue)
             {
-                return new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory, snapshotTestMode.Value);
+                return new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory,
+                    snapshotTestMode.Value);
             }
 
             return snapshotRepositoryFactory;

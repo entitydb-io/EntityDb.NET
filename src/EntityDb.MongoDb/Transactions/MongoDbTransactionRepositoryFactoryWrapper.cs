@@ -11,7 +11,8 @@ namespace EntityDb.MongoDb.Transactions
     {
         private readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
 
-        public MongoDbTransactionRepositoryFactoryWrapper(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
+        public MongoDbTransactionRepositoryFactoryWrapper(
+            IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
         {
             _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
         }
@@ -38,7 +39,8 @@ namespace EntityDb.MongoDb.Transactions
             return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
         }
 
-        public virtual Task<MongoDbTransactionObjects> CreateObjects(TransactionSessionOptions transactionSessionOptions)
+        public virtual Task<MongoDbTransactionObjects> CreateObjects(
+            TransactionSessionOptions transactionSessionOptions)
         {
             return _mongoDbTransactionRepositoryFactory.CreateObjects(transactionSessionOptions);
         }
@@ -50,7 +52,8 @@ namespace EntityDb.MongoDb.Transactions
             IMongoClient mongoClient
         )
         {
-            return _mongoDbTransactionRepositoryFactory.CreateRepository(transactionSessionOptions, mongoSession, mongoClient);
+            return _mongoDbTransactionRepositoryFactory.CreateRepository(transactionSessionOptions, mongoSession,
+                mongoClient);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]

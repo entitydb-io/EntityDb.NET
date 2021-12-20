@@ -44,8 +44,9 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
         [Theory]
         [InlineData(10, 20)]
-        public async Task GivenSnapshottingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
-            ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
+        public async Task
+            GivenSnapshottingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
+                ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
         {
             // ARRANGE
 
@@ -65,8 +66,9 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
             var entityId = Guid.NewGuid();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite",
-                    "TestWrite");
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository("TestWrite",
+                        "TestWrite");
 
             var firstTransaction = await BuildTransaction(entityId, 1, expectedSnapshotVersion, serviceProvider);
 

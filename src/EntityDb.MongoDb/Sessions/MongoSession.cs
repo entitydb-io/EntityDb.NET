@@ -31,7 +31,8 @@ namespace EntityDb.MongoDb.Sessions
                 );
         }
 
-        public async Task DeleteMany<TDocument>(IMongoCollection<TDocument> mongoCollection, FilterDefinition<TDocument> documentFilter)
+        public async Task DeleteMany<TDocument>(IMongoCollection<TDocument> mongoCollection,
+            FilterDefinition<TDocument> documentFilter)
         {
             await mongoCollection
                 .DeleteManyAsync
@@ -41,7 +42,8 @@ namespace EntityDb.MongoDb.Sessions
                 );
         }
 
-        public IFindFluent<TDocument, TDocument> Find<TDocument>(IMongoCollection<TDocument> mongoCollection, FilterDefinition<TDocument> filter)
+        public IFindFluent<TDocument, TDocument> Find<TDocument>(IMongoCollection<TDocument> mongoCollection,
+            FilterDefinition<TDocument> filter)
         {
             return mongoCollection.Find(ClientSessionHandle, filter);
         }

@@ -5,15 +5,19 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Transactions
 {
-    internal sealed class AutoProvisionMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
+    internal sealed class
+        AutoProvisionMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
     {
         private bool _needToProvision = true;
 
-        public AutoProvisionMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
+        public AutoProvisionMongoDbTransactionRepositoryFactory(
+            IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(
+            mongoDbTransactionRepositoryFactory)
         {
         }
 
-        public override async Task<MongoDbTransactionObjects> CreateObjects(TransactionSessionOptions transactionSessionOptions)
+        public override async Task<MongoDbTransactionObjects> CreateObjects(
+            TransactionSessionOptions transactionSessionOptions)
         {
             var mongoObjects = await base.CreateObjects(transactionSessionOptions);
 

@@ -15,8 +15,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
         private static readonly CreateIndexOptions UniquenessConstraint = new()
         {
-            Name = "Uniqueness Constraint",
-            Unique = true
+            Name = "Uniqueness Constraint", Unique = true
         };
 
         private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> _collections = new()

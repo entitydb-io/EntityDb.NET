@@ -37,7 +37,8 @@ namespace EntityDb.Common.Tests.Transactions
         {
         }
 
-        private Task<ITransactionRepository<TransactionEntity>> CreateRepository(string transactionSessionOptionsName, Action<IServiceCollection>? configureOverrides = null)
+        private Task<ITransactionRepository<TransactionEntity>> CreateRepository(string transactionSessionOptionsName,
+            Action<IServiceCollection>? configureOverrides = null)
         {
             var serviceProvider = _serviceProvider;
 
@@ -46,7 +47,8 @@ namespace EntityDb.Common.Tests.Transactions
                 serviceProvider = GetServiceProviderWithOverrides(configureOverrides);
             }
 
-            return serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(transactionSessionOptionsName);
+            return serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository(transactionSessionOptionsName);
         }
 
         private async Task TestGet<TResult>
@@ -419,9 +421,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = TransactionSeeder.Create(1, 1);
 
-            await using var transactionRepository = await CreateRepository("TestReadOnly", (serviceCollection) =>
+            await using var transactionRepository = await CreateRepository("TestReadOnly", serviceCollection =>
             {
-                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", (options) =>
+                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", options =>
                 {
                     options.LoggerOverride = loggerMock.Object;
                 });
@@ -445,8 +447,8 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transactionId = Guid.NewGuid();
 
-            var firstTransaction = TransactionSeeder.Create(1, 1, transactionId: transactionId);
-            var secondTransaction = TransactionSeeder.Create(1, 1, transactionId: transactionId);
+            var firstTransaction = TransactionSeeder.Create(1, 1, transactionId);
+            var secondTransaction = TransactionSeeder.Create(1, 1, transactionId);
 
             await using var transactionRepository = await CreateRepository("TestWrite");
 
@@ -492,16 +494,16 @@ namespace EntityDb.Common.Tests.Transactions
                 .Verifiable();
 
 
-
             var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
 
-            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride", (serviceCollection) =>
-            {
-                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", (options) =>
+            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride",
+                serviceCollection =>
                 {
-                    options.LoggerOverride = loggerMock.Object;
+                    serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
+                    {
+                        options.LoggerOverride = loggerMock.Object;
+                    });
                 });
-            });
 
             // ACT
 
@@ -532,13 +534,14 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride", (serviceCollection) =>
-            {
-                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", (options) =>
+            await using var transactionRepository = await CreateRepository("TestWriteWithLoggerOverride",
+                serviceCollection =>
                 {
-                    options.LoggerOverride = loggerMock.Object;
+                    serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
+                    {
+                        options.LoggerOverride = loggerMock.Object;
+                    });
                 });
-            });
 
             // ACT
 
@@ -553,7 +556,8 @@ namespace EntityDb.Common.Tests.Transactions
             secondTransaction.Steps.Length.ShouldBe(1);
 
             firstTransaction.Steps[0].EntityId.ShouldBe(secondTransaction.Steps[0].EntityId);
-            firstTransaction.Steps[0].NextEntityVersionNumber.ShouldBe(secondTransaction.Steps[0].NextEntityVersionNumber);
+            firstTransaction.Steps[0].NextEntityVersionNumber
+                .ShouldBe(secondTransaction.Steps[0].NextEntityVersionNumber);
 
             firstTransactionInserted.ShouldBeTrue();
             secondTransactionInserted.ShouldBeFalse();
@@ -610,10 +614,10 @@ namespace EntityDb.Common.Tests.Transactions
             var expectedTransactionTimeStamps = new[]
             {
                 transactionTimeStamp,
-                
+
                 // A .NET DateTime can be more precise than milliseconds.
                 // This allows for database types that cannot be more precise than milliseconds.
-                transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond),
+                transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond)
             };
 
             var transaction = BuildTransaction(expectedTransactionId, expectedEntityId, new NoSource(),

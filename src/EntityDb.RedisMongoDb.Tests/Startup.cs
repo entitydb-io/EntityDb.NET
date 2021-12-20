@@ -43,7 +43,7 @@ namespace EntityDb.RedisMongoDb.Tests
                 TransactionTestMode.AllRepositoriesDisposed
             );
 
-            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>("TestWrite", synchronousMode: true);
+            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>("TestWrite", true);
 
             Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);
         }

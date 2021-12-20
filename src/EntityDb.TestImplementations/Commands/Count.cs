@@ -30,7 +30,10 @@ namespace EntityDb.TestImplementations.Commands
 
             tags.Add(new CountTag(Number));
 
-            return entity with { VersionNumber = entity.VersionNumber + 1, Leases = leases.ToArray(), Tags = tags.ToArray() };
+            return entity with
+            {
+                VersionNumber = entity.VersionNumber + 1, Leases = leases.ToArray(), Tags = tags.ToArray()
+            };
         }
     }
 }

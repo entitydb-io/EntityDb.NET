@@ -9,7 +9,8 @@ namespace EntityDb.MongoDb.Sessions
     {
         private readonly TestModeTransactionManager _testModeTransactionManager;
 
-        public TestModeMongoSession(IClientSessionHandle clientSessionHandle, TestModeTransactionManager testModeTransactionManager) : base(clientSessionHandle)
+        public TestModeMongoSession(IClientSessionHandle clientSessionHandle,
+            TestModeTransactionManager testModeTransactionManager) : base(clientSessionHandle)
         {
             _testModeTransactionManager = testModeTransactionManager;
 

@@ -33,7 +33,8 @@ namespace EntityDb.TestImplementations.Seeders
                 .RuleFor
                 (
                     transactionStep => transactionStep.PreviousEntitySnapshot,
-                    (_, transactionStep) => new TransactionEntity().Reduce(Enumerable.Repeat(CommandSeeder.Create(), (int)transactionStep.PreviousEntityVersionNumber))
+                    (_, transactionStep) => new TransactionEntity().Reduce(Enumerable.Repeat(CommandSeeder.Create(),
+                        (int)transactionStep.PreviousEntityVersionNumber))
                 )
                 .RuleFor
                 (

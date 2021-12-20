@@ -31,7 +31,7 @@ namespace EntityDb.Common.Transactions
             }
         }
 
-        /// <inheritdoc cref="ITransactionSubscriber{TEntity}.Notify(ITransaction{TEntity})"/>
+        /// <inheritdoc cref="ITransactionSubscriber{TEntity}.Notify(ITransaction{TEntity})" />
         /// <returns>A task that handles notification asynchronously.</returns>
         protected abstract Task NotifyAsync(ITransaction<TEntity> transaction);
     }

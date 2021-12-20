@@ -57,10 +57,7 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[]
-                    {
-                        new DoNothing()
-                    }));
+                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
 
                 serviceCollection.AddScoped(_ => authorizingStrategy);
             });
@@ -68,7 +65,8 @@ namespace EntityDb.Common.Tests.Transactions
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository(default!);
 
             // ACT
 
@@ -225,7 +223,8 @@ namespace EntityDb.Common.Tests.Transactions
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository(default!);
 
             // ACT
 
@@ -253,7 +252,8 @@ namespace EntityDb.Common.Tests.Transactions
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository(default!);
 
             // ASSERT
 
@@ -309,16 +309,14 @@ namespace EntityDb.Common.Tests.Transactions
             var serviceProvider = GetServiceProviderWithOverrides(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[]
-                    {
-                        new DoNothing(),
-                    }));
+                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
             });
 
             var transactionBuilder = serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             await using var entityRepository =
-                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>().CreateRepository(default!);
+                await serviceProvider.GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository(default!);
 
             // ACT
 

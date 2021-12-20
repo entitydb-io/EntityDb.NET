@@ -63,12 +63,12 @@ namespace EntityDb.MongoDb.Documents
         {
             return new DocumentQuery<SourceDocument>
             (
-                MongoSession: mongoSession,
-                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
-                Filter: sourceQuery.GetFilter(_filterBuilder),
-                Sort: sourceQuery.GetSort(_sortBuilder),
-                Skip: sourceQuery.Skip,
-                Limit: sourceQuery.Take
+                mongoSession,
+                GetMongoCollection(mongoDatabase, CollectionName),
+                sourceQuery.GetFilter(_filterBuilder),
+                sourceQuery.GetSort(_sortBuilder),
+                sourceQuery.Skip,
+                sourceQuery.Take
             );
         }
     }
