@@ -12,12 +12,6 @@ namespace EntityDb.Void.Transactions
 {
     internal sealed class VoidTransactionRepository<TEntity> : ITransactionRepository<TEntity>
     {
-        private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
-            Task.FromResult(Array.Empty<ICommand<TEntity>>());
-
-        private static readonly Task<IEntityAnnotation<ICommand<TEntity>>[]> _emptyAnnotatedCommandArrayTask =
-            Task.FromResult(Array.Empty<IEntityAnnotation<ICommand<TEntity>>>());
-
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
             return Task.FromResult(Array.Empty<Guid>());
