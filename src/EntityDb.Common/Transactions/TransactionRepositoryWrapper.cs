@@ -13,7 +13,7 @@ namespace EntityDb.Common.Transactions
     {
         private readonly ITransactionRepository<TEntity> _transactionRepository;
 
-        public TransactionRepositoryWrapper(ITransactionRepository<TEntity> transactionRepository)
+        protected TransactionRepositoryWrapper(ITransactionRepository<TEntity> transactionRepository)
         {
             _transactionRepository = transactionRepository;
         }
