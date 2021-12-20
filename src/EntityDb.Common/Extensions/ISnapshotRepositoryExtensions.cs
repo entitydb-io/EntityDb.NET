@@ -6,7 +6,7 @@ namespace EntityDb.Common.Extensions
 {
     internal static class ISnapshotRepositoryExtensions
     {
-        public static ISnapshotRepository<TEntity> WithTryCatch<TEntity>
+        public static ISnapshotRepository<TEntity> UseTryCatch<TEntity>
         (
             this ISnapshotRepository<TEntity> snapshotRepository,
             ILogger logger

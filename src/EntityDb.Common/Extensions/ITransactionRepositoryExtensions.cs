@@ -6,7 +6,7 @@ namespace EntityDb.Common.Extensions
 {
     internal static class ITransactionRepositoryExtensions
     {
-        public static ITransactionRepository<TEntity> WithTryCatch<TEntity>
+        public static ITransactionRepository<TEntity> UseTryCatch<TEntity>
         (
             this ITransactionRepository<TEntity> transactionRepository,
             ILogger logger

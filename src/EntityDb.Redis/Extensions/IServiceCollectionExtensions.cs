@@ -33,7 +33,7 @@ namespace EntityDb.Redis.Extensions
 
                 return RedisSnapshotRepositoryFactory<TEntity>
                     .Create(serviceProvider, connectionString, keyNamespace)
-                    .WithTestMode(testMode);
+                    .UseTestMode(testMode);
             });
         }
     }

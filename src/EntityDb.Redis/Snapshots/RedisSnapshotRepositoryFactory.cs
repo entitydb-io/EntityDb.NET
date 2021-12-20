@@ -50,7 +50,7 @@ namespace EntityDb.Redis.Snapshots
                 logger
             );
 
-            return redisSnapshotRepository.WithTryCatch(logger);
+            return redisSnapshotRepository.UseTryCatch(logger);
         }
 
         public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,

@@ -5,7 +5,7 @@ namespace EntityDb.Common.Extensions
 {
     internal static class ISnapshotRepositoryFactoryExtensions
     {
-        public static ISnapshotRepositoryFactory<TEntity> WithTestMode<TEntity>
+        public static ISnapshotRepositoryFactory<TEntity> UseTestMode<TEntity>
         (
             this ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
             SnapshotTestMode? snapshotTestMode

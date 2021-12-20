@@ -88,7 +88,7 @@ namespace EntityDb.MongoDb.Transactions
                 _resolvingStrategyChain
             );
 
-            return mongoDbTransactionRepository.WithTryCatch(logger);
+            return mongoDbTransactionRepository.UseTryCatch(logger);
         }
 
         public async Task<MongoDbTransactionObjects> CreateObjects(TransactionSessionOptions transactionSessionOptions)
