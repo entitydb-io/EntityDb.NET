@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 {
-    public class MongoDbAtlasClient : IDisposable
+    internal class MongoDbAtlasClient : IDisposable
     {
         private static readonly HttpClient _httpClient = new();
 
@@ -18,7 +18,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
         private readonly string _privateKey;
         private readonly string _publicKey;
 
-        private MongoDbAtlasClient(string groupId, string publicKey, string privateKey)
+        public MongoDbAtlasClient(string groupId, string publicKey, string privateKey)
         {
             _groupId = groupId;
             _publicKey = publicKey;

@@ -58,7 +58,7 @@ namespace EntityDb.MongoDb.Provisioner.Commands
             command.AddArgument(entityPasswordArgument);
         }
 
-        protected static Task<MongoDbAtlasClient> GetMongoDbAtlasClient(string groupName, string publicKey,
+        internal static Task<MongoDbAtlasClient> GetMongoDbAtlasClient(string groupName, string publicKey,
             string privateKey)
         {
             return MongoDbAtlasClient.Create(groupName, publicKey, privateKey);
