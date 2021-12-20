@@ -1,6 +1,6 @@
-﻿using EntityDb.MongoDb.Transactions;
+﻿using EntityDb.Common.Exceptions;
+using EntityDb.MongoDb.Transactions;
 using MongoDB.Driver;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -25,7 +25,7 @@ namespace EntityDb.MongoDb.Sessions
         {
             if (ClientSessionHandle.IsInTransaction == false)
             {
-                throw new Exception("Test Mode Issue - Transaction should be started already.");
+                throw new TestModeException();
             }
         }
 
@@ -33,7 +33,7 @@ namespace EntityDb.MongoDb.Sessions
         {
             if (ClientSessionHandle.IsInTransaction == false)
             {
-                throw new Exception("Test Mode Issue - Transaction should be started already.");
+                throw new TestModeException();
             }
 
             return Task.CompletedTask;
@@ -43,7 +43,7 @@ namespace EntityDb.MongoDb.Sessions
         {
             if (ClientSessionHandle.IsInTransaction == false)
             {
-                throw new Exception("Test Mode Issue - Transaction should be started already.");
+                throw new TestModeException();
             }
 
             return Task.CompletedTask;
