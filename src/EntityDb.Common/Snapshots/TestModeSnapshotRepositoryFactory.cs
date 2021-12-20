@@ -35,14 +35,11 @@ namespace EntityDb.Common.Snapshots
 
         public async ValueTask DisposeAsync()
         {
-            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed)
+            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed && _testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
             {
-                if (_testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
-                {
-                    var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
+                var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
 
-                    await snapshotRepository.DeleteSnapshots(deleteEntityIds);
-                }
+                await snapshotRepository.DeleteSnapshots(deleteEntityIds);
             }
 
             await _snapshotRepositoryFactory.DisposeAsync();
