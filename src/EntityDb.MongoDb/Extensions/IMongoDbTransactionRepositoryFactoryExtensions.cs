@@ -7,11 +7,12 @@ namespace EntityDb.MongoDb.Extensions
     {
         public static IMongoDbTransactionRepositoryFactory<TEntity> UseTestMode<TEntity>(this IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory, TransactionTestMode? transactionTestMode)
         {
-            return transactionTestMode switch
+            if (transactionTestMode.HasValue)
             {
-                null => mongoDbTransactionRepositoryFactory,
-                _ => new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory, transactionTestMode.Value),
-            };
+                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory, transactionTestMode.Value);
+            }
+
+            return mongoDbTransactionRepositoryFactory;
         }
     }
 }
