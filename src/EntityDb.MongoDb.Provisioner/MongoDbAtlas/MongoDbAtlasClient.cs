@@ -34,7 +34,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         private static Uri GetUri(string route)
         {
-            var baseUrl = "https://cloud.mongodb.com";
+            const string baseUrl = "https://cloud.mongodb.com";
 
             return new Uri($"{baseUrl}/api/atlas/v1.0/{route}");
         }
