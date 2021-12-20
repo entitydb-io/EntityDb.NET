@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;

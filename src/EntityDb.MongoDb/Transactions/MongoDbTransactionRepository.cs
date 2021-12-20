@@ -8,6 +8,7 @@ using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using MongoDB.Driver;
 using System;
