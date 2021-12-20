@@ -624,9 +624,13 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
-            await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             var commandQuery = new GetCurrentEntityQuery(expectedEntityId, 0);
+
+            // ARRANGE ASSERTIONS
+
+            transactionInserted.ShouldBeTrue();
 
             // ACT
 
@@ -660,7 +664,11 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(),
                 new ICommand<TransactionEntity>[] { new DoNothing() });
 
-            await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
+
+            // ARRANGE ASSERTIONS
+
+            transactionInserted.ShouldBeTrue();
 
             // ACT
 
@@ -688,9 +696,13 @@ namespace EntityDb.Common.Tests.Transactions
                 .Create(entityId, new AddTag("Foo", "Bar"))
                 .Build(Guid.NewGuid(), new NoSource());
 
-            await transactionRepository.PutTransaction(initialTransaction);
+            var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
             var tagQuery = new DeleteTagsQuery(entityId, expectedInitialTags);
+
+            // ARRANGE ASSERTIONS
+
+            initialTransactionInserted.ShouldBeTrue();
 
             // ACT
 
@@ -700,11 +712,13 @@ namespace EntityDb.Common.Tests.Transactions
                 .Append(entityId, new RemoveAllTags())
                 .Build(Guid.NewGuid(), new NoSource());
 
-            await transactionRepository.PutTransaction(finalTransaction);
+            var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
             var actualFinalTags = await transactionRepository.GetTags(tagQuery);
 
             // ASSERT
+
+            finalTransactionInserted.ShouldBeTrue();
 
             expectedInitialTags.SequenceEqual(actualInitialTags).ShouldBeTrue();
 
@@ -728,9 +742,13 @@ namespace EntityDb.Common.Tests.Transactions
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
                 .Build(Guid.NewGuid(), new NoSource());
 
-            await transactionRepository.PutTransaction(initialTransaction);
+            var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
             var leaseQuery = new DeleteLeasesQuery(entityId, expectedInitialLeases);
+
+            // ARRANGE ASSERTIONS
+
+            initialTransactionInserted.ShouldBeTrue();
 
             // ACT
 
@@ -740,11 +758,13 @@ namespace EntityDb.Common.Tests.Transactions
                 .Append(entityId, new RemoveAllLeases())
                 .Build(Guid.NewGuid(), new NoSource());
 
-            await transactionRepository.PutTransaction(finalTransaction);
+            var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
             var actualFinalLeases = await transactionRepository.GetLeases(leaseQuery);
 
             // ASSERT
+
+            finalTransactionInserted.ShouldBeTrue();
 
             actualInitialLeases.SequenceEqual(expectedInitialLeases).ShouldBeTrue();
 
@@ -769,11 +789,13 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            await transactionRepository.PutTransaction(transaction);
+            var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
             var newCommands = await transactionRepository.GetCommands(versionOneCommandQuery);
 
             // ASSERT
+
+            transactionInserted.ShouldBeTrue();
 
             transaction.Steps.Length.ShouldBe(1);
 
@@ -808,15 +830,21 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
-            await transactionRepository.PutTransaction(firstTransaction);
+            var firstTransactionInserted = await transactionRepository.PutTransaction(firstTransaction);
+
+            // ARRANGE ASSERTIONS
+
+            firstTransactionInserted.ShouldBeTrue();
 
             // ACT
 
-            await transactionRepository.PutTransaction(secondTransaction);
+            var secondTransactionInserted = await transactionRepository.PutTransaction(secondTransaction);
 
             var newCommands = await transactionRepository.GetCommands(versionTwoCommandQuery);
 
             // ASSERT
+
+            secondTransactionInserted.ShouldBeTrue();
 
             secondTransaction.Steps.Length.ShouldBe(1);
 

@@ -49,7 +49,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
             GivenSnapshottingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
                 ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
         {
-            // ARRANGE
+            // ARRANGE 1
 
             var snapshottingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
 
@@ -75,10 +75,20 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
 
             var firstTransactionInserted = await entityRepository.PutTransaction(firstTransaction);
 
+            // ARRANGE 1 ASSERTIONS
+
+            firstTransactionInserted.ShouldBeTrue();
+
+            // ARRANGE 2
+
             var secondTransaction = await BuildTransaction(entityId, expectedSnapshotVersion, expectedCurrentVersion,
                 serviceScope.ServiceProvider, entityRepository);
 
             var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
+            
+            // ARRANGE 2 ASSERTIONS
+
+            secondTransactionInserted.ShouldBeTrue();
 
             // ACT
 
@@ -87,9 +97,6 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
             var snapshot = await entityRepository.GetSnapshotOrDefault(entityId);
 
             // ASSERT
-
-            firstTransactionInserted.ShouldBeTrue();
-            secondTransactionInserted.ShouldBeTrue();
 
             snapshot.ShouldNotBeNull();
             snapshot.VersionNumber.ShouldBe(expectedSnapshotVersion);

@@ -41,7 +41,7 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore src/EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test src/EntityDb.sln --no-restore -c Release
+        run: dotnet test src/EntityDb.sln --no-restore -c Debug
       - name: Pack Projects into Nuget Packages
         run: dotnet pack src/EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${Env:NOTES}
       - name: Publish to Nuget.org
