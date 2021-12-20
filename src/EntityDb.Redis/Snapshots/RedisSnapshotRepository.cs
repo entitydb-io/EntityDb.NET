@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EntityDb.Redis.Sessions
+namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {

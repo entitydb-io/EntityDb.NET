@@ -3,7 +3,6 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
-using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;

@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System.Threading.Tasks;

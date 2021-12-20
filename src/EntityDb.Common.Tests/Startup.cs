@@ -39,12 +39,13 @@ namespace EntityDb.Common.Tests
 
         public static void ConfigureTestsBaseServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", (options) =>
+            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", (_) =>
             {
             });
 
             serviceCollection.Configure<TransactionSessionOptions>("TestWrite", (options) =>
             {
+                options.ReadOnly = false;
             });
 
             serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", (options) =>

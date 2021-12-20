@@ -111,7 +111,7 @@ namespace EntityDb.MongoDb.Extensions
                         Data: document.Data.Reconstruct<TData>(logger, resolvingStrategyChain)
                     );
                 })
-                .ToArray();
+                .ToArray<IEntityAnnotation<TData>>();
         }
 
         public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery, ILogger logger, IResolvingStrategyChain resolvingStrategyChain)

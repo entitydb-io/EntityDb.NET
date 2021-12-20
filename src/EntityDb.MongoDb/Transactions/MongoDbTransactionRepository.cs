@@ -9,13 +9,13 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
-using EntityDb.MongoDb.Queries;
+using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace EntityDb.MongoDb.Sessions
+namespace EntityDb.MongoDb.Transactions
 {
     internal class MongoDbTransactionRepository<TEntity> : ITransactionRepository<TEntity>
     {

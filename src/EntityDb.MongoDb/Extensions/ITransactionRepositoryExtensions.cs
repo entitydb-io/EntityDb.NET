@@ -2,7 +2,7 @@
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Transactions;
 
-namespace EntityDb.Common.Extensions
+namespace EntityDb.MongoDb.Extensions
 {
     internal static class ITransactionRepositoryExtensions
     {
