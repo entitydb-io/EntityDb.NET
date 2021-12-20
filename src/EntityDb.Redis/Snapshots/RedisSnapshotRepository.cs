@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Strategies;
 using EntityDb.Redis.Envelopes;
 using StackExchange.Redis;
 using System;
