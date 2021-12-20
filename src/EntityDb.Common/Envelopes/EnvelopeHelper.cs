@@ -15,7 +15,7 @@ namespace EntityDb.Common.Envelopes
 
         public static bool NotThisPlatform(IReadOnlyDictionary<string, string> headers)
         {
-            return headers.TryGetValue(Platform, out var platform) == false || platform != ThisPlatform;
+            return !headers.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
         }
 
         public static bool TryGetAssemblyFullName(IReadOnlyDictionary<string, string> headers,

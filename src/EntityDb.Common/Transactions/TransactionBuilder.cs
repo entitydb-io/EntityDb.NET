@@ -161,7 +161,7 @@ namespace EntityDb.Common.Transactions
         /// <returns>The transaction builder.</returns>
         public TransactionBuilder<TEntity> Append(Guid entityId, ICommand<TEntity> command)
         {
-            if (_knownEntities.ContainsKey(entityId) == false)
+            if (!_knownEntities.ContainsKey(entityId))
             {
                 throw new EntityNotLoadedException();
             }

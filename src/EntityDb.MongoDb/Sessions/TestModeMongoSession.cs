@@ -23,7 +23,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public override void StartTransaction()
         {
-            if (ClientSessionHandle.IsInTransaction == false)
+            if (!ClientSessionHandle.IsInTransaction)
             {
                 throw new TestModeException();
             }
@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public override Task CommitTransaction()
         {
-            if (ClientSessionHandle.IsInTransaction == false)
+            if (!ClientSessionHandle.IsInTransaction)
             {
                 throw new TestModeException();
             }
@@ -41,7 +41,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public override Task AbortTransaction()
         {
-            if (ClientSessionHandle.IsInTransaction == false)
+            if (!ClientSessionHandle.IsInTransaction)
             {
                 throw new TestModeException();
             }

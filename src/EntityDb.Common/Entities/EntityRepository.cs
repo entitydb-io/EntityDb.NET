@@ -97,7 +97,7 @@ namespace EntityDb.Common.Entities
         {
             var success = await _transactionRepository.PutTransaction(transaction);
 
-            if (success == false)
+            if (!success)
             {
                 return false;
             }

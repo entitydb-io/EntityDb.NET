@@ -73,7 +73,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             var wwwAuthenticateHeader =
                 AuthenticationHeaderValue.Parse(firstResponse.Headers.WwwAuthenticate.ToString());
 
-            if (DigestChallengeRequest.TryParse(wwwAuthenticateHeader, out var digestChallengeRequest) == false)
+            if (!DigestChallengeRequest.TryParse(wwwAuthenticateHeader, out var digestChallengeRequest))
             {
                 return firstResponse;
             }

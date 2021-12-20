@@ -92,7 +92,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
                 var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
                 var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
 
-                if (entityCollectionNames.Contains(collectionName) == false)
+                if (!entityCollectionNames.Contains(collectionName))
                 {
                     await mongoDatabase.CreateCollectionAsync(collectionName);
 

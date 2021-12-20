@@ -15,7 +15,7 @@ namespace EntityDb.Common.Exceptions
         /// <param name="isAuthorized"></param>
         public static void ThrowIfFalse(bool isAuthorized)
         {
-            if (isAuthorized == false)
+            if (!isAuthorized)
             {
                 throw new CommandNotAuthorizedException();
             }

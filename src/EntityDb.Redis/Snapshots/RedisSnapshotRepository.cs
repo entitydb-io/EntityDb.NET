@@ -45,7 +45,7 @@ namespace EntityDb.Redis.Sessions
             {
                 var previousSnapshot = await GetSnapshot(entityId);
 
-                if (_snapshottingStrategy.ShouldPutSnapshot(previousSnapshot, entity) == false)
+                if (!_snapshottingStrategy.ShouldPutSnapshot(previousSnapshot, entity))
                 {
                     return false;
                 }
@@ -74,7 +74,7 @@ namespace EntityDb.Redis.Sessions
 
             var snapshotValue = await redisDatabase.StringGetAsync(snapshotKey);
 
-            if (snapshotValue.HasValue == false)
+            if (!snapshotValue.HasValue)
             {
                 return default;
             }
