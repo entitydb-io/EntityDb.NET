@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots
@@ -26,6 +27,7 @@ namespace EntityDb.Common.Snapshots
             return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _snapshotTestMode, _testModeSnapshotDisposer);
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

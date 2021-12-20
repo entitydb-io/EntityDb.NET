@@ -2,6 +2,7 @@
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -52,6 +53,7 @@ namespace EntityDb.MongoDb.Transactions
             return _mongoDbTransactionRepositoryFactory.CreateRepository(transactionSessionOptions, mongoSession, mongoClient);
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

@@ -101,7 +101,7 @@ namespace EntityDb.Redis.Sessions
                 .All(task => task.Result);
         }
 
-        [ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

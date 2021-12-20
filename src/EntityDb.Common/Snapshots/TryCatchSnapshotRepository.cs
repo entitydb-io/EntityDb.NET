@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots
@@ -64,6 +65,7 @@ namespace EntityDb.Common.Snapshots
             return TryCatchQuery(_snapshotRepository.DeleteSnapshots(entityIds));
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

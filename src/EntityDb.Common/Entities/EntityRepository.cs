@@ -107,7 +107,7 @@ namespace EntityDb.Common.Entities
             return true;
         }
 
-        [ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

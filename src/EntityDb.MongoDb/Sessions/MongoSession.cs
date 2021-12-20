@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -60,6 +61,7 @@ namespace EntityDb.MongoDb.Sessions
             await ClientSessionHandle.AbortTransactionAsync();
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

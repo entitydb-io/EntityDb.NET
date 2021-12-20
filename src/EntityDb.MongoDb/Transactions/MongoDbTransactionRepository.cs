@@ -11,6 +11,7 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
 using MongoDB.Driver;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -170,6 +171,7 @@ namespace EntityDb.MongoDb.Sessions
             }
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

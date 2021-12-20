@@ -82,7 +82,7 @@ namespace EntityDb.Void.Transactions
             return Task.FromResult(true);
         }
 
-        [ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

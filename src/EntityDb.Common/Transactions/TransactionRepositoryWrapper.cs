@@ -5,6 +5,7 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions
@@ -92,6 +93,7 @@ namespace EntityDb.Common.Transactions
             return WrapCommand(_transactionRepository.PutTransaction(transaction));
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();

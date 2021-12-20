@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions
@@ -14,6 +15,7 @@ namespace EntityDb.Void.Transactions
             return _voidTransactionRepositoryTask;
         }
 
+        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
         public void Dispose()
         {
             DisposeAsync().AsTask().Wait();
