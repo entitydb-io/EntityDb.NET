@@ -32,8 +32,12 @@ jobs:
         run: dotnet restore src/EntityDb.sln --locked-mode
       - name: Run Project Tests
         run: dotnet test src/EntityDb.sln --no-restore -c Release --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Get Coverage Reports
+        id: get_coverage_reports
+        run: |
+          echo ::set-output name=csv::"'$(ls TestResults/**/*.xml | tr '\n', ',' | rev | cut --complement -c 1 | rev)'"
       - name: Publish Coverage Results
-        uses: codecov/codecov-action@v2
+        uses: codacy/codacy-coverage-reporter-action@v1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./TestResults
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ${{ steps.get_coverage_reports.outputs.csv }}
