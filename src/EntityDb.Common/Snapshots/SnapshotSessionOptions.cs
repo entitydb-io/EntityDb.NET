@@ -8,11 +8,6 @@ namespace EntityDb.Common.Snapshots
     public sealed record SnapshotSessionOptions
     {
         /// <summary>
-        ///     If <c>true</c>, indicates that all snapshots should be discarded when the repository is disposed.
-        /// </summary>
-        public bool TestMode { get; set; }
-
-        /// <summary>
         ///     Overrides the logger for the session.
         /// </summary>
         public ILogger? LoggerOverride { get; set; }

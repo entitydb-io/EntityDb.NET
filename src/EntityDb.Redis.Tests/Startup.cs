@@ -1,4 +1,5 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Strategies;
@@ -24,7 +25,8 @@ namespace EntityDb.Redis.Tests
             serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,
-                _ => "127.0.0.1:6379"
+                _ => "127.0.0.1:6379",
+                SnapshotTestMode.AllRepositoriesDisposed
             );
 
             Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);

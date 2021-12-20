@@ -407,18 +407,35 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
-        public async Task GivenReadOnlyMode_WhenPuttingTransaction_ThenThrow()
+        public async Task GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged()
         {
             // ARRANGE
 
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+
+            loggerMock
+                .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
+                .Verifiable();
+
             var transaction = TransactionSeeder.Create(1, 1);
 
-            await using var transactionRepository = await CreateRepository("TestReadOnly");
+            await using var transactionRepository = await CreateRepository("TestReadOnly", (serviceCollection) =>
+            {
+                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", (options) =>
+                {
+                    options.LoggerOverride = loggerMock.Object;
+                });
+            });
+
+            // ACT
+
+            var inserted = await transactionRepository.PutTransaction(transaction);
 
             // ASSERT
 
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(async () =>
-                await transactionRepository.PutTransaction(transaction));
+            inserted.ShouldBeFalse();
+
+            loggerMock.Verify();
         }
 
         [Fact]
@@ -482,7 +499,6 @@ namespace EntityDb.Common.Tests.Transactions
             {
                 serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", (options) =>
                 {
-                    options.TestMode = true;
                     options.LoggerOverride = loggerMock.Object;
                 });
             });
@@ -520,7 +536,6 @@ namespace EntityDb.Common.Tests.Transactions
             {
                 serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", (options) =>
                 {
-                    options.TestMode = true;
                     options.LoggerOverride = loggerMock.Object;
                 });
             });
@@ -621,7 +636,7 @@ namespace EntityDb.Common.Tests.Transactions
             annotatedCommands[0].TransactionId.ShouldBe(expectedTransactionId);
             annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
             annotatedCommands[0].EntityVersionNumber.ShouldBe(1ul);
-            annotatedCommands[0].Command.ShouldBe(expectedCommand);
+            annotatedCommands[0].Data.ShouldBe(expectedCommand);
 
             expectedTransactionTimeStamps.Contains(annotatedCommands[0].TransactionTimeStamp).ShouldBeTrue();
         }

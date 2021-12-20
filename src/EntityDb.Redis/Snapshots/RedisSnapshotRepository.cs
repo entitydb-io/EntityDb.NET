@@ -1,33 +1,45 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Redis.Envelopes;
-using EntityDb.Redis.Sessions;
+using StackExchange.Redis;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace EntityDb.Redis.Snapshots
+namespace EntityDb.Redis.Sessions
 {
     internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {
         private readonly string _keyNamespace;
+        protected readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
+        protected readonly IConnectionMultiplexer _connectionMultiplexer;
+        protected readonly ILogger _logger;
 
         public RedisSnapshotRepository
         (
-            IRedisSession redisSession,
             string keyNamespace,
-            ISnapshottingStrategy<TEntity>? snapshottingStrategy = null
+            IResolvingStrategyChain resolvingStrategyChain,
+            ISnapshottingStrategy<TEntity>? snapshottingStrategy,
+            IConnectionMultiplexer connectionMultiplexer,
+            ILogger logger
         )
         {
-            RedisSession = redisSession;
             _keyNamespace = keyNamespace;
+            _resolvingStrategyChain = resolvingStrategyChain;
             _snapshottingStrategy = snapshottingStrategy;
+            _connectionMultiplexer = connectionMultiplexer;
+            _logger = logger;
         }
 
-        public IRedisSession RedisSession { get; }
+        public RedisKey GetSnapshotKey(Guid entityId)
+        {
+            return $"{_keyNamespace}#{entityId}";
+        }
 
-        public virtual async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+        public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
             if (_snapshottingStrategy != null)
             {
@@ -39,42 +51,54 @@ namespace EntityDb.Redis.Snapshots
                 }
             }
 
-            return await RedisSession.ExecuteCommand
-            (
-                (logger, redisTransaction) =>
-                {
-                    var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(entity, logger);
+            var snapshotKey = GetSnapshotKey(entityId);
 
-                    var snapshotValue = jsonElementEnvelope.Serialize(logger);
+            var snapshotValue = JsonElementEnvelope
+                .Deconstruct(entity, _logger)
+                .Serialize(_logger);
 
-                    var key = GetKey(entityId);
+            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
 
-                    return redisTransaction.StringSetAsync(key, snapshotValue);
-                }
-            );
+            var insertedTask = redisTransaction.StringSetAsync(snapshotKey, snapshotValue);
+
+            await redisTransaction.ExecuteAsync();
+
+            return await insertedTask;
         }
 
-        public virtual Task<TEntity?> GetSnapshot(Guid entityId)
+        public async Task<TEntity?> GetSnapshot(Guid entityId)
         {
-            return RedisSession.ExecuteQuery
-            (
-                async (logger, resolvingStrategyChain, redisDatabase) =>
-                {
-                    var key = GetKey(entityId);
+            var snapshotKey = GetSnapshotKey(entityId);
 
-                    var snapshotValue = await redisDatabase.StringGetAsync(key);
+            var redisDatabase = _connectionMultiplexer.GetDatabase();
 
-                    if (snapshotValue.HasValue)
-                    {
-                        var jsonElementEnvelope = JsonElementEnvelope.Deserialize(snapshotValue, logger);
+            var snapshotValue = await redisDatabase.StringGetAsync(snapshotKey);
 
-                        return jsonElementEnvelope.Reconstruct<TEntity>(logger, resolvingStrategyChain);
-                    }
+            if (snapshotValue.HasValue == false)
+            {
+                return default;
+            }
 
-                    return default;
-                },
-                default
-            );
+            return JsonElementEnvelope
+                .Deserialize(snapshotValue, _logger)
+                .Reconstruct<TEntity>(_logger, _resolvingStrategyChain);
+        }
+
+        public async Task<bool> DeleteSnapshots(Guid[] entityIds)
+        {
+            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
+
+            var deleteSnapshotTasks = entityIds
+                .Select(GetSnapshotKey)
+                .Select(key => redisTransaction.KeyDeleteAsync(key))
+                .ToArray();
+
+            await redisTransaction.ExecuteAsync();
+
+            await Task.WhenAll(deleteSnapshotTasks);
+
+            return deleteSnapshotTasks
+                .All(task => task.Result);
         }
 
         [ExcludeFromCodeCoverage]
@@ -83,14 +107,11 @@ namespace EntityDb.Redis.Snapshots
             DisposeAsync().AsTask().Wait();
         }
 
-        public virtual async ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            await RedisSession.DisposeAsync();
-        }
+            await Task.Yield();
 
-        protected string GetKey(Guid entityId)
-        {
-            return $"{_keyNamespace}#{entityId}";
+            _connectionMultiplexer.Dispose();
         }
     }
 }

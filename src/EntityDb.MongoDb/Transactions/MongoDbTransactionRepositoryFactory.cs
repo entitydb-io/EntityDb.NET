@@ -12,14 +12,18 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
 {
-    internal class MongoDbTransactionRepositoryFactory<TEntity> : ITransactionRepositoryFactory<TEntity>
+    internal record MongoDbTransactionObjects(IMongoSession? MongoSession, IMongoClient MongoClient);
+
+    internal class MongoDbTransactionRepositoryFactory<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
     {
+        private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IResolvingStrategyChain _resolvingStrategyChain;
         private readonly string _connectionString;
+
         protected readonly string _databaseName;
 
-        protected readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
-        protected readonly ILoggerFactory _loggerFactory;
-        protected readonly IResolvingStrategyChain _resolvingStrategyChain;
+        public string DatabaseName => _databaseName;
 
         public MongoDbTransactionRepositoryFactory(IOptionsFactory<TransactionSessionOptions> optionsFactory, ILoggerFactory loggerFactory,
             IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
@@ -28,89 +32,84 @@ namespace EntityDb.MongoDb.Transactions
             _loggerFactory = loggerFactory;
             _resolvingStrategyChain = resolvingStrategyChain;
             _connectionString = connectionString;
+
             _databaseName = databaseName;
         }
 
-        public async Task<ITransactionRepository<TEntity>> CreateRepository(
-            string transactionSessionOptionsName)
+        public IMongoClient CreatePrimaryClient()
         {
-            var transactionSessionOptions = _optionsFactory.Create(transactionSessionOptionsName);
-
-            var mongoDbSession = await CreateSession(transactionSessionOptions);
-
-            return new MongoDbTransactionRepository<TEntity>(mongoDbSession);
+            return new MongoClient()
+                .WithReadPreference(ReadPreference.Primary)
+                .WithReadConcern(ReadConcern.Majority);
         }
 
-        private static async Task<IClientSessionHandle> CreateClientSessionHandle(IMongoClient mongoClient,
-            TransactionSessionOptions transactionSessionOptions)
+        public IMongoClient CreateSecondaryClient()
         {
-            return await mongoClient.StartSessionAsync(new ClientSessionOptions
+            return new MongoClient(_connectionString)
+                .WithReadPreference(ReadPreference.SecondaryPreferred)
+                .WithReadConcern(ReadConcern.Available);
+        }
+
+        public async Task<IClientSessionHandle> CreateClientSessionHandle()
+        {
+            var mongoClient = CreatePrimaryClient();
+
+            var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
             {
                 CausalConsistency = true,
-                DefaultTransactionOptions = new TransactionOptions(
-                    writeConcern: WriteConcern.WMajority,
-                    maxCommitTime: transactionSessionOptions.WriteTimeout
+                DefaultTransactionOptions = new TransactionOptions
+                (
+                    writeConcern: WriteConcern.WMajority
                 )
             });
+
+            return clientSessionHandle;
         }
 
-        protected virtual Task<IMongoClient> CreateClient(TransactionSessionOptions transactionSessionOptions)
+        public TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
         {
-            IMongoClient mongoClient = new MongoClient(_connectionString);
-
-            if (transactionSessionOptions.SecondaryPreferred)
-            {
-                mongoClient = mongoClient
-                    .WithReadPreference(ReadPreference.SecondaryPreferred)
-                    .WithReadConcern(ReadConcern.Available);
-            }
-            else
-            {
-                mongoClient = mongoClient
-                    .WithReadPreference(ReadPreference.Primary)
-                    .WithReadConcern(ReadConcern.Majority);
-            }
-
-            return Task.FromResult(mongoClient);
+            return _optionsFactory.Create(transactionSessionOptionsName);
         }
 
-        protected virtual IMongoDbSession CreateSession(IClientSessionHandle? clientSessionHandle,
-            IMongoDatabase mongoDatabase, TransactionSessionOptions transactionSessionOptions)
+        public ITransactionRepository<TEntity> CreateRepository
+        (
+            TransactionSessionOptions transactionSessionOptions,
+            IMongoSession? mongoSession,
+            IMongoClient mongoClient
+        )
         {
-            if (transactionSessionOptions.TestMode)
-            {
-                return new TestModeMongoDbSession
-                (
-                    clientSessionHandle,
-                    mongoDatabase,
-                    transactionSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>(),
-                    _resolvingStrategyChain
-                );
-            }
+            var logger = transactionSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>();
 
-            return new MongoDbSession
+            var mongoDbTransactionRepository = new MongoDbTransactionRepository<TEntity>
             (
-                clientSessionHandle,
-                mongoDatabase,
-                transactionSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>(),
+                mongoSession,
+                mongoClient.GetDatabase(_databaseName),
+                logger,
                 _resolvingStrategyChain
             );
+
+            return mongoDbTransactionRepository.WithTryCatch(logger);
         }
 
-        private async Task<IMongoDbSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
+        public async Task<MongoDbTransactionObjects> CreateObjects(TransactionSessionOptions transactionSessionOptions)
         {
-            var mongoClient = await CreateClient(transactionSessionOptions);
-
-            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
-
             if (transactionSessionOptions.ReadOnly)
             {
-                return CreateSession(null, mongoDatabase, transactionSessionOptions);
+                if (transactionSessionOptions.SecondaryPreferred)
+                {
+                    return new(null, CreateSecondaryClient());
+                }
+
+                return new(null, CreatePrimaryClient());
             }
 
-            var clientSessionHandle = await CreateClientSessionHandle(mongoClient, transactionSessionOptions);
+            var clientSessionHandle = await CreateClientSessionHandle();
 
-            return CreateSession(clientSessionHandle, mongoDatabase, transactionSessionOptions);
+            var mongoClient = clientSessionHandle.Client;
+
+            var mongoSession = new MongoSession(clientSessionHandle);
+
+            return new(mongoSession, mongoClient);
         }
 
         public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
@@ -122,6 +121,16 @@ namespace EntityDb.MongoDb.Transactions
                 connectionString,
                 databaseName
             );
+        }
+
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
         }
     }
 }

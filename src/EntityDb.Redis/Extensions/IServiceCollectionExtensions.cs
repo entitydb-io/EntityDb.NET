@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Extensions;
+using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,16 +21,19 @@ namespace EntityDb.Redis.Extensions
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="keyNamespace">The namespace used to build a Redis key.</param>
         /// <param name="getConnectionString">A function that retrieves the Redis connection string.</param>
+        /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
         public static void AddRedisSnapshots<TEntity>(this IServiceCollection serviceCollection, string keyNamespace,
-            Func<IConfiguration, string> getConnectionString)
+            Func<IConfiguration, string> getConnectionString, SnapshotTestMode? testMode = null)
         {
-            serviceCollection.AddSingleton<ISnapshotRepositoryFactory<TEntity>>(serviceProvider =>
+            serviceCollection.AddSingleton(serviceProvider =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
                 var connectionString = getConnectionString.Invoke(configuration);
 
-                return RedisSnapshotRepositoryFactory<TEntity>.Create(serviceProvider, connectionString, keyNamespace);
+                return RedisSnapshotRepositoryFactory<TEntity>
+                    .Create(serviceProvider, connectionString, keyNamespace)
+                    .WithTestMode(testMode);
             });
         }
     }

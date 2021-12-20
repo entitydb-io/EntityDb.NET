@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -15,8 +16,8 @@ namespace EntityDb.Void.Transactions
         private static readonly Task<ICommand<TEntity>[]> _emptyCommandArrayTask =
             Task.FromResult(Array.Empty<ICommand<TEntity>>());
 
-        private static readonly Task<IAnnotatedCommand<TEntity>[]> _emptyAnnotatedCommandArrayTask =
-            Task.FromResult(Array.Empty<IAnnotatedCommand<TEntity>>());
+        private static readonly Task<IEntityAnnotation<ICommand<TEntity>>[]> _emptyAnnotatedCommandArrayTask =
+            Task.FromResult(Array.Empty<IEntityAnnotation<ICommand<TEntity>>>());
 
         public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
         {
@@ -78,7 +79,7 @@ namespace EntityDb.Void.Transactions
             return EmptyTagArrayTask;
         }
 
-        public Task<IAnnotatedCommand<TEntity>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+        public Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
         {
             return _emptyAnnotatedCommandArrayTask;
         }

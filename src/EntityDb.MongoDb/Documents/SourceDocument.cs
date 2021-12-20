@@ -6,6 +6,7 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Linq;
@@ -17,8 +18,10 @@ namespace EntityDb.MongoDb.Documents
     {
         public const string CollectionName = "Sources";
 
-        private static readonly SourceFilterBuilder _sourceFilterBuilder = new();
-        private static readonly SourceSortBuilder _sourceSortBuilder = new();
+        private static readonly SourceFilterBuilder _filterBuilder = new();
+
+        private static readonly SourceSortBuilder _sortBuilder = new();
+
         public Guid[] EntityIds { get; init; } = default!;
 
         public static SourceDocument BuildOne<TEntity>
@@ -36,78 +39,37 @@ namespace EntityDb.MongoDb.Documents
             };
         }
 
-        public static Task InsertOne
+        public static Task InsertOne<TEntity>
         (
-            IClientSessionHandle clientSessionHandle,
+            IMongoSession mongoSession,
             IMongoDatabase mongoDatabase,
-            SourceDocument sourceDocument
+            ILogger logger,
+            ITransaction<TEntity> transaction
         )
         {
             return InsertOne
             (
-                clientSessionHandle,
+                mongoSession,
                 GetMongoCollection(mongoDatabase, CollectionName),
-                sourceDocument
+                BuildOne(logger, transaction)
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static DocumentQuery<SourceDocument> GetDocumentQuery
         (
-            IMongoDbSession mongoDbSession,
+            IMongoSession? mongoSession,
+            IMongoDatabase mongoDatabase,
             ISourceQuery sourceQuery
         )
         {
-            return mongoDbSession.ExecuteGuidQuery
+            return new DocumentQuery<SourceDocument>
             (
-                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<SourceDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
-                    Sort = sourceQuery.GetSort(_sourceSortBuilder),
-                    DistinctSkip = sourceQuery.Skip,
-                    DistinctLimit = sourceQuery.Take
-                }
-            );
-        }
-
-        public static Task<Guid[]> GetEntityIds
-        (
-            IMongoDbSession mongoDbSession,
-            ISourceQuery sourceQuery
-        )
-        {
-            return mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => new EntityIdsQuery<SourceDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
-                    Sort = sourceQuery.GetSort(_sourceSortBuilder),
-                    DistinctSkip = sourceQuery.Skip,
-                    DistinctLimit = sourceQuery.Take
-                }
-            );
-        }
-
-        public static Task<object[]> GetData
-        (
-            IMongoDbSession mongoDbSession,
-            ISourceQuery sourceQuery
-        )
-        {
-            return mongoDbSession.ExecuteDataQuery<SourceDocument, object>
-            (
-                (clientSessionHandle, mongoDatabase) => new DataQuery<SourceDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = sourceQuery.GetFilter(_sourceFilterBuilder),
-                    Sort = sourceQuery.GetSort(_sourceSortBuilder),
-                    Skip = sourceQuery.Skip,
-                    Limit = sourceQuery.Take
-                }
+                MongoSession: mongoSession,
+                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
+                Filter: sourceQuery.GetFilter(_filterBuilder),
+                Sort: sourceQuery.GetSort(_sortBuilder),
+                Skip: sourceQuery.Skip,
+                Limit: sourceQuery.Take
             );
         }
     }

@@ -8,6 +8,7 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,9 @@ namespace EntityDb.MongoDb.Documents
     {
         public const string CollectionName = "Leases";
 
-        private static readonly LeaseFilterBuilder _leaseFilterBuilder = new();
-        private static readonly LeaseSortBuilder _leaseSortBuilder = new();
+        private static readonly LeaseFilterBuilder _filterBuilder = new();
+
+        private static readonly LeaseSortBuilder _sortBuilder = new();
 
         public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
 
@@ -53,84 +55,44 @@ namespace EntityDb.MongoDb.Documents
                 .ToArray();
         }
 
-        public static async Task InsertMany
+        public static async Task InsertMany<TEntity>
         (
-            IClientSessionHandle clientSessionHandle,
+            IMongoSession mongoSession,
             IMongoDatabase mongoDatabase,
-            IReadOnlyCollection<LeaseDocument> leaseDocuments
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionStep<TEntity> transactionStep
         )
         {
             await InsertMany
             (
-                clientSessionHandle,
+                mongoSession,
                 GetMongoCollection(mongoDatabase, CollectionName),
-                leaseDocuments
+                BuildMany(logger, transaction, transactionStep)
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static DocumentQuery<LeaseDocument> GetDocumentQuery
         (
-            IMongoDbSession mongoDbSession,
+            IMongoSession? mongoSession,
+            IMongoDatabase mongoDatabase,
             ILeaseQuery leaseQuery
         )
         {
-            return mongoDbSession.ExecuteGuidQuery
+            return new DocumentQuery<LeaseDocument>
             (
-                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<LeaseDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
-                    Sort = leaseQuery.GetSort(_leaseSortBuilder),
-                    DistinctSkip = leaseQuery.Skip,
-                    DistinctLimit = leaseQuery.Take
-                }
-            );
-        }
-
-        public static Task<Guid[]> GetEntityIds
-        (
-            IMongoDbSession mongoDbSession,
-            ILeaseQuery leaseQuery
-        )
-        {
-            return mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => new EntityIdQuery<LeaseDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
-                    Sort = leaseQuery.GetSort(_leaseSortBuilder),
-                    DistinctSkip = leaseQuery.Skip,
-                    DistinctLimit = leaseQuery.Take
-                }
-            );
-        }
-
-        public static Task<ILease[]> GetData
-        (
-            IMongoDbSession mongoDbSession,
-            ILeaseQuery leaseQuery
-        )
-        {
-            return mongoDbSession.ExecuteDataQuery<LeaseDocument, ILease>
-            (
-                (clientSessionHandle, mongoDatabase) => new DataQuery<LeaseDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = leaseQuery.GetFilter(_leaseFilterBuilder),
-                    Sort = leaseQuery.GetSort(_leaseSortBuilder),
-                    Skip = leaseQuery.Skip,
-                    Limit = leaseQuery.Take
-                }
+                MongoSession: mongoSession,
+                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
+                Filter: leaseQuery.GetFilter(_filterBuilder),
+                Sort: leaseQuery.GetSort(_sortBuilder),
+                Skip: leaseQuery.Skip,
+                Limit: leaseQuery.Take
             );
         }
 
         public static async Task DeleteMany
         (
-            IClientSessionHandle clientSessionHandle,
+            IMongoSession mongoSession,
             IMongoDatabase mongoDatabase,
             Guid entityId,
             IReadOnlyCollection<ILease> deleteLeases
@@ -145,9 +107,9 @@ namespace EntityDb.MongoDb.Documents
 
             await DeleteMany
             (
-                clientSessionHandle,
+                mongoSession,
                 GetMongoCollection(mongoDatabase, CollectionName),
-                deleteLeasesQuery.GetFilter(_leaseFilterBuilder)
+                deleteLeasesQuery.GetFilter(_filterBuilder)
             );
         }
     }

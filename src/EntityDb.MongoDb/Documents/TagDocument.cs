@@ -20,8 +20,9 @@ namespace EntityDb.MongoDb.Documents
     {
         public const string CollectionName = "Tags";
 
-        private static readonly TagFilterBuilder _tagFilterBuilder = new();
-        private static readonly TagSortBuilder _tagSortBuilder = new();
+        public static readonly TagFilterBuilder _filterBuilder = new();
+
+        public static readonly TagSortBuilder _sortBuilder = new();
 
         public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
 
@@ -51,84 +52,44 @@ namespace EntityDb.MongoDb.Documents
                 .ToArray();
         }
 
-        public static async Task InsertMany
+        public static async Task InsertMany<TEntity>
         (
-            IClientSessionHandle clientSessionHandle,
+            IMongoSession mongoSession,
             IMongoDatabase mongoDatabase,
-            IReadOnlyCollection<TagDocument> tagDocuments
+            ILogger logger,
+            ITransaction<TEntity> transaction,
+            ITransactionStep<TEntity> transactionStep
         )
         {
             await InsertMany
             (
-                clientSessionHandle,
+                mongoSession,
                 GetMongoCollection(mongoDatabase, CollectionName),
-                tagDocuments
+                BuildMany(logger, transaction, transactionStep)
             );
         }
 
-        public static Task<Guid[]> GetTransactionIds
+        public static DocumentQuery<TagDocument> GetDocumentQuery
         (
-            IMongoDbSession mongoDbSession,
+            IMongoSession? mongoSession,
+            IMongoDatabase mongoDatabase,
             ITagQuery tagQuery
         )
         {
-            return mongoDbSession.ExecuteGuidQuery
+            return new DocumentQuery<TagDocument>
             (
-                (clientSessionHandle, mongoDatabase) => new TransactionIdQuery<TagDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                    Sort = tagQuery.GetSort(_tagSortBuilder),
-                    DistinctSkip = tagQuery.Skip,
-                    DistinctLimit = tagQuery.Take
-                }
-            );
-        }
-
-        public static Task<Guid[]> GetEntityIds
-        (
-            IMongoDbSession mongoDbSession,
-            ITagQuery tagQuery
-        )
-        {
-            return mongoDbSession.ExecuteGuidQuery
-            (
-                (clientSessionHandle, mongoDatabase) => new EntityIdQuery<TagDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                    Sort = tagQuery.GetSort(_tagSortBuilder),
-                    DistinctSkip = tagQuery.Skip,
-                    DistinctLimit = tagQuery.Take
-                }
-            );
-        }
-
-        public static Task<ITag[]> GetData
-        (
-            IMongoDbSession mongoDbSession,
-            ITagQuery tagQuery
-        )
-        {
-            return mongoDbSession.ExecuteDataQuery<TagDocument, ITag>
-            (
-                (clientSessionHandle, mongoDatabase) => new DataQuery<TagDocument>
-                {
-                    ClientSessionHandle = clientSessionHandle,
-                    MongoCollection = GetMongoCollection(mongoDatabase, CollectionName),
-                    Filter = tagQuery.GetFilter(_tagFilterBuilder),
-                    Sort = tagQuery.GetSort(_tagSortBuilder),
-                    Skip = tagQuery.Skip,
-                    Limit = tagQuery.Take
-                }
+                MongoSession: mongoSession,
+                MongoCollection: GetMongoCollection(mongoDatabase, CollectionName),
+                Filter: tagQuery.GetFilter(_filterBuilder),
+                Sort: tagQuery.GetSort(_sortBuilder),
+                Skip: tagQuery.Skip,
+                Limit: tagQuery.Take
             );
         }
 
         public static async Task DeleteMany
         (
-            IClientSessionHandle clientSessionHandle,
+            IMongoSession mongoSession,
             IMongoDatabase mongoDatabase,
             Guid entityId,
             IReadOnlyCollection<ITag> deleteTags
@@ -143,9 +104,9 @@ namespace EntityDb.MongoDb.Documents
 
             await DeleteMany
             (
-                clientSessionHandle,
+                mongoSession,
                 GetMongoCollection(mongoDatabase, CollectionName),
-                deleteTagsQuery.GetFilter(_tagFilterBuilder)
+                deleteTagsQuery.GetFilter(_filterBuilder)
             );
         }
     }

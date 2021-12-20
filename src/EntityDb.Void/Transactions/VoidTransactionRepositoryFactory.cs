@@ -13,5 +13,15 @@ namespace EntityDb.Void.Transactions
         {
             return _voidTransactionRepositoryTask;
         }
+
+        public void Dispose()
+        {
+            DisposeAsync().AsTask().Wait();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
+        }
     }
 }

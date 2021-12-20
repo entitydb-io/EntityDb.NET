@@ -1,4 +1,6 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Snapshots;
+using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Agents;
@@ -30,13 +32,15 @@ namespace EntityDb.RedisMongoDb.Tests
             serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
                 TransactionEntity.RedisKeyNamespace,
-                _ => "127.0.0.1:6379"
+                _ => "127.0.0.1:6379",
+                SnapshotTestMode.AllRepositoriesDisposed
             );
 
             serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
             (
                 TransactionEntity.MongoCollectionName,
-                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb"
+                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
+                TransactionTestMode.AllRepositoriesDisposed
             );
 
             serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>("TestWrite", synchronousMode: true);

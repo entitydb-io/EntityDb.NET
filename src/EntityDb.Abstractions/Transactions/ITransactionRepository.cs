@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -105,7 +106,7 @@ namespace EntityDb.Abstractions.Transactions
         /// </summary>
         /// <param name="commandQuery">The command query.</param>
         /// <returns>The annotated commands which are found by <paramref name="commandQuery" />.</returns>
-        Task<IAnnotatedCommand<TEntity>[]> GetAnnotatedCommands(ICommandQuery commandQuery);
+        Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery);
 
         /// <summary>
         ///     Inserts a single transaction with an atomic commit.

@@ -14,8 +14,6 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
     {
-        private readonly TestModeRedisSnapshotRepositoryDisposer _disposer = new();
-
         private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IResolvingStrategyChain _resolvingStrategyChain;
@@ -41,24 +39,18 @@ namespace EntityDb.Redis.Snapshots
 
             var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
 
-            var redisSession = new RedisSession
+            var logger = snapshotSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>();
+
+            var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
             (
+                _keyNamespace,
+                _resolvingStrategyChain,
+                _snapshottingStrategy,
                 connectionMultiplexer,
-                snapshotSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>(),
-                _resolvingStrategyChain
+                logger
             );
 
-            return CreateRepository(redisSession, snapshotSessionOptions);
-        }
-
-        internal virtual ISnapshotRepository<TEntity> CreateRepository(IRedisSession redisSession, SnapshotSessionOptions snapshotSessionOptions)
-        {
-            if (snapshotSessionOptions.TestMode)
-            {
-                return new TestModeRedisSnapshotRepository<TEntity>(_disposer, redisSession, _keyNamespace, _snapshottingStrategy);
-            }
-
-            return new RedisSnapshotRepository<TEntity>(redisSession, _keyNamespace, _snapshottingStrategy);
+            return redisSnapshotRepository.WithTryCatch(logger);
         }
 
         public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
@@ -70,6 +62,17 @@ namespace EntityDb.Redis.Snapshots
                 connectionString,
                 keyNamespace
             );
+        }
+
+        public void Dispose()
+        {
+            // Nothing To Dispose
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            // Nothing To Dispose
+            return ValueTask.CompletedTask;
         }
     }
 }

@@ -41,17 +41,14 @@ namespace EntityDb.Common.Tests
         {
             serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", (options) =>
             {
-                options.TestMode = true;
             });
 
             serviceCollection.Configure<TransactionSessionOptions>("TestWrite", (options) =>
             {
-                options.TestMode = true;
             });
 
             serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", (options) =>
             {
-                options.TestMode = true;
                 options.ReadOnly = true;
             });
         }

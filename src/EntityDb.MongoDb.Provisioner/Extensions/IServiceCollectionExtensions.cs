@@ -1,28 +1,18 @@
 using EntityDb.Abstractions.Transactions;
-using EntityDb.MongoDb.Provisioner.Transactions;
+using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Extensions;
+using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace EntityDb.MongoDb.Provisioner.Extensions
 {
-    public static class IServiceCollectionExtensions
+    internal static class IServiceCollectionExtensions
     {
-        /// <summary>
-        ///     Adds an auto-provision, test-mode implementation of <see cref="ITransactionRepositoryFactory{TEntity}" /> to a
-        ///     service collection.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity represented in the repository.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <param name="databaseName">The name of the MongoDB database.</param>
-        /// <param name="getConnectionString">A function that retrieves the MongoDB connection string.</param>
-        /// <remarks>
-        ///     The test-mode implementation will not commit transactions. They will be aborted when the
-        ///     <see cref="ITransactionRepository{TEntity}" /> is disposed.
-        /// </remarks>
         public static void AddAutoProvisionTestModeMongoDbTransactions<TEntity>(
             this IServiceCollection serviceCollection, string databaseName,
-            Func<IConfiguration, string> getConnectionString)
+            Func<IConfiguration, string> getConnectionString, TransactionTestMode? transactionTestMode = null)
         {
             serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
@@ -30,8 +20,10 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
                 var connectionString = getConnectionString.Invoke(configuration);
 
-                return AutoProvisionMongoDbTransactionRepositoryFactory<TEntity>.Create(serviceProvider,
-                    connectionString, databaseName);
+                return MongoDbTransactionRepositoryFactory<TEntity>
+                    .Create(serviceProvider, connectionString, databaseName)
+                    .UseTestMode(transactionTestMode)
+                    .UseAutoProvisioning();
             });
         }
     }

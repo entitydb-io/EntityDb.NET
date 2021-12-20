@@ -1,4 +1,5 @@
 ﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
@@ -30,7 +31,8 @@ namespace EntityDb.MongoDb.Tests
             serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
             (
                 TransactionEntity.MongoCollectionName,
-                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb"
+                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
+                TransactionTestMode.AllRepositoriesDisposed
             );
 
             Common.Tests.Startup.ConfigureTestsBaseServices(serviceCollection);

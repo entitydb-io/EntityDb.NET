@@ -4,16 +4,12 @@ using System;
 
 namespace EntityDb.Common.Transactions
 {
+
     /// <summary>
     ///     Represents the agent's use case for the transaction repository.
     /// </summary>
     public sealed class TransactionSessionOptions
     {
-        /// <summary>
-        ///     If <c>true</c>, indicates that all transactions should be reverted when the repository is disposed.
-        /// </summary>
-        public bool TestMode { get; set; }
-
         /// <summary>
         ///     If <c>true</c>, indicates the agent only intends to execute queries.
         /// </summary>

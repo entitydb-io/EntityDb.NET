@@ -11,6 +11,9 @@ namespace EntityDb.MongoDb.Documents
 #pragma warning restore IDE1006 // Naming Styles
 
         Guid TransactionId { get; }
+
+        DateTime TransactionTimeStamp { get; }
+
         BsonDocumentEnvelope Data { get; }
     }
 }
