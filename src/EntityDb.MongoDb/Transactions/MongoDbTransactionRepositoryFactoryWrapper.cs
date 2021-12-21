@@ -10,7 +10,7 @@ namespace EntityDb.MongoDb.Transactions
     {
         protected readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
 
-        public MongoDbTransactionRepositoryFactoryWrapper(
+        protected MongoDbTransactionRepositoryFactoryWrapper(
             IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
         {
             _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
