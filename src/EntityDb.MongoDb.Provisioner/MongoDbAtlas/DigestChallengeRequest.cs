@@ -18,6 +18,9 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         public bool IsUsable => ExpiresAt > DateTime.UtcNow;
 
+        public const int MinClientNonce = 0x100000;
+        public const int MaxClientNonce = 0xFFFFFF;
+
         private static string Hash(string input)
         {
             return BitConverter.ToString(MD5.ComputeHash(Encoding.ASCII.GetBytes(input))).Replace("-", "")
@@ -26,7 +29,7 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 
         private static string NewClientNonce()
         {
-            return new Random().Next(0x100000, 0xFFFFFF).ToString("X6");
+            return new Random().Next(MinClientNonce, MaxClientNonce).ToString("X6");
         }
 
         public DigestChallengeRequest Refresh()
@@ -43,7 +46,15 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
             var response = Hash($"{hash1}:{Nonce}:{NonceCount:D8}:{ClientNonce}:{Qop}:{hash2}");
 
             return AuthenticationHeaderValue.Parse(
-                $"Digest username=\"{username}\", realm=\"{Realm}\", nonce=\"{Nonce}\", uri=\"{digestUri}\", algorithm={Algorithm}, qop={Qop}, nc={NonceCount:D8}, cnonce=\"{ClientNonce}\", response=\"{response}\"");
+                $"Digest username=\"{username}\", " +
+                $"realm=\"{Realm}\", " +
+                $"nonce=\"{Nonce}\", " +
+                $"uri=\"{digestUri}\", " +
+                $"algorithm={Algorithm}, " +
+                $"qop={Qop}, " +
+                $"nc={NonceCount:D8}, " +
+                $"cnonce=\"{ClientNonce}\", " +
+                $"response=\"{response}\"");
         }
 
         public static bool TryParse(AuthenticationHeaderValue authorizationHeaderValue,
