@@ -2,14 +2,15 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
+using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
@@ -25,51 +26,51 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public static CommandDocument BuildOne<TEntity>
+        public static IReadOnlyCollection<CommandDocument>? BuildInsert<TEntity>
         (
-            ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            int transactionStepIndex,
+            ILogger logger
         )
         {
-            return new CommandDocument
+            var transactionStep = transaction.Steps[transactionStepIndex];
+
+            return new[]
             {
-                TransactionTimeStamp = transaction.TimeStamp,
-                TransactionId = transaction.Id,
-                EntityId = transactionStep.EntityId,
-                EntityVersionNumber = transactionStep.NextEntityVersionNumber,
-                Data = BsonDocumentEnvelope.Deconstruct(transactionStep.Command, logger)
+                new CommandDocument
+                {
+                    TransactionTimeStamp = transaction.TimeStamp,
+                    TransactionId = transaction.Id,
+                    EntityId = transactionStep.EntityId,
+                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
+                    Data = BsonDocumentEnvelope.Deconstruct(transactionStep.Command, logger)
+                }
             };
         }
 
-        public static Task InsertOne<TEntity>
+        public static InsertDocumentsCommand<TEntity, CommandDocument> GetInsertCommand<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            ILogger logger,
-            ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            IMongoSession mongoSession
         )
         {
-            return InsertOne
+            return new InsertDocumentsCommand<TEntity, CommandDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                BuildOne(logger, transaction, transactionStep)
+                CollectionName,
+                BuildInsert<TEntity>
             );
         }
 
-        public static DocumentQuery<CommandDocument> GetDocumentQuery
+        public static DocumentQuery<CommandDocument> GetQuery
         (
-            IMongoSession? mongoSession,
-            IMongoDatabase mongoDatabase,
+            IMongoSession mongoSession,
             ICommandQuery commandQuery
         )
         {
             return new DocumentQuery<CommandDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
+                CollectionName,
                 commandQuery.GetFilter(_filterBuilder),
                 commandQuery.GetSort(_sortBuilder),
                 commandQuery.Skip,
@@ -80,16 +81,14 @@ namespace EntityDb.MongoDb.Documents
         public static Task<ulong> GetLastEntityVersionNumber
         (
             IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
             Guid entityId
         )
         {
             var commandQuery = new GetLastEntityVersionQuery(entityId);
 
-            var documentQuery = GetDocumentQuery
+            var documentQuery = GetQuery
             (
                 mongoSession,
-                mongoDatabase,
                 commandQuery
             );
 

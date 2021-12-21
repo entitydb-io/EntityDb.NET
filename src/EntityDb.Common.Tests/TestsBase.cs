@@ -8,43 +8,58 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 using Xunit.DependencyInjection;
+using Xunit.DependencyInjection.Logging;
 
 namespace EntityDb.Common.Tests
 {
-    public class TestsBase
+    public class TestsBase<TStartup>
+        where TStartup : IStartup, new()
     {
-        protected readonly IServiceProvider _serviceProvider;
-
-        public TestsBase(IServiceProvider serviceProvider)
+        public record TestServiceScope(ServiceProvider SingletonServiceProvider, IServiceScope ServiceScope) : IServiceScope, IDisposable
         {
-            _serviceProvider = serviceProvider;
+            public IServiceProvider ServiceProvider => ServiceScope.ServiceProvider;
+
+            public void Dispose()
+            {
+                ServiceScope.Dispose();
+
+                SingletonServiceProvider.Dispose();
+            }
         }
 
-        public IServiceScope GetServiceScopeWithOverrides<TStartup>(Action<IServiceCollection> configureServices)
-            where TStartup : ITestStartup, new()
+        private readonly IConfiguration _configuration;
+        private readonly ITestOutputHelperAccessor? _testOutputHelperAccessor;
+
+        public TestsBase(IServiceProvider startupServiceProvider)
+        {
+            _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
+            _testOutputHelperAccessor = startupServiceProvider.GetService<ITestOutputHelperAccessor>();
+        }
+
+        public TestServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
         {
             var serviceCollection = new ServiceCollection();
 
             var startup = new TStartup();
 
-            var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
-            var testOutputHelperAccessor = _serviceProvider.GetRequiredService<ITestOutputHelperAccessor>();
+            serviceCollection.AddSingleton(_configuration);
 
-            serviceCollection.AddSingleton(configuration);
+            startup.AddServices(serviceCollection);
 
-            startup.ConfigureServices(serviceCollection);
+            configureServices?.Invoke(serviceCollection);
 
-            configureServices.Invoke(serviceCollection);
+            var singletonServiceProvider = serviceCollection.BuildServiceProvider();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            if (_testOutputHelperAccessor != null)
+            {
+                var loggerFactory = singletonServiceProvider.GetRequiredService<ILoggerFactory>();
 
-            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+                loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            }
 
-            startup.Configure(loggerFactory, testOutputHelperAccessor);
+            var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
-            var serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
-
-            return serviceScopeFactory.CreateScope();
+            return new(singletonServiceProvider, serviceScopeFactory.CreateScope());
         }
 
         public static ITransactionRepositoryFactory<TEntity> GetMockedTransactionRepositoryFactory<TEntity>(

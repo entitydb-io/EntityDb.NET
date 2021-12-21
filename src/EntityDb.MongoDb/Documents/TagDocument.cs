@@ -1,18 +1,18 @@
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
+using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
@@ -31,14 +31,22 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public static IReadOnlyCollection<TagDocument> BuildMany<TEntity>
+        public static IReadOnlyCollection<TagDocument>? BuildInsert<TEntity>
         (
-            ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            int transactionStepIndex,
+            ILogger logger
         )
         {
-            return transactionStep.Tags.Insert
+            var transactionStep = transaction.Steps[transactionStepIndex];
+            var insertTags = transactionStep.Tags.Insert;
+
+            if (insertTags.Length == 0)
+            {
+                return null;
+            }
+
+            return insertTags
                 .Select(insertTag => new TagDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
@@ -52,34 +60,48 @@ namespace EntityDb.MongoDb.Documents
                 .ToArray();
         }
 
-        public static async Task InsertMany<TEntity>
+        public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            int transactionStepIndex
         )
         {
-            await InsertMany
+            var transactionStep = transaction.Steps[transactionStepIndex];
+            var deleteTags = transactionStep.Tags.Delete;
+
+            if (deleteTags.Length == 0)
+            {
+                return null;
+            }
+
+            var deleteTagsQuery = new DeleteTagsQuery(transactionStep.EntityId, deleteTags);
+
+            return deleteTagsQuery.GetFilter(_filterBuilder);
+        }
+
+        public static InsertDocumentsCommand<TEntity, TagDocument> GetInsertCommand<TEntity>
+        (
+            IMongoSession mongoSession
+        )
+        {
+            return new InsertDocumentsCommand<TEntity, TagDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                BuildMany(logger, transaction, transactionStep)
+                CollectionName,
+                BuildInsert<TEntity>
             );
         }
 
-        public static DocumentQuery<TagDocument> GetDocumentQuery
+        public static DocumentQuery<TagDocument> GetQuery
         (
-            IMongoSession? mongoSession,
-            IMongoDatabase mongoDatabase,
+            IMongoSession mongoSession,
             ITagQuery tagQuery
         )
         {
             return new DocumentQuery<TagDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
+                CollectionName,
                 tagQuery.GetFilter(_filterBuilder),
                 tagQuery.GetSort(_sortBuilder),
                 tagQuery.Skip,
@@ -87,26 +109,16 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task DeleteMany
+        public static DeleteDocumentsCommand<TEntity, TagDocument> GetDeleteCommand<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            Guid entityId,
-            IReadOnlyCollection<ITag> deleteTags
+            IMongoSession mongoSession
         )
         {
-            if (deleteTags.Count == 0)
-            {
-                return;
-            }
-
-            var deleteTagsQuery = new DeleteTagsQuery(entityId, deleteTags);
-
-            await DeleteMany
+            return new DeleteDocumentsCommand<TEntity, TagDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                deleteTagsQuery.GetFilter(_filterBuilder)
+                CollectionName,
+                BuildDelete<TEntity>
             );
         }
     }

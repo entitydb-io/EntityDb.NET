@@ -8,8 +8,8 @@ namespace EntityDb.MongoDb.Queries
 {
     internal record DocumentQuery<TDocument>
     (
-        IMongoSession? MongoSession,
-        IMongoCollection<BsonDocument> MongoCollection,
+        IMongoSession MongoSession,
+        string CollectionName,
         FilterDefinition<BsonDocument> Filter,
         SortDefinition<BsonDocument>? Sort,
         int? Skip,
@@ -18,11 +18,8 @@ namespace EntityDb.MongoDb.Queries
     {
         public Task<List<TDocument>> Execute(ProjectionDefinition<BsonDocument, TDocument> projection)
         {
-            var find = (
-                    MongoSession != null
-                        ? MongoSession.Find(MongoCollection, Filter)
-                        : MongoCollection.Find(Filter)
-                )
+            var find = MongoSession
+                .Find(CollectionName, Filter)
                 .Project(projection);
 
             if (Sort != null)

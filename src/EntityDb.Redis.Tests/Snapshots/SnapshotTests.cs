@@ -1,13 +1,11 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Tests.Snapshots;
-using EntityDb.TestImplementations.Entities;
+﻿using EntityDb.Common.Tests.Snapshots;
+using System;
 
 namespace EntityDb.Redis.Tests.Snapshots
 {
-    public class SnapshotTests : SnapshotTestsBase
+    public class SnapshotTests : SnapshotTestsBase<Startup>
     {
-        public SnapshotTests(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory) : base(
-            snapshotRepositoryFactory)
+        public SnapshotTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
         }
     }

@@ -1,23 +1,21 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System;
 using System.Text;
 using Xunit;
 
 namespace EntityDb.Redis.Tests.Envelopes
 {
-    public class JsonElementEnvelopeTests
+    public class JsonElementEnvelopeTests : TestsBase<Startup>
     {
-        private readonly ILogger _logger;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
-
-        public JsonElementEnvelopeTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
+        public JsonElementEnvelopeTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
-            _logger = loggerFactory.CreateLogger<JsonElementEnvelopeTests>();
-            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         [Fact]
@@ -25,20 +23,29 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<JsonElementEnvelopeTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
             var originalTestRecord = new TestRecord<bool>(true);
 
             IRecord boxedTestRecord = originalTestRecord;
 
             // ACT
 
-            var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, _logger);
+            var jsonElementEnvelope = JsonElementEnvelope.Deconstruct(boxedTestRecord, logger);
 
-            var json = jsonElementEnvelope.Serialize(_logger);
+            var json = jsonElementEnvelope.Serialize(logger);
 
-            var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, _logger);
+            var reconstructedJsonElementEnvelope = JsonElementEnvelope.Deserialize(json, logger);
 
             var reconstructedTestRecord =
-                reconstructedJsonElementEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+                reconstructedJsonElementEnvelope.Reconstruct<IRecord>(logger, resolvingStategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
 
@@ -52,6 +59,12 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<JsonElementEnvelopeTests>();
+
             var invalidJson = "I AM A STRING VALUE, NOT JSON!";
 
             var invalidJsonBytes = Encoding.UTF8.GetBytes(invalidJson);
@@ -60,7 +73,7 @@ namespace EntityDb.Redis.Tests.Envelopes
 
             Should.Throw<DeserializeException>(() =>
             {
-                JsonElementEnvelope.Deserialize(invalidJsonBytes, _logger);
+                JsonElementEnvelope.Deserialize(invalidJsonBytes, logger);
             });
         }
 
@@ -69,13 +82,22 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<JsonElementEnvelopeTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
             var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
             Should.Throw<DeserializeException>(() =>
             {
-                jsonElementEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
+                jsonElementEnvelope.Reconstruct<object>(logger, resolvingStategyChain);
             });
         }
 
@@ -84,13 +106,22 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<JsonElementEnvelopeTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
             var jsonElementEnvelope = new JsonElementEnvelope();
 
             // ACT
 
             Should.Throw<SerializeException>(() =>
             {
-                jsonElementEnvelope.Serialize(_logger);
+                jsonElementEnvelope.Serialize(logger);
             });
         }
 
@@ -99,9 +130,15 @@ namespace EntityDb.Redis.Tests.Envelopes
         {
             // ACT
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<JsonElementEnvelopeTests>();
+
             Should.Throw<SerializeException>(() =>
             {
-                JsonElementEnvelope.Deconstruct(default!, _logger);
+                JsonElementEnvelope.Deconstruct(default!, logger);
             });
         }
 

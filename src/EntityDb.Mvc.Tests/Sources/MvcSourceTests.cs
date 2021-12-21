@@ -1,12 +1,15 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.Mvc.Sources;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -14,15 +17,10 @@ using Xunit;
 
 namespace EntityDb.Mvc.Tests.Sources
 {
-    public class MvcSourceTests
+    public class MvcSourceTests : TestsBase<Startup>
     {
-        private readonly ILogger _logger;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
-
-        public MvcSourceTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
+        public MvcSourceTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
-            _logger = loggerFactory.CreateLogger<MvcSourceTests>();
-            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         private static HttpContext CreateHttpContext
@@ -157,16 +155,25 @@ namespace EntityDb.Mvc.Tests.Sources
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<MvcSourceTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
             var httpContext = CreateHttpContext(headerName, headerValue, connectionId, remoteIpAddress, remotePort,
                 localIpAddress, localPort, claimType, claimValue);
 
             var originalMvcSource = MvcSource.FromHttpContext(httpContext);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, _logger);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(originalMvcSource, logger);
 
             // ACT
 
-            var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(_logger, _resolvingStrategyChain);
+            var reconstructedMvcSource = bsonDocumentEnvelope.Reconstruct<MvcSource>(logger, resolvingStategyChain);
 
             // ASSERT
 

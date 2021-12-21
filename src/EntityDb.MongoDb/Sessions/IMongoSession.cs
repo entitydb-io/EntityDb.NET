@@ -1,4 +1,8 @@
-﻿using MongoDB.Driver;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Strategies;
+using EntityDb.Common.Extensions;
+using EntityDb.Common.Transactions;
+using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
 
@@ -6,14 +10,22 @@ namespace EntityDb.MongoDb.Sessions
 {
     internal interface IMongoSession : IDisposable, IAsyncDisposable
     {
-        Task InsertOne<TDocument>(IMongoCollection<TDocument> mongoCollection, TDocument bsonDocument);
-        Task InsertMany<TDocument>(IMongoCollection<TDocument> mongoCollection, TDocument[] bsonDocuments);
+        IMongoDatabase MongoDatabase { get; }
+        ILoggerFactory LoggerFactory { get; }
+        IResolvingStrategyChain ResolvingStrategyChain { get; }
+        TransactionSessionOptions TransactionSessionOptions { get; }
 
-        Task DeleteMany<TDocument>(IMongoCollection<TDocument> mongoCollection,
+        public ILogger Logger => TransactionSessionOptions.LoggerOverride ?? LoggerFactory.CreateLogger<IMongoSession>();
+
+        Task Insert<TDocument>(string collectionName,
+            TDocument[] bsonDocuments);
+        IFindFluent<TDocument, TDocument> Find<TDocument>(string collectionName,
+            FilterDefinition<TDocument> documentFilter);
+        Task Delete<TDocument>(string collectionName,
             FilterDefinition<TDocument> documentFilter);
 
-        IFindFluent<TDocument, TDocument> Find<TDocument>(IMongoCollection<TDocument> mongoCollection,
-            FilterDefinition<TDocument> documentFilter);
+
+        bool TransactionStarted { get; }
 
         void StartTransaction();
         Task CommitTransaction();

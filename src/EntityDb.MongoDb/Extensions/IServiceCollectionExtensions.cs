@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,10 +19,10 @@ namespace EntityDb.MongoDb.Extensions
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="databaseName">The name of the MongoDB database.</param>
         /// <param name="getConnectionString">A function that retrieves the MongoDB connection string.</param>
-        /// <param name="transactionTestMode">Modifies the behavior of the repository to accomodate tests.</param>
+        /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
         public static void AddMongoDbTransactions<TEntity>(this IServiceCollection serviceCollection,
             string databaseName, Func<IConfiguration, string> getConnectionString,
-            TransactionTestMode? transactionTestMode = null)
+            bool testMode = false)
         {
             serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
@@ -33,7 +32,7 @@ namespace EntityDb.MongoDb.Extensions
 
                 return MongoDbTransactionRepositoryFactory<TEntity>
                     .Create(serviceProvider, connectionString, databaseName)
-                    .UseTestMode(transactionTestMode);
+                    .UseTestMode(testMode);
             });
         }
     }

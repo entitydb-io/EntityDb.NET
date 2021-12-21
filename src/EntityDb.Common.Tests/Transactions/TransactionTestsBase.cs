@@ -31,16 +31,33 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions
 {
-    public abstract class TransactionTestsBase<TStartup> : TestsBase
-        where TStartup : ITestStartup, new()
+    public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
+        where TStartup : IStartup, new()
     {
-        protected TransactionTestsBase(IServiceProvider serviceProvider) : base(serviceProvider)
+        protected TransactionTestsBase(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
+        }
+
+        private async Task InsertTransactions
+        (
+            IServiceScope serviceScope,
+            List<ITransaction<TransactionEntity>> transactions
+        )
+        {
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestRead");
+
+            foreach (var transaction in transactions)
+            {
+                var transactionInserted = await transactionRepository.PutTransaction(transaction);
+
+                transactionInserted.ShouldBeTrue();
+            }
         }
 
         private async Task TestGet<TResult>
         (
-            List<ITransaction<TransactionEntity>> transactions,
+            IServiceScope serviceScope,
             Func<bool, TResult[]> getExpectedResults,
             Func<ITransactionRepository<TransactionEntity>, bool, bool, int?, int?, Task<TResult[]>> getActualResults
         )
@@ -53,14 +70,8 @@ namespace EntityDb.Common.Tests.Transactions
             var reversedExpectedFalseResults = expectedFalseResults.Reverse().ToArray();
             var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
-
-            foreach (var transaction in transactions)
-            {
-                var transactionInserted = await transactionRepository.PutTransaction(transaction);
-
-                transactionInserted.ShouldBeTrue();
-            }
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestRead");
 
             // ACT
 
@@ -81,12 +92,17 @@ namespace EntityDb.Common.Tests.Transactions
             actualSkipTakeResults.SequenceEqual(expectedSkipTakeResults).ShouldBeTrue();
         }
 
-        private Task TestGetTransactionIds(ISourceQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ISourceQuery, ISourceQuery>? filter = null)
+        private Task TestGetTransactionIds
+        (
+            IServiceScope serviceScope,
+            ISourceQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ISourceQuery, ISourceQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -110,12 +126,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetTransactionIds(ICommandQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ICommandQuery, ICommandQuery>? filter = null)
+        private Task TestGetTransactionIds
+        (
+            IServiceScope serviceScope,
+            ICommandQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ICommandQuery, ICommandQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -139,12 +160,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetTransactionIds(ILeaseQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ILeaseQuery, ILeaseQuery>? filter = null)
+        private Task TestGetTransactionIds
+        (
+            IServiceScope serviceScope,
+            ILeaseQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ILeaseQuery, ILeaseQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -168,12 +194,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetEntityIds(ISourceQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ISourceQuery, ISourceQuery>? filter = null)
+        private Task TestGetEntityIds
+        (
+            IServiceScope serviceScope,
+            ISourceQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ISourceQuery, ISourceQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -197,12 +228,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetEntityIds(ICommandQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ICommandQuery, ICommandQuery>? filter = null)
+        private Task TestGetEntityIds
+        (
+            IServiceScope serviceScope,
+            ICommandQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ICommandQuery, ICommandQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -226,12 +262,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetEntityIds(ILeaseQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ILeaseQuery, ILeaseQuery>? filter = null)
+        private Task TestGetEntityIds
+        (
+            IServiceScope serviceScope,
+            ILeaseQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ILeaseQuery, ILeaseQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -255,12 +296,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetSources(ISourceQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ISourceQuery, ISourceQuery>? filter = null)
+        private Task TestGetSources
+        (
+            IServiceScope serviceScope,
+            ISourceQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ISourceQuery, ISourceQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseSources : expectedObjects.TrueSources).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -284,12 +330,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetCommands(ICommandQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ICommandQuery, ICommandQuery>? filter = null)
+        private Task TestGetCommands
+        (
+            IServiceScope serviceScope,
+            ICommandQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ICommandQuery, ICommandQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseCommands : expectedObjects.TrueCommands).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -313,12 +364,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetLeases(ILeaseQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ILeaseQuery, ILeaseQuery>? filter = null)
+        private Task TestGetLeases
+        (
+            IServiceScope serviceScope,
+            ILeaseQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ILeaseQuery, ILeaseQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseLeases : expectedObjects.TrueLeases).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -342,12 +398,17 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetTags(ITagQuery query, List<ITransaction<TransactionEntity>> transactions,
-            ExpectedObjects expectedObjects, Func<ITagQuery, ITagQuery>? filter = null)
+        private Task TestGetTags
+        (
+            IServiceScope serviceScope,
+            ITagQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ITagQuery, ITagQuery>? filter = null
+        )
         {
             return TestGet
             (
-                transactions,
+                serviceScope,
                 invert => (invert ? expectedObjects.FalseTags : expectedObjects.TrueTags).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
@@ -371,10 +432,11 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private ITransaction<TransactionEntity> BuildTransaction(Guid transactionId, Guid entityId, object source,
+        private ITransaction<TransactionEntity> BuildTransaction(IServiceScope serviceScope, Guid transactionId, Guid entityId, object source,
             ICommand<TransactionEntity>[] commands, DateTime? timeStampOverride = null)
         {
-            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             transactionBuilder.Create(entityId, commands[0]);
 
@@ -406,9 +468,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            var transaction = TransactionSeeder.Create(1, 1);
-
-            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.Configure<TransactionSessionOptions>("TestReadOnlyWithLoggerOverride", options =>
                 {
@@ -416,6 +476,8 @@ namespace EntityDb.Common.Tests.Transactions
                     options.ReadOnly = true;
                 });
             });
+
+            var transaction = TransactionSeeder.Create(1, 1);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
@@ -437,12 +499,15 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var transactionId = Guid.NewGuid();
 
             var firstTransaction = TransactionSeeder.Create(1, 1, transactionId);
             var secondTransaction = TransactionSeeder.Create(1, 1, transactionId);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -460,9 +525,12 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var transaction = TransactionSeeder.Create(1, 2);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -485,16 +553,15 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<VersionZeroReservedException>(), It.IsAny<string>()))
                 .Verifiable();
 
-
-            var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
-
-            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
                 {
                     options.LoggerOverride = loggerMock.Object;
                 });
             });
+
+            var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
@@ -518,24 +585,24 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var entityId = Guid.NewGuid();
-
-            var firstTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
-            var secondTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
-
             var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
             loggerMock
                 .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
                 .Verifiable();
 
-            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
                 {
                     options.LoggerOverride = loggerMock.Object;
                 });
             });
+
+            var entityId = Guid.NewGuid();
+
+            var firstTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
+            var secondTransaction = TransactionSeeder.Create(1, 1, entityId: entityId);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
@@ -569,9 +636,12 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var transaction = TransactionSeeder.Create(2, 1, insertTag: true);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -587,9 +657,12 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var transaction = TransactionSeeder.Create(2, 1, insertLease: true);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             // ACT
 
@@ -605,6 +678,8 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var transactionTimeStamp = DateTime.UtcNow;
 
             var expectedTransactionId = Guid.NewGuid();
@@ -619,10 +694,12 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond)
             };
 
-            var transaction = BuildTransaction(expectedTransactionId, expectedEntityId, new NoSource(),
+            var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId, new NoSource(),
                 new ICommand<TransactionEntity>[] { expectedCommand }, transactionTimeStamp);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWrite");
 
             var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
@@ -653,15 +730,18 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var expectedEntity = new TransactionEntity { VersionNumber = 1 };
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
-            var entityRepository = EntityRepository<TransactionEntity>.Create(_serviceProvider, transactionRepository);
+            var entityRepository = EntityRepository<TransactionEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
-            var transaction = BuildTransaction(Guid.NewGuid(), entityId, new NoSource(),
+            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), entityId, new NoSource(),
                 new ICommand<TransactionEntity>[] { new DoNothing() });
 
             var transactionInserted = await transactionRepository.PutTransaction(transaction);
@@ -684,13 +764,18 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            using var serviceScope = CreateServiceScope();
+
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var expectedInitialTags = new[] { new Tag("Foo", "Bar") }.ToImmutableArray<ITag>();
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWrite");
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
@@ -730,13 +815,18 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
-            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            using var serviceScope = CreateServiceScope();
+
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var expectedInitialLeases = new[] { new Lease("Foo", "Bar", "Baz") }.ToImmutableArray<ILease>();
 
             var entityId = Guid.NewGuid();
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWrite");
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
@@ -776,16 +866,20 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var expectedCommand = new Count(1);
 
-            var transaction = _serviceProvider
+            var transaction = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .Create(Guid.NewGuid(), expectedCommand)
                 .Build(Guid.NewGuid(), new NoSource());
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestWrite");
 
             // ACT
 
@@ -812,11 +906,14 @@ namespace EntityDb.Common.Tests.Transactions
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
             var expectedCommand = new Count(2);
 
             var entityId = Guid.NewGuid();
 
-            var transactionBuilder = _serviceProvider.GetRequiredService<TransactionBuilder<TransactionEntity>>();
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
             var firstTransaction = transactionBuilder
                 .Create(entityId, new Count(1))
@@ -828,7 +925,8 @@ namespace EntityDb.Common.Tests.Transactions
 
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
-            await using var transactionRepository = await _serviceProvider.GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+            await using var transactionRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
 
             var firstTransactionInserted = await transactionRepository.PutTransaction(firstTransaction);
 
@@ -860,6 +958,8 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(
             int timeSpanInMinutes, int gteInMinutes, int lteInMinutes)
         {
+            using var serviceScope = CreateServiceScope();
+
             var originTimeStamp = DateTime.UnixEpoch;
 
             var transactions = new List<ITransaction<TransactionEntity>>();
@@ -898,7 +998,7 @@ namespace EntityDb.Common.Tests.Transactions
                     gte = currentTimeStamp;
                 }
 
-                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands,
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands,
                     currentTimeStamp);
 
                 transactions.Add(transaction);
@@ -909,16 +1009,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var query = new TransactionTimeStampQuery(gte.Value, lte.Value);
 
-            await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetSources(query, transactions, expectedObjects);
-            await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetLeases(query, transactions, expectedObjects);
-            await TestGetTags(query, transactions, expectedObjects);
+            await InsertTransactions(serviceScope, transactions);
+            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetCommands(serviceScope, query, expectedObjects);
+            await TestGetLeases(serviceScope, query, expectedObjects);
+            await TestGetTags(serviceScope, query, expectedObjects);
         }
 
         [Theory]
@@ -926,6 +1027,8 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(
             int numberOfTransactionIds, int whichTransactionId)
         {
+            using var serviceScope = CreateServiceScope();
+
             var transactions = new List<ITransaction<TransactionEntity>>();
             var expectedObjects = new ExpectedObjects();
 
@@ -955,7 +1058,7 @@ namespace EntityDb.Common.Tests.Transactions
                     transactionId = currentTransactionId;
                 }
 
-                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
@@ -964,16 +1067,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var query = new TransactionIdQuery(transactionId.Value);
 
-            await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetSources(query, transactions, expectedObjects);
-            await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetLeases(query, transactions, expectedObjects);
-            await TestGetTags(query, transactions, expectedObjects);
+            await InsertTransactions(serviceScope, transactions);
+            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetCommands(serviceScope, query, expectedObjects);
+            await TestGetLeases(serviceScope, query, expectedObjects);
+            await TestGetTags(serviceScope, query, expectedObjects);
         }
 
         [Theory]
@@ -981,6 +1085,8 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
             int numberOfEntityIds, int whichEntityId)
         {
+            using var serviceScope = CreateServiceScope();
+
             var transactions = new List<ITransaction<TransactionEntity>>();
             var expectedObjects = new ExpectedObjects();
 
@@ -1010,7 +1116,7 @@ namespace EntityDb.Common.Tests.Transactions
                     entityId = currentEntityId;
                 }
 
-                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
@@ -1019,16 +1125,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var query = new EntityIdQuery(entityId.Value);
 
-            await TestGetTransactionIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetTransactionIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ISourceQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ICommandQuery, transactions, expectedObjects);
-            await TestGetEntityIds(query as ILeaseQuery, transactions, expectedObjects);
-            await TestGetSources(query, transactions, expectedObjects);
-            await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetLeases(query, transactions, expectedObjects);
-            await TestGetTags(query, transactions, expectedObjects);
+            await InsertTransactions(serviceScope, transactions);
+            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetCommands(serviceScope, query, expectedObjects);
+            await TestGetLeases(serviceScope, query, expectedObjects);
+            await TestGetTags(serviceScope, query, expectedObjects);
         }
 
         [Theory]
@@ -1036,6 +1143,8 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(
             int numberOfVersionNumbers, int gteAsInt, int lteAsInt)
         {
+            using var serviceScope = CreateServiceScope();
+
             var commands = new List<ICommand<TransactionEntity>>();
             var expectedObjects = new ExpectedObjects();
 
@@ -1053,15 +1162,16 @@ namespace EntityDb.Common.Tests.Transactions
                     leases, tags);
             }
 
-            var transaction = BuildTransaction(Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
+            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
 
             var transactions = new List<ITransaction<TransactionEntity>> { transaction };
 
             var query = new EntityVersionNumberQuery((ulong)gteAsInt, (ulong)lteAsInt);
 
-            await TestGetCommands(query, transactions, expectedObjects);
-            await TestGetLeases(query, transactions, expectedObjects);
-            await TestGetTags(query, transactions, expectedObjects);
+            await InsertTransactions(serviceScope, transactions);
+            await TestGetCommands(serviceScope, query, expectedObjects);
+            await TestGetLeases(serviceScope, query, expectedObjects);
+            await TestGetTags(serviceScope, query, expectedObjects);
         }
 
         [Theory]
@@ -1069,6 +1179,8 @@ namespace EntityDb.Common.Tests.Transactions
         public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(int countTo,
             int gte, int lte)
         {
+            using var serviceScope = CreateServiceScope();
+
             var transactions = new List<ITransaction<TransactionEntity>>();
             var expectedObjects = new ExpectedObjects();
 
@@ -1091,7 +1203,7 @@ namespace EntityDb.Common.Tests.Transactions
                 expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, source, commands,
                     leases, tags);
 
-                var transaction = BuildTransaction(currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
 
                 transactions.Add(transaction);
             }
@@ -1118,16 +1230,17 @@ namespace EntityDb.Common.Tests.Transactions
 
             var query = new CountQuery(gte, lte);
 
-            await TestGetTransactionIds(query, transactions, expectedObjects, FilterSources);
-            await TestGetTransactionIds(query, transactions, expectedObjects, FilterCommands);
-            await TestGetTransactionIds(query, transactions, expectedObjects, FilterLeases);
-            await TestGetEntityIds(query, transactions, expectedObjects, FilterSources);
-            await TestGetEntityIds(query, transactions, expectedObjects, FilterCommands);
-            await TestGetEntityIds(query, transactions, expectedObjects, FilterLeases);
-            await TestGetSources(query, transactions, expectedObjects, FilterSources);
-            await TestGetCommands(query, transactions, expectedObjects, FilterCommands);
-            await TestGetLeases(query, transactions, expectedObjects, FilterLeases);
-            await TestGetTags(query, transactions, expectedObjects, FilterTags);
+            await InsertTransactions(serviceScope, transactions);
+            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterCommands);
+            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterLeases);
+            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterCommands);
+            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterLeases);
+            await TestGetSources(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetCommands(serviceScope, query, expectedObjects, FilterCommands);
+            await TestGetLeases(serviceScope, query, expectedObjects, FilterLeases);
+            await TestGetTags(serviceScope, query, expectedObjects, FilterTags);
         }
 
         private class ExpectedObjects

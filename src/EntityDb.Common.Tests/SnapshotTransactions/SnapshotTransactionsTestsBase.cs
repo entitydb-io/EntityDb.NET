@@ -14,8 +14,8 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.SnapshotTransactions
 {
-    public abstract class SnapshotTransactionsTestsBase<TStartup> : TestsBase
-        where TStartup : ITestStartup, new()
+    public abstract class SnapshotTransactionsTestsBase<TStartup> : TestsBase<TStartup>
+        where TStartup : IStartup, new()
     {
         protected SnapshotTransactionsTestsBase(IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -59,7 +59,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
                 .Returns((TransactionEntity? _, TransactionEntity nextEntity) =>
                     nextEntity.VersionNumber == expectedSnapshotVersion);
 
-            using var serviceScope = GetServiceScopeWithOverrides<TStartup>(serviceCollection =>
+            using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.AddSingleton(_ => snapshottingStrategyMock.Object);
             });
@@ -85,7 +85,7 @@ namespace EntityDb.Common.Tests.SnapshotTransactions
                 serviceScope.ServiceProvider, entityRepository);
 
             var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
-            
+
             // ARRANGE 2 ASSERTIONS
 
             secondTransactionInserted.ShouldBeTrue();

@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
@@ -8,8 +9,8 @@ using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
@@ -23,48 +24,48 @@ namespace EntityDb.MongoDb.Documents
 
         public Guid[] EntityIds { get; init; } = default!;
 
-        public static SourceDocument BuildOne<TEntity>
+        public static IReadOnlyCollection<SourceDocument> Build<TEntity>
         (
-            ILogger logger,
-            ITransaction<TEntity> transaction
+            ITransaction<TEntity> transaction,
+            int transactionStepIndex,
+            ILogger logger
         )
         {
-            return new SourceDocument
+            return new[]
             {
-                TransactionTimeStamp = transaction.TimeStamp,
-                TransactionId = transaction.Id,
-                EntityIds = transaction.Steps.Select(command => command.EntityId).Distinct().ToArray(),
-                Data = BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
+                new SourceDocument
+                {
+                    TransactionTimeStamp = transaction.TimeStamp,
+                    TransactionId = transaction.Id,
+                    EntityIds = transaction.Steps.Select(command => command.EntityId).Distinct().ToArray(),
+                    Data = BsonDocumentEnvelope.Deconstruct(transaction.Source, logger)
+                }
             };
         }
 
-        public static Task InsertOne<TEntity>
+        public static InsertDocumentsCommand<TEntity, SourceDocument> GetInsertCommand<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            ILogger logger,
-            ITransaction<TEntity> transaction
+            IMongoSession mongoSession
         )
         {
-            return InsertOne
+            return new InsertDocumentsCommand<TEntity, SourceDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                BuildOne(logger, transaction)
+                CollectionName,
+                Build<TEntity>
             );
         }
 
-        public static DocumentQuery<SourceDocument> GetDocumentQuery
+        public static DocumentQuery<SourceDocument> GetQuery
         (
-            IMongoSession? mongoSession,
-            IMongoDatabase mongoDatabase,
+            IMongoSession mongoSession,
             ISourceQuery sourceQuery
         )
         {
             return new DocumentQuery<SourceDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
+                CollectionName,
                 sourceQuery.GetFilter(_filterBuilder),
                 sourceQuery.GetSort(_sortBuilder),
                 sourceQuery.Skip,

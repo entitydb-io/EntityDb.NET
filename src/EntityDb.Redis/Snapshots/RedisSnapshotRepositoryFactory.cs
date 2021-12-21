@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
+using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -35,11 +36,23 @@ namespace EntityDb.Redis.Snapshots
             _snapshottingStrategy = snapshottingStrategy;
         }
 
+        public async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
+        {
+            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
+
+            if (snapshotSessionOptions.ReadOnly)
+            {
+                return new ReadOnlyRedisSession(connectionMultiplexer, snapshotSessionOptions);
+            }
+
+            return new WriteRedisSession(connectionMultiplexer);
+        }
+
         public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
         {
             var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
-            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
+            var redisSession = await CreateSession(snapshotSessionOptions);
 
             var logger = snapshotSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>();
 
@@ -48,7 +61,7 @@ namespace EntityDb.Redis.Snapshots
                 _keyNamespace,
                 _resolvingStrategyChain,
                 _snapshottingStrategy,
-                connectionMultiplexer,
+                redisSession,
                 logger
             );
 

@@ -5,7 +5,7 @@ namespace EntityDb.MongoDb.Tests.Transactions
 {
     public class TransactionTests : TransactionTestsBase<Startup>
     {
-        public TransactionTests(IServiceProvider serviceProvider) : base(serviceProvider)
+        public TransactionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
         }
     }

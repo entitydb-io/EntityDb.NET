@@ -8,29 +8,21 @@ namespace EntityDb.Common.Snapshots
     internal sealed class TestModeSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {
         private readonly ISnapshotRepository<TEntity> _snapshotRepository;
-        private readonly SnapshotTestMode _snapshotTestMode;
-        private readonly TestModeSnapshotDisposer _testModeSnapshotDisposer;
+        private readonly TestModeSnapshotManager _testModeSnapshotManager;
 
         public TestModeSnapshotRepository
         (
             ISnapshotRepository<TEntity> snapshotRepository,
-            SnapshotTestMode snapshotTestMode,
-            TestModeSnapshotDisposer testModeSnapshotDisposer
+            TestModeSnapshotManager testModeSnapshotManager
         )
         {
             _snapshotRepository = snapshotRepository;
-            _snapshotTestMode = snapshotTestMode;
-            _testModeSnapshotDisposer = testModeSnapshotDisposer;
-
-            if (snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed)
-            {
-                _testModeSnapshotDisposer.Hold();
-            }
+            _testModeSnapshotManager = testModeSnapshotManager;
         }
 
         public Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
-            _testModeSnapshotDisposer.AddEntityId(entityId);
+            _testModeSnapshotManager.AddEntityId(entityId);
 
             return _snapshotRepository.PutSnapshot(entityId, entity);
         }
@@ -42,7 +34,7 @@ namespace EntityDb.Common.Snapshots
 
         public Task<bool> DeleteSnapshots(Guid[] entityIds)
         {
-            _testModeSnapshotDisposer.RemoveEntityIds(entityIds);
+            _testModeSnapshotManager.RemoveEntityIds(entityIds);
 
             return _snapshotRepository.DeleteSnapshots(entityIds);
         }
@@ -55,16 +47,6 @@ namespace EntityDb.Common.Snapshots
 
         public async ValueTask DisposeAsync()
         {
-            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed)
-            {
-                _testModeSnapshotDisposer.Release();
-
-                if (_testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
-                {
-                    await DeleteSnapshots(deleteEntityIds);
-                }
-            }
-
             await _snapshotRepository.DisposeAsync();
         }
     }

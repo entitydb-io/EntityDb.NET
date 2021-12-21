@@ -1,15 +1,14 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Driver;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
 {
-    internal class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
+    internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
     {
-        private readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
+        protected readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
 
         public MongoDbTransactionRepositoryFactoryWrapper(
             IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
@@ -17,21 +16,14 @@ namespace EntityDb.MongoDb.Transactions
             _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
         }
 
-        public string DatabaseName => _mongoDbTransactionRepositoryFactory.DatabaseName;
-
-        public virtual IMongoClient CreatePrimaryClient()
+        public virtual ReadOnlyMongoSession CreateReadOnlySession(TransactionSessionOptions transactionSessionOptions)
         {
-            return _mongoDbTransactionRepositoryFactory.CreatePrimaryClient();
+            return _mongoDbTransactionRepositoryFactory.CreateReadOnlySession(transactionSessionOptions);
         }
 
-        public virtual IMongoClient CreateSecondaryClient()
+        public virtual Task<WriteMongoSession> CreateWriteSession(TransactionSessionOptions transactionSessionOptions)
         {
-            return _mongoDbTransactionRepositoryFactory.CreateSecondaryClient();
-        }
-
-        public virtual Task<IClientSessionHandle> CreateClientSessionHandle()
-        {
-            return _mongoDbTransactionRepositoryFactory.CreateClientSessionHandle();
+            return _mongoDbTransactionRepositoryFactory.CreateWriteSession(transactionSessionOptions);
         }
 
         public virtual TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
@@ -39,32 +31,28 @@ namespace EntityDb.MongoDb.Transactions
             return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
         }
 
-        public virtual Task<MongoDbTransactionObjects> CreateObjects(
-            TransactionSessionOptions transactionSessionOptions)
+        public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
-            return _mongoDbTransactionRepositoryFactory.CreateObjects(transactionSessionOptions);
+            return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions);
         }
 
         public virtual ITransactionRepository<TEntity> CreateRepository
         (
-            TransactionSessionOptions transactionSessionOptions,
-            IMongoSession? mongoSession,
-            IMongoClient mongoClient
+            IMongoSession mongoSession
         )
         {
-            return _mongoDbTransactionRepositoryFactory.CreateRepository(transactionSessionOptions, mongoSession,
-                mongoClient);
+            return _mongoDbTransactionRepositoryFactory.CreateRepository(mongoSession);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
+        public virtual void Dispose()
         {
             DisposeAsync().AsTask().Wait();
         }
 
         public virtual ValueTask DisposeAsync()
         {
-            return ValueTask.CompletedTask;
+            return _mongoDbTransactionRepositoryFactory.DisposeAsync();
         }
     }
 }

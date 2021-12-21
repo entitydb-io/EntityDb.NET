@@ -1,6 +1,4 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Annotations;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
@@ -90,8 +88,7 @@ namespace EntityDb.MongoDb.Extensions
             return guids.ToArray();
         }
 
-        public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(
-            this DocumentQuery<TDocument> documentQuery, ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(this DocumentQuery<TDocument> documentQuery)
             where TDocument : IEntityDocument
         {
             var documents = await documentQuery.Execute(NoDocumentIdProjection);
@@ -105,20 +102,19 @@ namespace EntityDb.MongoDb.Extensions
                         document.TransactionTimeStamp,
                         document.EntityId,
                         document.EntityVersionNumber,
-                        document.Data.Reconstruct<TData>(logger, resolvingStrategyChain)
+                        document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.ResolvingStrategyChain)
                     );
                 })
                 .ToArray<IEntityAnnotation<TData>>();
         }
 
-        public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery,
-            ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery)
             where TDocument : ITransactionDocument
         {
             var documents = await documentQuery.Execute(DataProjection);
 
             return documents
-                .Select(document => document.Data.Reconstruct<TData>(logger, resolvingStrategyChain))
+                .Select(document => document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.ResolvingStrategyChain))
                 .ToArray();
         }
 

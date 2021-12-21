@@ -86,7 +86,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
             foreach (var (collectionName, collectionIndices) in _collections)
             {
-                var mongoCollection = DocumentBase.GetMongoCollection(mongoDatabase, collectionName);
+                var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
                 var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
                 var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();

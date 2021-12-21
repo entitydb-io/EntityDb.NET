@@ -1,8 +1,10 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
 using System.Text;
@@ -10,34 +12,44 @@ using Xunit;
 
 namespace EntityDb.MongoDb.Tests.Envelopes
 {
-    public class BsonDocumentEnvelopeTests
+    public class BsonDocumentEnvelopeTests : TestsBase<Startup>
     {
-        private readonly ILogger _logger;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
-
-        public BsonDocumentEnvelopeTests(ILoggerFactory loggerFactory, IResolvingStrategyChain resolvingStrategyChain)
+        public BsonDocumentEnvelopeTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
-            _logger = loggerFactory.CreateLogger<BsonDocumentEnvelopeTests>();
-            _resolvingStrategyChain = resolvingStrategyChain;
         }
 
         [Fact]
         public void CanDeconstructAndReconstructGenericBsonDocumentEnvelope()
         {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
+            // ACT 
+
             var originalTestRecord = new TestRecord<bool>(true);
 
             IRecord boxedTestRecord = originalTestRecord;
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, _logger);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(boxedTestRecord, logger);
 
-            var bsonBytes = bsonDocumentEnvelope.Serialize(_logger);
+            var bsonBytes = bsonDocumentEnvelope.Serialize(logger);
 
-            var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, _logger);
+            var reconstructedBsonDocumentEnvelope = BsonDocumentEnvelope.Deserialize(bsonBytes, logger);
 
             var reconstructedTestRecord =
-                reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(_logger, _resolvingStrategyChain);
+                reconstructedBsonDocumentEnvelope.Reconstruct<IRecord>(logger, resolvingStategyChain);
 
             var unboxedTestRecord = (TestRecord<bool>)reconstructedTestRecord;
+
+            // ASSERT
 
             unboxedTestRecord.TestProperty.ShouldBe(originalTestRecord.TestProperty);
         }
@@ -47,6 +59,12 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
             var invalidBson = "I AM A STRING VALUE, NOT BSON!";
 
             var invalidBsonBytes = Encoding.UTF8.GetBytes(invalidBson);
@@ -55,7 +73,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
 
             Should.Throw<DeserializeException>(() =>
             {
-                BsonDocumentEnvelope.Deserialize(invalidBsonBytes, _logger);
+                BsonDocumentEnvelope.Deserialize(invalidBsonBytes, logger);
             });
         }
 
@@ -64,13 +82,22 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
+            var resolvingStategyChain = serviceScope.ServiceProvider
+                .GetRequiredService<IResolvingStrategyChain>();
+
             var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 
             Should.Throw<DeserializeException>(() =>
             {
-                bsonDocumentEnvelope.Reconstruct<object>(_logger, _resolvingStrategyChain);
+                bsonDocumentEnvelope.Reconstruct<object>(logger, resolvingStategyChain);
             });
         }
 
@@ -79,24 +106,38 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
             var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 
             // ASSERT
 
             Should.Throw<SerializeException>(() =>
             {
-                bsonDocumentEnvelope.Serialize(typeof(DateTime), _logger);
+                bsonDocumentEnvelope.Serialize(typeof(DateTime), logger);
             });
         }
 
         [Fact]
         public void WhenDeconstructingNull_ThrowSerializeException()
         {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
             // ASSERT
 
             Should.Throw<SerializeException>(() =>
             {
-                BsonDocumentEnvelope.Deconstruct(default!, _logger);
+                BsonDocumentEnvelope.Deconstruct(default!, logger);
             });
         }
 
@@ -105,9 +146,15 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, logger);
 
             // ASSERT
 
@@ -119,9 +166,15 @@ namespace EntityDb.MongoDb.Tests.Envelopes
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var logger = serviceScope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger<BsonDocumentEnvelopeTests>();
+
             var value = new TestRecord<bool>(true);
 
-            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, _logger, false);
+            var bsonDocumentEnvelope = BsonDocumentEnvelope.Deconstruct(value, logger, false);
 
             // ASSERT
 

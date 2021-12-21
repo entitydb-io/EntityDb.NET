@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Redis.Envelopes;
+using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -12,7 +13,7 @@ namespace EntityDb.Redis.Snapshots
 {
     internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
     {
-        protected readonly IConnectionMultiplexer _connectionMultiplexer;
+        protected readonly IRedisSession _redisSession;
         private readonly string _keyNamespace;
         protected readonly ILogger _logger;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
@@ -23,14 +24,14 @@ namespace EntityDb.Redis.Snapshots
             string keyNamespace,
             IResolvingStrategyChain resolvingStrategyChain,
             ISnapshottingStrategy<TEntity>? snapshottingStrategy,
-            IConnectionMultiplexer connectionMultiplexer,
+            IRedisSession redisSession,
             ILogger logger
         )
         {
             _keyNamespace = keyNamespace;
             _resolvingStrategyChain = resolvingStrategyChain;
             _snapshottingStrategy = snapshottingStrategy;
-            _connectionMultiplexer = connectionMultiplexer;
+            _redisSession = redisSession;
             _logger = logger;
         }
 
@@ -52,22 +53,13 @@ namespace EntityDb.Redis.Snapshots
                 .Deconstruct(entity, _logger)
                 .Serialize(_logger);
 
-            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
-
-            var insertedTask = redisTransaction.StringSetAsync(snapshotKey, snapshotValue);
-
-            await redisTransaction.ExecuteAsync();
-
-            return await insertedTask;
+            return await _redisSession.Insert(snapshotKey, snapshotValue);
         }
 
         public async Task<TEntity?> GetSnapshot(Guid entityId)
         {
             var snapshotKey = GetSnapshotKey(entityId);
-
-            var redisDatabase = _connectionMultiplexer.GetDatabase();
-
-            var snapshotValue = await redisDatabase.StringGetAsync(snapshotKey);
+            var snapshotValue = await _redisSession.Find(snapshotKey);
 
             if (!snapshotValue.HasValue)
             {
@@ -81,19 +73,9 @@ namespace EntityDb.Redis.Snapshots
 
         public async Task<bool> DeleteSnapshots(Guid[] entityIds)
         {
-            var redisTransaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
+            var snapshotKeys = entityIds.Select(GetSnapshotKey);
 
-            var deleteSnapshotTasks = entityIds
-                .Select(GetSnapshotKey)
-                .Select(key => redisTransaction.KeyDeleteAsync(key))
-                .ToArray();
-
-            await redisTransaction.ExecuteAsync();
-
-            await Task.WhenAll(deleteSnapshotTasks);
-
-            return deleteSnapshotTasks
-                .All(task => task.Result);
+            return await _redisSession.Delete(snapshotKeys);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
@@ -104,9 +86,7 @@ namespace EntityDb.Redis.Snapshots
 
         public async ValueTask DisposeAsync()
         {
-            await Task.Yield();
-
-            _connectionMultiplexer.Dispose();
+            await _redisSession.DisposeAsync();
         }
 
         public RedisKey GetSnapshotKey(Guid entityId)

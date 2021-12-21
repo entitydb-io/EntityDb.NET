@@ -1,5 +1,4 @@
-﻿using EntityDb.Common.Transactions;
-using EntityDb.MongoDb.Transactions;
+﻿using EntityDb.MongoDb.Transactions;
 
 namespace EntityDb.MongoDb.Extensions
 {
@@ -7,12 +6,11 @@ namespace EntityDb.MongoDb.Extensions
     {
         public static IMongoDbTransactionRepositoryFactory<TEntity> UseTestMode<TEntity>(
             this IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory,
-            TransactionTestMode? transactionTestMode)
+            bool testMode)
         {
-            if (transactionTestMode.HasValue)
+            if (testMode)
             {
-                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory,
-                    transactionTestMode.Value);
+                return new TestModeMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory);
             }
 
             return mongoDbTransactionRepositoryFactory;

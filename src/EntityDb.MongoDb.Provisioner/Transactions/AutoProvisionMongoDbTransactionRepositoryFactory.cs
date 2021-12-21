@@ -1,5 +1,6 @@
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
 using System.Threading.Tasks;
 
@@ -16,21 +17,20 @@ namespace EntityDb.MongoDb.Provisioner.Transactions
         {
         }
 
-        public override async Task<MongoDbTransactionObjects> CreateObjects(
-            TransactionSessionOptions transactionSessionOptions)
+        public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
-            var mongoObjects = await base.CreateObjects(transactionSessionOptions);
+            var mongoSession = await base.CreateSession(transactionSessionOptions);
 
             if (!_needToProvision)
             {
-                return mongoObjects;
+                return mongoSession;
             }
 
             _needToProvision = false;
 
-            await mongoObjects.MongoClient.ProvisionCollections(DatabaseName);
+            await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace.DatabaseName);
 
-            return mongoObjects;
+            return mongoSession;
         }
     }
 }

@@ -1,5 +1,4 @@
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
@@ -12,7 +11,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
     {
         public static void AddAutoProvisionTestModeMongoDbTransactions<TEntity>(
             this IServiceCollection serviceCollection, string databaseName,
-            Func<IConfiguration, string> getConnectionString, TransactionTestMode? transactionTestMode = null)
+            Func<IConfiguration, string> getConnectionString, bool testMode = false)
         {
             serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
@@ -22,7 +21,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
                 return MongoDbTransactionRepositoryFactory<TEntity>
                     .Create(serviceProvider, connectionString, databaseName)
-                    .UseTestMode(transactionTestMode)
+                    .UseTestMode(testMode)
                     .UseAutoProvisioning();
             });
         }

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.TestImplementations.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
@@ -7,13 +8,11 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots
 {
-    public abstract class SnapshotTestsBase
+    public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
+        where TStartup : IStartup, new()
     {
-        private readonly ISnapshotRepositoryFactory<TransactionEntity> _snapshotRepositoryFactory;
-
-        public SnapshotTestsBase(ISnapshotRepositoryFactory<TransactionEntity> snapshotRepositoryFactory)
+        public SnapshotTestsBase(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
-            _snapshotRepositoryFactory = snapshotRepositoryFactory;
         }
 
         [Fact]
@@ -21,12 +20,17 @@ namespace EntityDb.Common.Tests.Snapshots
         {
             // ARRANGE
 
+            using var serviceScope = CreateServiceScope();
+
+            var snapshotRepositoryFactory = serviceScope.ServiceProvider
+                .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>();
+
             var expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
 
             var entityId = Guid.NewGuid();
 
             await using var snapshotRepository =
-                await _snapshotRepositoryFactory.CreateRepository("TestWrite");
+                await snapshotRepositoryFactory.CreateRepository("TestWrite");
 
             // ACT
 

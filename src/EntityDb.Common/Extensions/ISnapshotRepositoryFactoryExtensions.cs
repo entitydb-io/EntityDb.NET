@@ -8,13 +8,12 @@ namespace EntityDb.Common.Extensions
         public static ISnapshotRepositoryFactory<TEntity> UseTestMode<TEntity>
         (
             this ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
-            SnapshotTestMode? snapshotTestMode
+            bool testMode
         )
         {
-            if (snapshotTestMode.HasValue)
+            if (testMode)
             {
-                return new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory,
-                    snapshotTestMode.Value);
+                return new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory);
             }
 
             return snapshotRepositoryFactory;

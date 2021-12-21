@@ -13,48 +13,42 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
 {
-    internal record MongoDbTransactionObjects(IMongoSession? MongoSession, IMongoClient MongoClient);
-
     internal class MongoDbTransactionRepositoryFactory<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
     {
-        private readonly string _connectionString;
-
-        protected readonly string _databaseName;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
         private readonly IResolvingStrategyChain _resolvingStrategyChain;
+        private readonly string _connectionString;
+        private readonly string _databaseName;
 
-        public MongoDbTransactionRepositoryFactory(IOptionsFactory<TransactionSessionOptions> optionsFactory,
+        public MongoDbTransactionRepositoryFactory
+        (
+            IOptionsFactory<TransactionSessionOptions> optionsFactory,
             ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string databaseName)
+            IResolvingStrategyChain resolvingStrategyChain,
+            string connectionString,
+            string databaseName
+        )
         {
             _optionsFactory = optionsFactory;
             _loggerFactory = loggerFactory;
             _resolvingStrategyChain = resolvingStrategyChain;
             _connectionString = connectionString;
-
             _databaseName = databaseName;
         }
 
-        public string DatabaseName => _databaseName;
-
-        public IMongoClient CreatePrimaryClient()
+        public ReadOnlyMongoSession CreateReadOnlySession(TransactionSessionOptions transactionSessionOptions)
         {
-            return new MongoClient()
-                .WithReadPreference(ReadPreference.Primary)
-                .WithReadConcern(ReadConcern.Majority);
+            var mongoDatabase = new MongoClient(_connectionString)
+                .GetDatabase(_databaseName);
+
+            return new ReadOnlyMongoSession(mongoDatabase, _loggerFactory, _resolvingStrategyChain, transactionSessionOptions);
         }
 
-        public IMongoClient CreateSecondaryClient()
+        public async Task<WriteMongoSession> CreateWriteSession(TransactionSessionOptions transactionSessionOptions)
         {
-            return new MongoClient(_connectionString)
-                .WithReadPreference(ReadPreference.SecondaryPreferred)
-                .WithReadConcern(ReadConcern.Available);
-        }
-
-        public async Task<IClientSessionHandle> CreateClientSessionHandle()
-        {
-            var mongoClient = CreatePrimaryClient();
+            var mongoClient = new MongoClient(_connectionString);
+            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
 
             var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
             {
@@ -65,7 +59,7 @@ namespace EntityDb.MongoDb.Transactions
                 )
             });
 
-            return clientSessionHandle;
+            return new WriteMongoSession(mongoDatabase, clientSessionHandle, _loggerFactory, _resolvingStrategyChain, transactionSessionOptions);
         }
 
         public TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
@@ -73,45 +67,27 @@ namespace EntityDb.MongoDb.Transactions
             return _optionsFactory.Create(transactionSessionOptionsName);
         }
 
-        public ITransactionRepository<TEntity> CreateRepository
-        (
-            TransactionSessionOptions transactionSessionOptions,
-            IMongoSession? mongoSession,
-            IMongoClient mongoClient
-        )
-        {
-            var logger = transactionSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>();
-
-            var mongoDbTransactionRepository = new MongoDbTransactionRepository<TEntity>
-            (
-                mongoSession,
-                mongoClient.GetDatabase(_databaseName),
-                logger,
-                _resolvingStrategyChain
-            );
-
-            return mongoDbTransactionRepository.UseTryCatch(logger);
-        }
-
-        public async Task<MongoDbTransactionObjects> CreateObjects(TransactionSessionOptions transactionSessionOptions)
+        public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
             if (transactionSessionOptions.ReadOnly)
             {
-                if (transactionSessionOptions.SecondaryPreferred)
-                {
-                    return new MongoDbTransactionObjects(null, CreateSecondaryClient());
-                }
-
-                return new MongoDbTransactionObjects(null, CreatePrimaryClient());
+                return CreateReadOnlySession(transactionSessionOptions);
             }
 
-            var clientSessionHandle = await CreateClientSessionHandle();
+            return await CreateWriteSession(transactionSessionOptions);
+        }
 
-            var mongoClient = clientSessionHandle.Client;
+        public ITransactionRepository<TEntity> CreateRepository
+        (
+            IMongoSession mongoSession
+        )
+        {
+            var mongoDbTransactionRepository = new MongoDbTransactionRepository<TEntity>
+            (
+                mongoSession
+            );
 
-            var mongoSession = new MongoSession(clientSessionHandle);
-
-            return new MongoDbTransactionObjects(mongoSession, mongoClient);
+            return mongoDbTransactionRepository.UseTryCatch(mongoSession.Logger);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]

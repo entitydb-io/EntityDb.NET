@@ -7,25 +7,21 @@ namespace EntityDb.Common.Snapshots
     internal sealed class TestModeSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
     {
         private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
-        private readonly SnapshotTestMode _snapshotTestMode;
-        private readonly TestModeSnapshotDisposer _testModeSnapshotDisposer = new();
+        private readonly TestModeSnapshotManager _testModeSnapshotManager = new();
 
         public TestModeSnapshotRepositoryFactory
         (
-            ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
-            SnapshotTestMode snapshotTestMode
+            ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory
         )
         {
             _snapshotRepositoryFactory = snapshotRepositoryFactory;
-            _snapshotTestMode = snapshotTestMode;
         }
 
         public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
         {
             var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
 
-            return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _snapshotTestMode,
-                _testModeSnapshotDisposer);
+            return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _testModeSnapshotManager);
         }
 
         [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
@@ -36,13 +32,12 @@ namespace EntityDb.Common.Snapshots
 
         public async ValueTask DisposeAsync()
         {
-            if (_snapshotTestMode == SnapshotTestMode.AllRepositoriesDisposed &&
-                _testModeSnapshotDisposer.NoHolds(out var deleteEntityIds))
-            {
-                var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
+            var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
 
-                await snapshotRepository.DeleteSnapshots(deleteEntityIds);
-            }
+            //TODO: is this configureable? o.o
+            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
+
+            await snapshotRepository.DeleteSnapshots(deleteEntityIds);
 
             await _snapshotRepositoryFactory.DisposeAsync();
         }

@@ -1,8 +1,6 @@
-﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
-using EntityDb.MongoDb.Extensions;
+﻿using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Driver;
+using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -10,81 +8,63 @@ namespace EntityDb.MongoDb.Transactions
     internal class
         TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
     {
-        private readonly TestModeTransactionManager _testModeTransactionManager = new();
-        private readonly TransactionTestMode _transactionTestMode;
-        private IClientSessionHandle? _clientSessionHandleSingleton;
-
-        private IMongoClient? _primaryClientSingleton;
-        private IMongoClient? _secondaryClientSingleton;
-
-        public TestModeMongoDbTransactionRepositoryFactory(
-            IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory,
-            TransactionTestMode transactionTestMode) : base(mongoDbTransactionRepositoryFactory)
+        private static readonly TransactionSessionOptions _testTransactionSessionOptions = new()
         {
-            _transactionTestMode = transactionTestMode;
+            WriteTimeout = TimeSpan.FromMinutes(1),
+        };
+
+        private WriteMongoSession? _writeSession;
+
+        public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
+        {
         }
 
-        public override IMongoClient CreatePrimaryClient()
+        public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
-            if (_transactionTestMode == TransactionTestMode.RepositoryFactoryDisposed)
+            if (_writeSession == null)
             {
-                return _primaryClientSingleton ??= base.CreatePrimaryClient();
+                _writeSession = await _mongoDbTransactionRepositoryFactory.CreateWriteSession(_testTransactionSessionOptions);
+
+                _writeSession.StartTransaction();
             }
 
-            return base.CreatePrimaryClient();
-        }
-
-        public override IMongoClient CreateSecondaryClient()
-        {
-            if (_transactionTestMode == TransactionTestMode.RepositoryFactoryDisposed)
+            if (transactionSessionOptions.ReadOnly)
             {
-                return _secondaryClientSingleton ??= base.CreateSecondaryClient();
+                return new TestModeMongoSessionWrapper
+                (
+                    MongoSession: new ReadOnlyMongoSession
+                    (
+                        _writeSession.MongoDatabase,
+                        _writeSession.LoggerFactory,
+                        _writeSession.ResolvingStrategyChain,
+                        transactionSessionOptions
+                    ),
+                    ReadOnly: true
+                );
             }
 
-            return base.CreateSecondaryClient();
-        }
-
-        public override async Task<IClientSessionHandle> CreateClientSessionHandle()
-        {
-            if (_transactionTestMode == TransactionTestMode.RepositoryFactoryDisposed)
-            {
-                return _clientSessionHandleSingleton ??= await base.CreateClientSessionHandle();
-            }
-
-            return await base.CreateClientSessionHandle();
-        }
-
-        public override async Task<MongoDbTransactionObjects> CreateObjects(
-            TransactionSessionOptions transactionSessionOptions)
-        {
-            var (mongoSession, mongoClient) = await base.CreateObjects(transactionSessionOptions);
-
-            if (mongoSession is MongoSession concreteMongoSession)
-            {
-                mongoSession = new TestModeMongoSession(concreteMongoSession.ClientSessionHandle,
-                    _testModeTransactionManager);
-            }
-
-            return new MongoDbTransactionObjects(mongoSession, mongoClient);
-        }
-
-        public override ITransactionRepository<TEntity> CreateRepository(
-            TransactionSessionOptions transactionSessionOptions, IMongoSession? mongoSession, IMongoClient mongoClient)
-        {
-            return base
-                .CreateRepository(transactionSessionOptions, mongoSession, mongoClient)
-                .UseTestMode(_testModeTransactionManager, _transactionTestMode);
+            return new TestModeMongoSessionWrapper
+            (
+                MongoSession: new WriteMongoSession
+                (
+                    _writeSession.MongoDatabase,
+                    _writeSession.ClientSessionHandle,
+                    _writeSession.LoggerFactory,
+                    _writeSession.ResolvingStrategyChain,
+                    transactionSessionOptions
+                ),
+                ReadOnly: false
+            );
         }
 
         public override async ValueTask DisposeAsync()
         {
-            if (_transactionTestMode == TransactionTestMode.AllRepositoriesDisposed &&
-                _clientSessionHandleSingleton != null)
+            if (_writeSession != null)
             {
-                await _clientSessionHandleSingleton.AbortTransactionAsync();
-            }
+                await _writeSession.AbortTransaction();
 
-            await base.DisposeAsync();
+                await _writeSession.DisposeAsync();
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
 using System;
 
 namespace EntityDb.Common.Transactions
@@ -12,10 +11,6 @@ namespace EntityDb.Common.Transactions
         /// <summary>
         ///     If <c>true</c>, indicates the agent only intends to execute queries.
         /// </summary>
-        /// <remarks>
-        ///     <see cref="ITransactionRepository{TEntity}.PutTransaction(ITransaction{TEntity})" /> should always return
-        ///     <c>false</c> if this is <c>true</c>.
-        /// </remarks>
         public bool ReadOnly { get; set; }
 
         /// <summary>
@@ -27,6 +22,11 @@ namespace EntityDb.Common.Transactions
         ///     Determines how long to wait before a command should be automatically aborted.
         /// </summary>
         public TimeSpan? WriteTimeout { get; set; }
+
+        /// <summary>
+        ///     Determines how long to wait before a query should be automatically killed.
+        /// </summary>
+        public TimeSpan? ReadTimeout { get; set; }
 
         /// <summary>
         ///     Overrides the logger for the session.

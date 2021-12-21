@@ -1,18 +1,18 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Loggers;
+﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Queries;
+using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents
 {
@@ -32,13 +32,21 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public static IReadOnlyCollection<LeaseDocument> BuildMany<TEntity>
+        public static IReadOnlyCollection<LeaseDocument>? BuildInsert<TEntity>
         (
-            ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            int transactionStepIndex,
+            ILogger logger
         )
         {
+            var transactionStep = transaction.Steps[transactionStepIndex];
+            var insertLeases = transactionStep.Leases.Insert;
+
+            if (insertLeases.Length == 0)
+            {
+                return null;
+            }
+
             return transactionStep.Leases.Insert
                 .Select(insertLease => new LeaseDocument
                 {
@@ -54,34 +62,47 @@ namespace EntityDb.MongoDb.Documents
                 .ToArray();
         }
 
-        public static async Task InsertMany<TEntity>
+        public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            ILogger logger,
             ITransaction<TEntity> transaction,
-            ITransactionStep<TEntity> transactionStep
+            int transactionStepIndex
         )
         {
-            await InsertMany
+            var transactionStep = transaction.Steps[transactionStepIndex];
+            var deleteLeases = transactionStep.Leases.Delete;
+
+            if (deleteLeases.Length == 0)
+            {
+                return null;
+            }
+
+            return new DeleteLeasesQuery(transactionStep.EntityId, deleteLeases)
+                .GetFilter(_filterBuilder);
+        }
+
+        public static InsertDocumentsCommand<TEntity, LeaseDocument> GetInsertCommand<TEntity>
+        (
+            IMongoSession mongoSession
+        )
+        {
+            return new InsertDocumentsCommand<TEntity, LeaseDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                BuildMany(logger, transaction, transactionStep)
+                CollectionName,
+                BuildInsert<TEntity>
             );
         }
 
-        public static DocumentQuery<LeaseDocument> GetDocumentQuery
+        public static DocumentQuery<LeaseDocument> GetQuery
         (
-            IMongoSession? mongoSession,
-            IMongoDatabase mongoDatabase,
+            IMongoSession mongoSession,
             ILeaseQuery leaseQuery
         )
         {
             return new DocumentQuery<LeaseDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
+                CollectionName,
                 leaseQuery.GetFilter(_filterBuilder),
                 leaseQuery.GetSort(_sortBuilder),
                 leaseQuery.Skip,
@@ -89,26 +110,16 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static async Task DeleteMany
+        public static DeleteDocumentsCommand<TEntity, LeaseDocument> GetDeleteCommand<TEntity>
         (
-            IMongoSession mongoSession,
-            IMongoDatabase mongoDatabase,
-            Guid entityId,
-            IReadOnlyCollection<ILease> deleteLeases
+            IMongoSession mongoSession
         )
         {
-            if (deleteLeases.Count == 0)
-            {
-                return;
-            }
-
-            var deleteLeasesQuery = new DeleteLeasesQuery(entityId, deleteLeases);
-
-            await DeleteMany
+            return new DeleteDocumentsCommand<TEntity, LeaseDocument>
             (
                 mongoSession,
-                GetMongoCollection(mongoDatabase, CollectionName),
-                deleteLeasesQuery.GetFilter(_filterBuilder)
+                CollectionName,
+                BuildDelete<TEntity>
             );
         }
     }
