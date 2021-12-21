@@ -109,12 +109,12 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static DeleteDocumentsCommand<TEntity, TagDocument> GetDeleteCommand<TEntity>
+        public static DeleteDocumentsCommand<TEntity> GetDeleteCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new DeleteDocumentsCommand<TEntity, TagDocument>
+            return new DeleteDocumentsCommand<TEntity>
             (
                 mongoSession,
                 CollectionName,

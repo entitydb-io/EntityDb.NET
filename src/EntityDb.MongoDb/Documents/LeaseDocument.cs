@@ -110,12 +110,12 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static DeleteDocumentsCommand<TEntity, LeaseDocument> GetDeleteCommand<TEntity>
+        public static DeleteDocumentsCommand<TEntity> GetDeleteCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new DeleteDocumentsCommand<TEntity, LeaseDocument>
+            return new DeleteDocumentsCommand<TEntity>
             (
                 mongoSession,
                 CollectionName,

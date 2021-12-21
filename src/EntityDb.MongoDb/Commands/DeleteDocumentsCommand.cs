@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands
 {
-    internal record DeleteDocumentsCommand<TEntity, TDocument>
+    internal record DeleteDocumentsCommand<TEntity>
     (
         IMongoSession MongoSession,
         string CollectionName,
