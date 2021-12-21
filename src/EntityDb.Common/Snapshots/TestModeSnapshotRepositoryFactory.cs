@@ -34,8 +34,7 @@ namespace EntityDb.Common.Snapshots
         {
             var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
 
-            //TODO: is this configureable? o.o
-            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TODO");
+            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TestWrite");
 
             await snapshotRepository.DeleteSnapshots(deleteEntityIds);
 
