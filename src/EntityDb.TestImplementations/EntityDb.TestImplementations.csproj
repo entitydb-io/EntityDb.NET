@@ -19,11 +19,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Bogus" Version="33.1.1"/>
+        <PackageReference Include="Bogus" Version="33.1.1" />
     </ItemGroup>
 
 </Project>

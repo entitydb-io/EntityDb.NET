@@ -37,9 +37,9 @@ namespace EntityDb.MongoDb.Provisioner.Commands
 
             var allDbResources = new MongoDbAtlasResource { Db = entityName };
 
-            var sourceResource = new MongoDbAtlasResource
+            var agentSignatureResource = new MongoDbAtlasResource
             {
-                Db = entityName, Collection = SourceDocument.CollectionName
+                Db = entityName, Collection = AgentSignatureDocument.CollectionName
             };
 
             var commandResource = new MongoDbAtlasResource
@@ -58,17 +58,17 @@ namespace EntityDb.MongoDb.Provisioner.Commands
                 new MongoDbAtlasRoleAction
                 {
                     Action = "FIND",
-                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
+                    Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
                 },
                 new MongoDbAtlasRoleAction
                 {
                     Action = "INSERT",
-                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
+                    Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
                 },
                 new MongoDbAtlasRoleAction
                 {
                     Action = "CREATE_INDEX",
-                    Resources = new[] { sourceResource, commandResource, leaseResource, tagResources }
+                    Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
                 },
                 new MongoDbAtlasRoleAction { Action = "REMOVE", Resources = new[] { leaseResource, tagResources } }
             };

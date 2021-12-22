@@ -11,7 +11,7 @@ namespace EntityDb.Void.Transactions
 {
     internal sealed class VoidTransactionRepository<TEntity> : ITransactionRepository<TEntity>
     {
-        public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
         {
             return Task.FromResult(Array.Empty<Guid>());
         }
@@ -31,7 +31,7 @@ namespace EntityDb.Void.Transactions
             return Task.FromResult(Array.Empty<Guid>());
         }
 
-        public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
         {
             return Task.FromResult(Array.Empty<Guid>());
         }
@@ -51,7 +51,7 @@ namespace EntityDb.Void.Transactions
             return Task.FromResult(Array.Empty<Guid>());
         }
 
-        public Task<object[]> GetSources(ISourceQuery sourceQuery)
+        public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
         {
             return Task.FromResult(Array.Empty<object>());
         }

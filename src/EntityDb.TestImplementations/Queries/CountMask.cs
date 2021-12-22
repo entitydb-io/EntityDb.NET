@@ -2,12 +2,12 @@
 using EntityDb.Abstractions.Queries.Filters;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Leases;
-using EntityDb.TestImplementations.Source;
+using EntityDb.TestImplementations.AgentSignature;
 using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountFilter : ISourceFilter, ICommandFilter, ILeaseFilter, ITagFilter
+    public record CountFilter : IAgentSignatureFilter, ICommandFilter, ILeaseFilter, ITagFilter
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
@@ -19,9 +19,9 @@ namespace EntityDb.TestImplementations.Queries
             return builder.LeaseTypeIn(typeof(CountLease));
         }
 
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
         {
-            return builder.SourceTypeIn(typeof(Counter));
+            return builder.AgentSignatureTypeIn(typeof(CounterAgentSignature));
         }
 
         public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)

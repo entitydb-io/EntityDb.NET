@@ -6,11 +6,24 @@ namespace EntityDb.Mvc.Agents
 {
     internal record HttpContextAgentAccessor(IHttpContextAccessor HttpContextAccessor) : IAgentAccessor
     {
-        private readonly Lazy<IAgent> _agent = new(() => new HttpContextAgent(HttpContextAccessor.HttpContext!));
+        private IAgent? _agent;
+
+        private IAgent CreateAgent()
+        {
+            var httpContext = HttpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                //TODO: Well-named exception
+                throw new Exception("");
+            }
+
+            return new HttpContextAgent(httpContext);
+        }
 
         public IAgent GetAgent()
         {
-            return _agent.Value;
+            return _agent ??= CreateAgent();
         }
     }
 }

@@ -19,11 +19,11 @@ namespace EntityDb.Abstractions.Transactions
     public interface ITransactionRepository<TEntity> : IDisposableResource
     {
         /// <summary>
-        ///     Returns the transaction ids which are found by a source query.
+        ///     Returns the transaction ids which are found by a agentSignature query.
         /// </summary>
-        /// <param name="sourceQuery">The source query.</param>
-        /// <returns>The transaction ids which are found by <paramref name="sourceQuery" />.</returns>
-        Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery);
+        /// <param name="agentSignatureQuery">The agentSignature query.</param>
+        /// <returns>The transaction ids which are found by <paramref name="agentSignatureQuery" />.</returns>
+        Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery);
 
         /// <summary>
         ///     Returns the transaction ids which are found by a command query.
@@ -47,11 +47,11 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetTransactionIds(ITagQuery tagQuery);
 
         /// <summary>
-        ///     Returns the entity ids which are found by a source query.
+        ///     Returns the entity ids which are found by a agentSignature query.
         /// </summary>
-        /// <param name="sourceQuery">The source query.</param>
-        /// <returns>The entity ids which are found by <paramref name="sourceQuery" />.</returns>
-        Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery);
+        /// <param name="agentSignatureQuery">The agentSignature query.</param>
+        /// <returns>The entity ids which are found by <paramref name="agentSignatureQuery" />.</returns>
+        Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery);
 
         /// <summary>
         ///     Returns the entity ids which are found by a command query.
@@ -75,11 +75,11 @@ namespace EntityDb.Abstractions.Transactions
         Task<Guid[]> GetEntityIds(ITagQuery tagQuery);
 
         /// <summary>
-        ///     Returns the sources which are found by a source query.
+        ///     Returns the agentSignatures which are found by a agentSignature query.
         /// </summary>
-        /// <param name="sourceQuery">The source query.</param>
-        /// <returns>The sources which are found by <paramref name="sourceQuery" />.</returns>
-        Task<object[]> GetSources(ISourceQuery sourceQuery);
+        /// <param name="agentSignatureQuery">The agentSignature query.</param>
+        /// <returns>The agentSignatures which are found by <paramref name="agentSignatureQuery" />.</returns>
+        Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery);
 
         /// <summary>
         ///     Returns the commands which are found by a command query.

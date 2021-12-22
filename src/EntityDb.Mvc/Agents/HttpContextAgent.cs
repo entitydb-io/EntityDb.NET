@@ -9,5 +9,10 @@ namespace EntityDb.Mvc.Agents
         {
             return HttpContext.User.IsInRole(role);
         }
+
+        public object GetSignature()
+        {
+            return HttpContextAgentSignature.FromHttpContext(HttpContext);
+        }
     }
 }

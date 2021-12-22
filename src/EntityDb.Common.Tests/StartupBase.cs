@@ -27,7 +27,7 @@ namespace EntityDb.Common.Tests
 
             // Agent
 
-            serviceCollection.AddAgentAccessor<DummyAgentAccessor>();
+            serviceCollection.AddAgentAccessor<NoAgentAccessor>();
 
             // Transaction Entity
 

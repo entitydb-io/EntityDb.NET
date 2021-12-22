@@ -11,18 +11,18 @@ namespace EntityDb.Common.Extensions
     public static class IQueryExtensions
     {
         /// <summary>
-        ///     Returns a new <see cref="ISourceQuery" /> that "ands" a source filter with the filter of a source query. All other
+        ///     Returns a new <see cref="IAgentSignatureQuery" /> that "ands" a agentSignature filter with the filter of a agentSignature query. All other
         ///     properties of the query are inherited.
         /// </summary>
-        /// <param name="sourceQuery">The source query.</param>
-        /// <param name="sourceFilter">The source filter.</param>
+        /// <param name="agentSignatureQuery">The agentSignature query.</param>
+        /// <param name="agentSignatureFilter">The agentSignature filter.</param>
         /// <returns>
-        ///     A new <see cref="ISourceQuery" /> that "ands" <paramref name="sourceFilter" /> with the filter of
-        ///     <paramref name="sourceQuery" />.
+        ///     A new <see cref="IAgentSignatureQuery" /> that "ands" <paramref name="agentSignatureFilter" /> with the filter of
+        ///     <paramref name="agentSignatureQuery" />.
         /// </returns>
-        public static ISourceQuery Filter(this ISourceQuery sourceQuery, ISourceFilter sourceFilter)
+        public static IAgentSignatureQuery Filter(this IAgentSignatureQuery agentSignatureQuery, IAgentSignatureFilter agentSignatureFilter)
         {
-            return new FilteredSourceQuery(sourceQuery, sourceFilter);
+            return new FilteredAgentSignatureQuery(agentSignatureQuery, agentSignatureFilter);
         }
 
         /// <summary>
@@ -71,15 +71,15 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Returns a new, modified <see cref="ISourceQuery" />. The way in which it is modified depends on the parameters of
+        ///     Returns a new, modified <see cref="IAgentSignatureQuery" />. The way in which it is modified depends on the parameters of
         ///     this extension method.
         /// </summary>
-        /// <param name="sourceQuery">The source query.</param>
+        /// <param name="agentSignatureQuery">The agentSignature query.</param>
         /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-        /// <returns>A new, modified <see cref="ISourceQuery" />.</returns>
-        public static ISourceQuery Modify(this ISourceQuery sourceQuery, ModifiedQueryOptions modifiedQueryOptions)
+        /// <returns>A new, modified <see cref="IAgentSignatureQuery" />.</returns>
+        public static IAgentSignatureQuery Modify(this IAgentSignatureQuery agentSignatureQuery, ModifiedQueryOptions modifiedQueryOptions)
         {
-            return new ModifiedSourceQuery(sourceQuery, modifiedQueryOptions);
+            return new ModifiedAgentSignatureQuery(agentSignatureQuery, modifiedQueryOptions);
         }
 
         /// <summary>

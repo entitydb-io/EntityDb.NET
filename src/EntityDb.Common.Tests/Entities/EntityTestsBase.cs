@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Source;
+using EntityDb.TestImplementations.AgentSignature;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -48,7 +48,7 @@ namespace EntityDb.Common.Tests.Entities
                 transactionBuilder.Append(entityId, new DoNothing());
             }
 
-            return transactionBuilder.Build(Guid.NewGuid(), new NoSource());
+            return transactionBuilder.Build(Guid.NewGuid());
         }
 
         [Theory]

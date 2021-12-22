@@ -28,7 +28,7 @@ information on the statement. (If I'm wrong, you should consider getting a new b
 There are five core objects at the heart of this implementation
 
 1. Transactions
-2. Sources
+2. Agent
 3. Commands
 4. Tags
 5. Leases
@@ -43,10 +43,11 @@ will be implementations that are not capable of doing this if you want to use ta
 which provides no ability to enforce uniqueness constraints in its transaction. Such implementations will need a complimentary
 transaction in order to make use of tags and leases.
 
-### Sources
+### Agent
 
-A source is the origin of a transaction. If the transaction was initiated by an HTTP API, for example, you might want
-record the headers and connection information of the request.
+An agent is an actor that can execute transactions. For example, if a transaction is initiated via and HTTP API, you might use
+the `HttpContextAgent` - it's signature includes headers and connection information, and it uses the ClaimsPrincipal to decide
+if an agent has a particular role required for authorized commands.
 
 ### Commands
 

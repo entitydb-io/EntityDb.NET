@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : ISourceQuery, ICommandQuery,
+    public record TransactionTimeStampQuery(DateTime Gte, DateTime Lte) : IAgentSignatureQuery, ICommandQuery,
         ILeaseQuery, ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -46,7 +46,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
         {
             return builder.And
             (
@@ -55,7 +55,7 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

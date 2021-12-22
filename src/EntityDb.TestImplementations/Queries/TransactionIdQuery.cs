@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record TransactionIdQuery(Guid TransactionId) : ISourceQuery, ICommandQuery, ILeaseQuery,
+    public record TransactionIdQuery(Guid TransactionId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
         ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -38,12 +38,12 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
         {
             return builder.TransactionIdIn(TransactionId);
         }
 
-        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
         {
             return builder.Combine
             (

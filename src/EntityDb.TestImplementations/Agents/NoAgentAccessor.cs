@@ -2,11 +2,11 @@
 
 namespace EntityDb.TestImplementations.Agents
 {
-    public class DummyAgentAccessor : IAgentAccessor
+    public class NoAgentAccessor : IAgentAccessor
     {
         public IAgent GetAgent()
         {
-            return new DummyAgent();
+            return new NoAgent();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Strategies;
@@ -16,24 +17,27 @@ namespace EntityDb.Common.Transactions
 {
     /// <summary>
     ///     Provides a way to construct an <see cref="ITransaction{TEntity}" />. Note that no operations are permanent until
-    ///     you call <see cref="Build(Guid, object, DateTime?)" /> and pass the result to a transaction repository.
+    ///     you call <see cref="Build(Guid, DateTime?, object?)" /> and pass the result to a transaction repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
     public sealed class TransactionBuilder<TEntity>
     {
-        private readonly IAuthorizingStrategy<TEntity>? _authorizingStrategy;
-        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
+        private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
+
+        private readonly IAgentAccessor _agentAccessor;
+        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
+        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
+        private readonly IAuthorizingStrategy<TEntity>? _authorizingStrategy;
         private readonly ILeasingStrategy<TEntity>? _leasingStrategy;
         private readonly ITaggingStrategy<TEntity>? _taggingStrategy;
-        private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
-        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
 
         /// <summary>
         ///     Initializes a new instance of <see cref="TransactionBuilder{TEntity}" />.
         /// </summary>
         public TransactionBuilder
         (
+            IAgentAccessor agentAccessor,
             IConstructingStrategy<TEntity> constructingStrategy,
             IVersioningStrategy<TEntity> versioningStrategy,
             IAuthorizingStrategy<TEntity>? authorizingStrategy = null,
@@ -41,6 +45,7 @@ namespace EntityDb.Common.Transactions
             ITaggingStrategy<TEntity>? taggingStrategy = null
         )
         {
+            _agentAccessor = agentAccessor;
             _constructingStrategy = constructingStrategy;
             _versioningStrategy = versioningStrategy;
             _authorizingStrategy = authorizingStrategy;
@@ -175,13 +180,16 @@ namespace EntityDb.Common.Transactions
         ///     Returns a new instance of <see cref="ITransaction{TEntity}" />.
         /// </summary>
         /// <param name="transactionId">A new id for the new transaction.</param>
-        /// <param name="source">A description of the agent who has requested this transaction.</param>
         /// <param name="timeStampOverride">
         ///     An optional override for the transaction timestamp. The default is
         ///     <see cref="DateTime.UtcNow" />.
         /// </param>
+        /// <param name="agentSignatureOverride">
+        ///     An optional override for the agent signature. The default is
+        ///     from <see cref="IAgent.GetSignature()"/>
+        /// </param>
         /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
-        public ITransaction<TEntity> Build(Guid transactionId, object source, DateTime? timeStampOverride = null)
+        public ITransaction<TEntity> Build(Guid transactionId, DateTime? timeStampOverride = null, object? agentSignatureOverride = null)
         {
             var timeStamp = DateTime.UtcNow;
 
@@ -190,11 +198,18 @@ namespace EntityDb.Common.Transactions
                 timeStamp = timeStampOverride.Value.ToUniversalTime();
             }
 
+            var agentSignature = _agentAccessor.GetAgent().GetSignature();
+
+            if (agentSignatureOverride != null)
+            {
+                agentSignature = agentSignatureOverride;
+            }
+
             var transaction = new Transaction<TEntity>
             {
                 Id = transactionId,
                 TimeStamp = timeStamp,
-                Source = source,
+                AgentSignature = agentSignature,
                 Steps = _transactionSteps.ToImmutableArray<ITransactionStep<TEntity>>()
             };
 

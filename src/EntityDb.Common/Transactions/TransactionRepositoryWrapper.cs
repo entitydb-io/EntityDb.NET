@@ -18,9 +18,9 @@ namespace EntityDb.Common.Transactions
             _transactionRepository = transactionRepository;
         }
 
-        public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
         {
-            return WrapQuery(_transactionRepository.GetTransactionIds(sourceQuery));
+            return WrapQuery(_transactionRepository.GetTransactionIds(agentSignatureQuery));
         }
 
         public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
@@ -38,9 +38,9 @@ namespace EntityDb.Common.Transactions
             return WrapQuery(_transactionRepository.GetTransactionIds(tagQuery));
         }
 
-        public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
         {
-            return WrapQuery(_transactionRepository.GetEntityIds(sourceQuery));
+            return WrapQuery(_transactionRepository.GetEntityIds(agentSignatureQuery));
         }
 
         public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
@@ -58,9 +58,9 @@ namespace EntityDb.Common.Transactions
             return WrapQuery(_transactionRepository.GetEntityIds(tagQuery));
         }
 
-        public Task<object[]> GetSources(ISourceQuery sourceQuery)
+        public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
         {
-            return WrapQuery(_transactionRepository.GetSources(sourceQuery));
+            return WrapQuery(_transactionRepository.GetAgentSignatures(agentSignatureQuery));
         }
 
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)

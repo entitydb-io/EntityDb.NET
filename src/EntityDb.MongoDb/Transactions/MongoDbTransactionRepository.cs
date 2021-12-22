@@ -25,10 +25,10 @@ namespace EntityDb.MongoDb.Transactions
             _mongoSession = mongoSession;
         }
 
-        public Task<Guid[]> GetTransactionIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
         {
-            return SourceDocument
-                .GetQuery(_mongoSession, sourceQuery)
+            return AgentSignatureDocument
+                .GetQuery(_mongoSession, agentSignatureQuery)
                 .GetTransactionIds();
         }
 
@@ -53,10 +53,10 @@ namespace EntityDb.MongoDb.Transactions
                 .GetTransactionIds();
         }
 
-        public Task<Guid[]> GetEntityIds(ISourceQuery sourceQuery)
+        public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
         {
-            return SourceDocument
-                .GetQuery(_mongoSession, sourceQuery)
+            return AgentSignatureDocument
+                .GetQuery(_mongoSession, agentSignatureQuery)
                 .GetEntitiesIds();
         }
 
@@ -81,11 +81,11 @@ namespace EntityDb.MongoDb.Transactions
                 .GetEntityIds();
         }
 
-        public Task<object[]> GetSources(ISourceQuery sourceQuery)
+        public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
         {
-            return SourceDocument
-                .GetQuery(_mongoSession, sourceQuery)
-                .GetData<SourceDocument, object>();
+            return AgentSignatureDocument
+                .GetQuery(_mongoSession, agentSignatureQuery)
+                .GetData<AgentSignatureDocument, object>();
         }
 
         public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
@@ -122,7 +122,7 @@ namespace EntityDb.MongoDb.Transactions
             {
                 _mongoSession.StartTransaction();
 
-                await SourceDocument
+                await AgentSignatureDocument
                     .GetInsertCommand<TEntity>(_mongoSession)
                     .Execute(transaction, -1);
 

@@ -20,13 +20,13 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
 
         private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> _collections = new()
         {
-            [SourceDocument.CollectionName] = new[]
+            [AgentSignatureDocument.CollectionName] = new[]
             {
                 new CreateIndexModel<BsonDocument>
                 (
                     IndexKeys.Combine
                     (
-                        IndexKeys.Descending(nameof(SourceDocument.TransactionId))
+                        IndexKeys.Descending(nameof(AgentSignatureDocument.TransactionId))
                     ),
                     UniquenessConstraint
                 )

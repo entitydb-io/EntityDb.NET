@@ -17,7 +17,7 @@ using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Leases;
 using EntityDb.TestImplementations.Queries;
 using EntityDb.TestImplementations.Seeders;
-using EntityDb.TestImplementations.Source;
+using EntityDb.TestImplementations.AgentSignature;
 using EntityDb.TestImplementations.Tags;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -95,9 +95,9 @@ namespace EntityDb.Common.Tests.Transactions
         private Task TestGetTransactionIds
         (
             IServiceScope serviceScope,
-            ISourceQuery query,
+            IAgentSignatureQuery query,
             ExpectedObjects expectedObjects,
-            Func<ISourceQuery, ISourceQuery>? filter = null
+            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
             return TestGet
@@ -197,9 +197,9 @@ namespace EntityDb.Common.Tests.Transactions
         private Task TestGetEntityIds
         (
             IServiceScope serviceScope,
-            ISourceQuery query,
+            IAgentSignatureQuery query,
             ExpectedObjects expectedObjects,
-            Func<ISourceQuery, ISourceQuery>? filter = null
+            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
             return TestGet
@@ -330,18 +330,18 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private Task TestGetSources
+        private Task TestGetAgentSignatures
         (
             IServiceScope serviceScope,
-            ISourceQuery query,
+            IAgentSignatureQuery query,
             ExpectedObjects expectedObjects,
-            Func<ISourceQuery, ISourceQuery>? filter = null
+            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
             return TestGet
             (
                 serviceScope,
-                invert => (invert ? expectedObjects.FalseSources : expectedObjects.TrueSources).ToArray(),
+                invert => (invert ? expectedObjects.FalseAgentSignatures : expectedObjects.TrueAgentSignatures).ToArray(),
                 (transactionRepository, invertFilter, reverseSort, skip, take) =>
                 {
                     var modifiedQueryOptions = new ModifiedQueryOptions
@@ -359,7 +359,7 @@ namespace EntityDb.Common.Tests.Transactions
                         modifiedQuery = filter.Invoke(modifiedQuery);
                     }
 
-                    return transactionRepository.GetSources(modifiedQuery);
+                    return transactionRepository.GetAgentSignatures(modifiedQuery);
                 }
             );
         }
@@ -466,8 +466,15 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
-        private ITransaction<TransactionEntity> BuildTransaction(IServiceScope serviceScope, Guid transactionId, Guid entityId, object source,
-            ICommand<TransactionEntity>[] commands, DateTime? timeStampOverride = null)
+        private ITransaction<TransactionEntity> BuildTransaction
+        (
+            IServiceScope serviceScope,
+            Guid transactionId,
+            Guid entityId,
+            ICommand<TransactionEntity>[] commands,
+            DateTime? timeStampOverride = null,
+            object? agentSignatureOverride = null
+        )
         {
             var transactionBuilder = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>();
@@ -479,7 +486,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionBuilder.Append(entityId, commands[i]);
             }
 
-            return transactionBuilder.Build(transactionId, source, timeStampOverride);
+            return transactionBuilder.Build(transactionId, timeStampOverride, agentSignatureOverride);
         }
 
         private Guid[] GetSortedGuids(int numberOfGuids)
@@ -729,7 +736,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond)
             };
 
-            var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId, new NoSource(),
+            var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
                 new ICommand<TransactionEntity>[] { expectedCommand }, transactionTimeStamp);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
@@ -776,7 +783,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var entityRepository = EntityRepository<TransactionEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
-            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), entityId, new NoSource(),
+            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), entityId,
                 new ICommand<TransactionEntity>[] { new DoNothing() });
 
             var transactionInserted = await transactionRepository.PutTransaction(transaction);
@@ -814,7 +821,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -830,7 +837,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllTags())
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -865,7 +872,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -881,7 +888,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllLeases())
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -908,7 +915,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .Create(Guid.NewGuid(), expectedCommand)
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
@@ -952,11 +959,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             var firstTransaction = transactionBuilder
                 .Create(entityId, new Count(1))
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var secondTransaction = transactionBuilder
                 .Append(entityId, expectedCommand)
-                .Build(Guid.NewGuid(), new NoSource());
+                .Build(Guid.NewGuid());
 
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
@@ -1013,7 +1020,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var currentTimeStamp = originTimeStamp.AddMinutes(i);
 
-                var source = new Counter(i);
+                var agentSignature = new CounterAgentSignature(i);
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
@@ -1022,7 +1029,7 @@ namespace EntityDb.Common.Tests.Transactions
                 var tags = new[] { new CountTag(i) };
 
                 expectedObjects.Add(gteInMinutes <= i && i <= lteInMinutes, currentTransactionId, currentEntityId,
-                    source, commands, leases, tags);
+                    agentSignature, commands, leases, tags);
 
                 if (i == lteInMinutes)
                 {
@@ -1033,8 +1040,8 @@ namespace EntityDb.Common.Tests.Transactions
                     gte = currentTimeStamp;
                 }
 
-                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands,
-                    currentTimeStamp);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, commands,
+                    currentTimeStamp, agentSignature);
 
                 transactions.Add(transaction);
             }
@@ -1045,14 +1052,14 @@ namespace EntityDb.Common.Tests.Transactions
             var query = new TransactionTimeStampQuery(gte.Value, lte.Value);
 
             await InsertTransactions(serviceScope, transactions);
-            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
-            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
-            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetAgentSignatures(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
             await TestGetTags(serviceScope, query, expectedObjects);
@@ -1078,7 +1085,7 @@ namespace EntityDb.Common.Tests.Transactions
                 var currentTransactionId = transactionIds[i - 1];
                 var currentEntityId = entityIds[i - 1];
 
-                var source = new Counter(i);
+                var agentSignature = new CounterAgentSignature(i);
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
@@ -1086,7 +1093,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var tags = new[] { new CountTag(i) };
 
-                expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, source, commands,
+                expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, agentSignature, commands,
                     leases, tags);
 
                 if (i == whichTransactionId)
@@ -1094,7 +1101,8 @@ namespace EntityDb.Common.Tests.Transactions
                     transactionId = currentTransactionId;
                 }
 
-                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, commands,
+                    agentSignatureOverride: agentSignature);
 
                 transactions.Add(transaction);
             }
@@ -1104,14 +1112,14 @@ namespace EntityDb.Common.Tests.Transactions
             var query = new TransactionIdQuery(transactionId.Value);
 
             await InsertTransactions(serviceScope, transactions);
-            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
-            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
-            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetAgentSignatures(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
             await TestGetTags(serviceScope, query, expectedObjects);
@@ -1137,7 +1145,7 @@ namespace EntityDb.Common.Tests.Transactions
                 var currentTransactionId = transactionIds[i - 1];
                 var currentEntityId = entityIds[i - 1];
 
-                var source = new Counter(i);
+                var agentSignature = new CounterAgentSignature(i);
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
@@ -1145,7 +1153,7 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var tags = new[] { new CountTag(i) };
 
-                expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, source, commands,
+                expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, agentSignature, commands,
                     leases, tags);
 
                 if (i == whichEntityId)
@@ -1153,7 +1161,8 @@ namespace EntityDb.Common.Tests.Transactions
                     entityId = currentEntityId;
                 }
 
-                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, commands,
+                    agentSignatureOverride: agentSignature);
 
                 transactions.Add(transaction);
             }
@@ -1163,14 +1172,14 @@ namespace EntityDb.Common.Tests.Transactions
             var query = new EntityIdQuery(entityId.Value);
 
             await InsertTransactions(serviceScope, transactions);
-            await TestGetTransactionIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
-            await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
-            await TestGetSources(serviceScope, query, expectedObjects);
+            await TestGetAgentSignatures(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
             await TestGetTags(serviceScope, query, expectedObjects);
@@ -1200,7 +1209,7 @@ namespace EntityDb.Common.Tests.Transactions
                     leases, tags);
             }
 
-            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), Guid.NewGuid(), new NoSource(), commands.ToArray());
+            var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), Guid.NewGuid(), commands.ToArray());
 
             var transactions = new List<ITransaction<TransactionEntity>> { transaction };
 
@@ -1230,7 +1239,7 @@ namespace EntityDb.Common.Tests.Transactions
                 var currentTransactionId = transactionIds[i - 1];
                 var currentEntityId = entityIds[i - 1];
 
-                var source = new Counter(i);
+                var agentSignature = new CounterAgentSignature(i);
 
                 var commands = new ICommand<TransactionEntity>[] { new Count(i) };
 
@@ -1238,17 +1247,18 @@ namespace EntityDb.Common.Tests.Transactions
 
                 var tags = new[] { new CountTag(i) };
 
-                expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, source, commands,
+                expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, agentSignature, commands,
                     leases, tags);
 
-                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, source, commands);
+                var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, commands,
+                    agentSignatureOverride: agentSignature);
 
                 transactions.Add(transaction);
             }
 
-            ISourceQuery FilterSources(ISourceQuery sourceQuery)
+            IAgentSignatureQuery FilterAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
             {
-                return sourceQuery.Filter(new CountFilter());
+                return agentSignatureQuery.Filter(new CountFilter());
             }
 
             ICommandQuery FilterCommands(ICommandQuery commandQuery)
@@ -1269,14 +1279,14 @@ namespace EntityDb.Common.Tests.Transactions
             var query = new CountQuery(gte, lte);
 
             await InsertTransactions(serviceScope, transactions);
-            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
             await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterLeases);
-            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterLeases);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterTags);
-            await TestGetSources(serviceScope, query, expectedObjects, FilterSources);
+            await TestGetAgentSignatures(serviceScope, query, expectedObjects, FilterAgentSignatures);
             await TestGetCommands(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetLeases(serviceScope, query, expectedObjects, FilterLeases);
             await TestGetTags(serviceScope, query, expectedObjects, FilterTags);
@@ -1287,14 +1297,14 @@ namespace EntityDb.Common.Tests.Transactions
             public readonly List<ICommand<TransactionEntity>> FalseCommands = new();
             public readonly List<Guid> FalseEntityIds = new();
             public readonly List<ILease> FalseLeases = new();
-            public readonly List<object> FalseSources = new();
+            public readonly List<object> FalseAgentSignatures = new();
             public readonly List<ITag> FalseTags = new();
             public readonly List<Guid> FalseTransactionIds = new();
 
             public readonly List<ICommand<TransactionEntity>> TrueCommands = new();
             public readonly List<Guid> TrueEntityIds = new();
             public readonly List<ILease> TrueLeases = new();
-            public readonly List<object> TrueSources = new();
+            public readonly List<object> TrueAgentSignatures = new();
             public readonly List<ITag> TrueTags = new();
             public readonly List<Guid> TrueTransactionIds = new();
 
@@ -1303,7 +1313,7 @@ namespace EntityDb.Common.Tests.Transactions
                 bool condition,
                 Guid transactionId,
                 Guid entityId,
-                object source,
+                object agentSignature,
                 IEnumerable<ICommand<TransactionEntity>> commands,
                 IEnumerable<ILease> leases,
                 IEnumerable<ITag> tags
@@ -1313,7 +1323,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     TrueTransactionIds.Add(transactionId);
                     TrueEntityIds.Add(entityId);
-                    TrueSources.Add(source);
+                    TrueAgentSignatures.Add(agentSignature);
                     TrueCommands.AddRange(commands);
                     TrueLeases.AddRange(leases);
                     TrueTags.AddRange(tags);
@@ -1322,7 +1332,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     FalseTransactionIds.Add(transactionId);
                     FalseEntityIds.Add(entityId);
-                    FalseSources.Add(source);
+                    FalseAgentSignatures.Add(agentSignature);
                     FalseCommands.AddRange(commands);
                     FalseLeases.AddRange(leases);
                     FalseTags.AddRange(tags);

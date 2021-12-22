@@ -5,12 +5,12 @@ using EntityDb.Common.Leases;
 using EntityDb.Common.Tags;
 using EntityDb.TestImplementations.Commands;
 using EntityDb.TestImplementations.Leases;
-using EntityDb.TestImplementations.Source;
+using EntityDb.TestImplementations.AgentSignature;
 using EntityDb.TestImplementations.Tags;
 
 namespace EntityDb.TestImplementations.Queries
 {
-    public record CountQuery(int Gte, int Lte) : ISourceQuery, ICommandQuery, ILeaseQuery,
+    public record CountQuery(int Gte, int Lte) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
         ITagQuery
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
@@ -47,18 +47,18 @@ namespace EntityDb.TestImplementations.Queries
             );
         }
 
-        public TFilter GetFilter<TFilter>(ISourceFilterBuilder<TFilter> builder)
+        public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
         {
-            return builder.SourceMatches((Counter counter) => Gte <= counter.Number && counter.Number <= Lte);
+            return builder.AgentSignatureMatches((CounterAgentSignature counter) => Gte <= counter.Number && counter.Number <= Lte);
         }
 
-        public TSort GetSort<TSort>(ISourceSortBuilder<TSort> builder)
+        public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
         {
             return builder.Combine
             (
                 builder.EntityIds(true),
-                builder.SourceType(true),
-                builder.SourceProperty(true, (Counter counter) => counter.Number)
+                builder.AgentSignatureType(true),
+                builder.AgentSignatureProperty(true, (CounterAgentSignature counter) => counter.Number)
             );
         }
 

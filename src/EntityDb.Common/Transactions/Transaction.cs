@@ -8,7 +8,7 @@ namespace EntityDb.Common.Transactions
     {
         public Guid Id { get; init; }
         public DateTime TimeStamp { get; init; }
-        public object Source { get; init; } = default!;
+        public object AgentSignature { get; init; } = default!;
         public ImmutableArray<ITransactionStep<TEntity>> Steps { get; init; }
     }
 }

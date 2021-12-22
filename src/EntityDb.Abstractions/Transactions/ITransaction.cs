@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 namespace EntityDb.Abstractions.Transactions
 {
     /// <summary>
-    ///     Represents a set of objects which must be committed together or not at all. Possible objects include: sources,
+    ///     Represents a set of objects which must be committed together or not at all. Possible objects include: agentSignatures,
     ///     commands, leases, and tags.
     /// </summary>
     /// <typeparam name="TEntity">The type of entities to be modified.</typeparam>
@@ -21,9 +21,9 @@ namespace EntityDb.Abstractions.Transactions
         DateTime TimeStamp { get; }
 
         /// <summary>
-        ///     A description of the agent who has requested this transaction.
+        ///     The signature of the agent who requested this transaction.
         /// </summary>
-        object Source { get; }
+        object AgentSignature { get; }
 
         /// <summary>
         ///     A series of sets of modifiers for a set of entities.

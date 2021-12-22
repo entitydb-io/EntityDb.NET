@@ -30,7 +30,7 @@
         <PackageTags>EntityDb EventSourcing DDD CQRS MVC</PackageTags>
         <Description>Provides a model for a Transaction Source that is mapped from an HttpContext. The source includes: Claims, Connection Information, and Raw Headers.</Description>
         <PackageIcon>ICON.png</PackageIcon>
-        <PackageIconUrl/>
+        <PackageIconUrl />
     </PropertyGroup>
 
     <ItemGroup>
@@ -41,11 +41,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
     </ItemGroup>
 
 </Project>

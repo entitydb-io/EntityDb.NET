@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
+using EntityDb.TestImplementations.AgentSignature;
 using EntityDb.TestImplementations.Entities;
 using System;
 
@@ -25,7 +26,7 @@ namespace EntityDb.TestImplementations.Seeders
             {
                 Id = transactionId ?? Guid.NewGuid(),
                 TimeStamp = DateTime.UtcNow,
-                Source = SourceSeeder.Create(),
+                AgentSignature = new NoAgentSignature(),
                 Steps = TransactionStepSeeder.Create(generateCount, repeatCount, previousEntityVersionNumber,
                     wellBehavedNextEntityVersionNumber, entityId, insertLease, deleteLease, insertTag, deleteTag)
             };

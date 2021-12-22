@@ -187,7 +187,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = transactionBuilder
                 .Create(default, new AddLease(default!, default!, default!))
-                .Build(default, default!);
+                .Build(default);
 
             // ASSERT
 
@@ -213,7 +213,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var transaction = transactionBuilder
                 .Create(default, new AddLease(default!, default!, default!))
-                .Build(default, default!);
+                .Build(default);
 
             // ASSERT
 
@@ -308,7 +308,7 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionBuilder.Append(entityId, new DoNothing());
             }
 
-            var transaction = transactionBuilder.Build(default!, default!);
+            var transaction = transactionBuilder.Build(default);
 
             // ASSERT
 
@@ -344,7 +344,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             transactionBuilder.Append(entityId, new DoNothing());
 
-            var transaction = transactionBuilder.Build(default!, default!);
+            var transaction = transactionBuilder.Build(default);
 
             // ASSERT
 

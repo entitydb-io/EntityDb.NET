@@ -31,7 +31,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
 
             transactionRepositoryMock
-                .Setup(repository => repository.GetTransactionIds(It.IsAny<ISourceQuery>()))
+                .Setup(repository => repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>()))
                 .ThrowsAsync(new NotImplementedException());
 
             transactionRepositoryMock
@@ -47,7 +47,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .ThrowsAsync(new NotImplementedException());
 
             transactionRepositoryMock
-                .Setup(repository => repository.GetEntityIds(It.IsAny<ISourceQuery>()))
+                .Setup(repository => repository.GetEntityIds(It.IsAny<IAgentSignatureQuery>()))
                 .ThrowsAsync(new NotImplementedException());
 
             transactionRepositoryMock
@@ -63,7 +63,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .ThrowsAsync(new NotImplementedException());
 
             transactionRepositoryMock
-                .Setup(repository => repository.GetSources(It.IsAny<ISourceQuery>()))
+                .Setup(repository => repository.GetAgentSignatures(It.IsAny<IAgentSignatureQuery>()))
                 .ThrowsAsync(new NotImplementedException());
 
             transactionRepositoryMock
@@ -90,15 +90,15 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            var transactionIdsFromSourceQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ISourceQuery)!);
+            var transactionIdsFromAgentSignatureQuery = await tryCatchTransactionRepository.GetTransactionIds(default(IAgentSignatureQuery)!);
             var transactionIdsFromCommandQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ICommandQuery)!);
             var transactionIdsFromLeaseQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ILeaseQuery)!);
             var transactionIdsFromTagQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ITagQuery)!);
-            var entityIdsFromSourceQuery = await tryCatchTransactionRepository.GetEntityIds(default(ISourceQuery)!);
+            var entityIdsFromAgentSignatureQuery = await tryCatchTransactionRepository.GetEntityIds(default(IAgentSignatureQuery)!);
             var entityIdsFromCommandQuery = await tryCatchTransactionRepository.GetEntityIds(default(ICommandQuery)!);
             var entityIdsFromLeaseQuery = await tryCatchTransactionRepository.GetEntityIds(default(ILeaseQuery)!);
             var entityIdsFromTagQuery = await tryCatchTransactionRepository.GetEntityIds(default(ITagQuery)!);
-            var sources = await tryCatchTransactionRepository.GetSources(default!);
+            var agentSignatures = await tryCatchTransactionRepository.GetAgentSignatures(default!);
             var commands = await tryCatchTransactionRepository.GetCommands(default!);
             var leases = await tryCatchTransactionRepository.GetLeases(default!);
             var tags = await tryCatchTransactionRepository.GetTags(default!);
@@ -107,15 +107,15 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            transactionIdsFromSourceQuery.ShouldBeEmpty();
+            transactionIdsFromAgentSignatureQuery.ShouldBeEmpty();
             transactionIdsFromCommandQuery.ShouldBeEmpty();
             transactionIdsFromLeaseQuery.ShouldBeEmpty();
             transactionIdsFromTagQuery.ShouldBeEmpty();
-            entityIdsFromSourceQuery.ShouldBeEmpty();
+            entityIdsFromAgentSignatureQuery.ShouldBeEmpty();
             entityIdsFromCommandQuery.ShouldBeEmpty();
             entityIdsFromLeaseQuery.ShouldBeEmpty();
             entityIdsFromTagQuery.ShouldBeEmpty();
-            sources.ShouldBeEmpty();
+            agentSignatures.ShouldBeEmpty();
             commands.ShouldBeEmpty();
             leases.ShouldBeEmpty();
             tags.ShouldBeEmpty();
