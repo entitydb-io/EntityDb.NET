@@ -33,7 +33,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public void StartTransaction()
         {
-            if (!ReadOnly && !MongoSession.TransactionStarted)
+            if (!ReadOnly && !TransactionStarted)
             {
                 throw new TestModeException("Transaction should be started already.");
             }
@@ -41,7 +41,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public Task CommitTransaction()
         {
-            if (!ReadOnly && !MongoSession.TransactionStarted)
+            if (!ReadOnly && !TransactionStarted)
             {
                 throw new TestModeException("Transaction should be started already.");
             }
@@ -51,7 +51,7 @@ namespace EntityDb.MongoDb.Sessions
 
         public Task AbortTransaction()
         {
-            if (!ReadOnly && !MongoSession.TransactionStarted)
+            if (!ReadOnly && !TransactionStarted)
             {
                 throw new TestModeException("Transaction should be started already.");
             }

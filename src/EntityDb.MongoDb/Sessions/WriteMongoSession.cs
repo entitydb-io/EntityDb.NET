@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -60,6 +61,7 @@ namespace EntityDb.MongoDb.Sessions
             ));
         }
 
+        [ExcludeFromCodeCoverage(Justification = "This should not be called by tests.")]
         public async Task CommitTransaction()
         {
 #if DEBUG

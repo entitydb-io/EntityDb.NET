@@ -66,6 +66,7 @@ namespace EntityDb.Common.Tests.Snapshots
                 {
                     options.LoggerOverride = loggerMock.Object;
                     options.ReadOnly = true;
+                    options.SecondaryPreferred = true;
                 });
             });
 

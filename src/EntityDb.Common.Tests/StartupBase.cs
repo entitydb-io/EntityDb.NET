@@ -5,6 +5,7 @@ using EntityDb.TestImplementations.Agents;
 using EntityDb.TestImplementations.Entities;
 using EntityDb.TestImplementations.Strategies;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace EntityDb.Common.Tests
 {
@@ -19,6 +20,8 @@ namespace EntityDb.Common.Tests
             // Resolving
 
             serviceCollection.AddLifoResolvingStrategyChain();
+
+            serviceCollection.AddMemberInfoNameResolvingStrategy(Array.Empty<Type>());
 
             serviceCollection.AddDefaultResolvingStrategy();
 
@@ -38,8 +41,15 @@ namespace EntityDb.Common.Tests
 
             // Snapshot Session Options
 
-            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", _ =>
+            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", options =>
             {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<SnapshotSessionOptions>("TestReadOnly", options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
             });
 
             // Transaction Session Options
@@ -52,6 +62,7 @@ namespace EntityDb.Common.Tests
             serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", options =>
             {
                 options.ReadOnly = true;
+                options.SecondaryPreferred = true;
             });
         }
     }

@@ -25,10 +25,23 @@ information on the statement. (If I'm wrong, you should consider getting a new b
 
 ## How does EntityDb.NET implement Event Sourcing?
 
-There are two core sets of data:
+There are five core objects at the heart of this implementation
 
-1. Sources
-2. Commands
+1. Transactions
+2. Sources
+3. Commands
+4. Tags
+5. Leases
+
+### Transactions
+
+A transaction represents an atomic operation on multiple entities. A transaction is ideally* committed atomically or not at all.
+If some step in the transaction fails, the entire transaction should fail.
+
+*In the MongoDb implementation, the transaction _is_ committed atomically. However, it is possible in the future that there
+will be implementations that are not capable of doing this if you want to use tags and/or leases. An example would be EventStore,
+which provides no ability to enforce uniqueness constraints in its transaction. Such implementations will need a complimentary
+transaction in order to make use of tags and leases.
 
 ### Sources
 
@@ -37,11 +50,22 @@ record the headers and connection information of the request.
 
 ### Commands
 
-A command represents the intent to perform some operation on the state. Going back to the bank account example, one
+A command represents the intent to perform some operation on a single entity. Going back to the bank account example, one
 command could be `PerformDeposit` while another could be `PerformWithdrawl`. The things that you can do are commands.
 
-### Tying it all together
+### Tags
 
-The source and commands are all tied together under one transient object - the transaction. A transaction can have
-exactly one source and can have many commands; each command can have many facts. When you need to commit your changes,
-you commit the transaction - it's all or nothing.
+A tag is a way to index entities by some piece of information. A tag can have a label and a value, both of which are strings.
+Many accounts are typed, and you could represent this with a tag where `Label` is `Type` and `Value` is `Savings` or `Checking`.
+You could then run a query to get the account id of all accounts where `Label` is `Type` and `Value` is `Savings`. The number
+of savings accounts in the system would be the number of entity ids.
+
+### Leases
+
+A lease is like a tag, except that it has a uniqueness constraint. Many banks have online portals, allowing bank members
+to see their accounts on the internet. From the bank's perspective, all of the accounts should be tied to a member id,
+probably a guid. But the member will not want to rememebr nor lookup their this guid - they will want to use a username.
+What you can do in EntityDb is make a lease for member entities where the entity id is the member id, the `Label` is `Usernaame`
+and the `Value` is whatever username the member wants to use. If an attempt to commit a transaction is made that would violate the
+uniqueness constraint, it will be rejected. (This is obnoxious behavior for the user, though, so the bank should check before attempting
+to commit to see if the username is available and give immediate feedback to choose a different username).

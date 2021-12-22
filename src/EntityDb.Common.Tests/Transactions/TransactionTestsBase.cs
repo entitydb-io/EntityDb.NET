@@ -296,6 +296,40 @@ namespace EntityDb.Common.Tests.Transactions
             );
         }
 
+        private Task TestGetEntityIds
+        (
+            IServiceScope serviceScope,
+            ITagQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ITagQuery, ITagQuery>? filter = null
+        )
+        {
+            return TestGet
+            (
+                serviceScope,
+                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
+                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                {
+                    var modifiedQueryOptions = new ModifiedQueryOptions
+                    {
+                        InvertFilter = invertFilter,
+                        ReverseSort = reverseSort,
+                        ReplaceSkip = skip,
+                        ReplaceTake = take
+                    };
+
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                    if (filter != null)
+                    {
+                        modifiedQuery = filter.Invoke(modifiedQuery);
+                    }
+
+                    return transactionRepository.GetEntityIds(modifiedQuery);
+                }
+            );
+        }
+
         private Task TestGetSources
         (
             IServiceScope serviceScope,
@@ -474,6 +508,7 @@ namespace EntityDb.Common.Tests.Transactions
                 {
                     options.LoggerOverride = loggerMock.Object;
                     options.ReadOnly = true;
+                    options.SecondaryPreferred = true;
                 });
             });
 
@@ -1016,6 +1051,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetSources(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1074,6 +1110,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetSources(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1132,6 +1169,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetEntityIds(serviceScope, query as ISourceQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetSources(serviceScope, query, expectedObjects);
             await TestGetCommands(serviceScope, query, expectedObjects);
             await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1237,6 +1275,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterSources);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterLeases);
+            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterTags);
             await TestGetSources(serviceScope, query, expectedObjects, FilterSources);
             await TestGetCommands(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetLeases(serviceScope, query, expectedObjects, FilterLeases);

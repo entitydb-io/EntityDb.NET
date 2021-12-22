@@ -8,6 +8,7 @@ namespace EntityDb.Redis.Sessions
 {
     internal record ReadOnlyRedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : IRedisSession
     {
+        //TODO: Cover this with base snapshot repository tests
         private CommandFlags GetCommandFlags()
         {
             if (SnapshotSessionOptions.SecondaryPreferred)
