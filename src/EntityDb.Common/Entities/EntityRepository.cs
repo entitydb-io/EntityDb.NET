@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
@@ -15,7 +14,6 @@ namespace EntityDb.Common.Entities
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
     {
         private readonly IConstructingStrategy<TEntity> _constructingStrategy;
-        private readonly ILogger _logger;
         private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
         private readonly ITransactionRepository<TEntity> _transactionRepository;
         private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
@@ -23,7 +21,6 @@ namespace EntityDb.Common.Entities
 
         public EntityRepository
         (
-            ILoggerFactory loggerFactory,
             IConstructingStrategy<TEntity> constructingStrategy,
             IVersioningStrategy<TEntity> versioningStrategy,
             IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
@@ -31,7 +28,6 @@ namespace EntityDb.Common.Entities
             ISnapshotRepository<TEntity>? snapshotRepository = null
         )
         {
-            _logger = loggerFactory.CreateLogger<EntityRepository<TEntity>>();
             _constructingStrategy = constructingStrategy;
             _versioningStrategy = versioningStrategy;
             _transactionSubscribers = transactionSubscribers;
