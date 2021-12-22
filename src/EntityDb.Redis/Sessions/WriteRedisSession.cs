@@ -1,6 +1,5 @@
 ﻿using StackExchange.Redis;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,12 +43,6 @@ namespace EntityDb.Redis.Sessions
             await Task.WhenAll(deleteSnapshotTasks);
 
             return deleteSnapshotTasks.All(task => task.Result);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
         }
 
         public virtual ValueTask DisposeAsync()

@@ -26,9 +26,7 @@ namespace EntityDb.Common.Strategies.Resolving
             {
                 try
                 {
-                    var resolvedType = resolvingStrategy.ResolveType(headers);
-
-                    if (resolvedType != null)
+                    if (resolvingStrategy.TryResolveType(headers, out var resolvedType))
                     {
                         return resolvedType;
                     }

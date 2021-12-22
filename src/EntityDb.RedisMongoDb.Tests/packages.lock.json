@@ -1902,11 +1902,28 @@
           "System.CommandLine": "2.0.0-beta1.21216.1"
         }
       },
+      "entitydb.mongodb.tests": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common.Tests": "1.0.0",
+          "EntityDb.MongoDb": "1.0.0",
+          "EntityDb.MongoDb.Provisioner": "1.0.0",
+          "Microsoft.NET.Test.Sdk": "16.11.0"
+        }
+      },
       "entitydb.redis": {
         "type": "Project",
         "dependencies": {
           "EntityDb.Common": "1.0.0",
           "StackExchange.Redis": "2.2.62"
+        }
+      },
+      "entitydb.redis.tests": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common.Tests": "1.0.0",
+          "EntityDb.Redis": "1.0.0",
+          "Microsoft.NET.Test.Sdk": "16.11.0"
         }
       },
       "entitydb.testimplementations": {

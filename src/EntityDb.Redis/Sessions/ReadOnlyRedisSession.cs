@@ -2,7 +2,6 @@
 using EntityDb.Common.Snapshots;
 using StackExchange.Redis;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions
@@ -34,12 +33,6 @@ namespace EntityDb.Redis.Sessions
         public Task<bool> Delete(IEnumerable<RedisKey> redisKeys)
         {
             throw new CannotWriteInReadOnlyModeException();
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
         }
 
         public virtual ValueTask DisposeAsync()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace EntityDb.Common.Envelopes
@@ -18,18 +19,29 @@ namespace EntityDb.Common.Envelopes
             return !headers.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
         }
 
-        public static bool TryGetAssemblyFullName(IReadOnlyDictionary<string, string> headers,
-            out string? assemblyFullName)
+        public static bool TryGetAssemblyFullName
+        (
+            IReadOnlyDictionary<string, string> headers,
+            [NotNullWhen(true)] out string? assemblyFullName
+        )
         {
             return headers.TryGetValue(AssemblyFullName, out assemblyFullName);
         }
 
-        public static bool TryGetTypeFullName(IReadOnlyDictionary<string, string> headers, out string? typeFullName)
+        public static bool TryGetTypeFullName
+        (
+            IReadOnlyDictionary<string, string> headers,
+            [NotNullWhen(true)] out string? typeFullName
+        )
         {
             return headers.TryGetValue(TypeFullName, out typeFullName);
         }
 
-        public static bool TryGetMemberInfoName(IReadOnlyDictionary<string, string> headers, out string? memberInfoName)
+        public static bool TryGetMemberInfoName
+        (
+            IReadOnlyDictionary<string, string> headers,
+            [NotNullWhen(true)] out string? memberInfoName
+        )
         {
             return headers.TryGetValue(MemberInfoName, out memberInfoName);
         }

@@ -1,14 +1,14 @@
-﻿using EntityDb.Abstractions.Loggers;
+﻿using EntityDb.Abstractions.Disposables;
+using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
 {
-    internal interface IMongoSession : IDisposable, IAsyncDisposable
+    internal interface IMongoSession : IDisposableResource
     {
         IMongoDatabase MongoDatabase { get; }
         ILoggerFactory LoggerFactory { get; }

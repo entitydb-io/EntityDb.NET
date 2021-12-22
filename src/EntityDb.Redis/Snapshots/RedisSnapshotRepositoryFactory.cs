@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots
@@ -66,17 +65,6 @@ namespace EntityDb.Redis.Snapshots
             );
 
             return redisSnapshotRepository.UseTryCatch(logger);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
         }
 
         public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,

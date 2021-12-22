@@ -1,6 +1,10 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
@@ -43,6 +47,43 @@ namespace EntityDb.Common.Tests.Snapshots
             snapshotInserted.ShouldBeTrue();
 
             actualSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
+        }
+
+        [Fact]
+        public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged()
+        {
+            // ARRANGE
+
+            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+
+            loggerMock
+                .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
+                .Verifiable();
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.Configure<SnapshotSessionOptions>("TestReadOnlyWithLoggerOverride", options =>
+                {
+                    options.LoggerOverride = loggerMock.Object;
+                    options.ReadOnly = true;
+                });
+            });
+
+            var snapshot = new TransactionEntity();
+
+            await using var snapshotRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("TestReadOnlyWithLoggerOverride");
+
+            // ACT
+
+            var inserted = await snapshotRepository.PutSnapshot(default, snapshot);
+
+            // ASSERT
+
+            inserted.ShouldBeFalse();
+
+            loggerMock.Verify();
         }
     }
 }

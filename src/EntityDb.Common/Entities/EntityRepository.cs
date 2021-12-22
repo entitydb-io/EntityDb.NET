@@ -8,7 +8,6 @@ using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities
@@ -80,22 +79,14 @@ namespace EntityDb.Common.Entities
 
         public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
-            var success = await _transactionRepository.PutTransaction(transaction);
-
-            if (!success)
+            try
             {
-                return false;
+                return await _transactionRepository.PutTransaction(transaction);
             }
-
-            Publish(transaction);
-
-            return true;
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
+            finally
+            {
+                Publish(transaction);
+            }
         }
 
         public async ValueTask DisposeAsync()
@@ -112,15 +103,7 @@ namespace EntityDb.Common.Entities
         {
             foreach (var transactionSubscriber in _transactionSubscribers)
             {
-                try
-                {
-                    transactionSubscriber.Notify(transaction);
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(exception,
-                        $"{transactionSubscriber.GetType()}.{nameof(transactionSubscriber.Notify)}({transaction.Id})");
-                }
+                transactionSubscriber.Notify(transaction);
             }
         }
 

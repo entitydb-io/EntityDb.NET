@@ -131,7 +131,7 @@ namespace EntityDb.Common.Tests.Transactions
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                    GetMockedTransactionRepositoryFactory());
             });
 
             var transactionBuilder = serviceScope.ServiceProvider
@@ -155,7 +155,7 @@ namespace EntityDb.Common.Tests.Transactions
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                    GetMockedTransactionRepositoryFactory());
             });
 
             var transactionBuilder = serviceScope.ServiceProvider
@@ -263,7 +263,7 @@ namespace EntityDb.Common.Tests.Transactions
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                    GetMockedTransactionRepositoryFactory());
             });
 
             var transactionBuilder = serviceScope.ServiceProvider
@@ -293,7 +293,7 @@ namespace EntityDb.Common.Tests.Transactions
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
                 serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory<TransactionEntity>());
+                    GetMockedTransactionRepositoryFactory());
             });
 
             var transactionBuilder = serviceScope.ServiceProvider

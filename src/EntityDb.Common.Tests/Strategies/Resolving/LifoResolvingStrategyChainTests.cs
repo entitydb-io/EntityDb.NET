@@ -13,7 +13,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
     public class LifoResolvingStrategyChainTests
     {
         [Fact]
-        public void GivenResolvingStrategyThrows_WhenExceptionThrown_ThenExceptionIsLogged()
+        public void GivenResolvingStrategyThrows_WhenResolvingType_ThenExceptionIsLogged()
         {
             // ARRANGE
 
@@ -32,7 +32,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
             var resolvingStrategyMock = new Mock<IResolvingStrategy>();
 
             resolvingStrategyMock
-                .Setup(strategy => strategy.ResolveType(It.IsAny<Dictionary<string, string>>()))
+                .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
                 .Throws(new Exception());
 
             var resolvingStrategyChain =
@@ -43,6 +43,53 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
             Should.Throw<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!));
 
             loggerMock.Verify();
+        }
+
+        delegate bool TryResolveTypeDelegate(Dictionary<string, string> headers, out Type? resolvedType);
+
+        [Fact]
+        public void GivenFirstResolvingStrategyReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
+        {
+            // ARRANGE
+
+            var expectedType = typeof(object);
+
+            var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Loose);
+
+            var sequence = new MockSequence();
+
+            var firstResolvingStrategyMock = new Mock<IResolvingStrategy>();
+
+            firstResolvingStrategyMock
+                .InSequence(sequence)
+                .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
+                .Returns(new TryResolveTypeDelegate((Dictionary<string, string> headers, out Type? resolvedType) =>
+                {
+                    resolvedType = null;
+                    return false;
+                }));
+
+            var secondResolvingStrategyMock = new Mock<IResolvingStrategy>();
+
+            secondResolvingStrategyMock
+                .InSequence(sequence)
+                .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
+                .Returns(new TryResolveTypeDelegate((Dictionary<string, string> headers, out Type? resolvedType) =>
+                {
+                    resolvedType = expectedType;
+                    return true;
+                }));
+
+            var resolvingStrategyChain =
+                new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[] { secondResolvingStrategyMock.Object, firstResolvingStrategyMock.Object });
+
+            // ACT
+
+            var actualType = resolvingStrategyChain.ResolveType(default!);
+
+            // ASSERT
+
+            actualType.ShouldBe(expectedType);
         }
     }
 }

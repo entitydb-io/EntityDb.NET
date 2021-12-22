@@ -1,7 +1,5 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests;
-using EntityDb.MongoDb.Provisioner.Extensions;
-using EntityDb.Redis.Extensions;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,21 +13,15 @@ namespace EntityDb.RedisMongoDb.Tests
 
             // Snapshots
 
-            serviceCollection.AddRedisSnapshots<TransactionEntity>
-            (
-                TransactionEntity.RedisKeyNamespace,
-                _ => "127.0.0.1:6379",
-                true
-            );
+            var redisStartup = new Redis.Tests.Startup();
+
+            redisStartup.AddServices(serviceCollection);
 
             // Transactions
 
-            serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
-            (
-                TransactionEntity.MongoCollectionName,
-                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
-                true
-            );
+            var mongoDbStartup = new MongoDb.Tests.Startup();
+
+            mongoDbStartup.AddServices(serviceCollection);
 
             // Snapshot Transactions
 

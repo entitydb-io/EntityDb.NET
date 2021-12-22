@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Disposables;
+using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Snapshots
@@ -7,7 +8,7 @@ namespace EntityDb.Abstractions.Snapshots
     ///     Represents a collection of <typeparamref name="TEntity" /> snapshots.
     /// </summary>
     /// <typeparam name="TEntity">The type of entity stored in the <see cref="ISnapshotRepository{TEntity}" />.</typeparam>
-    public interface ISnapshotRepository<TEntity> : IDisposable, IAsyncDisposable
+    public interface ISnapshotRepository<TEntity> : IDisposableResource
     {
         /// <summary>
         ///     Returns a <typeparamref name="TEntity" /> snapshot or <c>default(<typeparamref name="TEntity" />)</c>.

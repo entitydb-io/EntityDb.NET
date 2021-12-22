@@ -20,7 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
         <PackageReference Include="coverlet.collector" Version="3.1.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -28,9 +28,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common.Tests\EntityDb.Common.Tests.csproj"/>
-        <ProjectReference Include="..\EntityDb.MongoDb.Provisioner\EntityDb.MongoDb.Provisioner.csproj"/>
-        <ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj"/>
+        <ProjectReference Include="..\EntityDb.Common.Tests\EntityDb.Common.Tests.csproj" />
+        <ProjectReference Include="..\EntityDb.MongoDb.Provisioner\EntityDb.MongoDb.Provisioner.csproj" />
+        <ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj" />
     </ItemGroup>
 
 </Project>

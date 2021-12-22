@@ -10,6 +10,25 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
     public class DefaultResolvingStrategyTests
     {
         [Fact]
+        public void GivenEmptyHeaders_WhenLoadingType_ThenReturnNull()
+        {
+            // ARRANGE
+
+            var headers = new Dictionary<string, string>();
+
+            var resolvingStrategy = new DefaultResolvingStrategy();
+
+            // ACT
+
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
+
+            // ASSERT
+
+            resolved.ShouldBeFalse();
+            actualType.ShouldBeNull();
+        }
+
+        [Fact]
         public void GivenFullNames_WhenLoadingType_ThenReturnType()
         {
             // ARRANGE
@@ -24,10 +43,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeTrue();
             actualType.ShouldBe(expectedType);
         }
 
@@ -42,10 +62,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeFalse();
             actualType.ShouldBeNull();
         }
 
@@ -60,10 +81,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeFalse();
             actualType.ShouldBeNull();
         }
 
@@ -84,7 +106,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Should.Throw<FileNotFoundException>(() => resolvingStrategy.ResolveType(headers));
+            Should.Throw<FileNotFoundException>(() => resolvingStrategy.TryResolveType(headers, out _));
         }
     }
 }

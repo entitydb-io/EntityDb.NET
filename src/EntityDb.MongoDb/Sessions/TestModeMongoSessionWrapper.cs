@@ -3,7 +3,6 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
@@ -58,17 +57,6 @@ namespace EntityDb.MongoDb.Sessions
             }
 
             return Task.CompletedTask;
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
         }
     }
 }

@@ -5,7 +5,6 @@ using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -76,12 +75,6 @@ namespace EntityDb.Redis.Snapshots
             var snapshotKeys = entityIds.Select(GetSnapshotKey);
 
             return await _redisSession.Delete(snapshotKeys);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
         }
 
         public async ValueTask DisposeAsync()

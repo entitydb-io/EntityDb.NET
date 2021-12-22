@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -88,17 +87,6 @@ namespace EntityDb.MongoDb.Transactions
             );
 
             return mongoDbTransactionRepository.UseTryCatch(mongoSession.Logger);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
         }
 
         public static MongoDbTransactionRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,

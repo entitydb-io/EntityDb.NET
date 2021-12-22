@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -42,12 +41,6 @@ namespace EntityDb.MongoDb.Transactions
         )
         {
             return _mongoDbTransactionRepositoryFactory.CreateRepository(mongoSession);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public virtual void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
         }
 
         public virtual ValueTask DisposeAsync()

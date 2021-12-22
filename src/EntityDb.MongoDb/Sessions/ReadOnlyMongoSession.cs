@@ -3,13 +3,13 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions
 {
     internal record ReadOnlyMongoSession(IMongoDatabase MongoDatabase, ILoggerFactory LoggerFactory, IResolvingStrategyChain ResolvingStrategyChain, TransactionSessionOptions TransactionSessionOptions) : IMongoSession
     {
+        //TODO: Cover this with base transaction repository tests
         private IMongoCollection<TDocument> GetMongoCollection<TDocument>(string collectionName)
         {
             if (TransactionSessionOptions.SecondaryPreferred)
@@ -62,17 +62,6 @@ namespace EntityDb.MongoDb.Sessions
         public Task AbortTransaction()
         {
             throw new CannotWriteInReadOnlyModeException();
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
         }
     }
 }

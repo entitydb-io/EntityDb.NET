@@ -2,35 +2,31 @@
 using EntityDb.Common.Envelopes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EntityDb.Common.Strategies.Resolving
 {
     internal class DefaultResolvingStrategy : IResolvingStrategy
     {
-        public Type? ResolveType(IReadOnlyDictionary<string, string> headers)
+        public bool TryResolveType(IReadOnlyDictionary<string, string> headers, [NotNullWhen(true)] out Type? resolvedType)
         {
-            if (EnvelopeHelper.NotThisPlatform(headers))
+            if (EnvelopeHelper.NotThisPlatform(headers) || !EnvelopeHelper.TryGetAssemblyFullName(headers, out var assemblyFullName) || !EnvelopeHelper.TryGetTypeFullName(headers, out var typeFullName))
             {
-                return null;
+                resolvedType = null;
+                return false;
             }
 
-            EnvelopeHelper.TryGetAssemblyFullName(headers, out var assemblyFullName);
-            EnvelopeHelper.TryGetTypeFullName(headers, out var typeFullName);
-
-            if (assemblyFullName == null || typeFullName == null)
-            {
-                return null;
-            }
-
-            return Type.GetType
+            resolvedType = Type.GetType
             (
                 Assembly.CreateQualifiedName(assemblyFullName, typeFullName),
                 Assembly.Load,
                 (assembly, typeName, ignoreCase) => assembly!.GetType(typeName, true, ignoreCase),
-                false,
+                true,
                 false
-            );
+            )!;
+
+            return true;
         }
     }
 }

@@ -1,7 +1,6 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
@@ -30,14 +29,14 @@ namespace EntityDb.Common.Entities
 
             if (_snapshotRepositoryFactory == null || snapshotSessionOptionsName == null)
             {
-                return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider,
+                return EntityRepository<TEntity>.Create(_serviceProvider,
                     transactionRepository);
             }
 
             var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
 
-            return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(_serviceProvider, transactionRepository,
-                snapshotRepository);
+            return EntityRepository<TEntity>.Create(_serviceProvider,
+                transactionRepository, snapshotRepository);
         }
     }
 }

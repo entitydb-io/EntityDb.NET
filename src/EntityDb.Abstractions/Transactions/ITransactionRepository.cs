@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -15,7 +16,7 @@ namespace EntityDb.Abstractions.Transactions
     ///     The type of entity represented by the objects stored in the
     ///     <see cref="ITransactionRepository{TEntity}" />.
     /// </typeparam>
-    public interface ITransactionRepository<TEntity> : IDisposable, IAsyncDisposable
+    public interface ITransactionRepository<TEntity> : IDisposableResource
     {
         /// <summary>
         ///     Returns the transaction ids which are found by a source query.

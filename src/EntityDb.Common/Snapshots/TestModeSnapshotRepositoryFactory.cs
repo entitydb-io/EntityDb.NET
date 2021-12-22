@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots
@@ -24,17 +23,11 @@ namespace EntityDb.Common.Snapshots
             return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _testModeSnapshotManager);
         }
 
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
         public async ValueTask DisposeAsync()
         {
             var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
 
-            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository("TestWrite");
+            var snapshotRepository = await CreateRepository("TestWrite");
 
             await snapshotRepository.DeleteSnapshots(deleteEntityIds);
 

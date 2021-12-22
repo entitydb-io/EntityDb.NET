@@ -1,11 +1,11 @@
-﻿using StackExchange.Redis;
-using System;
+﻿using EntityDb.Abstractions.Disposables;
+using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions
 {
-    internal interface IRedisSession : IDisposable, IAsyncDisposable
+    internal interface IRedisSession : IDisposableResource
     {
         Task<bool> Insert(RedisKey redisKey, RedisValue redisValue);
         Task<RedisValue> Find(RedisKey redisKey);

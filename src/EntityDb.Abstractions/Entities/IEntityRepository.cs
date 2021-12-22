@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Disposables;
+using EntityDb.Abstractions.Transactions;
 using System;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace EntityDb.Abstractions.Entities
     ///     Encapsulates the transaction repository and the snapshot repository of an entity.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public interface IEntityRepository<TEntity> : IDisposable, IAsyncDisposable
+    public interface IEntityRepository<TEntity> : IDisposableResource
     {
         /// <summary>
         ///     Returns the most recent snapshot of a <typeparamref name="TEntity" /> or

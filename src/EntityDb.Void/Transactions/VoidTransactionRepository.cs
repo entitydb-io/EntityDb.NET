@@ -5,7 +5,6 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions
@@ -80,17 +79,6 @@ namespace EntityDb.Void.Transactions
         public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             return Task.FromResult(true);
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
         }
     }
 }

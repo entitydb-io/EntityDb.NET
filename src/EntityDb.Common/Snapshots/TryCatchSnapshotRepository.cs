@@ -1,53 +1,25 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots
 {
-    internal sealed class TryCatchSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
+    internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWrapper<TEntity>
     {
         private readonly ILogger _logger;
-        private readonly ISnapshotRepository<TEntity> _snapshotRepository;
 
         public TryCatchSnapshotRepository
         (
             ISnapshotRepository<TEntity> snapshotRepository,
             ILogger logger
         )
+            : base(snapshotRepository)
         {
-            _snapshotRepository = snapshotRepository;
             _logger = logger;
         }
 
-        public Task<bool> PutSnapshot(Guid entityId, TEntity entity)
-        {
-            return TryCatchQuery(_snapshotRepository.PutSnapshot(entityId, entity));
-        }
-
-        public Task<TEntity?> GetSnapshot(Guid entityId)
-        {
-            return TryCatchQuery(_snapshotRepository.GetSnapshot(entityId));
-        }
-
-        public Task<bool> DeleteSnapshots(Guid[] entityIds)
-        {
-            return TryCatchQuery(_snapshotRepository.DeleteSnapshots(entityIds));
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return _snapshotRepository.DisposeAsync();
-        }
-
-        public async Task<T?> TryCatchQuery<T>(Task<T> task)
+        protected override async Task<TEntity?> WrapQuery(Task<TEntity?> task)
         {
             try
             {
@@ -61,8 +33,7 @@ namespace EntityDb.Common.Snapshots
             }
         }
 
-        public async Task<T> TryCatchCommand<T>(Task<T> task)
-            where T : struct
+        protected override async Task<bool> WrapCommand(Task<bool> task)
         {
             try
             {

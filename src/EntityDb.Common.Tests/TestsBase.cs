@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -62,18 +63,18 @@ namespace EntityDb.Common.Tests
             return new(singletonServiceProvider, serviceScopeFactory.CreateScope());
         }
 
-        public static ITransactionRepositoryFactory<TEntity> GetMockedTransactionRepositoryFactory<TEntity>(
-            ICommand<TEntity>[]? commands = null)
+        public static ITransactionRepositoryFactory<TransactionEntity> GetMockedTransactionRepositoryFactory(
+            ICommand<TransactionEntity>[]? commands = null)
         {
             if (commands == null)
             {
-                commands = Array.Empty<ICommand<TEntity>>();
+                commands = Array.Empty<ICommand<TransactionEntity>>();
             }
 
-            var transactionRepositoryMock = new Mock<ITransactionRepository<TEntity>>(MockBehavior.Strict);
+            var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
 
             transactionRepositoryMock
-                .Setup(session => session.PutTransaction(It.IsAny<ITransaction<TEntity>>()))
+                .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
                 .ReturnsAsync(true)
                 .Verifiable();
 
@@ -86,7 +87,7 @@ namespace EntityDb.Common.Tests
                 .Returns(ValueTask.CompletedTask);
 
             var transactionRepositoryFactoryMock =
-                new Mock<ITransactionRepositoryFactory<TEntity>>(MockBehavior.Strict);
+                new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
 
             transactionRepositoryFactoryMock
                 .Setup(factory => factory.CreateRepository(It.IsAny<string>()))

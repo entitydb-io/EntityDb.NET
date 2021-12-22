@@ -9,7 +9,6 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -158,12 +157,6 @@ namespace EntityDb.MongoDb.Transactions
 
                 throw;
             }
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Proxy for DisposeAsync")]
-        public void Dispose()
-        {
-            DisposeAsync().AsTask().Wait();
         }
 
         public async ValueTask DisposeAsync()

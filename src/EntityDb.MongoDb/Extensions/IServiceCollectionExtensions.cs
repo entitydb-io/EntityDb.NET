@@ -3,12 +3,14 @@ using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.MongoDb.Extensions
 {
     /// <summary>
     ///     Extensions for service collections.
     /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
     public static class IServiceCollectionExtensions
     {
         /// <summary>

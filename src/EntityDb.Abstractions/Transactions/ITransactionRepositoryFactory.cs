@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Disposables;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Transactions
@@ -7,7 +7,7 @@ namespace EntityDb.Abstractions.Transactions
     ///     Represents a type used to create instances of <see cref="ITransactionRepository{TEntity}" />.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity stored by the <see cref="ITransactionRepository{TEntity}" />.</typeparam>
-    public interface ITransactionRepositoryFactory<TEntity> : IDisposable, IAsyncDisposable
+    public interface ITransactionRepositoryFactory<TEntity> : IDisposableResource
     {
         /// <summary>
         ///     Creates a new instance of <see cref="ITransactionRepository{TEntity}" />.

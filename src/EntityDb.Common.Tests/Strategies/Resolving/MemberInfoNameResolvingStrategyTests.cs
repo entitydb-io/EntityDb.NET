@@ -26,10 +26,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeTrue();
             actualType.ShouldBe(expectedType);
         }
 
@@ -44,10 +45,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeFalse();
             actualType.ShouldBeNull();
         }
 
@@ -65,10 +67,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ACT
 
-            var actualType = resolvingStrategy.ResolveType(headers);
+            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
+            resolved.ShouldBeFalse();
             actualType.ShouldBeNull();
         }
     }
