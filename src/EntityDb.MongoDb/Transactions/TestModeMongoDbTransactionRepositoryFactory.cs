@@ -23,7 +23,7 @@ namespace EntityDb.MongoDb.Transactions
         {
             if (_writeSession == null)
             {
-                _writeSession = await _mongoDbTransactionRepositoryFactory.CreateWriteSession(_testTransactionSessionOptions);
+                _writeSession = await CreateWriteSession(_testTransactionSessionOptions);
 
                 _writeSession.StartTransaction();
             }

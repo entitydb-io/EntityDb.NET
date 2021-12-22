@@ -9,8 +9,6 @@ namespace EntityDb.MongoDb.Transactions
     {
         TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
 
-        ReadOnlyMongoSession CreateReadOnlySession(TransactionSessionOptions transactionSessionOptions);
-
         Task<WriteMongoSession> CreateWriteSession(TransactionSessionOptions transactionSessionOptions);
 
         Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions);

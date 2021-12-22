@@ -55,14 +55,31 @@ namespace EntityDb.Common.Tests.Transactions
             }
         }
 
+        private ModifiedQueryOptions NewModifiedQueryOptions(bool invertFilter, bool reverseSort, int? replaceSkip, int? replaceTake)
+        {
+            return new ModifiedQueryOptions
+            {
+                InvertFilter = invertFilter,
+                ReverseSort = reverseSort,
+                ReplaceSkip = replaceSkip,
+                ReplaceTake = replaceTake,
+            };
+        }
+
         private async Task TestGet<TResult>
         (
             IServiceScope serviceScope,
             Func<bool, TResult[]> getExpectedResults,
-            Func<ITransactionRepository<TransactionEntity>, bool, bool, int?, int?, Task<TResult[]>> getActualResults
+            Func<ITransactionRepository<TransactionEntity>, ModifiedQueryOptions, Task<TResult[]>> getActualResults
         )
         {
             // ARRANGE
+
+            var bufferModifier = NewModifiedQueryOptions(false, false, null, null);
+            var negateModifier = NewModifiedQueryOptions(true, false, null, null);
+            var reverseBufferModifier = NewModifiedQueryOptions(false, true, null, null);
+            var reverseNegateModifier = NewModifiedQueryOptions(true, true, null, null);
+            var bufferSubsetModifier = NewModifiedQueryOptions(false, false, 1, 1);
 
             var expectedTrueResults = getExpectedResults.Invoke(false);
             var expectedFalseResults = getExpectedResults.Invoke(true);
@@ -75,13 +92,16 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            var actualTrueResults = await getActualResults.Invoke(transactionRepository, false, false, null, null);
-            var actualFalseResults = await getActualResults.Invoke(transactionRepository, true, false, null, null);
+            var actualTrueResults =
+                await getActualResults.Invoke(transactionRepository, bufferModifier);
+            var actualFalseResults =
+                await getActualResults.Invoke(transactionRepository, negateModifier);
             var reversedActualTrueResults =
-                await getActualResults.Invoke(transactionRepository, false, true, null, null);
+                await getActualResults.Invoke(transactionRepository, reverseBufferModifier);
             var reversedActualFalseResults =
-                await getActualResults.Invoke(transactionRepository, true, true, null, null);
-            var actualSkipTakeResults = await getActualResults.Invoke(transactionRepository, false, false, 1, 1);
+                await getActualResults.Invoke(transactionRepository, reverseNegateModifier);
+            var actualSkipTakeResults =
+                await getActualResults.Invoke(transactionRepository, bufferSubsetModifier);
 
             // ASSERT
 
@@ -104,16 +124,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -138,16 +150,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -172,16 +176,34 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
+                    var modifiedQuery = query.Modify(modifiedQueryOptions);
 
+                    if (filter != null)
+                    {
+                        modifiedQuery = filter.Invoke(modifiedQuery);
+                    }
+
+                    return transactionRepository.GetTransactionIds(modifiedQuery);
+                }
+            );
+        }
+
+        private Task TestGetTransactionIds
+        (
+            IServiceScope serviceScope,
+            ITagQuery query,
+            ExpectedObjects expectedObjects,
+            Func<ITagQuery, ITagQuery>? filter = null
+        )
+        {
+            return TestGet
+            (
+                serviceScope,
+                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
+                (transactionRepository, modifiedQueryOptions) =>
+                {
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -206,16 +228,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -240,16 +254,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -274,16 +280,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -308,16 +306,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -342,16 +332,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseAgentSignatures : expectedObjects.TrueAgentSignatures).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -376,16 +358,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseCommands : expectedObjects.TrueCommands).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -410,16 +384,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseLeases : expectedObjects.TrueLeases).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -444,16 +410,8 @@ namespace EntityDb.Common.Tests.Transactions
             (
                 serviceScope,
                 invert => (invert ? expectedObjects.FalseTags : expectedObjects.TrueTags).ToArray(),
-                (transactionRepository, invertFilter, reverseSort, skip, take) =>
+                (transactionRepository, modifiedQueryOptions) =>
                 {
-                    var modifiedQueryOptions = new ModifiedQueryOptions
-                    {
-                        InvertFilter = invertFilter,
-                        ReverseSort = reverseSort,
-                        ReplaceSkip = skip,
-                        ReplaceTake = take
-                    };
-
                     var modifiedQuery = query.Modify(modifiedQueryOptions);
 
                     if (filter != null)
@@ -1055,6 +1013,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
@@ -1115,6 +1074,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
@@ -1175,6 +1135,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ITagQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
             await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
@@ -1282,6 +1243,7 @@ namespace EntityDb.Common.Tests.Transactions
             await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
             await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterLeases);
+            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterTags);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterCommands);
             await TestGetEntityIds(serviceScope, query, expectedObjects, FilterLeases);
