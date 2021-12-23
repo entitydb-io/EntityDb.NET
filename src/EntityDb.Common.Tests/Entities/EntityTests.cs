@@ -100,7 +100,7 @@ namespace EntityDb.Common.Tests.Entities
 
             await using var entityRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository("TestWrite");
+                    .CreateRepository(TestSessionOptions.Write);
 
             var transaction = await BuildTransaction(serviceScope, entityId, 1, ExpectedVersionNumber);
 

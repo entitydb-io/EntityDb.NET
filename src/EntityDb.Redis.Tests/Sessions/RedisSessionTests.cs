@@ -8,9 +8,9 @@ using Xunit;
 
 namespace EntityDb.Redis.Tests.Sessions
 {
-    public class ReadOnlyRedisSessionTests : TestsBase<Startup>
+    public class RedisSessionTests : TestsBase<Startup>
     {
-        public ReadOnlyRedisSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+        public RedisSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
         {
         }
 
@@ -19,7 +19,10 @@ namespace EntityDb.Redis.Tests.Sessions
         {
             // ARRANGE
 
-            var readOnlyRedisSession = new ReadOnlyRedisSession(default!, default!);
+            var readOnlyRedisSession = new RedisSession(default!, new()
+            {
+                ReadOnly = true,
+            });
 
             // ASSERT
 

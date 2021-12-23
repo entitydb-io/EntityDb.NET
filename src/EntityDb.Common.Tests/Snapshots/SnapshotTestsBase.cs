@@ -4,6 +4,7 @@ using EntityDb.Common.Exceptions;
 using EntityDb.Common.Snapshots;
 using EntityDb.TestImplementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
@@ -34,7 +35,7 @@ namespace EntityDb.Common.Tests.Snapshots
             var entityId = Guid.NewGuid();
 
             await using var snapshotRepository =
-                await snapshotRepositoryFactory.CreateRepository("TestWrite");
+                await snapshotRepositoryFactory.CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -60,21 +61,24 @@ namespace EntityDb.Common.Tests.Snapshots
                 .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
                 .Verifiable();
 
+            var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+            loggerFactoryMock
+                .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
+                .Returns(loggerMock.Object);
+
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
-                serviceCollection.Configure<SnapshotSessionOptions>("TestReadOnlyWithLoggerOverride", options =>
-                {
-                    options.LoggerOverride = loggerMock.Object;
-                    options.ReadOnly = true;
-                    options.SecondaryPreferred = true;
-                });
+                serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+                serviceCollection.AddSingleton(loggerFactoryMock.Object);
             });
 
             var snapshot = new TransactionEntity();
 
             await using var snapshotRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestReadOnlyWithLoggerOverride");
+                .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
 
             // ACT
 

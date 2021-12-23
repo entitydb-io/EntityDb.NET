@@ -39,12 +39,7 @@ namespace EntityDb.Redis.Snapshots
         {
             var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
 
-            if (snapshotSessionOptions.ReadOnly)
-            {
-                return new ReadOnlyRedisSession(connectionMultiplexer, snapshotSessionOptions);
-            }
-
-            return new WriteRedisSession(connectionMultiplexer);
+            return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
         }
 
         public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
@@ -53,7 +48,7 @@ namespace EntityDb.Redis.Snapshots
 
             var redisSession = await CreateSession(snapshotSessionOptions);
 
-            var logger = snapshotSessionOptions.LoggerOverride ?? _loggerFactory.CreateLogger<TEntity>();
+            var logger = _loggerFactory.CreateLogger<TEntity>();
 
             var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
             (

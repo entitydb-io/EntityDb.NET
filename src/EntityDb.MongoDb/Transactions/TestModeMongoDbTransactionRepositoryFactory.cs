@@ -10,10 +10,11 @@ namespace EntityDb.MongoDb.Transactions
     {
         private static readonly TransactionSessionOptions _testTransactionSessionOptions = new()
         {
-            WriteTimeout = TimeSpan.FromMinutes(1),
+            ReadOnly = false,
+            WriteTimeout = TimeSpan.FromMinutes(1)
         };
 
-        private WriteMongoSession? _writeSession;
+        private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 
         public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
         {
@@ -21,49 +22,26 @@ namespace EntityDb.MongoDb.Transactions
 
         public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
-            if (_writeSession == null)
+            if (!_sessions.HasValue)
             {
-                _writeSession = await CreateWriteSession(_testTransactionSessionOptions);
+                var normalSession = await base.CreateSession(_testTransactionSessionOptions);
+                var testModeSession = new TestModeMongoSession(normalSession);
 
-                _writeSession.StartTransaction();
+                normalSession.StartTransaction();
+
+                _sessions = (normalSession, testModeSession);
             }
 
-            if (transactionSessionOptions.ReadOnly)
-            {
-                return new TestModeMongoSessionWrapper
-                (
-                    MongoSession: new ReadOnlyMongoSession
-                    (
-                        _writeSession.MongoDatabase,
-                        _writeSession.LoggerFactory,
-                        _writeSession.ResolvingStrategyChain,
-                        transactionSessionOptions
-                    ),
-                    ReadOnly: true
-                );
-            }
-
-            return new TestModeMongoSessionWrapper
-            (
-                MongoSession: new WriteMongoSession
-                (
-                    _writeSession.MongoDatabase,
-                    _writeSession.ClientSessionHandle,
-                    _writeSession.LoggerFactory,
-                    _writeSession.ResolvingStrategyChain,
-                    transactionSessionOptions
-                ),
-                ReadOnly: false
-            );
+            return _sessions.Value.TestMode
+                .WithTransactionSessionOptions(transactionSessionOptions);
         }
 
         public override async ValueTask DisposeAsync()
         {
-            if (_writeSession != null)
+            if (_sessions.HasValue)
             {
-                await _writeSession.AbortTransaction();
-
-                await _writeSession.DisposeAsync();
+                await _sessions.Value.Normal.AbortTransaction();
+                await _sessions.Value.Normal.DisposeAsync();
             }
         }
     }

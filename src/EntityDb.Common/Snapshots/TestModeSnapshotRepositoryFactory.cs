@@ -27,7 +27,7 @@ namespace EntityDb.Common.Snapshots
         {
             var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
 
-            var snapshotRepository = await CreateRepository("TestWrite");
+            var snapshotRepository = await CreateRepository("");
 
             await snapshotRepository.DeleteSnapshots(deleteEntityIds);
 

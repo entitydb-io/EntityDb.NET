@@ -78,8 +78,8 @@ namespace EntityDb.Common.Tests.Entities
 
             await using var entityRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository("TestWrite",
-                        "TestWrite");
+                    .CreateRepository(TestSessionOptions.Write,
+                        TestSessionOptions.Write);
 
             var firstTransaction = await BuildTransaction(serviceScope, entityId, 1, expectedSnapshotVersion);
 
@@ -125,8 +125,8 @@ namespace EntityDb.Common.Tests.Entities
 
             await using var entityRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository("TestWrite",
-                        "TestWrite");
+                    .CreateRepository(TestSessionOptions.Write,
+                        TestSessionOptions.Write);
 
             var transaction = await BuildTransaction(serviceScope, entityId, 1, versionNumberN);
 

@@ -25,7 +25,7 @@ namespace EntityDb.RedisMongoDb.Tests
 
             // Snapshot Transactions
 
-            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>("TestWrite", true);
+            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>(TestSessionOptions.Write, true);
         }
     }
 }

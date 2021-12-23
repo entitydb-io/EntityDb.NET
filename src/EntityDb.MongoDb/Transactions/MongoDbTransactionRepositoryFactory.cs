@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -36,31 +37,6 @@ namespace EntityDb.MongoDb.Transactions
             _databaseName = databaseName;
         }
 
-        public ReadOnlyMongoSession CreateReadOnlySession(TransactionSessionOptions transactionSessionOptions)
-        {
-            var mongoDatabase = new MongoClient(_connectionString)
-                .GetDatabase(_databaseName);
-
-            return new ReadOnlyMongoSession(mongoDatabase, _loggerFactory, _resolvingStrategyChain, transactionSessionOptions);
-        }
-
-        public async Task<WriteMongoSession> CreateWriteSession(TransactionSessionOptions transactionSessionOptions)
-        {
-            var mongoClient = new MongoClient(_connectionString);
-            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
-
-            var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
-            {
-                CausalConsistency = true,
-                DefaultTransactionOptions = new TransactionOptions
-                (
-                    writeConcern: WriteConcern.WMajority
-                )
-            });
-
-            return new WriteMongoSession(mongoDatabase, clientSessionHandle, _loggerFactory, _resolvingStrategyChain, transactionSessionOptions);
-        }
-
         public TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
         {
             return _optionsFactory.Create(transactionSessionOptionsName);
@@ -68,12 +44,25 @@ namespace EntityDb.MongoDb.Transactions
 
         public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
         {
-            if (transactionSessionOptions.ReadOnly)
-            {
-                return CreateReadOnlySession(transactionSessionOptions);
-            }
+            var logger = _loggerFactory.CreateLogger<TEntity>();
 
-            return await CreateWriteSession(transactionSessionOptions);
+            var mongoClient = new MongoClient(_connectionString);
+
+            var mongoDatabase = mongoClient.GetDatabase(_databaseName);
+
+            var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
+            {
+                CausalConsistency = true
+            });
+
+            return new MongoSession
+            (
+                mongoDatabase,
+                clientSessionHandle,
+                logger,
+                _resolvingStrategyChain,
+                transactionSessionOptions
+            );
         }
 
         public ITransactionRepository<TEntity> CreateRepository

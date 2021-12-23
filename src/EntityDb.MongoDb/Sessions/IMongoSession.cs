@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Strategies;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
 using System.Threading.Tasks;
@@ -11,11 +10,8 @@ namespace EntityDb.MongoDb.Sessions
     internal interface IMongoSession : IDisposableResource
     {
         IMongoDatabase MongoDatabase { get; }
-        ILoggerFactory LoggerFactory { get; }
+        ILogger Logger { get; }
         IResolvingStrategyChain ResolvingStrategyChain { get; }
-        TransactionSessionOptions TransactionSessionOptions { get; }
-
-        public ILogger Logger => TransactionSessionOptions.LoggerOverride ?? LoggerFactory.CreateLogger<IMongoSession>();
 
         Task Insert<TDocument>(string collectionName,
             TDocument[] bsonDocuments);
@@ -24,11 +20,10 @@ namespace EntityDb.MongoDb.Sessions
         Task Delete<TDocument>(string collectionName,
             FilterDefinition<TDocument> documentFilter);
 
-
-        bool TransactionStarted { get; }
-
         void StartTransaction();
         Task CommitTransaction();
         Task AbortTransaction();
+
+        IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions);
     }
 }

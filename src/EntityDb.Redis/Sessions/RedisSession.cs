@@ -1,19 +1,38 @@
-﻿using StackExchange.Redis;
+﻿using EntityDb.Common.Exceptions;
+using EntityDb.Common.Snapshots;
+using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions
 {
-    internal record WriteRedisSession(IConnectionMultiplexer ConnectionMultiplexer) : IRedisSession
+    internal record RedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : IRedisSession
     {
-        private static CommandFlags GetCommandFlags()
+        private CommandFlags GetCommandFlags()
         {
-            return CommandFlags.DemandMaster;
+            if (!SnapshotSessionOptions.ReadOnly)
+            {
+                return CommandFlags.DemandMaster;
+            }
+
+            return SnapshotSessionOptions.SecondaryPreferred
+                ? CommandFlags.PreferReplica
+                : CommandFlags.PreferMaster;
+        }
+
+        private void AssertNotReadOnly()
+        {
+            if (SnapshotSessionOptions.ReadOnly)
+            {
+                throw new CannotWriteInReadOnlyModeException();
+            }
         }
 
         public async Task<bool> Insert(RedisKey redisKey, RedisValue redisValue)
         {
+            AssertNotReadOnly();
+
             var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
 
             var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
@@ -32,6 +51,8 @@ namespace EntityDb.Redis.Sessions
 
         public async Task<bool> Delete(IEnumerable<RedisKey> redisKeys)
         {
+            AssertNotReadOnly();
+
             var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
 
             var deleteSnapshotTasks = redisKeys

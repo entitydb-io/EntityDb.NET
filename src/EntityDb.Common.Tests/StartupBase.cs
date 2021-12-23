@@ -11,6 +11,7 @@ namespace EntityDb.Common.Tests
 {
     public abstract class StartupBase : IStartup
     {
+
         public virtual void AddServices(IServiceCollection serviceCollection)
         {
             // Logging
@@ -41,12 +42,18 @@ namespace EntityDb.Common.Tests
 
             // Snapshot Session Options
 
-            serviceCollection.Configure<SnapshotSessionOptions>("TestWrite", options =>
+            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
 
-            serviceCollection.Configure<SnapshotSessionOptions>("TestReadOnly", options =>
+            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;
@@ -54,12 +61,18 @@ namespace EntityDb.Common.Tests
 
             // Transaction Session Options
 
-            serviceCollection.Configure<TransactionSessionOptions>("TestWrite", options =>
+            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
 
-            serviceCollection.Configure<TransactionSessionOptions>("TestReadOnly", options =>
+            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;

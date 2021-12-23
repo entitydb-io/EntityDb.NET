@@ -28,6 +28,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EntityDb.Common.Tests.Transactions
 {
@@ -45,7 +46,7 @@ namespace EntityDb.Common.Tests.Transactions
         )
         {
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestRead");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             foreach (var transaction in transactions)
             {
@@ -70,7 +71,8 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             Func<bool, TResult[]> getExpectedResults,
-            Func<ITransactionRepository<TransactionEntity>, ModifiedQueryOptions, Task<TResult[]>> getActualResults
+            Func<ITransactionRepository<TransactionEntity>, ModifiedQueryOptions, Task<TResult[]>> getActualResults,
+            bool secondaryPreferred
         )
         {
             // ARRANGE
@@ -88,7 +90,8 @@ namespace EntityDb.Common.Tests.Transactions
             var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestRead");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
+                .CreateRepository(secondaryPreferred ? TestSessionOptions.ReadOnlySecondaryPreferred : TestSessionOptions.ReadOnly);
 
             // ACT
 
@@ -112,7 +115,7 @@ namespace EntityDb.Common.Tests.Transactions
             actualSkipTakeResults.SequenceEqual(expectedSkipTakeResults).ShouldBeTrue();
         }
 
-        private Task TestGetTransactionIds
+        private async Task TestGetTransactionIds
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
@@ -120,25 +123,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseTransactionIds
+                    : expectedObjects.TrueTransactionIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTransactionIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetTransactionIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetTransactionIds
+        private async Task TestGetTransactionIds
         (
             IServiceScope serviceScope,
             ICommandQuery query,
@@ -146,25 +155,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ICommandQuery, ICommandQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseTransactionIds
+                    : expectedObjects.TrueTransactionIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTransactionIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetTransactionIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetTransactionIds
+        private async Task TestGetTransactionIds
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
@@ -172,25 +187,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ILeaseQuery, ILeaseQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseTransactionIds
+                    : expectedObjects.TrueTransactionIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTransactionIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetTransactionIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetTransactionIds
+        private async Task TestGetTransactionIds
         (
             IServiceScope serviceScope,
             ITagQuery query,
@@ -198,25 +219,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ITagQuery, ITagQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseTransactionIds : expectedObjects.TrueTransactionIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseTransactionIds
+                    : expectedObjects.TrueTransactionIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTransactionIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetTransactionIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetEntityIds
+        private async Task TestGetEntityIds
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
@@ -224,25 +251,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseEntityIds
+                    : expectedObjects.TrueEntityIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetEntityIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetEntityIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetEntityIds
+        private async Task TestGetEntityIds
         (
             IServiceScope serviceScope,
             ICommandQuery query,
@@ -250,25 +283,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ICommandQuery, ICommandQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseEntityIds
+                    : expectedObjects.TrueEntityIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetEntityIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetEntityIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetEntityIds
+        private async Task TestGetEntityIds
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
@@ -276,25 +315,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ILeaseQuery, ILeaseQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseEntityIds
+                    : expectedObjects.TrueEntityIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetEntityIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetEntityIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetEntityIds
+        private async Task TestGetEntityIds
         (
             IServiceScope serviceScope,
             ITagQuery query,
@@ -302,25 +347,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ITagQuery, ITagQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseEntityIds : expectedObjects.TrueEntityIds).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            Guid[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseEntityIds
+                    : expectedObjects.TrueEntityIds)
+                    .ToArray();
+            }
+
+            Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetEntityIds(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetEntityIds(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetAgentSignatures
+        private async Task TestGetAgentSignatures
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
@@ -328,25 +379,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseAgentSignatures : expectedObjects.TrueAgentSignatures).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            object[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseAgentSignatures
+                    : expectedObjects.TrueAgentSignatures)
+                    .ToArray();
+            }
+
+            Task<object[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetAgentSignatures(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetAgentSignatures(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetCommands
+        private async Task TestGetCommands
         (
             IServiceScope serviceScope,
             ICommandQuery query,
@@ -354,25 +411,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ICommandQuery, ICommandQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseCommands : expectedObjects.TrueCommands).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            ICommand<TransactionEntity>[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseCommands
+                    : expectedObjects.TrueCommands)
+                    .ToArray();
+            }
+
+            Task<ICommand<TransactionEntity>[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetCommands(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetCommands(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetLeases
+        private async Task TestGetLeases
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
@@ -380,25 +443,31 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ILeaseQuery, ILeaseQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseLeases : expectedObjects.TrueLeases).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            ILease[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseLeases
+                    : expectedObjects.TrueLeases)
+                    .ToArray();
+            }
+
+            Task<ILease[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetLeases(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetLeases(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
-        private Task TestGetTags
+        private async Task TestGetTags
         (
             IServiceScope serviceScope,
             ITagQuery query,
@@ -406,22 +475,28 @@ namespace EntityDb.Common.Tests.Transactions
             Func<ITagQuery, ITagQuery>? filter = null
         )
         {
-            return TestGet
-            (
-                serviceScope,
-                invert => (invert ? expectedObjects.FalseTags : expectedObjects.TrueTags).ToArray(),
-                (transactionRepository, modifiedQueryOptions) =>
+            ITag[] GetExpectedResults(bool invert)
+            {
+                return (invert
+                    ? expectedObjects.FalseTags
+                    : expectedObjects.TrueTags)
+                    .ToArray();
+            }
+
+            Task<ITag[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+            {
+                var modifiedQuery = query.Modify(modifiedQueryOptions);
+
+                if (filter != null)
                 {
-                    var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                    if (filter != null)
-                    {
-                        modifiedQuery = filter.Invoke(modifiedQuery);
-                    }
-
-                    return transactionRepository.GetTags(modifiedQuery);
+                    modifiedQuery = filter.Invoke(modifiedQuery);
                 }
-            );
+
+                return transactionRepository.GetTags(modifiedQuery);
+            }
+
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
+            await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: false);
         }
 
         private ITransaction<TransactionEntity> BuildTransaction
@@ -467,21 +542,24 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
                 .Verifiable();
 
+            var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+            loggerFactoryMock
+                .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
+                .Returns(loggerMock.Object);
+
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
-                serviceCollection.Configure<TransactionSessionOptions>("TestReadOnlyWithLoggerOverride", options =>
-                {
-                    options.LoggerOverride = loggerMock.Object;
-                    options.ReadOnly = true;
-                    options.SecondaryPreferred = true;
-                });
+                serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+                serviceCollection.AddSingleton(loggerFactoryMock.Object);
             });
 
             var transaction = TransactionSeeder.Create(1, 1);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestReadOnlyWithLoggerOverride");
+                .CreateRepository(TestSessionOptions.ReadOnly);
 
             // ACT
 
@@ -507,7 +585,7 @@ namespace EntityDb.Common.Tests.Transactions
             var secondTransaction = TransactionSeeder.Create(1, 1, transactionId);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -530,7 +608,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = TransactionSeeder.Create(1, 2);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -553,19 +631,24 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<VersionZeroReservedException>(), It.IsAny<string>()))
                 .Verifiable();
 
+            var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+            loggerFactoryMock
+                .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
+                .Returns(loggerMock.Object);
+
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
-                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
-                {
-                    options.LoggerOverride = loggerMock.Object;
-                });
+                serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+                serviceCollection.AddSingleton(loggerFactoryMock.Object);
             });
 
             var transaction = TransactionSeeder.Create(1, 1, wellBehavedNextEntityVersionNumber: false);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWriteWithLoggerOverride");
+                .CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -591,12 +674,17 @@ namespace EntityDb.Common.Tests.Transactions
                 .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
                 .Verifiable();
 
+            var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+            loggerFactoryMock
+                .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
+                .Returns(loggerMock.Object);
+
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
-                serviceCollection.Configure<TransactionSessionOptions>("TestWriteWithLoggerOverride", options =>
-                {
-                    options.LoggerOverride = loggerMock.Object;
-                });
+                serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+                serviceCollection.AddSingleton(loggerFactoryMock.Object);
             });
 
             var entityId = Guid.NewGuid();
@@ -606,7 +694,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWriteWithLoggerOverride");
+                .CreateRepository(TestSessionOptions.Write);
 
 
             // ACT
@@ -641,7 +729,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = TransactionSeeder.Create(2, 1, insertTag: true);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -662,7 +750,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = TransactionSeeder.Create(2, 1, insertLease: true);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -699,7 +787,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWrite");
+                .CreateRepository(TestSessionOptions.Write);
 
             var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
@@ -737,7 +825,7 @@ namespace EntityDb.Common.Tests.Transactions
             var entityId = Guid.NewGuid();
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             var entityRepository = EntityRepository<TransactionEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
@@ -775,7 +863,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWrite");
+                .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
@@ -826,7 +914,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWrite");
+                .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
@@ -879,7 +967,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("TestWrite");
+                .CreateRepository(TestSessionOptions.Write);
 
             // ACT
 
@@ -926,7 +1014,7 @@ namespace EntityDb.Common.Tests.Transactions
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 
             await using var transactionRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository("TestWrite");
+                .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>().CreateRepository(TestSessionOptions.Write);
 
             var firstTransactionInserted = await transactionRepository.PutTransaction(firstTransaction);
 

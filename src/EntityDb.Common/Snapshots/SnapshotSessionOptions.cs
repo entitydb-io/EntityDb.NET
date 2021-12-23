@@ -16,10 +16,5 @@ namespace EntityDb.Common.Snapshots
         ///     If <c>true</c>, indicates the agent can tolerate replication lag for queries.
         /// </summary>
         public bool SecondaryPreferred { get; set; }
-
-        /// <summary>
-        ///     Overrides the logger for the session.
-        /// </summary>
-        public ILogger? LoggerOverride { get; set; }
     }
 }

@@ -15,11 +15,6 @@ namespace EntityDb.MongoDb.Transactions
             _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
         }
 
-        public virtual Task<WriteMongoSession> CreateWriteSession(TransactionSessionOptions transactionSessionOptions)
-        {
-            return _mongoDbTransactionRepositoryFactory.CreateWriteSession(transactionSessionOptions);
-        }
-
         public virtual TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
         {
             return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);

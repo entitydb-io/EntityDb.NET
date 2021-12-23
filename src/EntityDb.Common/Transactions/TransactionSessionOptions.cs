@@ -27,10 +27,5 @@ namespace EntityDb.Common.Transactions
         ///     Determines how long to wait before a query should be automatically killed.
         /// </summary>
         public TimeSpan? ReadTimeout { get; set; }
-
-        /// <summary>
-        ///     Overrides the logger for the session.
-        /// </summary>
-        public ILogger? LoggerOverride { get; set; }
     }
 }
