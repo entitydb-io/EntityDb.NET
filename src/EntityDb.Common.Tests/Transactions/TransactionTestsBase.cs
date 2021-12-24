@@ -119,8 +119,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
-            ExpectedObjects expectedObjects,
-            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -133,14 +132,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetTransactionIds(modifiedQuery);
+                return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -151,8 +143,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ICommandQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ICommandQuery, ICommandQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -165,14 +156,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetTransactionIds(modifiedQuery);
+                return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -183,8 +167,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ILeaseQuery, ILeaseQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -197,14 +180,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetTransactionIds(modifiedQuery);
+                return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -215,8 +191,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ITagQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ITagQuery, ITagQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -229,14 +204,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetTransactionIds(modifiedQuery);
+                return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -247,8 +215,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
-            ExpectedObjects expectedObjects,
-            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -261,14 +228,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetEntityIds(modifiedQuery);
+                return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -279,8 +239,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ICommandQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ICommandQuery, ICommandQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -293,14 +252,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetEntityIds(modifiedQuery);
+                return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -311,8 +263,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ILeaseQuery, ILeaseQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -325,14 +276,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetEntityIds(modifiedQuery);
+                return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -343,8 +287,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ITagQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ITagQuery, ITagQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             Guid[] GetExpectedResults(bool invert)
@@ -357,14 +300,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<Guid[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetEntityIds(modifiedQuery);
+                return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -375,8 +311,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             IAgentSignatureQuery query,
-            ExpectedObjects expectedObjects,
-            Func<IAgentSignatureQuery, IAgentSignatureQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             object[] GetExpectedResults(bool invert)
@@ -389,14 +324,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<object[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetAgentSignatures(modifiedQuery);
+                return transactionRepository.GetAgentSignatures(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -407,8 +335,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ICommandQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ICommandQuery, ICommandQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             ICommand<TransactionEntity>[] GetExpectedResults(bool invert)
@@ -421,14 +348,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<ICommand<TransactionEntity>[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetCommands(modifiedQuery);
+                return transactionRepository.GetCommands(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -439,8 +359,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ILeaseQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ILeaseQuery, ILeaseQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             ILease[] GetExpectedResults(bool invert)
@@ -453,14 +372,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<ILease[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetLeases(modifiedQuery);
+                return transactionRepository.GetLeases(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -471,8 +383,7 @@ namespace EntityDb.Common.Tests.Transactions
         (
             IServiceScope serviceScope,
             ITagQuery query,
-            ExpectedObjects expectedObjects,
-            Func<ITagQuery, ITagQuery>? filter = null
+            ExpectedObjects expectedObjects
         )
         {
             ITag[] GetExpectedResults(bool invert)
@@ -485,14 +396,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             Task<ITag[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
             {
-                var modifiedQuery = query.Modify(modifiedQueryOptions);
-
-                if (filter != null)
-                {
-                    modifiedQuery = filter.Invoke(modifiedQuery);
-                }
-
-                return transactionRepository.GetTags(modifiedQuery);
+                return transactionRepository.GetTags(query.Modify(modifiedQueryOptions));
             }
 
             await TestGet(serviceScope, GetExpectedResults, GetActualResults, secondaryPreferred: true);
@@ -1305,41 +1209,21 @@ namespace EntityDb.Common.Tests.Transactions
                 transactions.Add(transaction);
             }
 
-            IAgentSignatureQuery FilterAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
-            {
-                return agentSignatureQuery.Filter(new CountFilter());
-            }
-
-            ICommandQuery FilterCommands(ICommandQuery commandQuery)
-            {
-                return commandQuery.Filter(new CountFilter());
-            }
-
-            ILeaseQuery FilterLeases(ILeaseQuery leaseQuery)
-            {
-                return leaseQuery.Filter(new CountFilter());
-            }
-
-            ITagQuery FilterTags(ITagQuery tagQuery)
-            {
-                return tagQuery.Filter(new CountFilter());
-            }
-
             var query = new CountQuery(gte, lte);
 
             await InsertTransactions(serviceScope, transactions);
-            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
-            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterCommands);
-            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterLeases);
-            await TestGetTransactionIds(serviceScope, query, expectedObjects, FilterTags);
-            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterAgentSignatures);
-            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterCommands);
-            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterLeases);
-            await TestGetEntityIds(serviceScope, query, expectedObjects, FilterTags);
-            await TestGetAgentSignatures(serviceScope, query, expectedObjects, FilterAgentSignatures);
-            await TestGetCommands(serviceScope, query, expectedObjects, FilterCommands);
-            await TestGetLeases(serviceScope, query, expectedObjects, FilterLeases);
-            await TestGetTags(serviceScope, query, expectedObjects, FilterTags);
+            await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetTransactionIds(serviceScope, query as ITagQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+            await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
+            await TestGetAgentSignatures(serviceScope, query, expectedObjects);
+            await TestGetCommands(serviceScope, query, expectedObjects);
+            await TestGetLeases(serviceScope, query, expectedObjects);
+            await TestGetTags(serviceScope, query, expectedObjects);
         }
 
         private class ExpectedObjects

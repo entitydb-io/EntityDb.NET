@@ -15,7 +15,11 @@ namespace EntityDb.Common.Tests.Implementations.Queries
     {
         public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
         {
-            return builder.CommandMatches((Count count) => Gte <= count.Number && count.Number <= Lte);
+            return builder.And
+            (
+                builder.CommandTypeIn(typeof(Count)),
+                builder.CommandMatches((Count count) => Gte <= count.Number && count.Number <= Lte)
+            );
         }
 
         public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
@@ -31,8 +35,12 @@ namespace EntityDb.Common.Tests.Implementations.Queries
 
         public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
         {
-            return builder.LeaseMatches((CountLease countLease) =>
-                Gte <= countLease.Number && countLease.Number <= Lte);
+            return builder.And
+            (
+                builder.LeaseTypeIn(typeof(CountLease)),
+                builder.LeaseMatches((CountLease countLease) =>
+                    Gte <= countLease.Number && countLease.Number <= Lte)
+            );
         }
 
         public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
@@ -49,7 +57,11 @@ namespace EntityDb.Common.Tests.Implementations.Queries
 
         public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
         {
-            return builder.AgentSignatureMatches((CounterAgentSignature counter) => Gte <= counter.Number && counter.Number <= Lte);
+            return builder.And
+            (
+                builder.AgentSignatureTypeIn(typeof(CounterAgentSignature)),
+                builder.AgentSignatureMatches((CounterAgentSignature counter) => Gte <= counter.Number && counter.Number <= Lte)
+            );
         }
 
         public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
@@ -68,7 +80,11 @@ namespace EntityDb.Common.Tests.Implementations.Queries
 
         public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
         {
-            return builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte);
+            return builder.And
+            (
+                builder.TagTypeIn(typeof(CountTag)),
+                builder.TagMatches((CountTag countTag) => Gte <= countTag.Number && countTag.Number <= Lte)
+            );
         }
 
         public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)

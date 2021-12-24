@@ -5,16 +5,32 @@ using System.Linq;
 
 namespace EntityDb.MongoDb.Rewriters
 {
-    internal abstract class HoistedRewriterBase : BsonDocumentRewriter
+    internal class HoistedRewriter : BsonDocumentRewriter
     {
         protected readonly string[] _hoistedFieldNames;
         protected readonly string _parentFieldName;
 
-        public HoistedRewriterBase(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
+        private bool FoundTopDocument = false;
+
+        public HoistedRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
             base(bsonWriter)
         {
             _parentFieldName = parentFieldName;
             _hoistedFieldNames = hoistedFieldNames;
+        }
+
+        protected override void RewriteDocument(BsonElement[] bsonElements)
+        {
+            if (FoundTopDocument)
+            {
+                base.RewriteDocument(bsonElements);
+            }
+            else
+            {
+                FoundTopDocument = true;
+
+                RewriteHoisted(bsonElements);
+            }
         }
 
         protected void RewriteHoisted(BsonElement[] bsonElements)

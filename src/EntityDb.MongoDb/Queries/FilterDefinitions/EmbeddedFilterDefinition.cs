@@ -35,7 +35,7 @@ namespace EntityDb.MongoDb.Queries.FilterDefinitions
             using var bsonWriter = new BsonDocumentWriter(document);
 
             var embeddedFilterRewriter =
-                new EmbeddedFilterRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+                new HoistedRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedFilterRewriter.Rewrite(renderedChildFilter);
 

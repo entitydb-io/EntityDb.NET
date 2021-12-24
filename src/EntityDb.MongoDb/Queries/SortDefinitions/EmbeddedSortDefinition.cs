@@ -34,7 +34,7 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
             using var bsonWriter = new BsonDocumentWriter(document);
 
             var embeddedSortRewriter =
-                new EmbeddedSortRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+                new HoistedRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
             embeddedSortRewriter.Rewrite(renderedChildSort);
 
