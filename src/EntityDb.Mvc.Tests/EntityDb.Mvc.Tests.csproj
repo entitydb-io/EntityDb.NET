@@ -29,7 +29,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\EntityDb.Common.Tests\EntityDb.Common.Tests.csproj" />
-        <ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj" />
         <ProjectReference Include="..\EntityDb.Mvc\EntityDb.Mvc.csproj" />
     </ItemGroup>
 
