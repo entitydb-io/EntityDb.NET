@@ -25,16 +25,16 @@ namespace EntityDb.Common.Transactions
 
         protected override async Task NotifyAsync(ITransaction<TEntity> transaction)
         {
+            var snapshotRepository =
+                await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
+
             var commandGroups = transaction.Steps
                 .GroupBy(command => command.EntityId);
 
-            foreach (var commandGroup in commandGroups)
+            foreach(var commandGroup in commandGroups)
             {
                 var entityId = commandGroup.Key;
                 var nextSnapshot = commandGroup.Last().NextEntitySnapshot;
-
-                await using var snapshotRepository =
-                    await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
 
                 await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
             }

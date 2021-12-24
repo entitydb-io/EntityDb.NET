@@ -64,18 +64,21 @@ namespace EntityDb.Common.Tests
             serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
+                options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
             serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
+                options.ReadTimeout = TimeSpan.FromSeconds(1);
             });
 
             serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;
+                options.ReadTimeout = TimeSpan.FromSeconds(1);
             });
         }
     }

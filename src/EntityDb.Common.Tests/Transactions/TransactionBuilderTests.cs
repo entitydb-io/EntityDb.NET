@@ -223,6 +223,32 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
+        public void GivenNoTaggingStrategy_WhenBuildingNewEntityWithTag_ThenTransactionDoesNotInsertTags()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.RemoveAll(typeof(ITaggingStrategy<TransactionEntity>));
+            });
+
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
+
+            // ACT
+
+            var transaction = transactionBuilder
+                .Create(default, new AddTag(default!, default!))
+                .Build(default);
+
+            // ASSERT
+
+            transaction.Steps.Length.ShouldBe(1);
+
+            transaction.Steps[0].Tags.Insert.ShouldBeEmpty();
+        }
+
+        [Fact]
         public async Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows()
         {
             // ARRANGE

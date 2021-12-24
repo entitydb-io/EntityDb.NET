@@ -1,6 +1,5 @@
 ﻿using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions
@@ -11,7 +10,6 @@ namespace EntityDb.MongoDb.Transactions
         private static readonly TransactionSessionOptions _testTransactionSessionOptions = new()
         {
             ReadOnly = false,
-            WriteTimeout = TimeSpan.FromMinutes(1)
         };
 
         private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;

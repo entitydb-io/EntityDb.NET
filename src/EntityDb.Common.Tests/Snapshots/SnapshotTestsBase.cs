@@ -20,6 +20,13 @@ namespace EntityDb.Common.Tests.Snapshots
         {
         }
 
+        private Task<ISnapshotRepository<TransactionEntity>> CreateRepository(IServiceScope serviceScope, string snapshotSessionOptionsName)
+        {
+            return serviceScope.ServiceProvider
+                .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+                .CreateRepository(snapshotSessionOptionsName);
+        }
+
         [Fact]
         public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot()
         {
@@ -27,15 +34,11 @@ namespace EntityDb.Common.Tests.Snapshots
 
             using var serviceScope = CreateServiceScope();
 
-            var snapshotRepositoryFactory = serviceScope.ServiceProvider
-                .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>();
-
             var expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
 
             var entityId = Guid.NewGuid();
 
-            await using var snapshotRepository =
-                await snapshotRepositoryFactory.CreateRepository(TestSessionOptions.Write);
+            await using var snapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.Write);
 
             // ACT
 
@@ -76,9 +79,7 @@ namespace EntityDb.Common.Tests.Snapshots
 
             var snapshot = new TransactionEntity();
 
-            await using var snapshotRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
-                .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
+            await using var snapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.ReadOnly);
 
             // ACT
 
@@ -89,6 +90,39 @@ namespace EntityDb.Common.Tests.Snapshots
             inserted.ShouldBeFalse();
 
             loggerMock.Verify();
+        }
+
+        [Fact]
+        public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot()
+        {
+            // ARRANGE
+
+            var entityId = Guid.NewGuid();
+
+            var expectedSnapshot = new TransactionEntity(VersionNumber: 5000);
+
+            using var serviceScope = CreateServiceScope();
+
+            var writeSnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.Write);
+            var readOnlySnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.ReadOnly);
+            var readOnlySecondaryPreferredSnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.ReadOnlySecondaryPreferred);
+            
+            var inserted = await writeSnapshotRepository.PutSnapshot(entityId, expectedSnapshot);
+
+            // ARRANGE ASSERTIONS
+
+            inserted.ShouldBeTrue();
+
+            // ACT
+
+            var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshot(entityId);
+
+            var readOnlySecondaryPreferredSnapshot = await readOnlySecondaryPreferredSnapshotRepository.GetSnapshot(entityId);
+
+            // ASSERT
+
+            readOnlySnapshot.ShouldBeEquivalentTo(expectedSnapshot);
+            readOnlySecondaryPreferredSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
         }
     }
 }

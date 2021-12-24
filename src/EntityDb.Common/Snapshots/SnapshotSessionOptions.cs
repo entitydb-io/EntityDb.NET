@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
+﻿using System;
 
 namespace EntityDb.Common.Snapshots
 {

@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
-using System;
+﻿using System;
 
 namespace EntityDb.Common.Transactions
 {

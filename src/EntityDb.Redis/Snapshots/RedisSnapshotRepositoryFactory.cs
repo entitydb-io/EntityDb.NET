@@ -37,7 +37,9 @@ namespace EntityDb.Redis.Snapshots
 
         public async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
         {
-            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
+            var configurationOptions = ConfigurationOptions.Parse(_connectionString);
+
+            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions);
 
             return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
         }
