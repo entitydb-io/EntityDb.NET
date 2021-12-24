@@ -1857,7 +1857,8 @@
       "entitydb.common.tests": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.TestImplementations": "1.0.0",
+          "Bogus": "33.1.1",
+          "EntityDb.Common": "1.0.0",
           "Microsoft.NET.Test.Sdk": "16.11.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
@@ -1878,13 +1879,6 @@
         "dependencies": {
           "EntityDb.MongoDb": "1.0.0",
           "System.CommandLine": "2.0.0-beta1.21216.1"
-        }
-      },
-      "entitydb.testimplementations": {
-        "type": "Project",
-        "dependencies": {
-          "Bogus": "33.1.1",
-          "EntityDb.Common": "1.0.0"
         }
       }
     }

@@ -1,9 +1,9 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
-using EntityDb.TestImplementations.Agents;
-using EntityDb.TestImplementations.Entities;
-using EntityDb.TestImplementations.Strategies;
+using EntityDb.Common.Tests.Implementations.Agents;
+using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Tests.Implementations.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 

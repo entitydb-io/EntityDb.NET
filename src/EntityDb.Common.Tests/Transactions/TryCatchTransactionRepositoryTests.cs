@@ -2,7 +2,7 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
-using EntityDb.TestImplementations.Entities;
+using EntityDb.Common.Tests.Implementations.Entities;
 using Moq;
 using Shouldly;
 using System;

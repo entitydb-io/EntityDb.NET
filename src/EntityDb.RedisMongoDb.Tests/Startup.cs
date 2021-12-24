@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests;
-using EntityDb.TestImplementations.Entities;
+using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.RedisMongoDb.Tests

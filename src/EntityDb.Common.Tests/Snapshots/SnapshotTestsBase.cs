@@ -2,7 +2,7 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Snapshots;
-using EntityDb.TestImplementations.Entities;
+using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;

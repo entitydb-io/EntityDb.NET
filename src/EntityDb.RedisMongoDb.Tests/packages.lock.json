@@ -1879,7 +1879,8 @@
       "entitydb.common.tests": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.TestImplementations": "1.0.0",
+          "Bogus": "33.1.1",
+          "EntityDb.Common": "1.0.0",
           "Microsoft.NET.Test.Sdk": "16.11.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
@@ -1924,13 +1925,6 @@
           "EntityDb.Common.Tests": "1.0.0",
           "EntityDb.Redis": "1.0.0",
           "Microsoft.NET.Test.Sdk": "16.11.0"
-        }
-      },
-      "entitydb.testimplementations": {
-        "type": "Project",
-        "dependencies": {
-          "Bogus": "33.1.1",
-          "EntityDb.Common": "1.0.0"
         }
       }
     }

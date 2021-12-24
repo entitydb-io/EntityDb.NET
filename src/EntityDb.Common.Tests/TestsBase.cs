@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.TestImplementations.Entities;
+using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

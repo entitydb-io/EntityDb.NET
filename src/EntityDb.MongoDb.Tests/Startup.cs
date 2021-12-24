@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Tests;
 using EntityDb.MongoDb.Provisioner.Extensions;
-using EntityDb.TestImplementations.Entities;
+using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.MongoDb.Tests
