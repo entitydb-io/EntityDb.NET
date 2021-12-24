@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
-using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.SortDefinitions;
 using MongoDB.Bson;
@@ -9,15 +8,9 @@ using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders
 {
-    internal abstract class SortBuilderBase : ISortBuilder<SortDefinition<BsonDocument>>
+    internal abstract class SortBuilderBase : BuilderBase, ISortBuilder<SortDefinition<BsonDocument>>
     {
         private static readonly SortDefinitionBuilder<BsonDocument> _sort = Builders<BsonDocument>.Sort;
-
-        private static readonly string _dataTypeNameFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
-
-        private static readonly string _dataValueFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
 
         public SortDefinition<BsonDocument> TransactionTimeStamp(bool ascending)
         {
@@ -43,7 +36,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
 
         protected static SortDefinition<BsonDocument> SortDataType(bool ascending)
         {
-            return Sort(ascending, _dataTypeNameFieldName);
+            return Sort(ascending, DataTypeNameFieldName);
         }
 
         protected virtual string[] GetHoistedFieldNames()
@@ -58,7 +51,7 @@ namespace EntityDb.MongoDb.Queries.SortBuilders
                 ? Builders<TData>.Sort.Ascending(dataExpression)
                 : Builders<TData>.Sort.Descending(dataExpression);
 
-            return new EmbeddedSortDefinition<BsonDocument, TData>(_dataValueFieldName, dataSort,
+            return new EmbeddedSortDefinition<BsonDocument, TData>(DataValueFieldName, dataSort,
                 GetHoistedFieldNames());
         }
     }

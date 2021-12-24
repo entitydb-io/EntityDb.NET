@@ -9,15 +9,9 @@ using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders
 {
-    internal abstract class FilterBuilderBase : IFilterBuilder<FilterDefinition<BsonDocument>>
+    internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDefinition<BsonDocument>>
     {
         private static readonly FilterDefinitionBuilder<BsonDocument> _filter = Builders<BsonDocument>.Filter;
-
-        private static readonly string _dataTypeNameFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
-
-        private static readonly string _dataValueFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
 
         public FilterDefinition<BsonDocument> TransactionTimeStampGte(DateTime timeStamp)
         {
@@ -73,7 +67,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
         {
             var typeNames = dataTypes.GetTypeHeaderValues();
 
-            return _filter.In(_dataTypeNameFieldName, typeNames);
+            return _filter.In(DataTypeNameFieldName, typeNames);
         }
 
         protected virtual string[] GetHoistedFieldNames()
@@ -85,7 +79,7 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders
         {
             var dataFilter = Builders<TData>.Filter.Where(dataExpression);
 
-            return new EmbeddedFilterDefinition<BsonDocument, TData>(_dataValueFieldName, dataFilter,
+            return new EmbeddedFilterDefinition<BsonDocument, TData>(DataValueFieldName, dataFilter,
                 GetHoistedFieldNames());
         }
     }
