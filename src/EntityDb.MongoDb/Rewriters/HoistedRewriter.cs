@@ -10,7 +10,7 @@ namespace EntityDb.MongoDb.Rewriters
         protected readonly string[] _hoistedFieldNames;
         protected readonly string _parentFieldName;
 
-        private bool FoundTopDocument = false;
+        private bool FoundTopDocument;
 
         public HoistedRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
             base(bsonWriter)
