@@ -70,18 +70,6 @@ namespace EntityDb.MongoDb.Rewriters
                     _bsonWriter.WriteString(bsonValue.AsString);
                     break;
 
-                case BsonType.Binary:
-                    _bsonWriter.WriteBinaryData(bsonValue.AsBsonBinaryData);
-                    break;
-
-                case BsonType.Undefined:
-                    _bsonWriter.WriteUndefined();
-                    break;
-
-                case BsonType.ObjectId:
-                    _bsonWriter.WriteObjectId(bsonValue.AsObjectId);
-                    break;
-
                 case BsonType.Boolean:
                     _bsonWriter.WriteBoolean(bsonValue.AsBoolean);
                     break;
@@ -98,10 +86,6 @@ namespace EntityDb.MongoDb.Rewriters
                     _bsonWriter.WriteRegularExpression(bsonValue.AsBsonRegularExpression);
                     break;
 
-                case BsonType.Symbol:
-                    _bsonWriter.WriteSymbol(bsonValue.AsBsonSymbol.Name);
-                    break;
-
                 case BsonType.Int32:
                     _bsonWriter.WriteInt32(bsonValue.AsInt32);
                     break;
@@ -116,14 +100,6 @@ namespace EntityDb.MongoDb.Rewriters
 
                 case BsonType.Decimal128:
                     _bsonWriter.WriteDecimal128(bsonValue.AsDecimal128);
-                    break;
-
-                case BsonType.MaxKey:
-                    _bsonWriter.WriteMaxKey();
-                    break;
-
-                case BsonType.MinKey:
-                    _bsonWriter.WriteMinKey();
                     break;
 
                 default:
