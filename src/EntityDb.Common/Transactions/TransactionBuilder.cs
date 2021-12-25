@@ -125,11 +125,6 @@ namespace EntityDb.Common.Transactions
 
             var entity = await entityRepository.GetCurrent(entityId);
 
-            if (_versioningStrategy.GetVersionNumber(entity) == 0)
-            {
-                throw new EntityNotCreatedException();
-            }
-
             _knownEntities.Add(entityId, entity);
         }
 

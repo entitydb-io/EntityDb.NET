@@ -201,5 +201,27 @@ namespace EntityDb.Common.Tests.Entities
 
             entityRepository.HasSnapshots.ShouldBeTrue();
         }
+
+        [Fact]
+        public async Task GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            });
+
+            await using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                    .CreateRepository(default!);
+
+            // ASSERT
+
+            await Should.ThrowAsync<EntityNotCreatedException>(async () =>
+            {
+                await entityRepository.GetCurrent(default);
+            });
+        }
     }
 }

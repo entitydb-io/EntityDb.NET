@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,6 +61,11 @@ namespace EntityDb.Common.Entities
             var commands = await _transactionRepository.GetCommands(commandQuery);
 
             entity = entity.Reduce(commands);
+
+            if (_versioningStrategy.GetVersionNumber(entity) == 0)
+            {
+                throw new EntityNotCreatedException();
+            }
 
             return entity;
         }

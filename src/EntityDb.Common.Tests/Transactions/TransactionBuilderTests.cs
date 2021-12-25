@@ -282,32 +282,6 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
-        public async Task GivenNonExistentEntityId_WhenLoadingEntity_ThenLoadThrows()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory());
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>();
-
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(default!);
-
-            // ASSERT
-
-            await Should.ThrowAsync<EntityNotCreatedException>(async () =>
-            {
-                await transactionBuilder.Load(Guid.NewGuid(), entityRepository);
-            });
-        }
-
-        [Fact]
         public void GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionNumberAutoIncrements()
         {
             // ARRANGE
