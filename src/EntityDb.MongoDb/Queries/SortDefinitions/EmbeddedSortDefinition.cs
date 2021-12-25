@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace EntityDb.MongoDb.Queries.SortDefinitions
 {
@@ -21,13 +22,13 @@ namespace EntityDb.MongoDb.Queries.SortDefinitions
         }
 
         public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
-            IBsonSerializerRegistry bsonSerializerRegistry)
+            IBsonSerializerRegistry bsonSerializerRegistry, LinqProvider linqProvider)
         {
-            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry);
+            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry, linqProvider);
 
             var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
 
-            var renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry);
+            var renderedChildSort = _childSort.Render(childDocumentSerializer, bsonSerializerRegistry, linqProvider);
 
             var document = new BsonDocument();
 

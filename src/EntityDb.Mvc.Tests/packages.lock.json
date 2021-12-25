@@ -10,18 +10,18 @@
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
-        "requested": "[16.11.0, )",
-        "resolved": "16.11.0",
-        "contentHash": "f4mbG1SUSkNWF5p7B3Y8ZxMsvKhxCmpZhdl+w6tMtLSUGE7Izi1syU6TkmKOvB2BV66pdbENConFAISOix4ohQ==",
+        "requested": "[17.0.0, )",
+        "resolved": "17.0.0",
+        "contentHash": "fJcnMY3jX1MzJvhGvUWauRhU5eQsOaHdwlrcnI3NabBhbi8WLAkMFI8d0YnewA/+b9q/U7vbhp8Xmh1vJ05FYQ==",
         "dependencies": {
-          "Microsoft.CodeCoverage": "16.11.0",
-          "Microsoft.TestPlatform.TestHost": "16.11.0"
+          "Microsoft.CodeCoverage": "17.0.0",
+          "Microsoft.TestPlatform.TestHost": "17.0.0"
         }
       },
       "Bogus": {
         "type": "Transitive",
-        "resolved": "33.1.1",
-        "contentHash": "k3zLOajCV2iaus75RFqtC3PhHfJHuP2/jTN5Yl1Gixr0jTzrKiufm6oovpn6Nhbjw/zr5CTIzYioUS6HRhEi1w=="
+        "resolved": "34.0.1",
+        "contentHash": "49iq7QrD0wb7V4/FcK8p3dWdJxNUbojaqK9L6KRvdikIuRjt38EsNp7QXICcYdbYw01K8BHUdxlnTNn/YX3qDA=="
       },
       "Castle.Core": {
         "type": "Transitive",
@@ -49,20 +49,20 @@
           "Microsoft.Windows.Compatibility": "5.0.0"
         }
       },
-      "DnsClient": {
-        "type": "Transitive",
-        "resolved": "1.4.0",
-        "contentHash": "CO1NG1zQdV0nEAXmr/KppLZ0S1qkaPwV0kPX5YPgmYBtrBVh1XMYHM54IXy3RBJu1k4thFtpzwo4HNHqxiuFYw=="
-      },
       "EmptyFiles": {
         "type": "Transitive",
         "resolved": "2.3.3",
         "contentHash": "I7L5UMvHYms1KAJr2lSeuC11p+rfAewSCwTAmxsR/LMKi4i9ld9s/91LuvJ1+FJnz9EaWvnOr8XX78M9Xo5H7Q=="
       },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "1.0.0",
+        "contentHash": "K63Y4hORbBcKLWH5wnKgzyn7TOfYzevIEwIedQHBIkmkEBA9SCqgvom+XTuE+fAFGvINGkhFItaZ2dvMGdT5iw=="
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "wf6lpAeCqP0KFfbDVtfL50lr7jY1gq0+0oSphyksfLOEygMDXqnaxHK5LPFtMEhYSEtgXdNyXNnEddOqQQUdlQ=="
+        "resolved": "17.0.0",
+        "contentHash": "+B+09FPYBtf+cXfZOPIgpnP5mzLq5QdlBo+JEFy9CdqBaWHWE/YMY0Mos9uDsZhcgFegJm9GigAgMyqBZyfq+Q=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -197,8 +197,8 @@
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "EiknJx9N9Z30gs7R+HHhki7fA8EiiM3pwD1vkw3bFsBC8kdVq/O7mHf1hrg5aJp+ASO6BoOzQueD2ysfTOy/Bg==",
+        "resolved": "17.0.0",
+        "contentHash": "WMugCdPkA8U/BsSRc+3RN+DXcaYSDvp/s0MofVld08iF1O5fek4iKecygk6NruNf1rgJsv4LK71mrwbyeqhzHA==",
         "dependencies": {
           "NuGet.Frameworks": "5.0.0",
           "System.Reflection.Metadata": "1.6.0"
@@ -206,10 +206,10 @@
       },
       "Microsoft.TestPlatform.TestHost": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "/Q+R0EcCJE8JaYCk+bGReicw/xrB0HhecrYrUcLbn95BnAlaTJrZhoLkUhvtKTAVtqX/AIKWXYtutiU/Q6QUgg==",
+        "resolved": "17.0.0",
+        "contentHash": "xkKFzm0hylHF0SlDj78ACYMJC/i8fQ3i16sDDNYoKnjTsstGSQfuSBJ+QT4nqRXk/fOiYTh+iY0KIX5N7HTLuQ==",
         "dependencies": {
-          "Microsoft.TestPlatform.ObjectModel": "16.11.0",
+          "Microsoft.TestPlatform.ObjectModel": "17.0.0",
           "Newtonsoft.Json": "9.0.1"
         }
       },
@@ -298,41 +298,6 @@
           "System.Text.Encoding.CodePages": "5.0.0",
           "System.Threading.AccessControl": "5.0.0"
         }
-      },
-      "MongoDB.Bson": {
-        "type": "Transitive",
-        "resolved": "2.13.1",
-        "contentHash": "B/AI2we7YwfFuNcXr4jlCnVI5dJp+g8vkyj3Shi/bOpGhZQaxW4jK/NiiTwYvqxaMOe4MtVR+6Zlk4D2zalC7A==",
-        "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0"
-        }
-      },
-      "MongoDB.Driver": {
-        "type": "Transitive",
-        "resolved": "2.13.1",
-        "contentHash": "BGpE1Ce33T3MrStgxC4CPLVDA2ngsI+WZk4SYn+ycOaU5uQ7zwbQzqpdzHrS7EcMNVpD9r2wnpjos0nxhxvshw==",
-        "dependencies": {
-          "MongoDB.Bson": "2.13.1",
-          "MongoDB.Driver.Core": "2.13.1",
-          "MongoDB.Libmongocrypt": "1.2.2"
-        }
-      },
-      "MongoDB.Driver.Core": {
-        "type": "Transitive",
-        "resolved": "2.13.1",
-        "contentHash": "lLYYMBneLHA9PYwWzbfC3p0NkAqzxbT8ZuinCH9MwR2bgHqu/6cOaJG12twKsnjc6KJVBboY0ufjHt43T9ZLnA==",
-        "dependencies": {
-          "DnsClient": "1.4.0",
-          "MongoDB.Bson": "2.13.1",
-          "MongoDB.Libmongocrypt": "1.2.2",
-          "SharpCompress": "0.23.0",
-          "System.Buffers": "4.5.1"
-        }
-      },
-      "MongoDB.Libmongocrypt": {
-        "type": "Transitive",
-        "resolved": "1.2.2",
-        "contentHash": "pKrlKJk4wem4MyfkaMqj+sqJ+RwUDnqnt76/Xwm5DDjMzEU5QtDkzQOLq5bVwFhNgC8LMn6Hr22tl5WsmN5+AA=="
       },
       "Moq": {
         "type": "Transitive",
@@ -591,14 +556,6 @@
         "resolved": "4.4.0",
         "contentHash": "YhEdSQUsTx+C8m8Bw7ar5/VesXvCFMItyZF7G1AUY+OM0VPZUOeAVpJ4Wl6fydBGUYZxojTDR3I6Bj/+BPkJNA=="
       },
-      "SharpCompress": {
-        "type": "Transitive",
-        "resolved": "0.23.0",
-        "contentHash": "HBbT47JHvNrsZX2dTBzUBOSzBt+EmIRGLIBkbxcP6Jef7DB4eFWQX5iHWV3Nj7hABFPCjISrZ8s0z72nF2zFHQ==",
-        "dependencies": {
-          "System.Text.Encoding.CodePages": "4.5.1"
-        }
-      },
       "Shouldly": {
         "type": "Transitive",
         "resolved": "4.0.3",
@@ -620,8 +577,15 @@
       },
       "System.Buffers": {
         "type": "Transitive",
-        "resolved": "4.5.1",
-        "contentHash": "Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg=="
+        "resolved": "4.3.0",
+        "contentHash": "ratu44uTIHgeBeI0dE8DWvmXVBSo4u7ozRZZHOMmK/JPpYyo0dAfgSiHlpiObMQ5lEtEyIXA40sKRYg5J6A8uQ==",
+        "dependencies": {
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Diagnostics.Tracing": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Threading": "4.3.0"
+        }
       },
       "System.CodeDom": {
         "type": "Transitive",
@@ -803,14 +767,10 @@
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "tD6kosZnTAGdrEa0tZSuFyunMbt/5KYDnHdndJYGqZoNy00XVXyACd5d6KnE1YgYv3ne2CjtAfNXo/fwEhnKUA==",
+        "resolved": "6.0.0",
+        "contentHash": "frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
         "dependencies": {
-          "System.Collections": "4.3.0",
-          "System.Diagnostics.Tracing": "4.3.0",
-          "System.Reflection": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Threading": "4.3.0"
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         }
       },
       "System.Diagnostics.EventLog": {
@@ -1311,8 +1271,8 @@
       },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA=="
+        "resolved": "6.0.0",
+        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
       },
       "System.Runtime.Extensions": {
         "type": "Transitive",
@@ -1803,19 +1763,21 @@
       },
       "Xunit.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "7.6.0",
-        "contentHash": "NlTOChspLE8bkBzCK++V24sYyW3cH/KtEI652hdYE/YNVUy8FGLlFDXRd7SGYbwCCQrHlKgSBifuoAVBRzu2ow==",
+        "resolved": "8.3.0",
+        "contentHash": "uh4rHDT7IBpDB18zZWvP+jf7nbUYsGb71mHkeatNu9EvfTlY5MvtKGANBPwMEuxvnRhgypMSa14RhwunSvH5Ww==",
         "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "1.0.0",
           "Microsoft.Extensions.Hosting": "2.1.0",
+          "System.Diagnostics.DiagnosticSource": "6.0.0",
           "xunit.extensibility.execution": "[2.2.0, 3.0.0)"
         }
       },
       "Xunit.DependencyInjection.Logging": {
         "type": "Transitive",
-        "resolved": "7.5.1",
-        "contentHash": "sfvec2PxvShNpXm7dWFJDAsugoG4k7dTuzGd3DqwfJr2nO3S7LHLlSnD852fT9qHsc5J632TJIpntjeeAL4JRA==",
+        "resolved": "8.0.0",
+        "contentHash": "EfFGSxOGdu5k63+LBiPmG4rZ6kgTJF0WRES2MUriJ0LeLPD+0WJDNVjitx338O89ctt70gJ+JT9ogX4/74Esbg==",
         "dependencies": {
-          "Xunit.DependencyInjection": "7.5.1"
+          "Xunit.DependencyInjection": "8.0.0"
         }
       },
       "xunit.extensibility.core": {
@@ -1848,21 +1810,14 @@
       "entitydb.common.tests": {
         "type": "Project",
         "dependencies": {
-          "Bogus": "33.1.1",
+          "Bogus": "34.0.1",
           "EntityDb.Common": "1.0.0",
-          "Microsoft.NET.Test.Sdk": "16.11.0",
+          "Microsoft.NET.Test.Sdk": "17.0.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
-          "Xunit.DependencyInjection": "7.6.0",
-          "Xunit.DependencyInjection.Logging": "7.5.1",
+          "Xunit.DependencyInjection": "8.3.0",
+          "Xunit.DependencyInjection.Logging": "8.0.0",
           "xunit": "2.4.1"
-        }
-      },
-      "entitydb.mongodb": {
-        "type": "Project",
-        "dependencies": {
-          "EntityDb.Common": "1.0.0",
-          "MongoDB.Driver": "2.13.1"
         }
       },
       "entitydb.mvc": {

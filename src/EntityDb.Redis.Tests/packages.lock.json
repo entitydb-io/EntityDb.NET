@@ -10,18 +10,18 @@
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
-        "requested": "[16.11.0, )",
-        "resolved": "16.11.0",
-        "contentHash": "f4mbG1SUSkNWF5p7B3Y8ZxMsvKhxCmpZhdl+w6tMtLSUGE7Izi1syU6TkmKOvB2BV66pdbENConFAISOix4ohQ==",
+        "requested": "[17.0.0, )",
+        "resolved": "17.0.0",
+        "contentHash": "fJcnMY3jX1MzJvhGvUWauRhU5eQsOaHdwlrcnI3NabBhbi8WLAkMFI8d0YnewA/+b9q/U7vbhp8Xmh1vJ05FYQ==",
         "dependencies": {
-          "Microsoft.CodeCoverage": "16.11.0",
-          "Microsoft.TestPlatform.TestHost": "16.11.0"
+          "Microsoft.CodeCoverage": "17.0.0",
+          "Microsoft.TestPlatform.TestHost": "17.0.0"
         }
       },
       "Bogus": {
         "type": "Transitive",
-        "resolved": "33.1.1",
-        "contentHash": "k3zLOajCV2iaus75RFqtC3PhHfJHuP2/jTN5Yl1Gixr0jTzrKiufm6oovpn6Nhbjw/zr5CTIzYioUS6HRhEi1w=="
+        "resolved": "34.0.1",
+        "contentHash": "49iq7QrD0wb7V4/FcK8p3dWdJxNUbojaqK9L6KRvdikIuRjt38EsNp7QXICcYdbYw01K8BHUdxlnTNn/YX3qDA=="
       },
       "Castle.Core": {
         "type": "Transitive",
@@ -54,10 +54,15 @@
         "resolved": "2.3.3",
         "contentHash": "I7L5UMvHYms1KAJr2lSeuC11p+rfAewSCwTAmxsR/LMKi4i9ld9s/91LuvJ1+FJnz9EaWvnOr8XX78M9Xo5H7Q=="
       },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "1.0.0",
+        "contentHash": "K63Y4hORbBcKLWH5wnKgzyn7TOfYzevIEwIedQHBIkmkEBA9SCqgvom+XTuE+fAFGvINGkhFItaZ2dvMGdT5iw=="
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "wf6lpAeCqP0KFfbDVtfL50lr7jY1gq0+0oSphyksfLOEygMDXqnaxHK5LPFtMEhYSEtgXdNyXNnEddOqQQUdlQ=="
+        "resolved": "17.0.0",
+        "contentHash": "+B+09FPYBtf+cXfZOPIgpnP5mzLq5QdlBo+JEFy9CdqBaWHWE/YMY0Mos9uDsZhcgFegJm9GigAgMyqBZyfq+Q=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -192,8 +197,8 @@
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "EiknJx9N9Z30gs7R+HHhki7fA8EiiM3pwD1vkw3bFsBC8kdVq/O7mHf1hrg5aJp+ASO6BoOzQueD2ysfTOy/Bg==",
+        "resolved": "17.0.0",
+        "contentHash": "WMugCdPkA8U/BsSRc+3RN+DXcaYSDvp/s0MofVld08iF1O5fek4iKecygk6NruNf1rgJsv4LK71mrwbyeqhzHA==",
         "dependencies": {
           "NuGet.Frameworks": "5.0.0",
           "System.Reflection.Metadata": "1.6.0"
@@ -201,10 +206,10 @@
       },
       "Microsoft.TestPlatform.TestHost": {
         "type": "Transitive",
-        "resolved": "16.11.0",
-        "contentHash": "/Q+R0EcCJE8JaYCk+bGReicw/xrB0HhecrYrUcLbn95BnAlaTJrZhoLkUhvtKTAVtqX/AIKWXYtutiU/Q6QUgg==",
+        "resolved": "17.0.0",
+        "contentHash": "xkKFzm0hylHF0SlDj78ACYMJC/i8fQ3i16sDDNYoKnjTsstGSQfuSBJ+QT4nqRXk/fOiYTh+iY0KIX5N7HTLuQ==",
         "dependencies": {
-          "Microsoft.TestPlatform.ObjectModel": "16.11.0",
+          "Microsoft.TestPlatform.ObjectModel": "17.0.0",
           "Newtonsoft.Json": "9.0.1"
         }
       },
@@ -572,8 +577,8 @@
       },
       "StackExchange.Redis": {
         "type": "Transitive",
-        "resolved": "2.2.62",
-        "contentHash": "rcIFo/dK67An3mO1Heov0GZj9TYLMd+YB4drA09vOQz9ZpdjMhxSVtlDATcGpC++EH0aUGGnRnzhq0R0oXBOXg==",
+        "resolved": "2.2.88",
+        "contentHash": "JJi1jcO3/ZiamBhlsC/TR8aZmYf+nqpGzMi0HRRCy5wJkUPmMnRp0kBA6V84uhU8b531FHSdTDaFCAyCUJomjA==",
         "dependencies": {
           "Pipelines.Sockets.Unofficial": "2.2.0",
           "System.Diagnostics.PerformanceCounter": "5.0.0"
@@ -779,14 +784,10 @@
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "tD6kosZnTAGdrEa0tZSuFyunMbt/5KYDnHdndJYGqZoNy00XVXyACd5d6KnE1YgYv3ne2CjtAfNXo/fwEhnKUA==",
+        "resolved": "6.0.0",
+        "contentHash": "frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
         "dependencies": {
-          "System.Collections": "4.3.0",
-          "System.Diagnostics.Tracing": "4.3.0",
-          "System.Reflection": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Threading": "4.3.0"
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         }
       },
       "System.Diagnostics.EventLog": {
@@ -1292,8 +1293,8 @@
       },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",
-        "resolved": "4.5.0",
-        "contentHash": "YrzNWduCDHhUaSRBxHxL11UkM2fD6y8hITHis4/LbQZ6vj3vdRjoH3IoPWWC9uDXK2wHIqn+b5gv1Np/VKyM1g=="
+        "resolved": "6.0.0",
+        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
       },
       "System.Runtime.Extensions": {
         "type": "Transitive",
@@ -1784,19 +1785,21 @@
       },
       "Xunit.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "7.6.0",
-        "contentHash": "NlTOChspLE8bkBzCK++V24sYyW3cH/KtEI652hdYE/YNVUy8FGLlFDXRd7SGYbwCCQrHlKgSBifuoAVBRzu2ow==",
+        "resolved": "8.3.0",
+        "contentHash": "uh4rHDT7IBpDB18zZWvP+jf7nbUYsGb71mHkeatNu9EvfTlY5MvtKGANBPwMEuxvnRhgypMSa14RhwunSvH5Ww==",
         "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "1.0.0",
           "Microsoft.Extensions.Hosting": "2.1.0",
+          "System.Diagnostics.DiagnosticSource": "6.0.0",
           "xunit.extensibility.execution": "[2.2.0, 3.0.0)"
         }
       },
       "Xunit.DependencyInjection.Logging": {
         "type": "Transitive",
-        "resolved": "7.5.1",
-        "contentHash": "sfvec2PxvShNpXm7dWFJDAsugoG4k7dTuzGd3DqwfJr2nO3S7LHLlSnD852fT9qHsc5J632TJIpntjeeAL4JRA==",
+        "resolved": "8.0.0",
+        "contentHash": "EfFGSxOGdu5k63+LBiPmG4rZ6kgTJF0WRES2MUriJ0LeLPD+0WJDNVjitx338O89ctt70gJ+JT9ogX4/74Esbg==",
         "dependencies": {
-          "Xunit.DependencyInjection": "7.5.1"
+          "Xunit.DependencyInjection": "8.0.0"
         }
       },
       "xunit.extensibility.core": {
@@ -1829,13 +1832,13 @@
       "entitydb.common.tests": {
         "type": "Project",
         "dependencies": {
-          "Bogus": "33.1.1",
+          "Bogus": "34.0.1",
           "EntityDb.Common": "1.0.0",
-          "Microsoft.NET.Test.Sdk": "16.11.0",
+          "Microsoft.NET.Test.Sdk": "17.0.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
-          "Xunit.DependencyInjection": "7.6.0",
-          "Xunit.DependencyInjection.Logging": "7.5.1",
+          "Xunit.DependencyInjection": "8.3.0",
+          "Xunit.DependencyInjection.Logging": "8.0.0",
           "xunit": "2.4.1"
         }
       },
@@ -1843,7 +1846,7 @@
         "type": "Project",
         "dependencies": {
           "EntityDb.Common": "1.0.0",
-          "StackExchange.Redis": "2.2.62"
+          "StackExchange.Redis": "2.2.88"
         }
       }
     }
