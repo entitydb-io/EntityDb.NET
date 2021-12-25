@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.Configuration;
@@ -75,8 +76,7 @@ namespace EntityDb.Common.Tests
 
             transactionRepositoryMock
                 .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
-                .ReturnsAsync(true)
-                .Verifiable();
+                .ReturnsAsync(true);
 
             transactionRepositoryMock
                 .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
@@ -97,6 +97,33 @@ namespace EntityDb.Common.Tests
                 .Setup(factory => factory.Dispose());
 
             return transactionRepositoryFactoryMock.Object;
+        }
+
+        public static ISnapshotRepositoryFactory<TransactionEntity> GetMockedSnapshotRepositoryFactory
+        (
+            TransactionEntity? snapshot = null
+        )
+        {
+            var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
+
+            snapshotRepositoryMock
+                .Setup(repository => repository.GetSnapshot(It.IsAny<Guid>()))
+                .ReturnsAsync(snapshot);
+
+            snapshotRepositoryMock
+                .Setup(repository => repository.DisposeAsync())
+                .Returns(ValueTask.CompletedTask);
+
+            var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+
+            snapshotRepositoryFactoryMock
+                .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
+                .ReturnsAsync(snapshotRepositoryMock.Object);
+
+            snapshotRepositoryFactoryMock
+                .Setup(factory => factory.Dispose());
+
+            return snapshotRepositoryFactoryMock.Object;
         }
     }
 }

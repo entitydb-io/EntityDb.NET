@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using EntityDb.Abstractions.Snapshots;
 
 namespace EntityDb.Common.Tests.Entities
 {
@@ -120,6 +121,86 @@ namespace EntityDb.Common.Tests.Entities
 
             transactionRepositoryMock
                 .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            });
+
+            // ACT
+
+            var snapshotRepositoryFactory = serviceScope.ServiceProvider
+                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+
+            using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("NOT NULL", "NOT NULL");
+
+            // ASSERT
+
+            snapshotRepositoryFactory.ShouldBeNull();
+
+            entityRepository.HasSnapshots.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
+            });
+
+            // ACT
+
+            var snapshotRepositoryFactory = serviceScope.ServiceProvider
+                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+
+            using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("NOT NULL", null);
+
+            // ASSERT
+
+            snapshotRepositoryFactory.ShouldNotBeNull();
+
+            entityRepository.HasSnapshots.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
+            });
+
+            // ACT
+
+            var snapshotRepositoryFactory = serviceScope.ServiceProvider
+                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+
+            using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("NOT NULL", "NOT NULL");
+
+            // ASSERT
+
+            snapshotRepositoryFactory.ShouldNotBeNull();
+
+            entityRepository.HasSnapshots.ShouldBeTrue();
         }
     }
 }

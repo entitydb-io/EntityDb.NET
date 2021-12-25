@@ -12,6 +12,11 @@ namespace EntityDb.Abstractions.Entities
     public interface IEntityRepository<TEntity> : IDisposableResource
     {
         /// <summary>
+        ///     Indicates if the entity repository has an instance of a snapshot repository.
+        /// </summary>
+        bool HasSnapshots { get; }
+
+        /// <summary>
         ///     Returns the most recent snapshot of a <typeparamref name="TEntity" /> or
         ///     <c>default(<typeparamref name="TEntity" />)</c>.
         /// </summary>
