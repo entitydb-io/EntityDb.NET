@@ -52,7 +52,7 @@ namespace EntityDb.MongoDb.Transactions
 
             var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
             {
-                CausalConsistency = true
+                CausalConsistency = true,
             });
 
             return new MongoSession

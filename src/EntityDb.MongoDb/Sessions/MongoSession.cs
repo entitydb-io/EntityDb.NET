@@ -19,28 +19,27 @@ namespace EntityDb.MongoDb.Sessions
     {
         private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
 
-        private static ReadPreference GetReadPreference(TransactionSessionOptions transactionSessionOptions)
+        private ReadPreference GetReadPreference()
         {
-            if (!transactionSessionOptions.ReadOnly)
+            if (!TransactionSessionOptions.ReadOnly)
             {
                 return ReadPreference.Primary;
             }
 
-            return transactionSessionOptions.SecondaryPreferred
+            return TransactionSessionOptions.SecondaryPreferred
                 ? ReadPreference.SecondaryPreferred
                 : ReadPreference.PrimaryPreferred;
         }
 
-        private static ReadConcern GetReadConcern(TransactionSessionOptions transactionSessionOptions)
+        [ExcludeFromCodeCoverage(Justification = "Tests should always run in a transaction.")]
+        private ReadConcern GetReadConcern()
         {
-            if (!transactionSessionOptions.ReadOnly)
+            if (ClientSessionHandle.IsInTransaction)
             {
-                return ReadConcern.Majority;
+                return ReadConcern.Snapshot;
             }
 
-            return transactionSessionOptions.SecondaryPreferred
-                ? ReadConcern.Available
-                : ReadConcern.Majority;
+            return ReadConcern.Majority;
         }
 
         private void AssertNotReadOnly()
@@ -69,8 +68,8 @@ namespace EntityDb.MongoDb.Sessions
         {
             return MongoDatabase
                 .GetCollection<TDocument>(collectionName)
-                .WithReadPreference(GetReadPreference(TransactionSessionOptions))
-                .WithReadConcern(GetReadConcern(TransactionSessionOptions))
+                .WithReadPreference(GetReadPreference())
+                .WithReadConcern(GetReadConcern())
                 .Find(ClientSessionHandle, filter, new FindOptions
                 {
                     MaxTime = TransactionSessionOptions.ReadTimeout
