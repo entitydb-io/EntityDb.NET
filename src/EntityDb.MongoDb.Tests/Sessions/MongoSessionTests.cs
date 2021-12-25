@@ -31,7 +31,7 @@ namespace EntityDb.MongoDb.Tests.Sessions
             await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Delete<object>(default!, default!));
 
             Should.Throw<CannotWriteInReadOnlyModeException>(() => mongoSession.StartTransaction());
-            
+
             await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.CommitTransaction());
 
             await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.AbortTransaction());

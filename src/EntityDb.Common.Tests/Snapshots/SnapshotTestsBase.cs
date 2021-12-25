@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -106,7 +105,7 @@ namespace EntityDb.Common.Tests.Snapshots
             var writeSnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.Write);
             var readOnlySnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.ReadOnly);
             var readOnlySecondaryPreferredSnapshotRepository = await CreateRepository(serviceScope, TestSessionOptions.ReadOnlySecondaryPreferred);
-            
+
             var inserted = await writeSnapshotRepository.PutSnapshot(entityId, expectedSnapshot);
 
             // ARRANGE ASSERTIONS

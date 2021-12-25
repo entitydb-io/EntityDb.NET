@@ -1,8 +1,8 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests;
-using EntityDb.Redis.Extensions;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Strategies;
+using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Redis.Tests

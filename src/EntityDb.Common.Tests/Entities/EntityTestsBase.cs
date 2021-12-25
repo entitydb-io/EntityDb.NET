@@ -1,10 +1,9 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Tests.Implementations.AgentSignature;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;

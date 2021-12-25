@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Tests.Implementations.AgentSignature;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using EntityDb.Abstractions.Snapshots;
 
 namespace EntityDb.Common.Tests.Entities
 {

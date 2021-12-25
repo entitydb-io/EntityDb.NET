@@ -108,7 +108,7 @@ namespace EntityDb.MongoDb.Sessions
                 maxCommitTime: TransactionSessionOptions.WriteTimeout
             ));
         }
-        
+
         [ExcludeFromCodeCoverage(Justification = "Tests should run witht he Debug configuration, and should not execute this method.")]
         public async Task CommitTransaction()
         {
@@ -128,7 +128,7 @@ namespace EntityDb.MongoDb.Sessions
 
             await ClientSessionHandle.AbortTransactionAsync();
         }
-        
+
         public ValueTask DisposeAsync()
         {
             ClientSessionHandle.Dispose();

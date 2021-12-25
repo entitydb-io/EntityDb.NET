@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.Common.Snapshots
+﻿namespace EntityDb.Common.Snapshots
 {
     /// <summary>
     ///     Represents the agent's use case for the snapshot repository.

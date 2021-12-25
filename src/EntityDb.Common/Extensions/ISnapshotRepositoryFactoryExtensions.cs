@@ -17,7 +17,7 @@ namespace EntityDb.Common.Extensions
             {
                 return new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory);
             }
-            
+
             return snapshotRepositoryFactory;
         }
     }

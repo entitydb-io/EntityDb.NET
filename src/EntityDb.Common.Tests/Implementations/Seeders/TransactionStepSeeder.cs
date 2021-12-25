@@ -1,8 +1,8 @@
 using Bogus;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Transactions;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

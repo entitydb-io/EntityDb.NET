@@ -31,7 +31,7 @@ namespace EntityDb.Common.Transactions
             var commandGroups = transaction.Steps
                 .GroupBy(command => command.EntityId);
 
-            foreach(var commandGroup in commandGroups)
+            foreach (var commandGroup in commandGroups)
             {
                 var entityId = commandGroup.Key;
                 var nextSnapshot = commandGroup.Last().NextEntitySnapshot;

@@ -11,15 +11,16 @@ using EntityDb.Common.Leases;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Queries.Modified;
 using EntityDb.Common.Tags;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Tests.Implementations.AgentSignature;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Queries;
 using EntityDb.Common.Tests.Implementations.Seeders;
-using EntityDb.Common.Tests.Implementations.AgentSignature;
 using EntityDb.Common.Tests.Implementations.Tags;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
@@ -28,7 +29,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EntityDb.Common.Tests.Transactions
 {

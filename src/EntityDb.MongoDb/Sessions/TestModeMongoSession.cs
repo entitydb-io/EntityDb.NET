@@ -41,7 +41,7 @@ namespace EntityDb.MongoDb.Sessions
         {
             // Test Mode Transactions are started in the Test Mode Repository Factory
         }
-        
+
         public Task CommitTransaction()
         {
             // Test Mode Transactions are never committed

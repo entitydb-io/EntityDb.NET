@@ -1,8 +1,8 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Transactions;
 using Moq;
 using Shouldly;
 using System;

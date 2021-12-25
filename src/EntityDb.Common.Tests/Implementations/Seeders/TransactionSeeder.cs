@@ -1,7 +1,7 @@
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Tests.Implementations.AgentSignature;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Transactions;
 using System;
 
 namespace EntityDb.Common.Tests.Implementations.Seeders
