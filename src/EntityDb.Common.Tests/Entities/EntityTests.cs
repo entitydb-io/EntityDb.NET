@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
@@ -200,6 +201,40 @@ namespace EntityDb.Common.Tests.Entities
             snapshotRepositoryFactory.ShouldNotBeNull();
 
             entityRepository.HasSnapshots.ShouldBeTrue();
+        }
+
+        [Fact]
+        public async Task GivenSnapshotAndNewCommands_WhenGettningSnapshotOrDefault_ThenReturnNewerThanSnapshot()
+        {
+            // ARRANGE
+
+            var snapshot = new TransactionEntity(VersionNumber: 1);
+
+            var newCommands = new[]
+            {
+                new DoNothing(),
+                new DoNothing(),
+            };
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory(newCommands));
+                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory(snapshot));
+            });
+
+            // ACT
+
+            using var entityRepository = await serviceScope.ServiceProvider
+                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+                .CreateRepository("NOT NULL", "NOT NULL");
+
+            var snapshotOrDefault = await entityRepository.GetCurrent(default);
+
+            // ASSERT
+
+            snapshotOrDefault.ShouldNotBe(default);
+            snapshotOrDefault.ShouldNotBe(snapshot);
+            snapshotOrDefault!.VersionNumber.ShouldBe(snapshot.VersionNumber + Convert.ToUInt64(newCommands.Length));
         }
 
         [Fact]
