@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
 namespace EntityDb.Mvc.Tests.Seeder
@@ -39,12 +39,17 @@ namespace EntityDb.Mvc.Tests.Seeder
             return connectionInfoMock.Object;
         }
 
-        private static HttpRequest CreateHttpRequest()
+        private static HttpRequest CreateHttpRequest(HttpContextSeederOptions httpContextSeederOptions)
         {
-            var headers = new Dictionary<string, StringValues>
-            {
-                ["Content-Type"] = new("application/json"),
-            };
+            var query = httpContextSeederOptions.Query.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+
+            var queryCollectionMock = new Mock<IQueryCollection>(MockBehavior.Strict);
+
+            queryCollectionMock
+                .Setup(dictionary => dictionary.GetEnumerator())
+                .Returns(query.GetEnumerator());
+
+            var headers = httpContextSeederOptions.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
             var headerDictionaryMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
 
@@ -53,6 +58,30 @@ namespace EntityDb.Mvc.Tests.Seeder
                 .Returns(headers.GetEnumerator());
 
             var httpRequestMock = new Mock<HttpRequest>(MockBehavior.Strict);
+
+            httpRequestMock
+                .SetupGet(request => request.Method)
+                .Returns(httpContextSeederOptions.Method);
+
+            httpRequestMock
+                .SetupGet(request => request.Scheme)
+                .Returns(httpContextSeederOptions.Scheme);
+
+            httpRequestMock
+                .SetupGet(request => request.Host)
+                .Returns(new HostString(httpContextSeederOptions.Host));
+
+            httpRequestMock
+                .SetupGet(request => request.Path)
+                .Returns(new PathString(httpContextSeederOptions.Path));
+
+            httpRequestMock
+                .SetupGet(request => request.Protocol)
+                .Returns(httpContextSeederOptions.Protocol);
+
+            httpRequestMock
+                .SetupGet(request => request.Query)
+                .Returns(queryCollectionMock.Object);
 
             httpRequestMock
                 .SetupGet(request => request.Headers)
@@ -84,7 +113,7 @@ namespace EntityDb.Mvc.Tests.Seeder
 
             httpContextMock
                 .SetupGet(context => context.Request)
-                .Returns(CreateHttpRequest());
+                .Returns(CreateHttpRequest(httpContextSeederOptions));
 
             httpContextMock
                 .SetupGet(context => context.Connection)

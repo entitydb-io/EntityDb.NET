@@ -2,16 +2,19 @@
 using EntityDb.Common.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace EntityDb.Mvc.Agents
 {
     internal sealed class HttpContextAgentAccessor : AgentAccessorBase
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
 
-        public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor)
+        public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor, IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory)
         {
             _httpContextAccessor = httpContextAccessor;
+            _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
         }
 
         protected override IAgent CreateAgent()
@@ -23,7 +26,7 @@ namespace EntityDb.Mvc.Agents
                 throw new NoAgentException();
             }
 
-            return new HttpContextAgent(httpContext);
+            return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory);
         }
     }
 }

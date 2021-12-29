@@ -17,7 +17,7 @@ namespace EntityDb.Common.Transactions
 {
     /// <summary>
     ///     Provides a way to construct an <see cref="ITransaction{TEntity}" />. Note that no operations are permanent until
-    ///     you call <see cref="Build(Guid, DateTime?, object?)" /> and pass the result to a transaction repository.
+    ///     you call <see cref="Build(string, Guid)" /> and pass the result to a transaction repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
     public sealed class TransactionBuilder<TEntity>
@@ -174,37 +174,20 @@ namespace EntityDb.Common.Transactions
         /// <summary>
         ///     Returns a new instance of <see cref="ITransaction{TEntity}" />.
         /// </summary>
+        /// <param name="agentSignatureOptionsName">
+        ///     The name of the signature options configuration.
+        /// </param>
         /// <param name="transactionId">A new id for the new transaction.</param>
-        /// <param name="timeStampOverride">
-        ///     An optional override for the transaction timestamp. The default is
-        ///     <see cref="DateTime.UtcNow" />.
-        /// </param>
-        /// <param name="agentSignatureOverride">
-        ///     An optional override for the agent signature. The default is
-        ///     from <see cref="IAgent.GetSignature()"/>
-        /// </param>
         /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
-        public ITransaction<TEntity> Build(Guid transactionId, DateTime? timeStampOverride = null, object? agentSignatureOverride = null)
+        public ITransaction<TEntity> Build(string agentSignatureOptionsName, Guid transactionId)
         {
-            var timeStamp = DateTime.UtcNow;
-
-            if (timeStampOverride.HasValue)
-            {
-                timeStamp = timeStampOverride.Value.ToUniversalTime();
-            }
-
-            var agentSignature = _agentAccessor.GetAgent().GetSignature();
-
-            if (agentSignatureOverride != null)
-            {
-                agentSignature = agentSignatureOverride;
-            }
+            var agent = _agentAccessor.GetAgent();
 
             var transaction = new Transaction<TEntity>
             {
                 Id = transactionId,
-                TimeStamp = timeStamp,
-                AgentSignature = agentSignature,
+                TimeStamp = agent.GetTimestamp(),
+                AgentSignature = agent.GetSignature(agentSignatureOptionsName),
                 Steps = _transactionSteps.ToImmutableArray<ITransactionStep<TEntity>>()
             };
 

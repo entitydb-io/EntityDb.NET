@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Common.Tests.Implementations.AgentSignature;
+using System;
 
 namespace EntityDb.Common.Tests.Implementations.Agents
 {
@@ -10,7 +11,12 @@ namespace EntityDb.Common.Tests.Implementations.Agents
             return false;
         }
 
-        public object GetSignature()
+        public DateTime GetTimestamp()
+        {
+            return DateTime.UtcNow;
+        }
+
+        public object GetSignature(string signatureOptionsName)
         {
             return new NoAgentSignature();
         }

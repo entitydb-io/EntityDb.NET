@@ -50,7 +50,7 @@ namespace EntityDb.Common.Tests.Entities
                 transactionBuilder.Append(entityId, new DoNothing());
             }
 
-            return transactionBuilder.Build(Guid.NewGuid());
+            return transactionBuilder.Build(default!, Guid.NewGuid());
         }
 
         [Fact]

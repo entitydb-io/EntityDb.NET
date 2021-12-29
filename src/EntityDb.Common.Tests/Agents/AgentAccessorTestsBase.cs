@@ -65,6 +65,30 @@ namespace EntityDb.Common.Tests.Agents
         }
 
         [Fact]
+        public void GivenBackingServiceActive_ThenCanGetTimestamp()
+        {
+            foreach (var agentAccessorConfiguration in GetAgentAccessorConfigurations())
+            {
+                // ARRANGE
+
+                using var serviceScope = CreateServiceScope(serviceCollection =>
+                {
+                    ConfigureActiveAgentAccessor(serviceCollection, agentAccessorConfiguration);
+                });
+
+                // ACT
+
+                var agent = serviceScope.ServiceProvider
+                    .GetRequiredService<IAgentAccessor>()
+                    .GetAgent();
+
+                // ASSERT
+
+                Should.NotThrow(() => agent.GetTimestamp());
+            }
+        }
+
+        [Fact]
         public void GivenBackingServiceActive_WhenGettingAgentSignature_ThenReturnAgentSignature()
         {
             foreach (var agentAccessorConfiguration in GetAgentAccessorConfigurations())
@@ -81,7 +105,7 @@ namespace EntityDb.Common.Tests.Agents
 
                 // ACT
 
-                var agentSignature = agentAccessor.GetAgent().GetSignature();
+                var agentSignature = agentAccessor.GetAgent().GetSignature("");
 
                 // ASSERT
 

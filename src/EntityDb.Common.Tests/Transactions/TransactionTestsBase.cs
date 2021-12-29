@@ -423,7 +423,25 @@ namespace EntityDb.Common.Tests.Transactions
                 transactionBuilder.Append(entityId, commands[i]);
             }
 
-            return transactionBuilder.Build(transactionId, timeStampOverride, agentSignatureOverride);
+            var transaction = (transactionBuilder.Build(default!, transactionId) as Transaction<TransactionEntity>)!;
+            
+            if (timeStampOverride.HasValue)
+            {
+                transaction = transaction with
+                {
+                    TimeStamp = timeStampOverride.Value
+                };
+            }
+
+            if (agentSignatureOverride != null)
+            {
+                transaction = transaction with
+                {
+                    AgentSignature = agentSignatureOverride
+                };
+            }
+
+            return transaction;
         }
 
         private Guid[] GetSortedGuids(int numberOfGuids)
@@ -771,7 +789,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddTag("Foo", "Bar"))
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -787,7 +805,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllTags())
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -822,7 +840,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var initialTransaction = transactionBuilder
                 .Create(entityId, new AddLease("Foo", "Bar", "Baz"))
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -838,7 +856,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var finalTransaction = transactionBuilder
                 .Append(entityId, new RemoveAllLeases())
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -865,7 +883,7 @@ namespace EntityDb.Common.Tests.Transactions
             var transaction = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .Create(Guid.NewGuid(), expectedCommand)
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
 
@@ -909,11 +927,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             var firstTransaction = transactionBuilder
                 .Create(entityId, new Count(1))
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var secondTransaction = transactionBuilder
                 .Append(entityId, expectedCommand)
-                .Build(Guid.NewGuid());
+                .Build(default!, Guid.NewGuid());
 
             var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
 

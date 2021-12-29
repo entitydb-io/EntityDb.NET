@@ -41,10 +41,18 @@ namespace EntityDb.Mvc.Tests.Agents
             {
                 new HttpContextSeederOptions
                 {
+                    Headers = new()
+                    {
+                        ["Content-Type"] = new[]{ "application/json" }
+                    },
                     HasIpAddress = true,
                 },
                 new HttpContextSeederOptions
                 {
+                    Headers = new()
+                    {
+                        ["Content-Type"] = new[]{ "application/json" }
+                    },
                     HasIpAddress = false,
                 },
             };
