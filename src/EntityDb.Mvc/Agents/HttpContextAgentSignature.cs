@@ -31,7 +31,7 @@ namespace EntityDb.Mvc.Agents
             string? Path,
             string Protocol,
             NameValuesPairSnapshot[] Headers,
-            NameValuesPairSnapshot[] Queries
+            NameValuesPairSnapshot[] QueryStringParams
         );
 
         /// <summary>
@@ -55,14 +55,13 @@ namespace EntityDb.Mvc.Agents
             ConnectionSnapshot Connection
         );
 
-        private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(IEnumerable<KeyValuePair<string, StringValues>> dictionary, HttpContextAgentSignatureOptions httpContextAgentOptions)
+        private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
         {
             return dictionary
-                .Where(pair => !httpContextAgentOptions.DoNotRecordHeaders.Contains(pair.Key))
                 .Select(pair => new NameValuesPairSnapshot
                 (
                     Name: pair.Key,
-                    Values: pair.Value.ToArray()
+                    Values: redactedKeys.Contains(pair.Key) ? new[] { redactedValue } : pair.Value.ToArray()
                 ))
                 .ToArray();
         }
@@ -76,8 +75,8 @@ namespace EntityDb.Mvc.Agents
                 Host: httpRequest.Host.Value,
                 Path: httpRequest.Path.Value,
                 Protocol: httpRequest.Protocol,
-                Headers: GetNameValuesPairSnapshots(httpRequest.Headers, httpContextAgentOptions),
-                Queries: GetNameValuesPairSnapshots(httpRequest.Query, httpContextAgentOptions)
+                Headers: GetNameValuesPairSnapshots(httpRequest.Headers, httpContextAgentOptions.RedactedHeaders, httpContextAgentOptions.RedactedValue),
+                QueryStringParams: GetNameValuesPairSnapshots(httpRequest.Query, httpContextAgentOptions.RedactedQueryStringParams, httpContextAgentOptions.RedactedValue)
             );
         }
 

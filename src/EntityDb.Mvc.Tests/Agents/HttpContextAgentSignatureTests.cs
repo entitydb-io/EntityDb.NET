@@ -9,23 +9,23 @@ namespace EntityDb.Mvc.Tests.Agents
     public class HttpContextAgentSignatureTests
     {
         [Fact]
-        public void GivenNoDoNotRecordHeaders_WhenHttpContextHasSingleHeader_ThenAgentSignatureHasSingleHeader()
+        public void GivenNoRedactedHeaders_WhenHttpContextHasHeader_ThenAgentSignatureHasHeaderValue()
         {
             // ARRANGE
 
-            const string RecordHeaderName = nameof(RecordHeaderName);
-            const string RecordHeaderValue = nameof(RecordHeaderValue);
+            const string HeaderName = nameof(HeaderName);
+            const string HeaderValue = nameof(HeaderValue);
 
             var httpContextAgentOptions = new HttpContextAgentSignatureOptions
             {
-                DoNotRecordHeaders = Array.Empty<string>()
+                RedactedHeaders = Array.Empty<string>()
             };
 
             var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
             {
                 Headers = new()
                 {
-                    [RecordHeaderName] = new[] { RecordHeaderValue }
+                    [HeaderName] = new[] { HeaderValue }
                 }
             });
 
@@ -36,28 +36,31 @@ namespace EntityDb.Mvc.Tests.Agents
             // ASSERT
 
             agentSignature.Request.Headers.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Name.ShouldBe(RecordHeaderName);
+            agentSignature.Request.Headers[0].Name.ShouldBe(HeaderName);
             agentSignature.Request.Headers[0].Values.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Values[0].ShouldBe(RecordHeaderValue);
+            agentSignature.Request.Headers[0].Values[0].ShouldBe(HeaderValue);
         }
 
         [Fact]
-        public void GivenDoNotRecordHeader_WhenHttpContextContainsOnlyThatHeader_ThenAgentSignatureHasNoHeaders()
+        public void GivenRedactedHeader_WhenHttpContextContainsOnlyThatHeader_ThenAgentSignatureHasRedactedHeader()
         {
             // ARRANGE
 
-            const string DoNotRecordHeader = nameof(DoNotRecordHeader);
+            const string HeaderName = nameof(HeaderName);
+            const string HeaderValue = nameof(HeaderValue);
+            const string RedactedValue = nameof(RedactedValue);
 
             var httpContextAgentOptions = new HttpContextAgentSignatureOptions
             {
-                DoNotRecordHeaders = new[] { DoNotRecordHeader }
+                RedactedHeaders = new[] { HeaderName },
+                RedactedValue = RedactedValue,
             };
 
             var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
             {
                 Headers = new()
                 {
-                    [DoNotRecordHeader] = Array.Empty<string>()
+                    [HeaderName] = new[] { HeaderValue }
                 }
             });
 
@@ -67,7 +70,78 @@ namespace EntityDb.Mvc.Tests.Agents
 
             // ASSERT
 
-            agentSignature.Request.Headers.ShouldBeEmpty();
+            agentSignature.Request.Headers.Length.ShouldBe(1);
+            agentSignature.Request.Headers[0].Name.ShouldBe(HeaderName);
+            agentSignature.Request.Headers[0].Values.Length.ShouldBe(1);
+            agentSignature.Request.Headers[0].Values[0].ShouldBe(RedactedValue);
+        }
+
+        [Fact]
+        public void GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
+        {
+            // ARRANGE
+
+            const string QueryStringParamName = nameof(QueryStringParamName);
+            const string QueryStringParamValue = nameof(QueryStringParamValue);
+
+            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+            {
+                RedactedQueryStringParams = Array.Empty<string>()
+            };
+
+            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
+            {
+                QueryStringParams = new()
+                {
+                    [QueryStringParamName] = new[] { QueryStringParamValue }
+                }
+            });
+
+            // ACT
+
+            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+
+            // ASSERT
+
+            agentSignature.Request.QueryStringParams.Length.ShouldBe(1);
+            agentSignature.Request.QueryStringParams[0].Name.ShouldBe(QueryStringParamName);
+            agentSignature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
+            agentSignature.Request.QueryStringParams[0].Values[0].ShouldBe(QueryStringParamValue);
+        }
+
+        [Fact]
+        public void GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
+        {
+            // ARRANGE
+
+            const string QueryStringParamName = nameof(QueryStringParamName);
+            const string QueryStringParamValue = nameof(QueryStringParamValue);
+            const string RedactedValue = nameof(RedactedValue);
+
+            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+            {
+                RedactedQueryStringParams = new[] { QueryStringParamName },
+                RedactedValue = RedactedValue,
+            };
+
+            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
+            {
+                QueryStringParams = new()
+                {
+                    [QueryStringParamName] = new[] { QueryStringParamValue }
+                }
+            });
+
+            // ACT
+
+            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+
+            // ASSERT
+
+            agentSignature.Request.QueryStringParams.Length.ShouldBe(1);
+            agentSignature.Request.QueryStringParams[0].Name.ShouldBe(QueryStringParamName);
+            agentSignature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
+            agentSignature.Request.QueryStringParams[0].Values[0].ShouldBe(RedactedValue);
         }
     }
 }

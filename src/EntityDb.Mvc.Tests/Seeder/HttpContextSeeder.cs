@@ -41,7 +41,7 @@ namespace EntityDb.Mvc.Tests.Seeder
 
         private static HttpRequest CreateHttpRequest(HttpContextSeederOptions httpContextSeederOptions)
         {
-            var query = httpContextSeederOptions.Query.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+            var query = httpContextSeederOptions.QueryStringParams.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
             var queryCollectionMock = new Mock<IQueryCollection>(MockBehavior.Strict);
 
