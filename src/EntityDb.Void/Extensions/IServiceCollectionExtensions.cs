@@ -21,7 +21,7 @@ namespace EntityDb.Void.Extensions
         public static void AddVoidTransactions<TEntity>(this IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddScoped<ITransactionRepositoryFactory<TEntity>, VoidTransactionRepositoryFactory<TEntity>>();
+                .AddSingleton<ITransactionRepositoryFactory<TEntity>, VoidTransactionRepositoryFactory<TEntity>>();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace EntityDb.MongoDb.Extensions
             string databaseName, Func<IConfiguration, string> getConnectionString,
             bool testMode = false)
         {
-            serviceCollection.AddScoped<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
+            serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
