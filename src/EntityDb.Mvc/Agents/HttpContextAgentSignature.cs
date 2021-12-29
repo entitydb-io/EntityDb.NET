@@ -81,7 +81,7 @@ namespace EntityDb.Mvc.Agents
             );
         }
 
-        private static ConnectionSnapshot GetConnectionSnapshot(ConnectionInfo connection, HttpContextAgentSignatureOptions httpContextAgentOptions)
+        private static ConnectionSnapshot GetConnectionSnapshot(ConnectionInfo connection)
         {
             return new ConnectionSnapshot
             (
@@ -98,7 +98,7 @@ namespace EntityDb.Mvc.Agents
             return new Snapshot
             (
                 Request: GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
-                Connection: GetConnectionSnapshot(httpContext.Connection, httpContextAgentOptions)
+                Connection: GetConnectionSnapshot(httpContext.Connection)
             );
         }
     }
