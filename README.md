@@ -45,7 +45,7 @@ transaction in order to make use of tags and leases.
 
 ### Agent
 
-An agent is an actor that can execute transactions. For example, if a transaction is initiated via and HTTP API, you might use
+An agent is an actor that can execute transactions. For example, if a transaction is initiated via an HTTP API, you might use
 the `HttpContextAgent` - it's signature includes headers and connection information, and it uses the ClaimsPrincipal to decide
 if an agent has a particular role required for authorized commands.
 
@@ -65,8 +65,8 @@ of savings accounts in the system would be the number of entity ids.
 
 A lease is like a tag, except that it has a uniqueness constraint. Many banks have online portals, allowing bank members
 to see their accounts on the internet. From the bank's perspective, all of the accounts should be tied to a member id,
-probably a guid. But the member will not want to rememebr nor lookup their this guid - they will want to use a username.
-What you can do in EntityDb is make a lease for member entities where the entity id is the member id, the `Label` is `Usernaame`
+probably a guid. But the member will not want to remember nor lookup this guid - they will want to use a username.
+What you can do in EntityDb is make a lease for member entities where the entity id is the member id, the `Label` is `Username`
 and the `Value` is whatever username the member wants to use. If an attempt to commit a transaction is made that would violate the
 uniqueness constraint, it will be rejected. (This is obnoxious behavior for the user, though, so the bank should check before attempting
 to commit to see if the username is available and give immediate feedback to choose a different username).
