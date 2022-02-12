@@ -105,18 +105,38 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///     Loads an already-existing entity into the builder.
+        ///     Returns a <typeparamref name="TEntity"/> associated with a given entity id, if it is known.
+        /// </summary>
+        /// <param name="entityId">The id assocaited with the entity.</param>
+        /// <returns>A <typeparamref name="TEntity"/> associated with <paramref name="entityId"/>, if it is known.</returns>
+        public TEntity GetEntity(Guid entityId)
+        {
+            return _knownEntities[entityId];
+        }
+
+        /// <summary>
+        ///     Indicates wether or not a <typeparamref name="TEntity"/> associated with a given entity id is in memory (i.e., created or loaded).
         /// </summary>
         /// <param name="entityId">The id of the entity.</param>
-        /// <param name="entity">The entity.</param>
-        /// <returns>A new task that loads an already-existing entity into the builder.</returns>
+        /// <returns><c>true</c> if a <typeparamref name="TEntity"/> associated with <paramref name="entityId"/> is in memory, or else <c>false</c>.</returns>
+        public bool IsEntityKnown(Guid entityId)
+        {
+            return _knownEntities.ContainsKey(entityId);
+        }
+
+        /// <summary>
+        ///     Associate a <typeparamref name="TEntity"/> with a given entity id.
+        /// </summary>
+        /// <param name="entityId">An id associated with a <typeparamref name="TEntity"/>.</param>
+        /// <param name="entity">A <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
         /// <remarks>
         ///     Call this method to load an entity that already exists before calling
         ///     <see cref="Append(Guid, ICommand{TEntity})" />.
         /// </remarks>
         public TransactionBuilder<TEntity> Load(Guid entityId, TEntity entity)
         {
-            if (_knownEntities.ContainsKey(entityId))
+            if (IsEntityKnown(entityId))
             {
                 throw new EntityAlreadyLoadedException();
             }
@@ -127,17 +147,17 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///     Adds a transaction step that creates a new entity.
+        ///     Adds a transaction step that creates a new <typeparamref name="TEntity"/> associated with a given entity id.
         /// </summary>
-        /// <param name="entityId">A new id for the new entity.</param>
-        /// <param name="command">The very first command for the new entity.</param>
+        /// <param name="entityId">A new id associated with the new <typeparamref name="TEntity"/>.</param>
+        /// <param name="command">The very first command for the new <typeparamref name="TEntity"/>.</param>
         /// <returns>The transaction builder.</returns>
         /// <remarks>
-        ///     Do not call this method for an entity that already exists.
+        ///     Do not call this method for a <typeparamref name="TEntity"/> that already exists.
         /// </remarks>
         public TransactionBuilder<TEntity> Create(Guid entityId, ICommand<TEntity> command)
         {
-            if (_knownEntities.ContainsKey(entityId))
+            if (IsEntityKnown(entityId))
             {
                 throw new EntityAlreadyCreatedException();
             }
@@ -152,14 +172,14 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///     Adds a transaction step that appends to an that has already been created.
+        ///     Adds a transaction step that appends to an existing <typeparamref name="TEntity"/> associated with a given entity id.
         /// </summary>
-        /// <param name="entityId">The id for the existing entity.</param>
-        /// <param name="command">A new command for the existing entity.</param>
+        /// <param name="entityId">An existing id associated with an existing <typeparamref name="TEntity"/>.</param>
+        /// <param name="command">A new command for the existing <typeparamref name="TEntity"/>.</param>
         /// <returns>The transaction builder.</returns>
         public TransactionBuilder<TEntity> Append(Guid entityId, ICommand<TEntity> command)
         {
-            if (!_knownEntities.ContainsKey(entityId))
+            if (!IsEntityKnown(entityId))
             {
                 throw new EntityNotLoadedException();
             }
@@ -172,9 +192,7 @@ namespace EntityDb.Common.Transactions
         /// <summary>
         ///     Returns a new instance of <see cref="ITransaction{TEntity}" />.
         /// </summary>
-        /// <param name="agentSignatureOptionsName">
-        ///     The name of the signature options configuration.
-        /// </param>
+        /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
         /// <param name="transactionId">A new id for the new transaction.</param>
         /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
         public ITransaction<TEntity> Build(string agentSignatureOptionsName, Guid transactionId)
