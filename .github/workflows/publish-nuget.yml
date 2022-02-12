@@ -39,10 +39,10 @@ jobs:
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v1
       - name: Restore Dependencies
-        run: dotnet restore src/EntityDb.sln --locked-mode
+        run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test src/EntityDb.sln --no-restore -c Debug
+        run: dotnet test EntityDb.sln --no-restore -c Debug
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack src/EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${Env:NOTES}
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${Env:NOTES}
       - name: Publish to Nuget.org
         run: dotnet nuget push */**.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}

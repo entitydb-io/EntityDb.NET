@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Commands
 {
-    public class CreateCollectionsDirect : CommandBase
+    internal class CreateCollectionsDirect : CommandBase
     {
         public static void AddTo(RootCommand rootCommand)
         {

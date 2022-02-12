@@ -6,7 +6,9 @@ on:
       - '**'
     paths:
       - '.github/workflows/build.yml'
+      - 'EntityDb.sln'
       - 'src/**'
+      - 'test/**'
 
 name: Build
 
@@ -29,9 +31,9 @@ jobs:
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v1
       - name: Restore Dependencies
-        run: dotnet restore src/EntityDb.sln --locked-mode
+        run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test src/EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Publish Coverage Results
         uses: codacy/codacy-coverage-reporter-action@v1
         with:

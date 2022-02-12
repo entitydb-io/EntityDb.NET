@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Commands
 {
-    public abstract class CommandBase
+    internal abstract class CommandBase
     {
         private static readonly Regex entityNameRegex = new("^[a-z][a-z]*$", RegexOptions.IgnoreCase);
 

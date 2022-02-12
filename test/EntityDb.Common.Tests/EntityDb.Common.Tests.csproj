@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\EntityDb.Common\EntityDb.Common.csproj" />
+    </ItemGroup>
+
+</Project>

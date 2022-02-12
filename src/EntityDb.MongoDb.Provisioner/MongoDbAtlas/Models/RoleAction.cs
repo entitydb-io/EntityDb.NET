@@ -2,7 +2,7 @@
 
 namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models
 {
-    public class MongoDbAtlasRoleAction
+    internal class MongoDbAtlasRoleAction
     {
         [JsonPropertyName("action")] public string? Action { get; set; }
 

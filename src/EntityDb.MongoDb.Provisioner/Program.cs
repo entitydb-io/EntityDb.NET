@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner
 {
-    public static class Program
+    internal static class Program
     {
         public static Task<int> Main(string[] args)
         {

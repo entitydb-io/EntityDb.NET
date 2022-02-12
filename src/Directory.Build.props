@@ -1,0 +1,39 @@
+<Project>
+    <!--Build-->
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <OutputType>Library</OutputType>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+  
+    <!--Pack-->
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <Authors>Chris Philips</Authors>
+        <Company>entitydb.io</Company>
+        <Copyright>2021 © entitydb.io</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <NeutralLanguage>en</NeutralLanguage>
+        <PackageIcon>ICON.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\ICON.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
+  
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+  
+</Project>

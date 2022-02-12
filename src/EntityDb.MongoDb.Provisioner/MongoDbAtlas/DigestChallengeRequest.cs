@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas
 {
-    public record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop,
+    internal record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop,
         string? Stale, uint NonceCount, string ClientNonce, DateTime ExpiresAt)
     {
         private static readonly MD5 MD5 = MD5.Create();

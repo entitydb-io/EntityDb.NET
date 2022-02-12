@@ -1,44 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!--Application-->
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>9.0</LangVersion>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
     <!--Build-->
     <PropertyGroup>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <NoWarn>1701;1702;CA1822</NoWarn>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
-
-    <!--Package-->
+  
+    <!--Pack-->
     <PropertyGroup>
-        <IsPackable>true</IsPackable>
-        <IncludeSymbols>false</IncludeSymbols>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>entitydb-provision-mongodb</ToolCommandName>
-        <Authors>Chris Philips</Authors>
-        <Company>entitydb.io</Company>
-        <Copyright>2021 © entitydb.io</Copyright>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <NeutralLanguage>en</NeutralLanguage>
         <PackageTags>EntityDb EventSourcing DDD CQRS MongoDb</PackageTags>
         <Description>A dotnet tool for provisioning a role, user, and database for usage with the EntityDb.MongoDb pacakge. Note - this tool is made for provisioning on a MongoDb Atlas Cluster. It does not work for other instances of MongoDb at this time.</Description>
-        <PackageIcon>ICON.png</PackageIcon>
-        <PackageIconUrl/>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="..\ICON.png">
-            <Pack>True</Pack>
-            <PackagePath></PackagePath>
-        </None>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21216.1"/>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Commands
 {
-    public class CreateRole : CommandBase
+    internal class CreateRole : CommandBase
     {
         public static void AddTo(RootCommand rootCommand)
         {
