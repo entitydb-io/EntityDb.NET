@@ -10,19 +10,72 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions
 {
-    public class TransactionBuilderTests : TestsBase<Startup>
+    public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     {
-        public TransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
+        public SingleEntityTransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
         [Fact]
-        public void GivenNoAuthorizingStrategy_WhenExecutingUnauthorizedCommand_ThenBuildSucceeds()
+        public void GivenEntityNotKnown_WhenGettingEntity_ThenThrow()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope();
+
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+                .ForSingleEntity(default);
+
+            // ASSERT
+
+            transactionBuilder.IsEntityKnown().ShouldBeFalse();
+
+            Should.Throw<KeyNotFoundException>(() => transactionBuilder.GetEntity());
+        }
+
+        [Fact]
+        public void GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity()
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope();
+
+            var expectedEntityId = Guid.NewGuid();
+
+            var expectedEntity = serviceScope.ServiceProvider
+                .GetRequiredService<IConstructingStrategy<TransactionEntity>>()
+                .Construct(expectedEntityId);
+
+            var transactionBuilder = serviceScope.ServiceProvider
+                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+                .ForSingleEntity(expectedEntityId);
+
+            transactionBuilder.Load(expectedEntity);
+
+            // ARRANGE ASSERTIONS
+
+            transactionBuilder.IsEntityKnown().ShouldBeTrue();
+
+            // ACT
+
+            var actualEntityId = transactionBuilder.EntityId;
+            var actualEntity = transactionBuilder.GetEntity();
+
+            // ASSERT
+
+            actualEntityId.ShouldBe(expectedEntityId);
+            actualEntity.ShouldBe(expectedEntity);
+        }
+
+        [Fact]
+        public void GivenNoAuthorizingStrategy_WhenExecutingUnauthorizedCommand_ThenAppendSucceeds()
         {
             // ARRANGE
 
