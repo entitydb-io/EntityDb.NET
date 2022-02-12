@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Disposables;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using System;
 using System.Threading.Tasks;
@@ -12,9 +13,14 @@ namespace EntityDb.Abstractions.Entities
     public interface IEntityRepository<TEntity> : IDisposableResource
     {
         /// <summary>
-        ///     Indicates if the entity repository has an instance of a snapshot repository.
+        ///     The backing transaction repository.
         /// </summary>
-        bool HasSnapshots { get; }
+        ITransactionRepository<TEntity> TransactionRepository { get; }
+
+        /// <summary>
+        ///     The backing snapshot repository (if snapshotting is available).
+        /// </summary>
+        ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
         /// <summary>
         ///     Returns the most recent snapshot of a <typeparamref name="TEntity" /> or

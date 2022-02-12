@@ -36,7 +36,9 @@ namespace EntityDb.Common.Entities
             _snapshotRepository = snapshotRepository;
         }
 
-        public bool HasSnapshots => _snapshotRepository != null;
+        public ITransactionRepository<TEntity> TransactionRepository => _transactionRepository;
+
+        public ISnapshotRepository<TEntity>? SnapshotRepository => _snapshotRepository;
 
         public async Task<TEntity?> GetSnapshotOrDefault(Guid entityId)
         {

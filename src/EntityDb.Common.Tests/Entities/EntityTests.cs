@@ -146,7 +146,7 @@ namespace EntityDb.Common.Tests.Entities
 
             snapshotRepositoryFactory.ShouldBeNull();
 
-            entityRepository.HasSnapshots.ShouldBeFalse();
+            entityRepository.SnapshotRepository.ShouldBeNull();
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace EntityDb.Common.Tests.Entities
 
             snapshotRepositoryFactory.ShouldNotBeNull();
 
-            entityRepository.HasSnapshots.ShouldBeFalse();
+            entityRepository.SnapshotRepository.ShouldBeNull();
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace EntityDb.Common.Tests.Entities
 
             snapshotRepositoryFactory.ShouldNotBeNull();
 
-            entityRepository.HasSnapshots.ShouldBeTrue();
+            entityRepository.SnapshotRepository.ShouldNotBeNull();
         }
 
         [Fact]
