@@ -105,6 +105,16 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
+        ///     Returns a single-entity transaction builder, which has a simplified set of methods.
+        /// </summary>
+        /// <param name="entityId">The id of the entity.</param>
+        /// <returns>A single-entity transaction builder, which has a simplified set of methods.</returns>
+        public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Guid entityId)
+        {
+            return new SingleEntityTransactionBuilder<TEntity>(entityId, this);
+        }
+
+        /// <summary>
         ///     Returns a <typeparamref name="TEntity"/> associated with a given entity id, if it is known.
         /// </summary>
         /// <param name="entityId">The id assocaited with the entity.</param>
