@@ -24,16 +24,20 @@ namespace EntityDb.Redis.Extensions
         public static void AddRedisSnapshots<TEntity>(this IServiceCollection serviceCollection, string keyNamespace,
             Func<IConfiguration, string> getConnectionString, bool testMode = false)
         {
-            serviceCollection.AddSingleton(serviceProvider =>
-            {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            serviceCollection.Add<ISnapshotRepositoryFactory<TEntity>>
+            (
+                testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
+                serviceProvider =>
+                {
+                    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-                var connectionString = getConnectionString.Invoke(configuration);
+                    var connectionString = getConnectionString.Invoke(configuration);
 
-                return RedisSnapshotRepositoryFactory<TEntity>
-                    .Create(serviceProvider, connectionString, keyNamespace)
-                    .UseTestMode(testMode);
-            });
+                    return RedisSnapshotRepositoryFactory<TEntity>
+                        .Create(serviceProvider, connectionString, keyNamespace)
+                        .UseTestMode(testMode);
+                }
+            );
         }
     }
 }

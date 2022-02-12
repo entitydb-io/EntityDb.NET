@@ -19,6 +19,12 @@ namespace EntityDb.Common.Extensions
     /// </summary>
     public static class IServiceCollectionExtensions
     {
+        internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime, Func<IServiceProvider, TService> serviceFactory)
+            where TService : class
+        {
+            serviceCollection.Add(new(typeof(TService), serviceFactory, serviceLifetime));
+        }
+
         /// <summary>
         ///     Adds an internal implementation of <see cref="IResolvingStrategy" /> which resolves types by using assembly
         ///     information.

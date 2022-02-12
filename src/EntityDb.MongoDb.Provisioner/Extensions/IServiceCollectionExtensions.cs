@@ -1,4 +1,5 @@
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
@@ -13,17 +14,21 @@ namespace EntityDb.MongoDb.Provisioner.Extensions
             this IServiceCollection serviceCollection, string databaseName,
             Func<IConfiguration, string> getConnectionString, bool testMode = false)
         {
-            serviceCollection.AddSingleton<ITransactionRepositoryFactory<TEntity>>(serviceProvider =>
-            {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            serviceCollection.Add<ITransactionRepositoryFactory<TEntity>>
+            (
+                testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
+                serviceProvider =>
+                {
+                    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-                var connectionString = getConnectionString.Invoke(configuration);
+                    var connectionString = getConnectionString.Invoke(configuration);
 
-                return MongoDbTransactionRepositoryFactory<TEntity>
-                    .Create(serviceProvider, connectionString, databaseName)
-                    .UseTestMode(testMode)
-                    .UseAutoProvisioning();
-            });
+                    return MongoDbTransactionRepositoryFactory<TEntity>
+                        .Create(serviceProvider, connectionString, databaseName)
+                        .UseTestMode(testMode)
+                        .UseAutoProvisioning();
+                }
+            );
         }
     }
 }
