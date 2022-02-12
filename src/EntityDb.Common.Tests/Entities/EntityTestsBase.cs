@@ -21,21 +21,21 @@ namespace EntityDb.Common.Tests.Entities
         {
         }
 
-        private static async Task<ITransaction<TransactionEntity>> BuildTransaction
+        private static ITransaction<TransactionEntity> BuildTransaction
         (
             IServiceScope serviceScope,
             Guid entityId,
             ulong from,
             ulong to,
-            IEntityRepository<TransactionEntity>? entityRepository = null
+            TransactionEntity? entity = null
         )
         {
             var transactionBuilder = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
-            if (entityRepository != null)
+            if (entity != null)
             {
-                await transactionBuilder.Load(entityId, entityRepository);
+                transactionBuilder.Load(entityId, entity);
             }
             else
             {
@@ -80,7 +80,7 @@ namespace EntityDb.Common.Tests.Entities
                     .CreateRepository(TestSessionOptions.Write,
                         TestSessionOptions.Write);
 
-            var firstTransaction = await BuildTransaction(serviceScope, entityId, 1, expectedSnapshotVersion);
+            var firstTransaction = BuildTransaction(serviceScope, entityId, 1, expectedSnapshotVersion);
 
             var firstTransactionInserted = await entityRepository.PutTransaction(firstTransaction);
 
@@ -90,8 +90,10 @@ namespace EntityDb.Common.Tests.Entities
 
             // ARRANGE 2
 
-            var secondTransaction = await BuildTransaction(serviceScope, entityId, expectedSnapshotVersion,
-                expectedCurrentVersion, entityRepository);
+            var entity = await entityRepository.GetCurrent(entityId);
+
+            var secondTransaction = BuildTransaction(serviceScope, entityId, expectedSnapshotVersion,
+                expectedCurrentVersion, entity);
 
             var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
 
@@ -127,7 +129,7 @@ namespace EntityDb.Common.Tests.Entities
                     .CreateRepository(TestSessionOptions.Write,
                         TestSessionOptions.Write);
 
-            var transaction = await BuildTransaction(serviceScope, entityId, 1, versionNumberN);
+            var transaction = BuildTransaction(serviceScope, entityId, 1, versionNumberN);
 
             var transactionInserted = await entityRepository.PutTransaction(transaction);
 

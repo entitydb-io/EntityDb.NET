@@ -74,9 +74,11 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
                     .CreateRepository(default!);
 
+            var entity = await entityRepository.GetCurrent(entityId);
+
             // ACT
 
-            await transactionBuilder.Load(entityId, entityRepository);
+            transactionBuilder.Load(entityId, entity);
 
             // ASSERT
 
@@ -269,15 +271,17 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
                     .CreateRepository(default!);
 
+            var entity = await entityRepository.GetCurrent(entityId);
+
             // ACT
 
-            await transactionBuilder.Load(entityId, entityRepository);
+            transactionBuilder.Load(entityId, entity);
 
             // ASSERT
 
-            await Should.ThrowAsync<EntityAlreadyLoadedException>(async () =>
+            Should.Throw<EntityAlreadyLoadedException>(() =>
             {
-                await transactionBuilder.Load(entityId, entityRepository);
+                transactionBuilder.Load(entityId, entity);
             });
         }
 
@@ -338,13 +342,14 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
                     .CreateRepository(default!);
 
+            var entity = await entityRepository.GetCurrent(entityId);
+
             // ACT
 
-            await transactionBuilder.Load(entityId, entityRepository);
-
-            transactionBuilder.Append(entityId, new DoNothing());
-
-            var transaction = transactionBuilder.Build(default!, default);
+            var transaction = transactionBuilder
+                .Load(entityId, entity)
+                .Append(entityId, new DoNothing())
+                .Build(default!, default);
 
             // ASSERT
 

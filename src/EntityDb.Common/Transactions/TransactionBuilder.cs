@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
@@ -11,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions
 {
@@ -109,23 +107,23 @@ namespace EntityDb.Common.Transactions
         /// <summary>
         ///     Loads an already-existing entity into the builder.
         /// </summary>
-        /// <param name="entityId">The id of the entity to load.</param>
-        /// <param name="entityRepository">The repository which encapsulates transactions and snapshots.</param>
+        /// <param name="entityId">The id of the entity.</param>
+        /// <param name="entity">The entity.</param>
         /// <returns>A new task that loads an already-existing entity into the builder.</returns>
         /// <remarks>
         ///     Call this method to load an entity that already exists before calling
         ///     <see cref="Append(Guid, ICommand{TEntity})" />.
         /// </remarks>
-        public async Task Load(Guid entityId, IEntityRepository<TEntity> entityRepository)
+        public TransactionBuilder<TEntity> Load(Guid entityId, TEntity entity)
         {
             if (_knownEntities.ContainsKey(entityId))
             {
                 throw new EntityAlreadyLoadedException();
             }
 
-            var entity = await entityRepository.GetCurrent(entityId);
-
             _knownEntities.Add(entityId, entity);
+
+            return this;
         }
 
         /// <summary>

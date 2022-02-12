@@ -24,26 +24,18 @@ namespace EntityDb.Common.Tests.Entities
         {
         }
 
-        private static async Task<ITransaction<TransactionEntity>> BuildTransaction
+        private static ITransaction<TransactionEntity> BuildTransaction
         (
             IServiceScope serviceScope,
             Guid entityId,
             ulong from,
-            ulong to,
-            IEntityRepository<TransactionEntity>? entityRepository = null
+            ulong to
         )
         {
             var transactionBuilder = serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>();
 
-            if (entityRepository != null)
-            {
-                await transactionBuilder.Load(entityId, entityRepository);
-            }
-            else
-            {
-                transactionBuilder.Create(entityId, new DoNothing());
-            }
+            transactionBuilder.Create(entityId, new DoNothing());
 
             for (var i = from; i < to; i++)
             {
@@ -103,7 +95,7 @@ namespace EntityDb.Common.Tests.Entities
                 .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
                     .CreateRepository(TestSessionOptions.Write);
 
-            var transaction = await BuildTransaction(serviceScope, entityId, 1, ExpectedVersionNumber);
+            var transaction = BuildTransaction(serviceScope, entityId, 1, ExpectedVersionNumber);
 
             var transactionInserted = await entityRepository.PutTransaction(transaction);
 
