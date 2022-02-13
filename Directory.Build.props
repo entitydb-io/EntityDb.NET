@@ -1,0 +1,9 @@
+<Project>
+    <!--Build-->
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10.0</LangVersion>
+        <Nullable>enable</Nullable>
+        <EnablePreviewFeatures>True</EnablePreviewFeatures>
+    </PropertyGroup>  
+</Project>

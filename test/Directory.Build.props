@@ -1,9 +1,8 @@
 <Project>
+    <Import Project="../Directory.Build.props" />
+  
     <!--Build-->
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>9.0</LangVersion>
-        <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
