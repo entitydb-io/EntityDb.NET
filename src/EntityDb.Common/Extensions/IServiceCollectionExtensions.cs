@@ -86,43 +86,6 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Adds an internal implementation of <see cref="ILeasingStrategy{TEntity}" /> to a service collection for an entity
-        ///     that implements <see cref="ILeasedEntity" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity to be leased.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        public static void AddLeasedEntityLeasingStrategy<TEntity>(this IServiceCollection serviceCollection)
-            where TEntity : ILeasedEntity
-        {
-            serviceCollection.AddSingleton<ILeasingStrategy<TEntity>, LeasedEntityLeasingStrategy<TEntity>>();
-        }
-
-        /// <summary>
-        ///     Adds an internal implementation of <see cref="ITaggingStrategy{TEntity}" /> to a service collection for an entity
-        ///     that implements <see cref="ITaggedEntity" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity to be tagged.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        public static void AddTaggedEntityTaggingStrategy<TEntity>(this IServiceCollection serviceCollection)
-            where TEntity : ITaggedEntity
-        {
-            serviceCollection.AddSingleton<ITaggingStrategy<TEntity>, TaggedEntityTaggingStrategy<TEntity>>();
-        }
-
-        /// <summary>
-        ///     Adds an internal implementation of <see cref="IAuthorizingStrategy{TEntity}" /> to a service collection for an
-        ///     entity that implements <see cref="IAuthorizedEntity{TEntity}" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity to be authorized.</typeparam>
-        /// <param name="serviceCollection">The service collection.</param>
-        public static void AddAuthorizedEntityAuthorizingStrategy<TEntity>(this IServiceCollection serviceCollection)
-            where TEntity : IAuthorizedEntity<TEntity>
-        {
-            serviceCollection
-                .AddSingleton<IAuthorizingStrategy<TEntity>, AuthorizedEntityAuthorizingStrategy<TEntity>>();
-        }
-
-        /// <summary>
         ///     Adds an implementation of <see cref="ISnapshottingStrategy{TEntity}" /> to a service collection.
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
@@ -141,18 +104,12 @@ namespace EntityDb.Common.Extensions
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TConstructingStrategy">The constructing strategy for the entity.</typeparam>
-        public static void AddEntity<TEntity, TConstructingStrategy>(this IServiceCollection serviceCollection)
-            where TEntity : IVersionedEntity<TEntity>
-            where TConstructingStrategy : class, IConstructingStrategy<TEntity>
+        public static void AddEntity<TEntity>(this IServiceCollection serviceCollection)
+            where TEntity : IEntity<TEntity>
         {
             serviceCollection.AddTransient<TransactionBuilder<TEntity>>();
 
             serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
-
-            serviceCollection.AddSingleton<IConstructingStrategy<TEntity>, TConstructingStrategy>();
-
-            serviceCollection.AddSingleton<IVersioningStrategy<TEntity>, VersionedEntityVersioningStrategy<TEntity>>();
         }
 
         /// <summary>

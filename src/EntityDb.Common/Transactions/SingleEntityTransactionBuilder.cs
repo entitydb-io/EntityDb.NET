@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Entities;
 using System;
 
 namespace EntityDb.Common.Transactions
@@ -9,6 +10,7 @@ namespace EntityDb.Common.Transactions
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public class SingleEntityTransactionBuilder<TEntity>
+        where TEntity : IEntity<TEntity>
     {
         private readonly Guid _entityId;
         private readonly TransactionBuilder<TEntity> _transactionBuilder;

@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -13,24 +12,19 @@ using System.Threading.Tasks;
 namespace EntityDb.Common.Entities
 {
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
+        where TEntity : IEntity<TEntity>
     {
-        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
         private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
         private readonly ITransactionRepository<TEntity> _transactionRepository;
         private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
-        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
 
         public EntityRepository
         (
-            IConstructingStrategy<TEntity> constructingStrategy,
-            IVersioningStrategy<TEntity> versioningStrategy,
             IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
             ITransactionRepository<TEntity> transactionRepository,
             ISnapshotRepository<TEntity>? snapshotRepository = null
         )
         {
-            _constructingStrategy = constructingStrategy;
-            _versioningStrategy = versioningStrategy;
             _transactionSubscribers = transactionSubscribers;
             _transactionRepository = transactionRepository;
             _snapshotRepository = snapshotRepository;
@@ -54,9 +48,9 @@ namespace EntityDb.Common.Entities
         {
             var snapshot = await GetSnapshotOrDefault(entityId);
 
-            var entity = snapshot ?? _constructingStrategy.Construct(entityId);
+            var entity = snapshot ?? TEntity.Construct(entityId);
 
-            var versionNumber = _versioningStrategy.GetVersionNumber(entity);
+            var versionNumber = entity.GetVersionNumber();
 
             var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
 
@@ -64,7 +58,7 @@ namespace EntityDb.Common.Entities
 
             entity = entity.Reduce(commands);
 
-            if (_versioningStrategy.GetVersionNumber(entity) == 0)
+            if (entity.GetVersionNumber() == 0)
             {
                 throw new EntityNotCreatedException();
             }
@@ -78,7 +72,7 @@ namespace EntityDb.Common.Entities
 
             var commands = await _transactionRepository.GetCommands(commandQuery);
 
-            return _constructingStrategy
+            return TEntity
                 .Construct(entityId)
                 .Reduce(commands);
         }

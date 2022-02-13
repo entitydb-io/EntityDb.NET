@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using System;
@@ -19,40 +20,26 @@ namespace EntityDb.Common.Transactions
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
     public sealed class TransactionBuilder<TEntity>
+        where TEntity : IEntity<TEntity>
     {
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
         private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
 
         private readonly IAgentAccessor _agentAccessor;
-        private readonly IConstructingStrategy<TEntity> _constructingStrategy;
-        private readonly IVersioningStrategy<TEntity> _versioningStrategy;
-        private readonly IAuthorizingStrategy<TEntity>? _authorizingStrategy;
-        private readonly ILeasingStrategy<TEntity>? _leasingStrategy;
-        private readonly ITaggingStrategy<TEntity>? _taggingStrategy;
 
         /// <summary>
         ///     Initializes a new instance of <see cref="TransactionBuilder{TEntity}" />.
         /// </summary>
         public TransactionBuilder
         (
-            IAgentAccessor agentAccessor,
-            IConstructingStrategy<TEntity> constructingStrategy,
-            IVersioningStrategy<TEntity> versioningStrategy,
-            IAuthorizingStrategy<TEntity>? authorizingStrategy = null,
-            ILeasingStrategy<TEntity>? leasingStrategy = null,
-            ITaggingStrategy<TEntity>? taggingStrategy = null
+            IAgentAccessor agentAccessor
         )
         {
             _agentAccessor = agentAccessor;
-            _constructingStrategy = constructingStrategy;
-            _versioningStrategy = versioningStrategy;
-            _authorizingStrategy = authorizingStrategy;
-            _leasingStrategy = leasingStrategy;
-            _taggingStrategy = taggingStrategy;
         }
 
         private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
-            TEntity nextEntity, Func<TEntity, TMetaData[]> metaDataMapper)
+            TEntity nextEntity, Func<TEntity, IEnumerable<TMetaData>> metaDataMapper)
         {
             var previousMetaData = metaDataMapper.Invoke(previousEntity);
             var nextMetaData = metaDataMapper.Invoke(nextEntity);
@@ -64,30 +51,13 @@ namespace EntityDb.Common.Transactions
             };
         }
 
-        private bool IsAuthorized(TEntity entity, ICommand<TEntity> command)
-        {
-            return _authorizingStrategy?.IsAuthorized(entity, command) ?? true;
-        }
-
-        private ILease[] GetLeases(TEntity entity)
-        {
-            return _leasingStrategy?.GetLeases(entity) ?? Array.Empty<ILease>();
-        }
-
-        private ITag[] GetTags(TEntity entity)
-        {
-            return _taggingStrategy?.GetTags(entity) ?? Array.Empty<ITag>();
-        }
-
         private void AddTransactionStep(Guid entityId, ICommand<TEntity> command)
         {
             var previousEntity = _knownEntities[entityId];
-            var previousEntityVersionNumber = _versioningStrategy.GetVersionNumber(previousEntity);
-
-            CommandNotAuthorizedException.ThrowIfFalse(IsAuthorized(previousEntity, command));
+            var previousEntityVersionNumber = previousEntity.GetVersionNumber();
 
             var nextEntity = previousEntity.Reduce(command);
-            var nextEntityVersionNumber = _versioningStrategy.GetVersionNumber(nextEntity);
+            var nextEntityVersionNumber = nextEntity.GetVersionNumber();
 
             _transactionSteps.Add(new TransactionStep<TEntity>
             {
@@ -97,8 +67,8 @@ namespace EntityDb.Common.Transactions
                 NextEntityVersionNumber = nextEntityVersionNumber,
                 EntityId = entityId,
                 Command = command,
-                Leases = GetTransactionMetaData(previousEntity, nextEntity, GetLeases),
-                Tags = GetTransactionMetaData(previousEntity, nextEntity, GetTags)
+                Leases = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetLeases()),
+                Tags = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetTags())
             });
 
             _knownEntities[entityId] = nextEntity;
@@ -172,7 +142,7 @@ namespace EntityDb.Common.Transactions
                 throw new EntityAlreadyCreatedException();
             }
 
-            var entity = _constructingStrategy.Construct(entityId);
+            var entity = TEntity.Construct(entityId);
 
             _knownEntities.Add(entityId, entity);
 

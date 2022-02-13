@@ -49,8 +49,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             var expectedEntityId = Guid.NewGuid();
 
-            var expectedEntity = serviceScope.ServiceProvider
-                .GetRequiredService<IConstructingStrategy<TransactionEntity>>()
+            var expectedEntity = TransactionEntity
                 .Construct(expectedEntityId);
 
             var transactionBuilder = serviceScope.ServiceProvider
@@ -72,107 +71,6 @@ namespace EntityDb.Common.Tests.Transactions
 
             actualEntityId.ShouldBe(expectedEntityId);
             actualEntity.ShouldBe(expectedEntity);
-        }
-
-        [Fact]
-        public void GivenNoAuthorizingStrategy_WhenExecutingUnauthorizedCommand_ThenAppendSucceeds()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.RemoveAll(typeof(IAuthorizingStrategy<TransactionEntity>));
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ACT & ASSERT
-
-            Should.NotThrow(() => transactionBuilder
-                .Create(new SetRole("Foo"))
-                .Append(new DoNothing()));
-        }
-
-        [Fact]
-        public async Task GivenExistingEntityId_WhenExecutingUnauthorizedCommand_ThenAppendThrows()
-        {
-            // ARRANGE
-
-            var authorizingStrategyMock = new Mock<IAuthorizingStrategy<TransactionEntity>>(MockBehavior.Strict);
-
-            authorizingStrategyMock
-                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>()))
-                .Returns(false);
-
-            var authorizingStrategy = authorizingStrategyMock.Object;
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
-
-                serviceCollection.AddScoped(_ => authorizingStrategy);
-            });
-
-            var entityId = Guid.NewGuid();
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(entityId);
-
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(default!);
-
-            var entity = await entityRepository.GetCurrent(entityId);
-
-            // ACT
-
-            transactionBuilder.Load(entity);
-
-            // ASSERT
-
-            Should.Throw<CommandNotAuthorizedException>(() =>
-            {
-                transactionBuilder.Append(new DoNothing());
-            });
-        }
-
-        [Fact]
-        public void GivenNonExistingEntityId_WhenExecutingUnauthorizedCommand_ThenCreateThrows()
-        {
-            // ARRANGE
-
-            var authorizingStrategyMock = new Mock<IAuthorizingStrategy<TransactionEntity>>(MockBehavior.Strict);
-
-            authorizingStrategyMock
-                .Setup(strategy => strategy.IsAuthorized(It.IsAny<TransactionEntity>(),
-                    It.IsAny<ICommand<TransactionEntity>>()))
-                .Returns(false);
-
-            var authorizingStrategy = authorizingStrategyMock.Object;
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
-
-                serviceCollection.AddScoped(_ => authorizingStrategy);
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ASSERT
-
-            Should.Throw<CommandNotAuthorizedException>(() =>
-            {
-                transactionBuilder.Create(new DoNothing());
-            });
         }
 
         [Fact]
@@ -247,60 +145,6 @@ namespace EntityDb.Common.Tests.Transactions
             transaction.Steps.Length.ShouldBe(1);
 
             transaction.Steps[0].Leases.Insert.ShouldNotBeEmpty();
-        }
-
-        [Fact]
-        public void GivenNoLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesNotInsertLeases()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.RemoveAll(typeof(ILeasingStrategy<TransactionEntity>));
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ACT
-
-            var transaction = transactionBuilder
-                .Create(new AddLease(default!, default!, default!))
-                .Build(default!, default);
-
-            // ASSERT
-
-            transaction.Steps.Length.ShouldBe(1);
-
-            transaction.Steps[0].Leases.Insert.ShouldBeEmpty();
-        }
-
-        [Fact]
-        public void GivenNoTaggingStrategy_WhenBuildingNewEntityWithTag_ThenTransactionDoesNotInsertTags()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.RemoveAll(typeof(ITaggingStrategy<TransactionEntity>));
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ACT
-
-            var transaction = transactionBuilder
-                .Create(new AddTag(default!, default!))
-                .Build(default!, default);
-
-            // ASSERT
-
-            transaction.Steps.Length.ShouldBe(1);
-
-            transaction.Steps[0].Tags.Insert.ShouldBeEmpty();
         }
 
         [Fact]

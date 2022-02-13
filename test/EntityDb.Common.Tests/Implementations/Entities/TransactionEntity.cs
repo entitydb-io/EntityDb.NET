@@ -1,8 +1,7 @@
-﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Common.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,26 +10,22 @@ namespace EntityDb.Common.Tests.Implementations.Entities
     public record TransactionEntity
     (
         ulong VersionNumber = default,
-        string? Role = default,
         ILease[]? Leases = default,
         ITag[]? Tags = default
-    ) :
-        IAuthorizedEntity<TransactionEntity>,
-        IVersionedEntity<TransactionEntity>,
-        ILeasedEntity,
-        ITaggedEntity
+    )
+        : IEntity<TransactionEntity>
     {
         public const string MongoCollectionName = "Test";
         public const string RedisKeyNamespace = "test";
 
-        public bool IsAuthorized(ICommand<TransactionEntity> command, IAgent agent)
+        public static TransactionEntity Construct(Guid entityId)
         {
-            if (Role != null)
-            {
-                return agent.HasRole(Role);
-            }
+            return new();
+        }
 
-            return true;
+        public ulong GetVersionNumber()
+        {
+            return VersionNumber;
         }
 
         public IEnumerable<ILease> GetLeases()
@@ -51,11 +46,6 @@ namespace EntityDb.Common.Tests.Implementations.Entities
             }
 
             return Enumerable.Empty<ITag>();
-        }
-
-        public TransactionEntity WithVersionNumber(ulong versionNumber)
-        {
-            return this with { VersionNumber = versionNumber };
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace EntityDb.Common.Entities
 {
     internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
+        where TEntity : IEntity<TEntity>
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ISnapshotRepositoryFactory<TEntity>? _snapshotRepositoryFactory;

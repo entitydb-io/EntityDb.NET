@@ -32,13 +32,7 @@ namespace EntityDb.Common.Tests
 
             // Transaction Entity
 
-            serviceCollection.AddEntity<TransactionEntity, TransactionEntityConstructingStrategy>();
-
-            serviceCollection.AddLeasedEntityLeasingStrategy<TransactionEntity>();
-
-            serviceCollection.AddTaggedEntityTaggingStrategy<TransactionEntity>();
-
-            serviceCollection.AddAuthorizedEntityAuthorizingStrategy<TransactionEntity>();
+            serviceCollection.AddEntity<TransactionEntity>();
 
             // Snapshot Session Options
 
