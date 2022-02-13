@@ -1,19 +1,19 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Strategies.Resolving;
+using EntityDb.Common.TypeResolvers;
 using Moq;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Strategies.Resolving
+namespace EntityDb.Common.Tests.TypeResolvers
 {
-    public class LifoResolvingStrategyChainTests
+    public class LifoTypeResolverTests
     {
         [Fact]
-        public void GivenResolvingStrategyThrows_WhenResolvingType_ThenExceptionIsLogged()
+        public void GivenPartialTypeResolverThrows_WhenResolvingType_ThenExceptionIsLogged()
         {
             // ARRANGE
 
@@ -29,18 +29,18 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
                 .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
                 .Returns(loggerMock.Object);
 
-            var resolvingStrategyMock = new Mock<IResolvingStrategy>();
+            var partialTypeResolver = new Mock<IPartialTypeResolver>();
 
-            resolvingStrategyMock
+            partialTypeResolver
                 .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
                 .Throws(new Exception());
 
-            var resolvingStrategyChain =
-                new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[] { resolvingStrategyMock.Object });
+            var typeResolver =
+                new LifoTypeResolver(loggerFactoryMock.Object, new[] { partialTypeResolver.Object });
 
             // ASSERT
 
-            Should.Throw<CannotResolveTypeException>(() => resolvingStrategyChain.ResolveType(default!));
+            Should.Throw<CannotResolveTypeException>(() => typeResolver.ResolveType(default!));
 
             loggerMock.Verify();
         }
@@ -48,7 +48,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         delegate bool TryResolveTypeDelegate(Dictionary<string, string> headers, out Type? resolvedType);
 
         [Fact]
-        public void GivenFirstResolvingStrategyReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
+        public void GivenFirstPartialTypeResolverReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
         {
             // ARRANGE
 
@@ -58,9 +58,9 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var sequence = new MockSequence();
 
-            var firstResolvingStrategyMock = new Mock<IResolvingStrategy>();
+            var firstPartialTypeResolver = new Mock<IPartialTypeResolver>();
 
-            firstResolvingStrategyMock
+            firstPartialTypeResolver
                 .InSequence(sequence)
                 .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
                 .Returns(new TryResolveTypeDelegate((Dictionary<string, string> headers, out Type? resolvedType) =>
@@ -69,9 +69,9 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
                     return false;
                 }));
 
-            var secondResolvingStrategyMock = new Mock<IResolvingStrategy>();
+            var secondPartialTypeResolver = new Mock<IPartialTypeResolver>();
 
-            secondResolvingStrategyMock
+            secondPartialTypeResolver
                 .InSequence(sequence)
                 .Setup(strategy => strategy.TryResolveType(It.IsAny<Dictionary<string, string>>(), out It.Ref<Type?>.IsAny))
                 .Returns(new TryResolveTypeDelegate((Dictionary<string, string> headers, out Type? resolvedType) =>
@@ -80,12 +80,12 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
                     return true;
                 }));
 
-            var resolvingStrategyChain =
-                new LifoResolvingStrategyChain(loggerFactoryMock.Object, new[] { secondResolvingStrategyMock.Object, firstResolvingStrategyMock.Object });
+            var typeResolver =
+                new LifoTypeResolver(loggerFactoryMock.Object, new[] { secondPartialTypeResolver.Object, firstPartialTypeResolver.Object });
 
             // ACT
 
-            var actualType = resolvingStrategyChain.ResolveType(default!);
+            var actualType = typeResolver.ResolveType(default!);
 
             // ASSERT
 

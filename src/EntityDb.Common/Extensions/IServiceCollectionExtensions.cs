@@ -2,12 +2,12 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
-using EntityDb.Common.Strategies.Resolving;
 using EntityDb.Common.Transactions;
+using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
@@ -26,38 +26,38 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Adds an internal implementation of <see cref="IResolvingStrategy" /> which resolves types by using assembly
+        ///     Adds an internal implementation of <see cref="IPartialTypeResolver" /> which resolves types by using assembly
         ///     information.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
-        public static void AddDefaultResolvingStrategy(this IServiceCollection serviceCollection)
+        public static void AddDefaultPartialTypeResolver(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IResolvingStrategy, DefaultResolvingStrategy>();
+            serviceCollection.AddSingleton<IPartialTypeResolver, DefaultPartialTypeResolver>();
         }
 
         /// <summary>
-        ///     Adds an internal implementation of <see cref="IResolvingStrategy" /> which resolves the given types based on their
+        ///     Adds an internal implementation of <see cref="IPartialTypeResolver" /> which resolves the given types based on their
         ///     <see cref="MemberInfo.Name" />.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         /// <param name="types">The types that can be resolved by <see cref="MemberInfo.Name" />.</param>
-        public static void AddMemberInfoNameResolvingStrategy(this IServiceCollection serviceCollection, Type[] types)
+        public static void AddMemberInfoNamePartialTypeResolver(this IServiceCollection serviceCollection, Type[] types)
         {
-            serviceCollection.AddSingleton<IResolvingStrategy>(_ =>
-                new MemberInfoNameResolvingStrategy(types));
+            serviceCollection.AddSingleton<IPartialTypeResolver>(_ =>
+                new MemberInfoNamePartialTypeResolver(types));
         }
 
         /// <summary>
-        ///     Adds an internal implementation of <see cref="IResolvingStrategyChain" /> to a service collection.
+        ///     Adds an internal implementation of <see cref="ITypeResolver" /> to a service collection.
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         /// <remarks>
         ///     LIFO means Last In, First Out. In other words, the last registered implementation of
-        ///     <see cref="IResolvingStrategy" /> will be the first to attempt to resolve the desired type.
+        ///     <see cref="IPartialTypeResolver" /> will be the first to attempt to resolve the desired type.
         /// </remarks>
-        public static void AddLifoResolvingStrategyChain(this IServiceCollection serviceCollection)
+        public static void AddLifoTypeResolver(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IResolvingStrategyChain, LifoResolvingStrategyChain>();
+            serviceCollection.AddSingleton<ITypeResolver, LifoTypeResolver>();
         }
 
         /// <summary>

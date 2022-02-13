@@ -1,13 +1,13 @@
-﻿using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Envelopes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace EntityDb.Common.Strategies.Resolving
+namespace EntityDb.Common.TypeResolvers
 {
-    internal class DefaultResolvingStrategy : IResolvingStrategy
+    internal class DefaultPartialTypeResolver : IPartialTypeResolver
     {
         public bool TryResolveType(IReadOnlyDictionary<string, string> headers, [NotNullWhen(true)] out Type? resolvedType)
         {

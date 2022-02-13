@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests;
 using EntityDb.Redis.Envelopes;
@@ -30,7 +30,7 @@ namespace EntityDb.Redis.Tests.Envelopes
                 .CreateLogger<JsonElementEnvelopeTests>();
 
             var resolvingStategyChain = serviceScope.ServiceProvider
-                .GetRequiredService<IResolvingStrategyChain>();
+                .GetRequiredService<ITypeResolver>();
 
             var originalTestRecord = new TestRecord<bool>(true);
 
@@ -89,7 +89,7 @@ namespace EntityDb.Redis.Tests.Envelopes
                 .CreateLogger<JsonElementEnvelopeTests>();
 
             var resolvingStategyChain = serviceScope.ServiceProvider
-                .GetRequiredService<IResolvingStrategyChain>();
+                .GetRequiredService<ITypeResolver>();
 
             var jsonElementEnvelope = new JsonElementEnvelope();
 
@@ -113,7 +113,7 @@ namespace EntityDb.Redis.Tests.Envelopes
                 .CreateLogger<JsonElementEnvelopeTests>();
 
             var resolvingStategyChain = serviceScope.ServiceProvider
-                .GetRequiredService<IResolvingStrategyChain>();
+                .GetRequiredService<ITypeResolver>();
 
             var jsonElementEnvelope = new JsonElementEnvelope();
 

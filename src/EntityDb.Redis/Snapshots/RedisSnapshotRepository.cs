@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
@@ -15,20 +15,20 @@ namespace EntityDb.Redis.Snapshots
         protected readonly IRedisSession _redisSession;
         private readonly string _keyNamespace;
         protected readonly ILogger _logger;
-        protected readonly IResolvingStrategyChain _resolvingStrategyChain;
+        protected readonly ITypeResolver _typeResolver;
         private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
         public RedisSnapshotRepository
         (
             string keyNamespace,
-            IResolvingStrategyChain resolvingStrategyChain,
+            ITypeResolver typeResolver,
             ISnapshotStrategy<TEntity>? snapshotStrategy,
             IRedisSession redisSession,
             ILogger logger
         )
         {
             _keyNamespace = keyNamespace;
-            _resolvingStrategyChain = resolvingStrategyChain;
+            _typeResolver = typeResolver;
             _snapshotStrategy = snapshotStrategy;
             _redisSession = redisSession;
             _logger = logger;
@@ -67,7 +67,7 @@ namespace EntityDb.Redis.Snapshots
 
             return JsonElementEnvelope
                 .Deserialize(snapshotValue, _logger)
-                .Reconstruct<TEntity>(_logger, _resolvingStrategyChain);
+                .Reconstruct<TEntity>(_logger, _typeResolver);
         }
 
         public async Task<bool> DeleteSnapshots(Guid[] entityIds)

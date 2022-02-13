@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
@@ -13,7 +13,7 @@ namespace EntityDb.MongoDb.Sessions
         IMongoDatabase MongoDatabase,
         IClientSessionHandle ClientSessionHandle,
         ILogger Logger,
-        IResolvingStrategyChain ResolvingStrategyChain,
+        ITypeResolver TypeResolver,
         TransactionSessionOptions TransactionSessionOptions
     ) : IMongoSession
     {

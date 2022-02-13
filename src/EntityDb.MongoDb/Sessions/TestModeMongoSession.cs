@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace EntityDb.MongoDb.Sessions
     {
         public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
         public ILogger Logger => MongoSession.Logger;
-        public IResolvingStrategyChain ResolvingStrategyChain => MongoSession.ResolvingStrategyChain;
+        public ITypeResolver TypeResolver => MongoSession.TypeResolver;
 
         public Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments)
         {

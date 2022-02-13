@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
@@ -16,7 +16,7 @@ namespace EntityDb.MongoDb.Transactions
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
+        private readonly ITypeResolver _typeResolver;
         private readonly string _connectionString;
         private readonly string _databaseName;
 
@@ -24,14 +24,14 @@ namespace EntityDb.MongoDb.Transactions
         (
             IOptionsFactory<TransactionSessionOptions> optionsFactory,
             ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain,
+            ITypeResolver typeResolver,
             string connectionString,
             string databaseName
         )
         {
             _optionsFactory = optionsFactory;
             _loggerFactory = loggerFactory;
-            _resolvingStrategyChain = resolvingStrategyChain;
+            _typeResolver = typeResolver;
             _connectionString = connectionString;
             _databaseName = databaseName;
         }
@@ -59,7 +59,7 @@ namespace EntityDb.MongoDb.Transactions
                 mongoDatabase,
                 clientSessionHandle,
                 logger,
-                _resolvingStrategyChain,
+                _typeResolver,
                 transactionSessionOptions
             );
         }

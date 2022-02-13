@@ -19,11 +19,11 @@ namespace EntityDb.Common.Tests
 
             // Resolving
 
-            serviceCollection.AddLifoResolvingStrategyChain();
+            serviceCollection.AddLifoTypeResolver();
 
-            serviceCollection.AddMemberInfoNameResolvingStrategy(Array.Empty<Type>());
+            serviceCollection.AddMemberInfoNamePartialTypeResolver(Array.Empty<Type>());
 
-            serviceCollection.AddDefaultResolvingStrategy();
+            serviceCollection.AddDefaultPartialTypeResolver();
 
             // Agent
 

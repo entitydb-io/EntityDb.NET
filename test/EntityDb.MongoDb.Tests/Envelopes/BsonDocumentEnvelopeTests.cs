@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests;
 using EntityDb.MongoDb.Envelopes;
@@ -30,7 +30,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
                 .CreateLogger<BsonDocumentEnvelopeTests>();
 
             var resolvingStategyChain = serviceScope.ServiceProvider
-                .GetRequiredService<IResolvingStrategyChain>();
+                .GetRequiredService<ITypeResolver>();
 
             // ACT 
 
@@ -89,7 +89,7 @@ namespace EntityDb.MongoDb.Tests.Envelopes
                 .CreateLogger<BsonDocumentEnvelopeTests>();
 
             var resolvingStategyChain = serviceScope.ServiceProvider
-                .GetRequiredService<IResolvingStrategyChain>();
+                .GetRequiredService<ITypeResolver>();
 
             var bsonDocumentEnvelope = new BsonDocumentEnvelope(default!, default!);
 

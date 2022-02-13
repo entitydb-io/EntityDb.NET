@@ -1,13 +1,13 @@
 ﻿using EntityDb.Common.Envelopes;
-using EntityDb.Common.Strategies.Resolving;
+using EntityDb.Common.TypeResolvers;
 using Shouldly;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Strategies.Resolving
+namespace EntityDb.Common.Tests.TypeResolvers
 {
-    public class DefaultResolvingStrategyTests
+    public class DefaultTypeResolverTests
     {
         [Fact]
         public void GivenEmptyHeaders_WhenLoadingType_ThenReturnNull()
@@ -16,11 +16,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var headers = new Dictionary<string, string>();
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            var typeResolver = new DefaultPartialTypeResolver();
 
             // ACT
 
-            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
+            var resolved = typeResolver.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
@@ -39,11 +39,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var headers = EnvelopeHelper.GetTypeHeaders(expectedType, true, false);
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            var typeResolver = new DefaultPartialTypeResolver();
 
             // ACT
 
-            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
+            var resolved = typeResolver.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
@@ -58,11 +58,11 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), false);
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            var typeResolver = new DefaultPartialTypeResolver();
 
             // ACT
 
-            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
+            var resolved = typeResolver.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
@@ -75,13 +75,13 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            var typeResolver = new DefaultPartialTypeResolver();
 
             var headers = new Dictionary<string, string> { [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform };
 
             // ACT
 
-            var resolved = resolvingStrategy.TryResolveType(headers, out var actualType);
+            var resolved = typeResolver.TryResolveType(headers, out var actualType);
 
             // ASSERT
 
@@ -94,7 +94,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
         {
             // ARRANGE
 
-            var resolvingStrategy = new DefaultResolvingStrategy();
+            var typeResolver = new DefaultPartialTypeResolver();
 
             var headers = new Dictionary<string, string>
             {
@@ -106,7 +106,7 @@ namespace EntityDb.Common.Tests.Strategies.Resolving
 
             // ASSERT
 
-            Should.Throw<FileNotFoundException>(() => resolvingStrategy.TryResolveType(headers, out _));
+            Should.Throw<FileNotFoundException>(() => typeResolver.TryResolveType(headers, out _));
         }
     }
 }

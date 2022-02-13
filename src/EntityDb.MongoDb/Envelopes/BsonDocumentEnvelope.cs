@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Exceptions;
 using MongoDB.Bson;
@@ -32,11 +32,11 @@ namespace EntityDb.MongoDb.Envelopes
             return bsonDocument;
         }
 
-        public TObject Reconstruct<TObject>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
         {
             try
             {
-                return (TObject)BsonSerializer.Deserialize(Value, resolvingStrategyChain.ResolveType(Headers));
+                return (TObject)BsonSerializer.Deserialize(Value, typeResolver.ResolveType(Headers));
             }
             catch (Exception exception)
             {

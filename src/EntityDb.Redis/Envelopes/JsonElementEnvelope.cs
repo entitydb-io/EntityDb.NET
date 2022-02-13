@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Envelopes;
 using EntityDb.Redis.Exceptions;
 using System;
@@ -20,12 +20,12 @@ namespace EntityDb.Redis.Envelopes
             return JsonSerializer.Deserialize<JsonElement>(json);
         }
 
-        public TObject Reconstruct<TObject>(ILogger logger, IResolvingStrategyChain resolvingStrategyChain)
+        public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
         {
             try
             {
                 return (TObject)JsonSerializer.Deserialize(Value.GetRawText(),
-                    resolvingStrategyChain.ResolveType(Headers))!;
+                    typeResolver.ResolveType(Headers))!;
             }
             catch (Exception exception)
             {

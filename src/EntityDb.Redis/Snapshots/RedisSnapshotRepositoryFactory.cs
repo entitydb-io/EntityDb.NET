@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Sessions;
@@ -19,17 +19,17 @@ namespace EntityDb.Redis.Snapshots
         protected readonly string _keyNamespace;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
-        private readonly IResolvingStrategyChain _resolvingStrategyChain;
+        private readonly ITypeResolver _typeResolver;
         protected readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
         public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
             ILoggerFactory loggerFactory,
-            IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace,
+            ITypeResolver typeResolver, string connectionString, string keyNamespace,
             ISnapshotStrategy<TEntity>? snapshotStrategy = null)
         {
             _optionsFactory = optionsFactory;
             _loggerFactory = loggerFactory;
-            _resolvingStrategyChain = resolvingStrategyChain;
+            _typeResolver = typeResolver;
             _connectionString = connectionString;
             _keyNamespace = keyNamespace;
             _snapshotStrategy = snapshotStrategy;
@@ -55,7 +55,7 @@ namespace EntityDb.Redis.Snapshots
             var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
             (
                 _keyNamespace,
-                _resolvingStrategyChain,
+                _typeResolver,
                 _snapshotStrategy,
                 redisSession,
                 logger

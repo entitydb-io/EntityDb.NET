@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Strategies;
+using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
 using System.Threading.Tasks;
@@ -11,7 +11,7 @@ namespace EntityDb.MongoDb.Sessions
     {
         IMongoDatabase MongoDatabase { get; }
         ILogger Logger { get; }
-        IResolvingStrategyChain ResolvingStrategyChain { get; }
+        ITypeResolver TypeResolver { get; }
 
         Task Insert<TDocument>(string collectionName,
             TDocument[] bsonDocuments);

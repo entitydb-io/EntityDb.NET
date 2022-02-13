@@ -1,17 +1,17 @@
-﻿using EntityDb.Abstractions.Strategies;
+﻿using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Envelopes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace EntityDb.Common.Strategies.Resolving
+namespace EntityDb.Common.TypeResolvers
 {
-    internal sealed class MemberInfoNameResolvingStrategy : IResolvingStrategy
+    internal sealed class MemberInfoNamePartialTypeResolver : IPartialTypeResolver
     {
         private readonly Dictionary<string, Type> _typeDictionary;
 
-        public MemberInfoNameResolvingStrategy(Type[] types)
+        public MemberInfoNamePartialTypeResolver(Type[] types)
         {
             _typeDictionary = types.ToDictionary(type => type.Name, Type => Type);
         }

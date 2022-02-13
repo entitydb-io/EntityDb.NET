@@ -102,7 +102,7 @@ namespace EntityDb.MongoDb.Extensions
                         document.TransactionTimeStamp,
                         document.EntityId,
                         document.EntityVersionNumber,
-                        document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.ResolvingStrategyChain)
+                        document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.TypeResolver)
                     );
                 })
                 .ToArray<IEntityAnnotation<TData>>();
@@ -114,7 +114,7 @@ namespace EntityDb.MongoDb.Extensions
             var documents = await documentQuery.Execute(DataProjection);
 
             return documents
-                .Select(document => document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.ResolvingStrategyChain))
+                .Select(document => document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.TypeResolver))
                 .ToArray();
         }
 
