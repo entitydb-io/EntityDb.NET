@@ -36,9 +36,7 @@ namespace EntityDb.Common.Entities
 
         public async Task<TEntity> GetCurrent(Guid entityId)
         {
-            var snapshot = await GetSnapshotOrDefault(entityId);
-
-            var entity = snapshot ?? TEntity.Construct(entityId);
+            var entity = await _snapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
 
             var versionNumber = entity.GetVersionNumber();
 
