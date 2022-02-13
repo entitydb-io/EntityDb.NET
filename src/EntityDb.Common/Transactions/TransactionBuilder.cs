@@ -1,8 +1,5 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Strategies;
-using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;

@@ -11,8 +11,8 @@ namespace EntityDb.Abstractions.Entities
         /// <summary>
         ///     Create a new instance of <see cref="IEntityRepository{TEntity}" />
         /// </summary>
-        /// <param name="transactionSessionOptionsName">The agent's use case for the inner transaction repository.</param>
-        /// <param name="snapshotSessionOptionsName">The agent's use case for the inner snapshot repository.</param>
+        /// <param name="transactionSessionOptionsName">The agent's use case for the transaction repository.</param>
+        /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
         /// <returns>A new instance of <see cref="IEntityRepository{TEntity}" />.</returns>
         Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
             string? snapshotSessionOptionsName = null);
