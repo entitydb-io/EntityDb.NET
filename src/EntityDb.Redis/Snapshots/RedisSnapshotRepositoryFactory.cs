@@ -20,19 +20,19 @@ namespace EntityDb.Redis.Snapshots
         private readonly ILoggerFactory _loggerFactory;
         private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
         private readonly IResolvingStrategyChain _resolvingStrategyChain;
-        protected readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
+        protected readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
         public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
             ILoggerFactory loggerFactory,
             IResolvingStrategyChain resolvingStrategyChain, string connectionString, string keyNamespace,
-            ISnapshottingStrategy<TEntity>? snapshottingStrategy = null)
+            ISnapshotStrategy<TEntity>? snapshotStrategy = null)
         {
             _optionsFactory = optionsFactory;
             _loggerFactory = loggerFactory;
             _resolvingStrategyChain = resolvingStrategyChain;
             _connectionString = connectionString;
             _keyNamespace = keyNamespace;
-            _snapshottingStrategy = snapshottingStrategy;
+            _snapshotStrategy = snapshotStrategy;
         }
 
         public async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
@@ -56,7 +56,7 @@ namespace EntityDb.Redis.Snapshots
             (
                 _keyNamespace,
                 _resolvingStrategyChain,
-                _snapshottingStrategy,
+                _snapshotStrategy,
                 redisSession,
                 logger
             );

@@ -2,7 +2,6 @@
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Agents;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Tests.Implementations.Strategies;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;

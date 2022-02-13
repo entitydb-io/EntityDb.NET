@@ -16,31 +16,31 @@ namespace EntityDb.Redis.Snapshots
         private readonly string _keyNamespace;
         protected readonly ILogger _logger;
         protected readonly IResolvingStrategyChain _resolvingStrategyChain;
-        private readonly ISnapshottingStrategy<TEntity>? _snapshottingStrategy;
+        private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
         public RedisSnapshotRepository
         (
             string keyNamespace,
             IResolvingStrategyChain resolvingStrategyChain,
-            ISnapshottingStrategy<TEntity>? snapshottingStrategy,
+            ISnapshotStrategy<TEntity>? snapshotStrategy,
             IRedisSession redisSession,
             ILogger logger
         )
         {
             _keyNamespace = keyNamespace;
             _resolvingStrategyChain = resolvingStrategyChain;
-            _snapshottingStrategy = snapshottingStrategy;
+            _snapshotStrategy = snapshotStrategy;
             _redisSession = redisSession;
             _logger = logger;
         }
 
         public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
         {
-            if (_snapshottingStrategy != null)
+            if (_snapshotStrategy != null)
             {
                 var previousSnapshot = await GetSnapshot(entityId);
 
-                if (!_snapshottingStrategy.ShouldPutSnapshot(previousSnapshot, entity))
+                if (!_snapshotStrategy.ShouldPutSnapshot(previousSnapshot, entity))
                 {
                     return false;
                 }

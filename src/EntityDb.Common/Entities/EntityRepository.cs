@@ -14,9 +14,9 @@ namespace EntityDb.Common.Entities
     internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
         where TEntity : IEntity<TEntity>
     {
-        private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
-        private readonly ITransactionRepository<TEntity> _transactionRepository;
         private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
+        private readonly ITransactionRepository<TEntity> _transactionRepository;
+        private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
 
         public EntityRepository
         (

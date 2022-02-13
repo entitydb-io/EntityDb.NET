@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
-using EntityDb.Common.Strategies;
 using EntityDb.Common.Strategies.Resolving;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,17 +86,17 @@ namespace EntityDb.Common.Extensions
         }
 
         /// <summary>
-        ///     Adds an implementation of <see cref="ISnapshottingStrategy{TEntity}" /> to a service collection.
+        ///     Adds an implementation of <see cref="ISnapshotStrategy{TEntity}" /> to a service collection.
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
-        /// <typeparam name="TSnapshottingStrategy"></typeparam>
+        /// <typeparam name="TSnapshotStrategy"></typeparam>
         /// <param name="serviceCollection"></param>
-        public static void AddSnapshottingStrategy<TEntity, TSnapshottingStrategy>(
+        public static void AddSnapshotStrategy<TEntity, TSnapshotStrategy>(
             this IServiceCollection serviceCollection)
-            where TSnapshottingStrategy : class, ISnapshottingStrategy<TEntity>
+            where TSnapshotStrategy : class, ISnapshotStrategy<TEntity>
         {
             serviceCollection
-                .AddSingleton<ISnapshottingStrategy<TEntity>, TSnapshottingStrategy>();
+                .AddSingleton<ISnapshotStrategy<TEntity>, TSnapshotStrategy>();
         }
 
         /// <summary>

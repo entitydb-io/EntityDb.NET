@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
@@ -60,7 +61,7 @@ namespace EntityDb.Common.Tests.Entities
         {
             // ARRANGE 1
 
-            var snapshottingStrategyMock = new Mock<ISnapshottingStrategy<TransactionEntity>>(MockBehavior.Strict);
+            var snapshottingStrategyMock = new Mock<ISnapshotStrategy<TransactionEntity>>(MockBehavior.Strict);
 
             snapshottingStrategyMock
                 .Setup(strategy =>
@@ -70,7 +71,7 @@ namespace EntityDb.Common.Tests.Entities
 
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
-                serviceCollection.RemoveAll(typeof(ISnapshottingStrategy<TransactionEntity>));
+                serviceCollection.RemoveAll(typeof(ISnapshotStrategy<TransactionEntity>));
 
                 serviceCollection.AddSingleton(_ => snapshottingStrategyMock.Object);
             });
