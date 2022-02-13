@@ -123,7 +123,7 @@ namespace EntityDb.Common.Extensions
             string snapshotSessionOptionsName, bool synchronousMode = false)
         {
             serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
-                SnapshottingTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
+                SnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
                     synchronousMode));
         }
     }

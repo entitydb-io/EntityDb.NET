@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Commands;
@@ -56,14 +55,14 @@ namespace EntityDb.Common.Tests.Entities
         [Theory]
         [InlineData(10, 20)]
         public async Task
-            GivenSnapshottingOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
+            GivenSnapshotOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
                 ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
         {
             // ARRANGE 1
 
-            var snapshottingStrategyMock = new Mock<ISnapshotStrategy<TransactionEntity>>(MockBehavior.Strict);
+            var snapshotStrategyMock = new Mock<ISnapshotStrategy<TransactionEntity>>(MockBehavior.Strict);
 
-            snapshottingStrategyMock
+            snapshotStrategyMock
                 .Setup(strategy =>
                     strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
                 .Returns((TransactionEntity? _, TransactionEntity nextEntity) =>
@@ -73,7 +72,7 @@ namespace EntityDb.Common.Tests.Entities
             {
                 serviceCollection.RemoveAll(typeof(ISnapshotStrategy<TransactionEntity>));
 
-                serviceCollection.AddSingleton(_ => snapshottingStrategyMock.Object);
+                serviceCollection.AddSingleton(_ => snapshotStrategyMock.Object);
             });
 
             var entityId = Guid.NewGuid();

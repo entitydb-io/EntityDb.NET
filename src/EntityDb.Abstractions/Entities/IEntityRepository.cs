@@ -18,7 +18,7 @@ namespace EntityDb.Abstractions.Entities
         ITransactionRepository<TEntity> TransactionRepository { get; }
 
         /// <summary>
-        ///     The backing snapshot repository (if snapshotting is available).
+        ///     The backing snapshot repository (if snapshot is available).
         /// </summary>
         ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 

@@ -47,7 +47,7 @@ namespace EntityDb.Common.Tests.Entities
         }
 
         [Fact]
-        public async Task GivenExistingEntityWithNoSnapshotting_WhenGettingEntity_ThenGetCommandsRuns()
+        public async Task GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns()
         {
             // ARRANGE
 
