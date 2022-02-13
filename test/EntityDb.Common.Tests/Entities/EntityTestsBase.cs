@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Strategies;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
@@ -106,7 +107,7 @@ namespace EntityDb.Common.Tests.Entities
 
             var current = await entityRepository.GetCurrent(entityId);
 
-            var snapshot = await entityRepository.GetSnapshotOrDefault(entityId);
+            var snapshot = await entityRepository.SnapshotRepository.GetSnapshotOrDefault(entityId);
 
             // ASSERT
 

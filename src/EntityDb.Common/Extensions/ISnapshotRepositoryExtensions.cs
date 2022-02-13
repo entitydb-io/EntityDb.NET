@@ -1,6 +1,8 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Snapshots;
+using System;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Extensions
 {
@@ -13,6 +15,16 @@ namespace EntityDb.Common.Extensions
         )
         {
             return new TryCatchSnapshotRepository<TEntity>(snapshotRepository, logger);
+        }
+
+        public static async Task<TEntity?> GetSnapshotOrDefault<TEntity>(this ISnapshotRepository<TEntity>? snapshotRepository, Guid entityId)
+        {
+            if (snapshotRepository != null)
+            {
+                return await snapshotRepository.GetSnapshot(entityId);
+            }
+
+            return default;
         }
     }
 }

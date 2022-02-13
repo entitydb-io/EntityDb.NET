@@ -34,16 +34,6 @@ namespace EntityDb.Common.Entities
 
         public ISnapshotRepository<TEntity>? SnapshotRepository => _snapshotRepository;
 
-        public async Task<TEntity?> GetSnapshotOrDefault(Guid entityId)
-        {
-            if (_snapshotRepository != null)
-            {
-                return await _snapshotRepository.GetSnapshot(entityId);
-            }
-
-            return default;
-        }
-
         public async Task<TEntity> GetCurrent(Guid entityId)
         {
             var snapshot = await GetSnapshotOrDefault(entityId);
