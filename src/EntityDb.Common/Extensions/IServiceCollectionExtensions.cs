@@ -1,11 +1,13 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
+using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
+using EntityDb.Common.Projections;
 using EntityDb.Common.Transactions;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
@@ -111,6 +113,28 @@ namespace EntityDb.Common.Extensions
 
             serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
         }
+
+        /// <summary>
+        ///     Adds a transient implementation of <see cref="IProjectionRepositoryFactory{TProjection}"/> to a service collection.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TProjection"></typeparam>
+        public static void AddProjection<TEntity, TProjection>(this IServiceCollection serviceCollection)
+            where TProjection : IProjection<TProjection>
+        {
+            serviceCollection.AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TEntity, TProjection>>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TProjection"></typeparam>
+        /// <param name="serviceCollection"></param>
+        public static void AddSingleEntityProjectingStrategy<TProjection>(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddScoped<IProjectionStrategy<TProjection>, SingleEntityProjectionStrategy<TProjection>>();
+        }    
 
         /// <summary>
         ///     Adds a transaction subscriber that records snapshots.
