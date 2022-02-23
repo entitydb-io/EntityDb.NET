@@ -27,7 +27,7 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public static IReadOnlyCollection<CommandDocument>? BuildInsert<TEntity>
+        public static IReadOnlyCollection<CommandDocument> BuildInsert<TEntity>
         (
             ITransaction<TEntity> transaction,
             ICommandTransactionStep<TEntity> commandTransactionStep,

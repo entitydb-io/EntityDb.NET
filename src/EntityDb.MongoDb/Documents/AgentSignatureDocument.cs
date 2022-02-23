@@ -24,21 +24,18 @@ namespace EntityDb.MongoDb.Documents
 
         public Guid[] EntityIds { get; init; } = default!;
 
-        public static IReadOnlyCollection<AgentSignatureDocument> Build<TEntity>
+        public static AgentSignatureDocument Build<TEntity>
         (
             ITransaction<TEntity> transaction,
             ILogger logger
         )
         {
-            return new[]
+            return new AgentSignatureDocument
             {
-                new AgentSignatureDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityIds = transaction.Steps.Select(command => command.EntityId).Distinct().ToArray(),
-                    Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, logger)
-                }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct().ToArray(),
+                Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, logger)
             };
         }
 
@@ -51,7 +48,7 @@ namespace EntityDb.MongoDb.Documents
             (
                 mongoSession,
                 CollectionName,
-                Build<TEntity>
+                Build
             );
         }
 
