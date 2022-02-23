@@ -1,9 +1,10 @@
 ﻿using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
@@ -71,56 +72,6 @@ namespace EntityDb.Common.Tests.Transactions
         }
 
         [Fact]
-        public void GivenNonExistingEntityId_WhenUsingEntityIdForAppend_ThenAppendThrows()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory());
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ASSERT
-
-            Should.Throw<EntityNotLoadedException>(() =>
-            {
-                transactionBuilder.Append(new DoNothing());
-            });
-        }
-
-        [Fact]
-        public void GivenExistingEntityId_WhenUsingEntityIdForCreate_ThenCreateThrows()
-        {
-            // ARRANGE
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory());
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
-
-            // ACT
-
-            transactionBuilder.Create(new DoNothing());
-
-            // ASSERT
-
-            Should.Throw<EntityAlreadyCreatedException>(() =>
-            {
-                transactionBuilder.Create(new DoNothing());
-            });
-        }
-
-        [Fact]
         public void GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
         {
             // ARRANGE
@@ -134,14 +85,16 @@ namespace EntityDb.Common.Tests.Transactions
             // ACT
 
             var transaction = transactionBuilder
-                .Create(new AddLease(default!, default!, default!))
+                .Append(new AddLease(default!, default!, default!))
                 .Build(default!, default);
 
             // ASSERT
 
             transaction.Steps.Length.ShouldBe(1);
+            
+            var leaseTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ILeaseTransactionStep<TransactionEntity>>()!;
 
-            transaction.Steps[0].Leases.Insert.ShouldNotBeEmpty();
+            leaseTransactionStep.Leases.Insert.ShouldNotBeEmpty();
         }
 
         [Fact]
@@ -174,7 +127,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ASSERT
 
-            Should.Throw<EntityAlreadyLoadedException>(() =>
+            Should.Throw<EntityAlreadyKnownException>(() =>
             {
                 transactionBuilder.Load(entity);
             });
@@ -201,9 +154,7 @@ namespace EntityDb.Common.Tests.Transactions
 
             // ACT
 
-            transactionBuilder.Create(new DoNothing());
-
-            for (ulong i = 1; i < NumberOfVersionsToTest; i++)
+            for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
                 transactionBuilder.Append(new DoNothing());
             }
@@ -214,7 +165,11 @@ namespace EntityDb.Common.Tests.Transactions
 
             for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
             {
-                transaction.Steps[(int)(i - 1)].NextEntityVersionNumber.ShouldBe(i);
+                var index = (int)i - 1;
+
+                var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+                commandTransactionStep.NextEntityVersionNumber.ShouldBe(i);
             }
         }
 
@@ -252,7 +207,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Steps[0].Command.ShouldBeEquivalentTo(new DoNothing());
+            var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+            commandTransactionStep.Command.ShouldBeEquivalentTo(new DoNothing());
         }
     }
 }

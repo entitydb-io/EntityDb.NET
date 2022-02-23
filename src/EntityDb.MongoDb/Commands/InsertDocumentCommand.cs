@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands
 {
-    internal record InsertDocumentsCommand<TEntity, TTransactionStep, TDocument>
+    internal record InsertDocumentCommand<TEntity, TDocument>
     (
         IMongoSession MongoSession,
         string CollectionName,
-        Func<ITransaction<TEntity>, TTransactionStep, ILogger, IReadOnlyCollection<TDocument>?> Build
+        Func<ITransaction<TEntity>, ILogger, IReadOnlyCollection<TDocument>?> Build
     )
     {
-        public async Task Execute(ITransaction<TEntity> transaction, TTransactionStep transactionStep)
+        public async Task Execute(ITransaction<TEntity> transaction)
         {
-            var documents = Build.Invoke(transaction, transactionStep, MongoSession.Logger);
+            var documents = Build.Invoke(transaction, MongoSession.Logger);
 
             if (documents == null)
             {

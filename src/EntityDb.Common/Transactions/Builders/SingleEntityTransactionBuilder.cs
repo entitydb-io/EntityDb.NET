@@ -1,9 +1,11 @@
 ﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using System;
 
-namespace EntityDb.Common.Transactions
+namespace EntityDb.Common.Transactions.Builders
 {
     /// <summary>
     ///     A transaction builder for a single entity.
@@ -44,7 +46,6 @@ namespace EntityDb.Common.Transactions
             return _transactionBuilder.IsEntityKnown(_entityId);
         }
 
-
         /// <summary>
         ///     Associate a <typeparamref name="TEntity"/>.
         /// </summary>
@@ -62,28 +63,61 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///    Adds a transaction step that creates a new <typeparamref name="TEntity"/>.
+        ///     Adds a transaction step that appends a single <see cref="ICommand{TEntity}"/>.
         /// </summary>
-        /// <param name="command">The very first command for the new <typeparamref name="TEntity"/>.</param>
+        /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
         /// <returns>The transaction builder.</returns>
-        /// <remarks>
-        ///     Do not call this method for a <typeparamref name="TEntity"/> that already exists.
-        /// </remarks>
-        public SingleEntityTransactionBuilder<TEntity> Create(ICommand<TEntity> command)
+        public SingleEntityTransactionBuilder<TEntity> Append(ICommand<TEntity> command)
         {
-            _transactionBuilder.Create(_entityId, command);
+            _transactionBuilder.Append(_entityId, command);
 
             return this;
         }
 
         /// <summary>
-        ///     Adds a transaction step that appends to an existing <typeparamref name="TEntity"/>.
+        ///     Adds a transaction step that adds a set of <see cref="ILease"/>s.
         /// </summary>
-        /// <param name="command">A new command for the existing <typeparamref name="TEntity"/>.</param>
+        /// <param name="leases">The leases to be added to the <typeparamref name="TEntity"/>.</param>
         /// <returns>The transaction builder.</returns>
-        public SingleEntityTransactionBuilder<TEntity> Append(ICommand<TEntity> command)
+        public SingleEntityTransactionBuilder<TEntity> Add(params ILease[] leases)
         {
-            _transactionBuilder.Append(_entityId, command);
+            _transactionBuilder.Add(_entityId, leases);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s.
+        /// </summary>
+        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public SingleEntityTransactionBuilder<TEntity> Delete(params ILease[] leases)
+        {
+            _transactionBuilder.Delete(_entityId, leases);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that adds a set of <see cref="ITag"/>s.
+        /// </summary>
+        /// <param name="tags">The tags to be added to the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public SingleEntityTransactionBuilder<TEntity> Add(params ITag[] tags)
+        {
+            _transactionBuilder.Add(_entityId, tags);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ITag"/>s.
+        /// </summary>
+        /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public SingleEntityTransactionBuilder<TEntity> Delete(params ITag[] tags)
+        {
+            _transactionBuilder.Delete(_entityId, tags);
 
             return this;
         }

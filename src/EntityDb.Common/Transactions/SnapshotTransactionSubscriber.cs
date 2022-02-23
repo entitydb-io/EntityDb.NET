@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -29,6 +30,8 @@ namespace EntityDb.Common.Transactions
                 await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
 
             var commandGroups = transaction.Steps
+                .Where(step => step is ICommandTransactionStep<TEntity>)
+                .Cast<ICommandTransactionStep<TEntity>>()
                 .GroupBy(command => command.EntityId);
 
             foreach (var commandGroup in commandGroups)

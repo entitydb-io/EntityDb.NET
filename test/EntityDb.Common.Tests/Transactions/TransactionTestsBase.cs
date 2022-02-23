@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -19,6 +20,7 @@ using EntityDb.Common.Tests.Implementations.Queries;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.Tags;
 using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -417,9 +419,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .ForSingleEntity(entityId);
 
-            transactionBuilder.Create(commands[0]);
-
-            for (var i = 1; i < commands.Length; i++)
+            for (var i = 0; i < commands.Length; i++)
             {
                 transactionBuilder.Append(commands[i]);
             }
@@ -633,8 +633,11 @@ namespace EntityDb.Common.Tests.Transactions
             secondTransaction.Steps.Length.ShouldBe(1);
 
             firstTransaction.Steps[0].EntityId.ShouldBe(secondTransaction.Steps[0].EntityId);
-            firstTransaction.Steps[0].NextEntityVersionNumber
-                .ShouldBe(secondTransaction.Steps[0].NextEntityVersionNumber);
+
+            var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+            var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+            firstCommandTransactionStep.NextEntityVersionNumber.ShouldBe(secondCommandTransactionStep.NextEntityVersionNumber);
 
             firstTransactionInserted.ShouldBeTrue();
             secondTransactionInserted.ShouldBeFalse();
@@ -790,7 +793,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
-                .Create(new AddTag("Foo", "Bar"))
+                .Append(new AddTag("Foo", "Bar"))
                 .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -842,7 +845,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
-                .Create(new AddLease("Foo", "Bar", "Baz"))
+                .Append(new AddLease("Foo", "Bar", "Baz"))
                 .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -888,7 +891,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .ForSingleEntity(default);
 
             var transaction = transactionBuilder
-                .Create(expectedCommand)
+                .Append(expectedCommand)
                 .Build(default!, Guid.NewGuid());
 
             var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
@@ -909,7 +912,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             transaction.Steps.Length.ShouldBe(1);
 
-            transaction.Steps[0].NextEntityVersionNumber.ShouldBe(1ul);
+            var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+            commandTransactionStep.NextEntityVersionNumber.ShouldBe(1ul);
 
             newCommands.Length.ShouldBe(1);
 
@@ -931,7 +936,7 @@ namespace EntityDb.Common.Tests.Transactions
                 .ForSingleEntity(default);
 
             var firstTransaction = transactionBuilder
-                .Create(new Count(1))
+                .Append(new Count(1))
                 .Build(default!, Guid.NewGuid());
 
             var secondTransaction = transactionBuilder
@@ -961,7 +966,9 @@ namespace EntityDb.Common.Tests.Transactions
 
             secondTransaction.Steps.Length.ShouldBe(1);
 
-            secondTransaction.Steps[0].NextEntityVersionNumber.ShouldBe(2ul);
+            var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+            secondCommandTransactionStep.NextEntityVersionNumber.ShouldBe(2ul);
 
             newCommands.Length.ShouldBe(1);
 

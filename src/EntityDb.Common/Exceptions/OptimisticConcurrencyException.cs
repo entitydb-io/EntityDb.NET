@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -7,7 +8,7 @@ namespace EntityDb.Common.Exceptions
     /// <summary>
     ///     The exception that is logged when an actor passes a <see cref="ITransaction{TEntity}" /> to an
     ///     <see cref="ITransactionRepository{TEntity}" /> with a
-    ///     <see cref="ITransactionStep{TEntity}.PreviousEntityVersionNumber" /> that is not the actual
+    ///     <see cref="ICommandTransactionStep{TEntity}.PreviousEntityVersionNumber" /> that is not the actual
     ///     previous version number.
     /// </summary>
     /// <remarks>

@@ -1,8 +1,8 @@
 using Bogus;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Steps;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace EntityDb.Common.Tests.Implementations.Seeders
             bool deleteTag = false
         )
         {
-            var faker = new Faker<TransactionStep<TransactionEntity>>()
+            var faker = new Faker<GeneralTransactionStep<TransactionEntity>>()
                 .RuleFor
                 (
                     transactionStep => transactionStep.PreviousEntityVersionNumber,

@@ -27,7 +27,6 @@ namespace EntityDb.MongoDb.Documents
         public static IReadOnlyCollection<AgentSignatureDocument> Build<TEntity>
         (
             ITransaction<TEntity> transaction,
-            int transactionStepIndex,
             ILogger logger
         )
         {
@@ -43,12 +42,12 @@ namespace EntityDb.MongoDb.Documents
             };
         }
 
-        public static InsertDocumentsCommand<TEntity, AgentSignatureDocument> GetInsertCommand<TEntity>
+        public static InsertDocumentCommand<TEntity, AgentSignatureDocument> GetInsertCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new InsertDocumentsCommand<TEntity, AgentSignatureDocument>
+            return new InsertDocumentCommand<TEntity, AgentSignatureDocument>
             (
                 mongoSession,
                 CollectionName,

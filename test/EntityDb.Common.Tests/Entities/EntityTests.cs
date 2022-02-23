@@ -3,10 +3,11 @@ using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
@@ -36,9 +37,7 @@ namespace EntityDb.Common.Tests.Entities
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .ForSingleEntity(entityId);
 
-            transactionBuilder.Create(new DoNothing());
-
-            for (var i = from; i < to; i++)
+            for (var i = from; i <= to; i++)
             {
                 transactionBuilder.Append(new DoNothing());
             }
@@ -63,7 +62,13 @@ namespace EntityDb.Common.Tests.Entities
                 .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
                 .ReturnsAsync((ITransaction<TransactionEntity> transaction) =>
                 {
-                    commands.AddRange(transaction.Steps.Select(step => step.Command));
+                    foreach (var transactionStep in transaction.Steps)
+                    {
+                        if (transactionStep is ICommandTransactionStep<TransactionEntity> commandTransactionStep)
+                        {
+                            commands.Add(commandTransactionStep.Command);
+                        }
+                    }
 
                     return true;
                 });

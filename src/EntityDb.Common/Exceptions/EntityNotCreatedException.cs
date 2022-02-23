@@ -1,4 +1,4 @@
-﻿using EntityDb.Common.Transactions;
+﻿using EntityDb.Common.Transactions.Builders;
 using System;
 
 namespace EntityDb.Common.Exceptions
