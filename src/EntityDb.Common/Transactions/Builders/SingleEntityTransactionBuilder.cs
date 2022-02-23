@@ -87,18 +87,6 @@ namespace EntityDb.Common.Transactions.Builders
         }
 
         /// <summary>
-        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s.
-        /// </summary>
-        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
-        /// <returns>The transaction builder.</returns>
-        public SingleEntityTransactionBuilder<TEntity> Delete(params ILease[] leases)
-        {
-            _transactionBuilder.Delete(_entityId, leases);
-
-            return this;
-        }
-
-        /// <summary>
         ///     Adds a transaction step that adds a set of <see cref="ITag"/>s.
         /// </summary>
         /// <param name="tags">The tags to be added to the <typeparamref name="TEntity"/>.</param>
@@ -106,6 +94,18 @@ namespace EntityDb.Common.Transactions.Builders
         public SingleEntityTransactionBuilder<TEntity> Add(params ITag[] tags)
         {
             _transactionBuilder.Add(_entityId, tags);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s.
+        /// </summary>
+        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public SingleEntityTransactionBuilder<TEntity> Delete(params ILease[] leases)
+        {
+            _transactionBuilder.Delete(_entityId, leases);
 
             return this;
         }

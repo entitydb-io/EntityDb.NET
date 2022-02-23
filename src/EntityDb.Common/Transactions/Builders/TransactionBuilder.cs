@@ -204,19 +204,6 @@ namespace EntityDb.Common.Transactions.Builders
         }
 
         /// <summary>
-        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s associated with a given entity id.
-        /// </summary>
-        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
-        /// <returns>The transaction builder.</returns>
-        public TransactionBuilder<TEntity> Delete(Guid entityId, params ILease[] leases)
-        {
-            AddLeaseTransactionStep(entityId, leases, Array.Empty<ILease>());
-
-            return this;
-        }
-
-        /// <summary>
         ///     Adds a transaction step that adds a set of <see cref="ITag"/>s associated with a given entity id.
         /// </summary>
         /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
@@ -225,6 +212,19 @@ namespace EntityDb.Common.Transactions.Builders
         public TransactionBuilder<TEntity> Add(Guid entityId, params ITag[] tags)
         {
             AddTagTransactionStep(entityId, Array.Empty<ITag>(), tags);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s associated with a given entity id.
+        /// </summary>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public TransactionBuilder<TEntity> Delete(Guid entityId, params ILease[] leases)
+        {
+            AddLeaseTransactionStep(entityId, leases, Array.Empty<ILease>());
 
             return this;
         }
