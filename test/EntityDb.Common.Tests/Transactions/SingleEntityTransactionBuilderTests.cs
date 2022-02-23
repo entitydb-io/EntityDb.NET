@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Exceptions;
+using EntityDb.Common.Leases;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions.Builders;
@@ -85,7 +86,7 @@ namespace EntityDb.Common.Tests.Transactions
             // ACT
 
             var transaction = transactionBuilder
-                .Append(new AddLease(default!, default!, default!))
+                .Add(new Lease(default!, default!, default!))
                 .Build(default!, default);
 
             // ASSERT

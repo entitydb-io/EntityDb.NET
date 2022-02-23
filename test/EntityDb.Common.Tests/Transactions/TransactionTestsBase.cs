@@ -786,14 +786,16 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .ForSingleEntity(entityId);
 
-            var expectedInitialTags = new[] { new Tag("Foo", "Bar") }.ToImmutableArray<ITag>();
+            var tag = new Tag("Foo", "Bar");
+
+            var expectedInitialTags = new[] { tag }.ToImmutableArray<ITag>();
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
                 .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
-                .Append(new AddTag("Foo", "Bar"))
+                .Add(tag)
                 .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -809,7 +811,7 @@ namespace EntityDb.Common.Tests.Transactions
             var actualInitialTags = await transactionRepository.GetTags(tagQuery);
 
             var finalTransaction = transactionBuilder
-                .Append(new RemoveAllTags())
+                .Delete(tag)
                 .Build(default!, Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
@@ -838,14 +840,16 @@ namespace EntityDb.Common.Tests.Transactions
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
                 .ForSingleEntity(entityId);
 
-            var expectedInitialLeases = new[] { new Lease("Foo", "Bar", "Baz") }.ToImmutableArray<ILease>();
+            var lease = new Lease("Foo", "Bar", "Baz");
+
+            var expectedInitialLeases = new[] { lease }.ToImmutableArray<ILease>();
 
             await using var transactionRepository = await serviceScope.ServiceProvider
                 .GetRequiredService<ITransactionRepositoryFactory<TransactionEntity>>()
                 .CreateRepository(TestSessionOptions.Write);
 
             var initialTransaction = transactionBuilder
-                .Append(new AddLease("Foo", "Bar", "Baz"))
+                .Add(lease)
                 .Build(default!, Guid.NewGuid());
 
             var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -861,7 +865,7 @@ namespace EntityDb.Common.Tests.Transactions
             var actualInitialLeases = await transactionRepository.GetLeases(leaseQuery);
 
             var finalTransaction = transactionBuilder
-                .Append(new RemoveAllLeases())
+                .Delete(lease)
                 .Build(default!, Guid.NewGuid());
 
             var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
