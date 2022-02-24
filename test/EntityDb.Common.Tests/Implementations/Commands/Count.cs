@@ -12,27 +12,9 @@ namespace EntityDb.Common.Tests.Implementations.Commands
     {
         public TransactionEntity Reduce(TransactionEntity entity)
         {
-            var leases = new List<ILease>();
-
-            if (entity.Leases != null)
-            {
-                leases.AddRange(entity.Leases);
-            }
-
-            leases.Add(new CountLease(Number));
-
-            var tags = new List<ITag>();
-
-            if (entity.Tags != null)
-            {
-                tags.AddRange(entity.Tags);
-            }
-
-            tags.Add(new CountTag(Number));
-
             return entity with
             {
-                VersionNumber = entity.VersionNumber + 1, Leases = leases.ToArray(), Tags = tags.ToArray()
+                VersionNumber = entity.VersionNumber + 1,
             };
         }
     }

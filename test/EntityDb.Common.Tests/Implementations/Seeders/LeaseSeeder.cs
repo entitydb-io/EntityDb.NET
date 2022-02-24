@@ -6,11 +6,9 @@ namespace EntityDb.Common.Tests.Implementations.Seeders
 {
     public static class LeaseSeeder
     {
-        public static ImmutableArray<ILease> Create()
+        public static ILease Create()
         {
-            var lease = new Lease("Foo", "Bar", "Baz");
-
-            return ImmutableArray.Create<ILease>(lease);
+            return new Lease("Foo", "Bar", "Baz");
         }
     }
 }

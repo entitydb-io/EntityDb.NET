@@ -7,6 +7,7 @@ using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
 using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Builders;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System;

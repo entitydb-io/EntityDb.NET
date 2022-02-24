@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
@@ -26,34 +27,32 @@ namespace EntityDb.MongoDb.Documents
         public Guid EntityId { get; init; }
         public ulong EntityVersionNumber { get; init; }
 
-        public static IReadOnlyCollection<CommandDocument>? BuildInsert<TEntity>
+        public static IReadOnlyCollection<CommandDocument> BuildInsert<TEntity>
         (
             ITransaction<TEntity> transaction,
-            int transactionStepIndex,
+            ICommandTransactionStep<TEntity> commandTransactionStep,
             ILogger logger
         )
         {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-
             return new[]
             {
                 new CommandDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionStep.EntityId,
-                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
-                    Data = BsonDocumentEnvelope.Deconstruct(transactionStep.Command, logger)
+                    EntityId = commandTransactionStep.EntityId,
+                    EntityVersionNumber = commandTransactionStep.NextEntityVersionNumber,
+                    Data = BsonDocumentEnvelope.Deconstruct(commandTransactionStep.Command, logger)
                 }
             };
         }
 
-        public static InsertDocumentsCommand<TEntity, CommandDocument> GetInsertCommand<TEntity>
+        public static InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument> GetInsertCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new InsertDocumentsCommand<TEntity, CommandDocument>
+            return new InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument>
             (
                 mongoSession,
                 CollectionName,

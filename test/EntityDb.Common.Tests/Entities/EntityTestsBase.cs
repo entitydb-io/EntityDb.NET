@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Transactions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -39,13 +39,14 @@ namespace EntityDb.Common.Tests.Entities
             {
                 transactionBuilder.Load(entity);
             }
-            else
-            {
-                transactionBuilder.Create(new DoNothing());
-            }
 
-            for (var i = from; i < to; i++)
+            for (var i = from; i <= to; i++)
             {
+                if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber >= i)
+                {
+                    continue;
+                }
+
                 transactionBuilder.Append(new DoNothing());
             }
 

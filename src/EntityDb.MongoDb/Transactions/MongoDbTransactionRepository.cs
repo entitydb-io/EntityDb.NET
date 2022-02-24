@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
@@ -116,6 +117,31 @@ namespace EntityDb.MongoDb.Transactions
                 .GetEntityAnnotation<CommandDocument, ICommand<TEntity>>();
         }
 
+        private async Task ExecuteCommandTransactionStep(ITransaction<TEntity> transaction, ICommandTransactionStep<TEntity> commandTransactionStep)
+        {
+            VersionZeroReservedException.ThrowIfZero(commandTransactionStep.NextEntityVersionNumber);
+
+            var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, commandTransactionStep.EntityId);
+
+            OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, commandTransactionStep.PreviousEntityVersionNumber);
+
+            await CommandDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, commandTransactionStep);
+        }
+
+        private async Task ExecuteLeaseTransactionStep(ITransaction<TEntity> transaction, ILeaseTransactionStep<TEntity> leaseTransactionStep)
+        {
+            await LeaseDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+
+            await LeaseDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+        }
+
+        private async Task ExecuteTagTransactionStep(ITransaction<TEntity> transaction, ITagTransactionStep<TEntity> tagTransactionStep)
+        {
+            await TagDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
+
+            await TagDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
+        }
+
         public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
         {
             try
@@ -124,27 +150,26 @@ namespace EntityDb.MongoDb.Transactions
 
                 await AgentSignatureDocument
                     .GetInsertCommand<TEntity>(_mongoSession)
-                    .Execute(transaction, -1);
+                    .Execute(transaction);
 
                 for (var transactionStepIndex = 0; transactionStepIndex < transaction.Steps.Length; transactionStepIndex++)
                 {
                     var transactionStep = transaction.Steps[transactionStepIndex];
 
-                    VersionZeroReservedException.ThrowIfZero(transaction.Steps[transactionStepIndex].NextEntityVersionNumber);
+                    if (transactionStep is ICommandTransactionStep<TEntity> commandTransactionStep)
+                    {
+                        await ExecuteCommandTransactionStep(transaction, commandTransactionStep);
+                    }
 
-                    var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, transactionStep.EntityId);
+                    if (transactionStep is ILeaseTransactionStep<TEntity> leaseTransactionStep)
+                    {
+                        await ExecuteLeaseTransactionStep(transaction, leaseTransactionStep);
+                    }
 
-                    OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, transactionStep.PreviousEntityVersionNumber);
-
-                    await CommandDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, transactionStepIndex);
-
-                    await LeaseDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, transactionStepIndex);
-
-                    await LeaseDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, transactionStepIndex);
-
-                    await TagDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, transactionStepIndex);
-
-                    await TagDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, transactionStepIndex);
+                    if (transactionStep is ITagTransactionStep<TEntity> tagTransactionStep)
+                    {
+                        await ExecuteTagTransactionStep(transaction, tagTransactionStep);
+                    }
                 }
 
                 await _mongoSession.CommitTransaction();

@@ -1,15 +1,19 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Transactions.Steps;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace EntityDb.Common.Transactions
+namespace EntityDb.Common.Transactions.Builders
 {
     /// <summary>
     ///     Provides a way to construct an <see cref="ITransaction{TEntity}" />. Note that no operations are permanent until
@@ -20,7 +24,7 @@ namespace EntityDb.Common.Transactions
         where TEntity : IEntity<TEntity>
     {
         private readonly Dictionary<Guid, TEntity> _knownEntities = new();
-        private readonly List<TransactionStep<TEntity>> _transactionSteps = new();
+        private readonly List<ITransactionStep<TEntity>> _transactionSteps = new();
 
         private readonly IAgentAccessor _agentAccessor;
 
@@ -38,8 +42,8 @@ namespace EntityDb.Common.Transactions
         private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
             TEntity nextEntity, Func<TEntity, IEnumerable<TMetaData>> metaDataMapper)
         {
-            var previousMetaData = metaDataMapper.Invoke(previousEntity);
-            var nextMetaData = metaDataMapper.Invoke(nextEntity);
+            var previousMetaData = metaDataMapper.Invoke(previousEntity).ToArray();
+            var nextMetaData = metaDataMapper.Invoke(nextEntity).ToArray();
 
             return new TransactionMetaData<TMetaData>
             {
@@ -48,27 +52,75 @@ namespace EntityDb.Common.Transactions
             };
         }
 
-        private void AddTransactionStep(Guid entityId, ICommand<TEntity> command)
+        private void ConstructIfNotKnown(Guid entityId)
         {
+            if (!IsEntityKnown(entityId))
+            {
+                var entity = TEntity.Construct(entityId);
+
+                _knownEntities.Add(entityId, entity);
+            }
+        }
+
+        private void AddGeneralTransactionStep(Guid entityId, ICommand<TEntity> command)
+        {
+            ConstructIfNotKnown(entityId);
+
             var previousEntity = _knownEntities[entityId];
             var previousEntityVersionNumber = previousEntity.GetVersionNumber();
 
             var nextEntity = previousEntity.Reduce(command);
             var nextEntityVersionNumber = nextEntity.GetVersionNumber();
 
-            _transactionSteps.Add(new TransactionStep<TEntity>
+            _transactionSteps.Add(new CommandTransactionStep<TEntity>
             {
+                EntityId = entityId,
+                Command = command,
                 PreviousEntitySnapshot = previousEntity,
                 PreviousEntityVersionNumber = previousEntityVersionNumber,
                 NextEntitySnapshot = nextEntity,
                 NextEntityVersionNumber = nextEntityVersionNumber,
-                EntityId = entityId,
-                Command = command,
-                Leases = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetLeases()),
-                Tags = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetTags())
             });
 
             _knownEntities[entityId] = nextEntity;
+        }
+
+        private void AddLeaseTransactionStep(Guid entityId, IEnumerable<ILease> deleteLeases, IEnumerable<ILease> insertLeases)
+        {
+            ConstructIfNotKnown(entityId);
+
+            var entity = _knownEntities[entityId];
+            var entityVersionNumber = entity.GetVersionNumber();
+
+            _transactionSteps.Add(new LeaseTransactionStep<TEntity>
+            {
+                EntityId = entityId,
+                Leases = new TransactionMetaData<ILease>
+                {
+                    Delete = deleteLeases.ToImmutableArray(),
+                    Insert = insertLeases.ToImmutableArray()
+                },
+                LeasedAtEntityVersionNumber = entityVersionNumber,
+            });
+        }
+
+        private void AddTagTransactionStep(Guid entityId, IEnumerable<ITag> deleteTags, IEnumerable<ITag> insertTags)
+        {
+            ConstructIfNotKnown(entityId);
+
+            var entity = _knownEntities[entityId];
+            var entityVersionNumber = entity.GetVersionNumber();
+
+            _transactionSteps.Add(new TagTransactionStep<TEntity>
+            {
+                EntityId = entityId,
+                Tags = new TransactionMetaData<ITag>
+                {
+                    Delete = deleteTags.ToImmutableArray(),
+                    Insert = insertTags.ToImmutableArray()
+                },
+                TaggedAtEntityVersionNumber = entityVersionNumber,
+            });
         }
 
         /// <summary>
@@ -92,7 +144,7 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///     Indicates wether or not a <typeparamref name="TEntity"/> associated with a given entity id is in memory (i.e., created or loaded).
+        ///     Indicates wether or not a <typeparamref name="TEntity"/> associated with a given entity id is in memory.
         /// </summary>
         /// <param name="entityId">The id of the entity.</param>
         /// <returns><c>true</c> if a <typeparamref name="TEntity"/> associated with <paramref name="entityId"/> is in memory, or else <c>false</c>.</returns>
@@ -115,7 +167,7 @@ namespace EntityDb.Common.Transactions
         {
             if (IsEntityKnown(entityId))
             {
-                throw new EntityAlreadyLoadedException();
+                throw new EntityAlreadyKnownException();
             }
 
             _knownEntities.Add(entityId, entity);
@@ -124,44 +176,66 @@ namespace EntityDb.Common.Transactions
         }
 
         /// <summary>
-        ///     Adds a transaction step that creates a new <typeparamref name="TEntity"/> associated with a given entity id.
+        ///     Adds a transaction step that appends a single <see cref="ICommand{TEntity}"/> associated with a given entity id.
         /// </summary>
-        /// <param name="entityId">A new id associated with the new <typeparamref name="TEntity"/>.</param>
-        /// <param name="command">The very first command for the new <typeparamref name="TEntity"/>.</param>
-        /// <returns>The transaction builder.</returns>
-        /// <remarks>
-        ///     Do not call this method for a <typeparamref name="TEntity"/> that already exists.
-        /// </remarks>
-        public TransactionBuilder<TEntity> Create(Guid entityId, ICommand<TEntity> command)
-        {
-            if (IsEntityKnown(entityId))
-            {
-                throw new EntityAlreadyCreatedException();
-            }
-
-            var entity = TEntity.Construct(entityId);
-
-            _knownEntities.Add(entityId, entity);
-
-            AddTransactionStep(entityId, command);
-
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds a transaction step that appends to an existing <typeparamref name="TEntity"/> associated with a given entity id.
-        /// </summary>
-        /// <param name="entityId">An existing id associated with an existing <typeparamref name="TEntity"/>.</param>
-        /// <param name="command">A new command for the existing <typeparamref name="TEntity"/>.</param>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
         /// <returns>The transaction builder.</returns>
         public TransactionBuilder<TEntity> Append(Guid entityId, ICommand<TEntity> command)
         {
-            if (!IsEntityKnown(entityId))
-            {
-                throw new EntityNotLoadedException();
-            }
+            AddGeneralTransactionStep(entityId, command);
 
-            AddTransactionStep(entityId, command);
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that adds a set of <see cref="ILease"/>s associated with a given entity id.
+        /// </summary>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="leases">The leases to be added to the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public TransactionBuilder<TEntity> Add(Guid entityId, params ILease[] leases)
+        {
+            AddLeaseTransactionStep(entityId, Array.Empty<ILease>(), leases);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that adds a set of <see cref="ITag"/>s associated with a given entity id.
+        /// </summary>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="tags">The tags to be added to the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public TransactionBuilder<TEntity> Add(Guid entityId, params ITag[] tags)
+        {
+            AddTagTransactionStep(entityId, Array.Empty<ITag>(), tags);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s associated with a given entity id.
+        /// </summary>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public TransactionBuilder<TEntity> Delete(Guid entityId, params ILease[] leases)
+        {
+            AddLeaseTransactionStep(entityId, leases, Array.Empty<ILease>());
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a transaction step that deletes a set of <see cref="ITag"/>s associated with a given entity id.
+        /// </summary>
+        /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
+        /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity"/>.</param>
+        /// <returns>The transaction builder.</returns>
+        public TransactionBuilder<TEntity> Delete(Guid entityId, params ITag[] tags)
+        {
+            AddTagTransactionStep(entityId, tags, Array.Empty<ITag>());
 
             return this;
         }
@@ -181,7 +255,7 @@ namespace EntityDb.Common.Transactions
                 Id = transactionId,
                 TimeStamp = agent.GetTimestamp(),
                 AgentSignature = agent.GetSignature(agentSignatureOptionsName),
-                Steps = _transactionSteps.ToImmutableArray<ITransactionStep<TEntity>>()
+                Steps = _transactionSteps.ToImmutableArray()
             };
 
             _transactionSteps.Clear();

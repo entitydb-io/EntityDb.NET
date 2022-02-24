@@ -1,6 +1,7 @@
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
@@ -34,12 +35,11 @@ namespace EntityDb.MongoDb.Documents
         public static IReadOnlyCollection<TagDocument>? BuildInsert<TEntity>
         (
             ITransaction<TEntity> transaction,
-            int transactionStepIndex,
+            ITagTransactionStep<TEntity> tagTransactionStep,
             ILogger logger
         )
         {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-            var insertTags = transactionStep.Tags.Insert;
+            var insertTags = tagTransactionStep.Tags.Insert;
 
             if (insertTags.Length == 0)
             {
@@ -51,8 +51,8 @@ namespace EntityDb.MongoDb.Documents
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionStep.EntityId,
-                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
+                    EntityId = tagTransactionStep.EntityId,
+                    EntityVersionNumber = tagTransactionStep.TaggedAtEntityVersionNumber,
                     Label = insertTag.Label,
                     Value = insertTag.Value,
                     Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)
@@ -63,28 +63,27 @@ namespace EntityDb.MongoDb.Documents
         public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
         (
             ITransaction<TEntity> transaction,
-            int transactionStepIndex
+            ITagTransactionStep<TEntity> tagTransactionStep
         )
         {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-            var deleteTags = transactionStep.Tags.Delete;
+            var deleteTags = tagTransactionStep.Tags.Delete;
 
             if (deleteTags.Length == 0)
             {
                 return null;
             }
 
-            var deleteTagsQuery = new DeleteTagsQuery(transactionStep.EntityId, deleteTags);
+            var deleteTagsQuery = new DeleteTagsQuery(tagTransactionStep.EntityId, deleteTags);
 
             return deleteTagsQuery.GetFilter(_filterBuilder);
         }
 
-        public static InsertDocumentsCommand<TEntity, TagDocument> GetInsertCommand<TEntity>
+        public static InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument> GetInsertCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new InsertDocumentsCommand<TEntity, TagDocument>
+            return new InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument>
             (
                 mongoSession,
                 CollectionName,
@@ -109,12 +108,12 @@ namespace EntityDb.MongoDb.Documents
             );
         }
 
-        public static DeleteDocumentsCommand<TEntity> GetDeleteCommand<TEntity>
+        public static DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>> GetDeleteCommand<TEntity>
         (
             IMongoSession mongoSession
         )
         {
-            return new DeleteDocumentsCommand<TEntity>
+            return new DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>>
             (
                 mongoSession,
                 CollectionName,

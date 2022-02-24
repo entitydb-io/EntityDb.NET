@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands
 {
-    internal record DeleteDocumentsCommand<TEntity>
+    internal record DeleteDocumentsCommand<TEntity, TTransactionStep>
     (
         IMongoSession MongoSession,
         string CollectionName,
-        Func<ITransaction<TEntity>, int, FilterDefinition<BsonDocument>?> Build
+        Func<ITransaction<TEntity>, TTransactionStep, FilterDefinition<BsonDocument>?> Build
     )
     {
-        public async Task Execute(ITransaction<TEntity> transaction, int transactionStepindex)
+        public async Task Execute(ITransaction<TEntity> transaction, TTransactionStep transactionStep)
         {
-            var filter = Build.Invoke(transaction, transactionStepindex);
+            var filter = Build.Invoke(transaction, transactionStep);
 
             if (filter == null)
             {
