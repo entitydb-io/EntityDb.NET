@@ -39,19 +39,6 @@ namespace EntityDb.Common.Transactions.Builders
             _agentAccessor = agentAccessor;
         }
 
-        private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
-            TEntity nextEntity, Func<TEntity, IEnumerable<TMetaData>> metaDataMapper)
-        {
-            var previousMetaData = metaDataMapper.Invoke(previousEntity).ToArray();
-            var nextMetaData = metaDataMapper.Invoke(nextEntity).ToArray();
-
-            return new TransactionMetaData<TMetaData>
-            {
-                Delete = previousMetaData.Except(nextMetaData).ToImmutableArray(),
-                Insert = nextMetaData.Except(previousMetaData).ToImmutableArray()
-            };
-        }
-
         private void ConstructIfNotKnown(Guid entityId)
         {
             if (!IsEntityKnown(entityId))
