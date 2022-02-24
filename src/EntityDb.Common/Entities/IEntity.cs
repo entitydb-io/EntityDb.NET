@@ -1,7 +1,4 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Tags;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace EntityDb.Common.Entities
 {
@@ -23,17 +20,5 @@ namespace EntityDb.Common.Entities
         /// </summary>
         /// <returns></returns>
         ulong GetVersionNumber();
-
-        /// <summary>
-        ///     Returns the set of <see cref="ILease"/> objects for the entity.
-        /// </summary>
-        /// <returns>The set of <see cref="ILease"/>.</returns>
-        IEnumerable<ILease> GetLeases();
-
-        /// <summary>
-        ///     Returns the set of <see cref="ITag"/> objects for the entity.
-        /// </summary>
-        /// <returns>The set of <see cref="ITag"/> objects.</returns>
-        IEnumerable<ITag> GetTags();
     }
 }

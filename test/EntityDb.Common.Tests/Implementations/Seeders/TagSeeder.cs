@@ -6,11 +6,9 @@ namespace EntityDb.Common.Tests.Implementations.Seeders
 {
     public static class TagSeeder
     {
-        public static ImmutableArray<ITag> Create()
+        public static ITag Create()
         {
-            var tag = new Tag("Foo", "Bar");
-
-            return ImmutableArray.Create<ITag>(tag);
+            return new Tag("Foo", "Bar");
         }
     }
 }

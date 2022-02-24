@@ -42,8 +42,8 @@ namespace EntityDb.Common.Transactions.Builders
         private static ITransactionMetaData<TMetaData> GetTransactionMetaData<TMetaData>(TEntity previousEntity,
             TEntity nextEntity, Func<TEntity, IEnumerable<TMetaData>> metaDataMapper)
         {
-            var previousMetaData = metaDataMapper.Invoke(previousEntity);
-            var nextMetaData = metaDataMapper.Invoke(nextEntity);
+            var previousMetaData = metaDataMapper.Invoke(previousEntity).ToArray();
+            var nextMetaData = metaDataMapper.Invoke(nextEntity).ToArray();
 
             return new TransactionMetaData<TMetaData>
             {
@@ -72,7 +72,7 @@ namespace EntityDb.Common.Transactions.Builders
             var nextEntity = previousEntity.Reduce(command);
             var nextEntityVersionNumber = nextEntity.GetVersionNumber();
 
-            _transactionSteps.Add(new GeneralTransactionStep<TEntity>
+            _transactionSteps.Add(new CommandTransactionStep<TEntity>
             {
                 EntityId = entityId,
                 Command = command,
@@ -80,8 +80,6 @@ namespace EntityDb.Common.Transactions.Builders
                 PreviousEntityVersionNumber = previousEntityVersionNumber,
                 NextEntitySnapshot = nextEntity,
                 NextEntityVersionNumber = nextEntityVersionNumber,
-                Leases = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetLeases()),
-                Tags = GetTransactionMetaData(previousEntity, nextEntity, entity => entity.GetTags())
             });
 
             _knownEntities[entityId] = nextEntity;

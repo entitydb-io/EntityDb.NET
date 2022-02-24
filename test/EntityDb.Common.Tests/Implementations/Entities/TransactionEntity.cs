@@ -9,9 +9,7 @@ namespace EntityDb.Common.Tests.Implementations.Entities
 {
     public record TransactionEntity
     (
-        ulong VersionNumber = default,
-        ILease[]? Leases = default,
-        ITag[]? Tags = default
+        ulong VersionNumber = default
     )
         : IEntity<TransactionEntity>
     {
@@ -26,26 +24,6 @@ namespace EntityDb.Common.Tests.Implementations.Entities
         public ulong GetVersionNumber()
         {
             return VersionNumber;
-        }
-
-        public IEnumerable<ILease> GetLeases()
-        {
-            if (Leases != null)
-            {
-                return Leases;
-            }
-
-            return Enumerable.Empty<ILease>();
-        }
-
-        public IEnumerable<ITag> GetTags()
-        {
-            if (Tags != null)
-            {
-                return Tags;
-            }
-
-            return Enumerable.Empty<ITag>();
         }
     }
 }
