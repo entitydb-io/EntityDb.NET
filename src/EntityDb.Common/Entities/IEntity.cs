@@ -6,7 +6,7 @@ namespace EntityDb.Common.Entities
     ///     Provides basic functionality for the common implementations.
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    public interface IEntity<TEntity>
+    public interface IEntity<out TEntity>
     {
         /// <summary>
         ///     Creates a new instance of a <typeparamref name="TEntity" />.
