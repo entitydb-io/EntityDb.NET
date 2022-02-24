@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal interface IEntitiesDocument : ITransactionDocument
 {
-    internal interface IEntitiesDocument : ITransactionDocument
-    {
-        Guid[] EntityIds { get; }
-    }
+    Guid[] EntityIds { get; }
 }

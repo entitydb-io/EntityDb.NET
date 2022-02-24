@@ -7,33 +7,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityDb.Common.Queries
+namespace EntityDb.Common.Queries;
+
+internal sealed record DeleteTagsQuery(Guid EntityId, IReadOnlyCollection<ITag> Tags) : ITagQuery
 {
-    internal sealed record DeleteTagsQuery(Guid EntityId, IReadOnlyCollection<ITag> Tags) : ITagQuery
+    public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {
-        public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
-        {
-            return builder.And
+        return builder.And
+        (
+            builder.EntityIdIn(EntityId),
+            builder.Or
             (
-                builder.EntityIdIn(EntityId),
-                builder.Or
-                (
-                    Tags
-                        .Select(deleteLease => builder.TagMatches((Tag lease) =>
-                            lease.Label == deleteLease.Label &&
-                            lease.Value == deleteLease.Value))
-                        .ToArray()
-                )
-            );
-        }
-
-        public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
-        {
-            return default;
-        }
-
-        public int? Skip => null;
-
-        public int? Take => null;
+                Tags
+                    .Select(deleteLease => builder.TagMatches((Tag lease) =>
+                        lease.Label == deleteLease.Label &&
+                        lease.Value == deleteLease.Value))
+                    .ToArray()
+            )
+        );
     }
+
+    public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    {
+        return default;
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
 }

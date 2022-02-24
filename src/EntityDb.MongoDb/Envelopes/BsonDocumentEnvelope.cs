@@ -9,99 +9,98 @@ using MongoDB.Bson.Serialization.Options;
 using System;
 using System.Collections.Generic;
 
-namespace EntityDb.MongoDb.Envelopes
+namespace EntityDb.MongoDb.Envelopes;
+
+internal sealed record BsonDocumentEnvelope
+(
+    [property: BsonDictionaryOptions(DictionaryRepresentation.Document)]
+    Dictionary<string, string> Headers,
+    BsonDocument Value
+)
 {
-    internal sealed record BsonDocumentEnvelope
-    (
-        [property: BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        Dictionary<string, string> Headers,
-        BsonDocument Value
-    )
+    public const string TypeDiscriminatorPropertyName = "_t";
+
+    private static BsonDocument GetBsonDocument(dynamic? @object, bool removeTypeDiscriminatorProperty)
     {
-        public const string TypeDiscriminatorPropertyName = "_t";
+        var bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
 
-        private static BsonDocument GetBsonDocument(dynamic? @object, bool removeTypeDiscriminatorProperty)
+        if (removeTypeDiscriminatorProperty && bsonDocument.Contains(TypeDiscriminatorPropertyName))
         {
-            var bsonDocument = BsonExtensionMethods.ToBsonDocument(@object, typeof(object));
-
-            if (removeTypeDiscriminatorProperty && bsonDocument.Contains(TypeDiscriminatorPropertyName))
-            {
-                bsonDocument.Remove(TypeDiscriminatorPropertyName);
-            }
-
-            return bsonDocument;
+            bsonDocument.Remove(TypeDiscriminatorPropertyName);
         }
 
-        public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
-        {
-            try
-            {
-                return (TObject)BsonSerializer.Deserialize(Value, typeResolver.ResolveType(Headers));
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to reconstruct.");
+        return bsonDocument;
+    }
 
-                throw new DeserializeException();
-            }
+    public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
+    {
+        try
+        {
+            return (TObject)BsonSerializer.Deserialize(Value, typeResolver.ResolveType(Headers));
         }
-
-        public byte[] Serialize(Type type, ILogger logger)
+        catch (Exception exception)
         {
-            try
-            {
-                return this.ToBsonDocument(type).ToBson();
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to serialize.");
+            logger.LogError(exception, "Unable to reconstruct.");
 
-                throw new SerializeException();
-            }
+            throw new DeserializeException();
         }
+    }
 
-        public byte[] Serialize(ILogger logger)
+    public byte[] Serialize(Type type, ILogger logger)
+    {
+        try
         {
-            return Serialize(typeof(BsonDocumentEnvelope), logger);
+            return this.ToBsonDocument(type).ToBson();
         }
-
-        public static BsonDocumentEnvelope Deserialize(byte[] bsonBytes, ILogger logger)
+        catch (Exception exception)
         {
-            try
-            {
-                var bsonDocument = new RawBsonDocument(bsonBytes);
+            logger.LogError(exception, "Unable to serialize.");
 
-                return (BsonDocumentEnvelope)BsonSerializer.Deserialize(bsonDocument, typeof(BsonDocumentEnvelope));
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to deserialize.");
-
-                throw new DeserializeException();
-            }
+            throw new SerializeException();
         }
+    }
 
-        public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger,
-            bool removeTypeDiscriminatorProperty = true)
+    public byte[] Serialize(ILogger logger)
+    {
+        return Serialize(typeof(BsonDocumentEnvelope), logger);
+    }
+
+    public static BsonDocumentEnvelope Deserialize(byte[] bsonBytes, ILogger logger)
+    {
+        try
         {
-            try
-            {
-                var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
+            var bsonDocument = new RawBsonDocument(bsonBytes);
 
-                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+            return (BsonDocumentEnvelope)BsonSerializer.Deserialize(bsonDocument, typeof(BsonDocumentEnvelope));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Unable to deserialize.");
 
-                return new BsonDocumentEnvelope
-                (
-                    headers,
-                    bsonDocument
-                );
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to deconstruct.");
+            throw new DeserializeException();
+        }
+    }
 
-                throw new SerializeException();
-            }
+    public static BsonDocumentEnvelope Deconstruct(dynamic? @object, ILogger logger,
+        bool removeTypeDiscriminatorProperty = true)
+    {
+        try
+        {
+            var bsonDocument = GetBsonDocument(@object, removeTypeDiscriminatorProperty);
+
+            var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+
+            return new BsonDocumentEnvelope
+            (
+                headers,
+                bsonDocument
+            );
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Unable to deconstruct.");
+
+            throw new SerializeException();
         }
     }
 }

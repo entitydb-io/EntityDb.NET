@@ -15,111 +15,110 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 {
-    internal sealed record LeaseDocument : DocumentBase, IEntityDocument
+    public const string CollectionName = "Leases";
+
+    private static readonly LeaseFilterBuilder FilterBuilder = new();
+
+    private static readonly LeaseSortBuilder SortBuilder = new();
+
+    public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
+
+    public string Scope { get; init; } = default!;
+    public string Label { get; init; } = default!;
+    public string Value { get; init; } = default!;
+    public Guid EntityId { get; init; }
+    public ulong EntityVersionNumber { get; init; }
+
+    private static IReadOnlyCollection<LeaseDocument>? BuildInsert<TEntity>
+    (
+        ITransaction<TEntity> transaction,
+        ILeaseTransactionStep<TEntity> leaseTransactionStep,
+        ILogger logger
+    )
     {
-        public const string CollectionName = "Leases";
+        var insertLeases = leaseTransactionStep.Leases.Insert;
 
-        private static readonly LeaseFilterBuilder _filterBuilder = new();
-
-        private static readonly LeaseSortBuilder _sortBuilder = new();
-
-        public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
-
-        public string Scope { get; init; } = default!;
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-
-        public static IReadOnlyCollection<LeaseDocument>? BuildInsert<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            ILeaseTransactionStep<TEntity> leaseTransactionStep,
-            ILogger logger
-        )
+        if (insertLeases.Length == 0)
         {
-            var insertLeases = leaseTransactionStep.Leases.Insert;
+            return null;
+        }
 
-            if (insertLeases.Length == 0)
+        return leaseTransactionStep.Leases.Insert
+            .Select(insertLease => new LeaseDocument
             {
-                return null;
-            }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = leaseTransactionStep.EntityId,
+                EntityVersionNumber = leaseTransactionStep.LeasedAtEntityVersionNumber,
+                Scope = insertLease.Scope,
+                Label = insertLease.Label,
+                Value = insertLease.Value,
+                Data = BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+            })
+            .ToArray();
+    }
 
-            return leaseTransactionStep.Leases.Insert
-                .Select(insertLease => new LeaseDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityId = leaseTransactionStep.EntityId,
-                    EntityVersionNumber = leaseTransactionStep.LeasedAtEntityVersionNumber,
-                    Scope = insertLease.Scope,
-                    Label = insertLease.Label,
-                    Value = insertLease.Value,
-                    Data = BsonDocumentEnvelope.Deconstruct(insertLease, logger)
-                })
-                .ToArray();
-        }
+    private static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
+    (
+        ITransaction<TEntity> transaction,
+        ILeaseTransactionStep<TEntity> leaseTransactionStep
+    )
+    {
+        var deleteLeases = leaseTransactionStep.Leases.Delete;
 
-        public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            ILeaseTransactionStep<TEntity> leaseTransactionStep
-        )
+        if (deleteLeases.Length == 0)
         {
-            var deleteLeases = leaseTransactionStep.Leases.Delete;
-
-            if (deleteLeases.Length == 0)
-            {
-                return null;
-            }
-
-            return new DeleteLeasesQuery(leaseTransactionStep.EntityId, deleteLeases)
-                .GetFilter(_filterBuilder);
+            return null;
         }
 
-        public static InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument> GetInsertCommand<TEntity>
+        return new DeleteLeasesQuery(leaseTransactionStep.EntityId, deleteLeases)
+            .GetFilter(FilterBuilder);
+    }
+
+    public static InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument> GetInsertCommand<TEntity>
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return new InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument>
-            (
-                mongoSession,
-                CollectionName,
-                BuildInsert<TEntity>
-            );
-        }
+            mongoSession,
+            CollectionName,
+            BuildInsert
+        );
+    }
 
-        public static DocumentQuery<LeaseDocument> GetQuery
+    public static DocumentQuery<LeaseDocument> GetQuery
+    (
+        IMongoSession mongoSession,
+        ILeaseQuery leaseQuery
+    )
+    {
+        return new DocumentQuery<LeaseDocument>
         (
-            IMongoSession mongoSession,
-            ILeaseQuery leaseQuery
-        )
-        {
-            return new DocumentQuery<LeaseDocument>
-            (
-                mongoSession,
-                CollectionName,
-                leaseQuery.GetFilter(_filterBuilder),
-                leaseQuery.GetSort(_sortBuilder),
-                leaseQuery.Skip,
-                leaseQuery.Take
-            );
-        }
+            mongoSession,
+            CollectionName,
+            leaseQuery.GetFilter(FilterBuilder),
+            leaseQuery.GetSort(SortBuilder),
+            leaseQuery.Skip,
+            leaseQuery.Take
+        );
+    }
 
-        public static DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    public static DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return new DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>>
-            (
-                mongoSession,
-                CollectionName,
-                BuildDelete<TEntity>
-            );
-        }
+            mongoSession,
+            CollectionName,
+            BuildDelete
+        );
     }
 }

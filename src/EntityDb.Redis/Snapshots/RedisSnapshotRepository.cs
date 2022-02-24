@@ -8,83 +8,82 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EntityDb.Redis.Snapshots
+namespace EntityDb.Redis.Snapshots;
+
+internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
 {
-    internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
+    private readonly IRedisSession _redisSession;
+    private readonly string _keyNamespace;
+    private readonly ILogger _logger;
+    private readonly ITypeResolver _typeResolver;
+    private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
+
+    public RedisSnapshotRepository
+    (
+        string keyNamespace,
+        ITypeResolver typeResolver,
+        ISnapshotStrategy<TEntity>? snapshotStrategy,
+        IRedisSession redisSession,
+        ILogger logger
+    )
     {
-        protected readonly IRedisSession _redisSession;
-        private readonly string _keyNamespace;
-        protected readonly ILogger _logger;
-        protected readonly ITypeResolver _typeResolver;
-        private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
+        _keyNamespace = keyNamespace;
+        _typeResolver = typeResolver;
+        _snapshotStrategy = snapshotStrategy;
+        _redisSession = redisSession;
+        _logger = logger;
+    }
 
-        public RedisSnapshotRepository
-        (
-            string keyNamespace,
-            ITypeResolver typeResolver,
-            ISnapshotStrategy<TEntity>? snapshotStrategy,
-            IRedisSession redisSession,
-            ILogger logger
-        )
-        {
-            _keyNamespace = keyNamespace;
-            _typeResolver = typeResolver;
-            _snapshotStrategy = snapshotStrategy;
-            _redisSession = redisSession;
-            _logger = logger;
-        }
+    private RedisKey GetSnapshotKey(Guid entityId)
+    {
+        return $"{_keyNamespace}#{entityId}";
+    }
 
-        public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    {
+        if (_snapshotStrategy != null)
         {
-            if (_snapshotStrategy != null)
+            var previousSnapshot = await GetSnapshot(entityId);
+
+            if (!_snapshotStrategy.ShouldPutSnapshot(previousSnapshot, entity))
             {
-                var previousSnapshot = await GetSnapshot(entityId);
-
-                if (!_snapshotStrategy.ShouldPutSnapshot(previousSnapshot, entity))
-                {
-                    return false;
-                }
+                return false;
             }
-
-            var snapshotKey = GetSnapshotKey(entityId);
-
-            var snapshotValue = JsonElementEnvelope
-                .Deconstruct(entity, _logger)
-                .Serialize(_logger);
-
-            return await _redisSession.Insert(snapshotKey, snapshotValue);
         }
 
-        public async Task<TEntity?> GetSnapshot(Guid entityId)
+        var snapshotKey = GetSnapshotKey(entityId);
+
+        var snapshotValue = JsonElementEnvelope
+            .Deconstruct(entity, _logger)
+            .Serialize(_logger);
+
+        return await _redisSession.Insert(snapshotKey, snapshotValue);
+    }
+
+    public async Task<TEntity?> GetSnapshot(Guid entityId)
+    {
+        var snapshotKey = GetSnapshotKey(entityId);
+        var snapshotValue = await _redisSession.Find(snapshotKey);
+
+        if (!snapshotValue.HasValue)
         {
-            var snapshotKey = GetSnapshotKey(entityId);
-            var snapshotValue = await _redisSession.Find(snapshotKey);
-
-            if (!snapshotValue.HasValue)
-            {
-                return default;
-            }
-
-            return JsonElementEnvelope
-                .Deserialize(snapshotValue, _logger)
-                .Reconstruct<TEntity>(_logger, _typeResolver);
+            return default;
         }
 
-        public async Task<bool> DeleteSnapshots(Guid[] entityIds)
-        {
-            var snapshotKeys = entityIds.Select(GetSnapshotKey);
+        return JsonElementEnvelope
+            .Deserialize(snapshotValue, _logger)
+            .Reconstruct<TEntity>(_logger, _typeResolver);
+    }
 
-            return await _redisSession.Delete(snapshotKeys);
-        }
+    public async Task<bool> DeleteSnapshots(Guid[] entityIds)
+    {
+        var snapshotKeys = entityIds.Select(GetSnapshotKey);
 
-        public async ValueTask DisposeAsync()
-        {
-            await _redisSession.DisposeAsync();
-        }
+        return await _redisSession.Delete(snapshotKeys);
+    }
 
-        public RedisKey GetSnapshotKey(Guid entityId)
-        {
-            return $"{_keyNamespace}#{entityId}";
-        }
+    public async ValueTask DisposeAsync()
+    {
+        await _redisSession.DisposeAsync();
     }
 }

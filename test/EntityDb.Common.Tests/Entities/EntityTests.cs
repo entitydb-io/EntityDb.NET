@@ -13,248 +13,243 @@ using Moq;
 using Shouldly;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Entities
+namespace EntityDb.Common.Tests.Entities;
+
+public class EntityTests : TestsBase<Startup>
 {
-    public class EntityTests : TestsBase<Startup>
+    public EntityTests(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        public EntityTests(IServiceProvider serviceProvider) : base(serviceProvider)
+    }
+
+    private static ITransaction<TransactionEntity> BuildTransaction
+    (
+        IServiceScope serviceScope,
+        Guid entityId,
+        ulong from,
+        ulong to
+    )
+    {
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(entityId);
+
+        for (var i = from; i <= to; i++)
         {
+            transactionBuilder.Append(new DoNothing());
         }
 
-        private static ITransaction<TransactionEntity> BuildTransaction
-        (
-            IServiceScope serviceScope,
-            Guid entityId,
-            ulong from,
-            ulong to
-        )
-        {
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(entityId);
+        return transactionBuilder.Build(default!, Guid.NewGuid());
+    }
 
-            for (var i = from; i <= to; i++)
+    [Fact]
+    public async Task GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns()
+    {
+        // ARRANGE
+
+        const ulong expectedVersionNumber = 10;
+
+        var entityId = Guid.NewGuid();
+
+        var commands = new List<ICommand<TransactionEntity>>();
+
+        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+
+        transactionRepositoryMock
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
+            .ReturnsAsync((ITransaction<TransactionEntity> transaction) =>
             {
-                transactionBuilder.Append(new DoNothing());
-            }
-
-            return transactionBuilder.Build(default!, Guid.NewGuid());
-        }
-
-        [Fact]
-        public async Task GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns()
-        {
-            // ARRANGE
-
-            const ulong ExpectedVersionNumber = 10;
-
-            var entityId = Guid.NewGuid();
-
-            var commands = new List<ICommand<TransactionEntity>>();
-
-            var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
-
-            transactionRepositoryMock
-                .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
-                .ReturnsAsync((ITransaction<TransactionEntity> transaction) =>
+                foreach (var transactionStep in transaction.Steps)
                 {
-                    foreach (var transactionStep in transaction.Steps)
+                    if (transactionStep is ICommandTransactionStep<TransactionEntity> commandTransactionStep)
                     {
-                        if (transactionStep is ICommandTransactionStep<TransactionEntity> commandTransactionStep)
-                        {
-                            commands.Add(commandTransactionStep.Command);
-                        }
+                        commands.Add(commandTransactionStep.Command);
                     }
+                }
 
-                    return true;
-                });
-
-            transactionRepositoryMock
-                .Setup(factory => factory.DisposeAsync())
-                .Returns(ValueTask.CompletedTask);
-
-            transactionRepositoryMock
-                .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
-                .ReturnsAsync(() =>
-                {
-                    return commands.ToArray();
-                })
-                .Verifiable();
-
-            var transactionRepositoryFactoryMock =
-                new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
-
-            transactionRepositoryFactoryMock
-                .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
-                .ReturnsAsync(transactionRepositoryMock.Object);
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(transactionRepositoryFactoryMock.Object);
+                return true;
             });
 
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(TestSessionOptions.Write);
+        transactionRepositoryMock
+            .Setup(factory => factory.DisposeAsync())
+            .Returns(ValueTask.CompletedTask);
 
-            var transaction = BuildTransaction(serviceScope, entityId, 1, ExpectedVersionNumber);
+        transactionRepositoryMock
+            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
+            .ReturnsAsync(() => commands.ToArray())
+            .Verifiable();
 
-            var transactionInserted = await entityRepository.PutTransaction(transaction);
+        var transactionRepositoryFactoryMock =
+            new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
 
-            // ARRANGE ASSERTIONS
+        transactionRepositoryFactoryMock
+            .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
+            .ReturnsAsync(transactionRepositoryMock.Object);
 
-            transactionInserted.ShouldBeTrue();
-
-            // ACT
-
-            var currenEntity = await entityRepository.GetCurrent(entityId);
-
-            // ASSERT
-
-            currenEntity.VersionNumber.ShouldBe(ExpectedVersionNumber);
-
-            transactionRepositoryMock
-                .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddSingleton(transactionRepositoryFactoryMock.Object);
+        });
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-            });
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(TestSessionOptions.Write);
 
-            // ACT
+        var transaction = BuildTransaction(serviceScope, entityId, 1, expectedVersionNumber);
 
-            var snapshotRepositoryFactory = serviceScope.ServiceProvider
-                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+        var transactionInserted = await entityRepository.PutTransaction(transaction);
 
-            using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("NOT NULL", "NOT NULL");
+        // ARRANGE ASSERTIONS
 
-            // ASSERT
+        transactionInserted.ShouldBeTrue();
 
-            snapshotRepositoryFactory.ShouldBeNull();
+        // ACT
 
-            entityRepository.SnapshotRepository.ShouldBeNull();
-        }
+        var currenEntity = await entityRepository.GetCurrent(entityId);
 
-        [Fact]
-        public async Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        // ASSERT
+
+        currenEntity.VersionNumber.ShouldBe(expectedVersionNumber);
+
+        transactionRepositoryMock
+            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository()
+    {
+        // ARRANGE
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+        });
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
-            });
+        // ACT
 
-            // ACT
+        var snapshotRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
 
-            var snapshotRepositoryFactory = serviceScope.ServiceProvider
-                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository("NOT NULL", "NOT NULL");
 
-            using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("NOT NULL", null);
+        // ASSERT
 
-            // ASSERT
+        snapshotRepositoryFactory.ShouldBeNull();
 
-            snapshotRepositoryFactory.ShouldNotBeNull();
+        entityRepository.SnapshotRepository.ShouldBeNull();
+    }
 
-            entityRepository.SnapshotRepository.ShouldBeNull();
-        }
+    [Fact]
+    public async Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository()
+    {
+        // ARRANGE
 
-        [Fact]
-        public async Task GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepositry_ThenNoSnapshotRepository()
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
+        });
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
-            });
+        // ACT
 
-            // ACT
+        var snapshotRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
 
-            var snapshotRepositoryFactory = serviceScope.ServiceProvider
-                .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository("NOT NULL");
 
-            using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("NOT NULL", "NOT NULL");
+        // ASSERT
 
-            // ASSERT
+        snapshotRepositoryFactory.ShouldNotBeNull();
 
-            snapshotRepositoryFactory.ShouldNotBeNull();
+        entityRepository.SnapshotRepository.ShouldBeNull();
+    }
 
-            entityRepository.SnapshotRepository.ShouldNotBeNull();
-        }
+    [Fact]
+    public async Task GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository()
+    {
+        // ARRANGE
 
-        [Fact]
-        public async Task GivenSnapshotAndNewCommands_WhenGettningSnapshotOrDefault_ThenReturnNewerThanSnapshot()
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory());
+        });
 
-            var snapshot = new TransactionEntity(VersionNumber: 1);
+        // ACT
 
-            var newCommands = new[]
-            {
-                new DoNothing(),
-                new DoNothing(),
-            };
+        var snapshotRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory(newCommands));
-                serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory(snapshot));
-            });
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository("NOT NULL", "NOT NULL");
 
-            // ACT
+        // ASSERT
 
-            using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                .CreateRepository("NOT NULL", "NOT NULL");
+        snapshotRepositoryFactory.ShouldNotBeNull();
 
-            var snapshotOrDefault = await entityRepository.GetCurrent(default);
+        entityRepository.SnapshotRepository.ShouldNotBeNull();
+    }
 
-            // ASSERT
+    [Fact]
+    public async Task GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot()
+    {
+        // ARRANGE
 
-            snapshotOrDefault.ShouldNotBe(default);
-            snapshotOrDefault.ShouldNotBe(snapshot);
-            snapshotOrDefault!.VersionNumber.ShouldBe(snapshot.VersionNumber + Convert.ToUInt64(newCommands.Length));
-        }
+        var snapshot = new TransactionEntity(1);
 
-        [Fact]
-        public async Task GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow()
+        var newCommands = new ICommand<TransactionEntity>[]
         {
-            // ARRANGE
+            new DoNothing(),
+            new DoNothing()
+        };
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-            });
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory(newCommands));
+            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory(snapshot));
+        });
 
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(default!);
+        // ACT
 
-            // ASSERT
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository("NOT NULL", "NOT NULL");
 
-            await Should.ThrowAsync<EntityNotCreatedException>(async () =>
-            {
-                await entityRepository.GetCurrent(default);
-            });
-        }
+        var snapshotOrDefault = await entityRepository.GetCurrent(default);
+
+        // ASSERT
+
+        snapshotOrDefault.ShouldNotBe(default);
+        snapshotOrDefault.ShouldNotBe(snapshot);
+        snapshotOrDefault.VersionNumber.ShouldBe(snapshot.VersionNumber + Convert.ToUInt64(newCommands.Length));
+    }
+
+    [Fact]
+    public async Task GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow()
+    {
+        // ARRANGE
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+        });
+
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(default!);
+
+        // ASSERT
+
+        await Should.ThrowAsync<EntityNotCreatedException>(async () =>
+        {
+            await entityRepository.GetCurrent(default);
+        });
     }
 }

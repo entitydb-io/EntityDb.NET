@@ -3,29 +3,28 @@ using EntityDb.Common.Tests;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDb.RedisMongoDb.Tests
+namespace EntityDb.RedisMongoDb.Tests;
+
+public class Startup : StartupBase
 {
-    public class Startup : StartupBase
+    public override void AddServices(IServiceCollection serviceCollection)
     {
-        public override void AddServices(IServiceCollection serviceCollection)
-        {
-            base.AddServices(serviceCollection);
+        base.AddServices(serviceCollection);
 
-            // Snapshots
+        // Snapshots
 
-            var redisStartup = new Redis.Tests.Startup();
+        var redisStartup = new Redis.Tests.Startup();
 
-            redisStartup.AddServices(serviceCollection);
+        redisStartup.AddServices(serviceCollection);
 
-            // Transactions
+        // Transactions
 
-            var mongoDbStartup = new MongoDb.Tests.Startup();
+        var mongoDbStartup = new MongoDb.Tests.Startup();
 
-            mongoDbStartup.AddServices(serviceCollection);
+        mongoDbStartup.AddServices(serviceCollection);
 
-            // Snapshot Transactions
+        // Snapshot Transactions
 
-            serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>(TestSessionOptions.Write, true);
-        }
+        serviceCollection.AddSnapshotTransactionSubscriber<TransactionEntity>(TestSessionOptions.Write, true);
     }
 }

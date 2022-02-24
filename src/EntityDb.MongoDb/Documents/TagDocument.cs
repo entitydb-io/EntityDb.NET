@@ -15,110 +15,109 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record TagDocument : DocumentBase, IEntityDocument
 {
-    internal sealed record TagDocument : DocumentBase, IEntityDocument
+    public const string CollectionName = "Tags";
+
+    private static readonly TagFilterBuilder FilterBuilder = new();
+
+    private static readonly TagSortBuilder SortBuilder = new();
+
+    public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
+
+    public string Label { get; init; } = default!;
+    public string Value { get; init; } = default!;
+    public Guid EntityId { get; init; }
+    public ulong EntityVersionNumber { get; init; }
+
+    private static IReadOnlyCollection<TagDocument>? BuildInsert<TEntity>
+    (
+        ITransaction<TEntity> transaction,
+        ITagTransactionStep<TEntity> tagTransactionStep,
+        ILogger logger
+    )
     {
-        public const string CollectionName = "Tags";
+        var insertTags = tagTransactionStep.Tags.Insert;
 
-        public static readonly TagFilterBuilder _filterBuilder = new();
-
-        public static readonly TagSortBuilder _sortBuilder = new();
-
-        public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
-
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-
-        public static IReadOnlyCollection<TagDocument>? BuildInsert<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            ITagTransactionStep<TEntity> tagTransactionStep,
-            ILogger logger
-        )
+        if (insertTags.Length == 0)
         {
-            var insertTags = tagTransactionStep.Tags.Insert;
+            return null;
+        }
 
-            if (insertTags.Length == 0)
+        return insertTags
+            .Select(insertTag => new TagDocument
             {
-                return null;
-            }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = tagTransactionStep.EntityId,
+                EntityVersionNumber = tagTransactionStep.TaggedAtEntityVersionNumber,
+                Label = insertTag.Label,
+                Value = insertTag.Value,
+                Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)
+            })
+            .ToArray();
+    }
 
-            return insertTags
-                .Select(insertTag => new TagDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityId = tagTransactionStep.EntityId,
-                    EntityVersionNumber = tagTransactionStep.TaggedAtEntityVersionNumber,
-                    Label = insertTag.Label,
-                    Value = insertTag.Value,
-                    Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)
-                })
-                .ToArray();
-        }
+    private static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
+    (
+        ITransaction<TEntity> transaction,
+        ITagTransactionStep<TEntity> tagTransactionStep
+    )
+    {
+        var deleteTags = tagTransactionStep.Tags.Delete;
 
-        public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            ITagTransactionStep<TEntity> tagTransactionStep
-        )
+        if (deleteTags.Length == 0)
         {
-            var deleteTags = tagTransactionStep.Tags.Delete;
-
-            if (deleteTags.Length == 0)
-            {
-                return null;
-            }
-
-            var deleteTagsQuery = new DeleteTagsQuery(tagTransactionStep.EntityId, deleteTags);
-
-            return deleteTagsQuery.GetFilter(_filterBuilder);
+            return null;
         }
 
-        public static InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument> GetInsertCommand<TEntity>
+        var deleteTagsQuery = new DeleteTagsQuery(tagTransactionStep.EntityId, deleteTags);
+
+        return deleteTagsQuery.GetFilter(FilterBuilder);
+    }
+
+    public static InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument> GetInsertCommand<TEntity>
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return new InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, ITagTransactionStep<TEntity>, TagDocument>
-            (
-                mongoSession,
-                CollectionName,
-                BuildInsert<TEntity>
-            );
-        }
+            mongoSession,
+            CollectionName,
+            BuildInsert
+        );
+    }
 
-        public static DocumentQuery<TagDocument> GetQuery
+    public static DocumentQuery<TagDocument> GetQuery
+    (
+        IMongoSession mongoSession,
+        ITagQuery tagQuery
+    )
+    {
+        return new DocumentQuery<TagDocument>
         (
-            IMongoSession mongoSession,
-            ITagQuery tagQuery
-        )
-        {
-            return new DocumentQuery<TagDocument>
-            (
-                mongoSession,
-                CollectionName,
-                tagQuery.GetFilter(_filterBuilder),
-                tagQuery.GetSort(_sortBuilder),
-                tagQuery.Skip,
-                tagQuery.Take
-            );
-        }
+            mongoSession,
+            CollectionName,
+            tagQuery.GetFilter(FilterBuilder),
+            tagQuery.GetSort(SortBuilder),
+            tagQuery.Skip,
+            tagQuery.Take
+        );
+    }
 
-        public static DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    public static DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return new DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new DeleteDocumentsCommand<TEntity, ITagTransactionStep<TEntity>>
-            (
-                mongoSession,
-                CollectionName,
-                BuildDelete<TEntity>
-            );
-        }
+            mongoSession,
+            CollectionName,
+            BuildDelete
+        );
     }
 }

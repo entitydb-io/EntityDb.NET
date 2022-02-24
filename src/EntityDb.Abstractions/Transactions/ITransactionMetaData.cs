@@ -1,21 +1,20 @@
 ﻿using System.Collections.Immutable;
 
-namespace EntityDb.Abstractions.Transactions
+namespace EntityDb.Abstractions.Transactions;
+
+/// <summary>
+///     Represents a set of metadata for a single entity.
+/// </summary>
+/// <typeparam name="TMetaData"></typeparam>
+public interface ITransactionMetaData<TMetaData>
 {
     /// <summary>
-    ///     Represemts a set of metadata for a single entity.
+    ///     Meta data properties which must be deleted.
     /// </summary>
-    /// <typeparam name="TMetaData"></typeparam>
-    public interface ITransactionMetaData<TMetaData>
-    {
-        /// <summary>
-        ///     Meta data properties which must be deleted.
-        /// </summary>
-        ImmutableArray<TMetaData> Delete { get; }
+    ImmutableArray<TMetaData> Delete { get; }
 
-        /// <summary>
-        ///     Meta data properties which must be inserted.
-        /// </summary>
-        ImmutableArray<TMetaData> Insert { get; }
-    }
+    /// <summary>
+    ///     Meta data properties which must be inserted.
+    /// </summary>
+    ImmutableArray<TMetaData> Insert { get; }
 }

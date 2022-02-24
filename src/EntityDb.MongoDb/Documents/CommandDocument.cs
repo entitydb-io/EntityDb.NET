@@ -14,84 +14,83 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record CommandDocument : DocumentBase, IEntityDocument
 {
-    internal sealed record CommandDocument : DocumentBase, IEntityDocument
+    public const string CollectionName = "Commands";
+
+    private static readonly CommandFilterBuilder FilterBuilder = new();
+
+    private static readonly CommandSortBuilder SortBuilder = new();
+
+    public Guid EntityId { get; init; }
+    public ulong EntityVersionNumber { get; init; }
+
+    private static IReadOnlyCollection<CommandDocument> BuildInsert<TEntity>
+    (
+        ITransaction<TEntity> transaction,
+        ICommandTransactionStep<TEntity> commandTransactionStep,
+        ILogger logger
+    )
     {
-        public const string CollectionName = "Commands";
-
-        private static readonly CommandFilterBuilder _filterBuilder = new();
-
-        private static readonly CommandSortBuilder _sortBuilder = new();
-
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-
-        public static IReadOnlyCollection<CommandDocument> BuildInsert<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            ICommandTransactionStep<TEntity> commandTransactionStep,
-            ILogger logger
-        )
+        return new[]
         {
-            return new[]
+            new CommandDocument
             {
-                new CommandDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityId = commandTransactionStep.EntityId,
-                    EntityVersionNumber = commandTransactionStep.NextEntityVersionNumber,
-                    Data = BsonDocumentEnvelope.Deconstruct(commandTransactionStep.Command, logger)
-                }
-            };
-        }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = commandTransactionStep.EntityId,
+                EntityVersionNumber = commandTransactionStep.NextEntityVersionNumber,
+                Data = BsonDocumentEnvelope.Deconstruct(commandTransactionStep.Command, logger)
+            }
+        };
+    }
 
-        public static InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument> GetInsertCommand<TEntity>
+    public static InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument> GetInsertCommand<TEntity>
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return new InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument>
-            (
-                mongoSession,
-                CollectionName,
-                BuildInsert<TEntity>
-            );
-        }
+            mongoSession,
+            CollectionName,
+            BuildInsert
+        );
+    }
 
-        public static DocumentQuery<CommandDocument> GetQuery
+    public static DocumentQuery<CommandDocument> GetQuery
+    (
+        IMongoSession mongoSession,
+        ICommandQuery commandQuery
+    )
+    {
+        return new DocumentQuery<CommandDocument>
         (
-            IMongoSession mongoSession,
-            ICommandQuery commandQuery
-        )
-        {
-            return new DocumentQuery<CommandDocument>
-            (
-                mongoSession,
-                CollectionName,
-                commandQuery.GetFilter(_filterBuilder),
-                commandQuery.GetSort(_sortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
-        }
+            mongoSession,
+            CollectionName,
+            commandQuery.GetFilter(FilterBuilder),
+            commandQuery.GetSort(SortBuilder),
+            commandQuery.Skip,
+            commandQuery.Take
+        );
+    }
 
-        public static Task<ulong> GetLastEntityVersionNumber
+    public static Task<ulong> GetLastEntityVersionNumber
+    (
+        IMongoSession mongoSession,
+        Guid entityId
+    )
+    {
+        var commandQuery = new GetLastEntityVersionQuery(entityId);
+
+        var documentQuery = GetQuery
         (
-            IMongoSession mongoSession,
-            Guid entityId
-        )
-        {
-            var commandQuery = new GetLastEntityVersionQuery(entityId);
+            mongoSession,
+            commandQuery
+        );
 
-            var documentQuery = GetQuery
-            (
-                mongoSession,
-                commandQuery
-            );
-
-            return documentQuery.GetEntityVersionNumber();
-        }
+        return documentQuery.GetEntityVersionNumber();
     }
 }

@@ -1,12 +1,11 @@
 ﻿using EntityDb.Abstractions.Agents;
 
-namespace EntityDb.Common.Tests.Implementations.Agents
+namespace EntityDb.Common.Tests.Implementations.Agents;
+
+public class NoAgentAccessor : IAgentAccessor
 {
-    public class NoAgentAccessor : IAgentAccessor
+    public IAgent GetAgent()
     {
-        public IAgent GetAgent()
-        {
-            return new NoAgent();
-        }
+        return new NoAgent();
     }
 }

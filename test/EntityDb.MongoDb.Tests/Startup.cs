@@ -3,22 +3,21 @@ using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDb.MongoDb.Tests
+namespace EntityDb.MongoDb.Tests;
+
+public class Startup : StartupBase
 {
-    public class Startup : StartupBase
+    public override void AddServices(IServiceCollection serviceCollection)
     {
-        public override void AddServices(IServiceCollection serviceCollection)
-        {
-            base.AddServices(serviceCollection);
+        base.AddServices(serviceCollection);
 
-            // Transactions
+        // Transactions
 
-            serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
-            (
-                TransactionEntity.MongoCollectionName,
-                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
-                true
-            );
-        }
+        serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
+        (
+            TransactionEntity.MongoCollectionName,
+            _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
+            true
+        );
     }
 }

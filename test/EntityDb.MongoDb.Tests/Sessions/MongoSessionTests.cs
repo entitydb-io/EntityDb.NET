@@ -4,37 +4,37 @@ using EntityDb.MongoDb.Sessions;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Common.Transactions;
 using Xunit;
 
-namespace EntityDb.MongoDb.Tests.Sessions
+namespace EntityDb.MongoDb.Tests.Sessions;
+
+public class MongoSessionTests : TestsBase<Startup>
 {
-    public class MongoSessionTests : TestsBase<Startup>
+    public MongoSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
-        public MongoSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    }
+
+    [Fact]
+    public async Task WhenExecutingWriteMethods_ThenThrow()
+    {
+        // ARRANGE
+
+        var mongoSession = new MongoSession(default!, default!, default!, default!, new TransactionSessionOptions
         {
-        }
+            ReadOnly = true
+        });
 
-        [Fact]
-        public async Task WhenExecutingWriteMethods_ThenThrow()
-        {
-            // ARRANGE
+        // ASSERT
 
-            var mongoSession = new MongoSession(default!, default!, default!, default!, new()
-            {
-                ReadOnly = true
-            });
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Insert<object>(default!, default!));
 
-            // ASSERT
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Delete<object>(default!, default!));
 
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Insert<object>(default!, default!));
+        Should.Throw<CannotWriteInReadOnlyModeException>(() => mongoSession.StartTransaction());
 
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Delete<object>(default!, default!));
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.CommitTransaction());
 
-            Should.Throw<CannotWriteInReadOnlyModeException>(() => mongoSession.StartTransaction());
-
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.CommitTransaction());
-
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.AbortTransaction());
-        }
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.AbortTransaction());
     }
 }

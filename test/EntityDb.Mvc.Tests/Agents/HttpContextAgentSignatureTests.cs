@@ -2,146 +2,146 @@
 using EntityDb.Mvc.Tests.Seeder;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
-namespace EntityDb.Mvc.Tests.Agents
+namespace EntityDb.Mvc.Tests.Agents;
+
+public class HttpContextAgentSignatureTests
 {
-    public class HttpContextAgentSignatureTests
+    [Fact]
+    public void GivenNoRedactedHeaders_WhenHttpContextHasHeader_ThenAgentSignatureHasHeaderValue()
     {
-        [Fact]
-        public void GivenNoRedactedHeaders_WhenHttpContextHasHeader_ThenAgentSignatureHasHeaderValue()
+        // ARRANGE
+
+        const string headerName = nameof(headerName);
+        const string headerValue = nameof(headerValue);
+
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            // ARRANGE
+            RedactedHeaders = Array.Empty<string>()
+        };
 
-            const string HeaderName = nameof(HeaderName);
-            const string HeaderValue = nameof(HeaderValue);
-
-            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
-            {
-                RedactedHeaders = Array.Empty<string>()
-            };
-
-            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
-            {
-                Headers = new()
-                {
-                    [HeaderName] = new[] { HeaderValue }
-                }
-            });
-
-            // ACT
-
-            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
-
-            // ASSERT
-
-            agentSignature.Request.Headers.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Name.ShouldBe(HeaderName);
-            agentSignature.Request.Headers[0].Values.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Values[0].ShouldBe(HeaderValue);
-        }
-
-        [Fact]
-        public void GivenRedactedHeader_WhenHttpContextContainsOnlyThatHeader_ThenAgentSignatureHasRedactedHeader()
+        var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            // ARRANGE
-
-            const string HeaderName = nameof(HeaderName);
-            const string HeaderValue = nameof(HeaderValue);
-            const string RedactedValue = nameof(RedactedValue);
-
-            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+            Headers = new Dictionary<string, string[]>
             {
-                RedactedHeaders = new[] { HeaderName },
-                RedactedValue = RedactedValue,
-            };
+                [headerName] = new[] { headerValue }
+            }
+        });
 
-            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
-            {
-                Headers = new()
-                {
-                    [HeaderName] = new[] { HeaderValue }
-                }
-            });
+        // ACT
 
-            // ACT
+        var (request, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
 
-            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+        // ASSERT
 
-            // ASSERT
+        request.Headers.Length.ShouldBe(1);
+        request.Headers[0].Name.ShouldBe(headerName);
+        request.Headers[0].Values.Length.ShouldBe(1);
+        request.Headers[0].Values[0].ShouldBe(headerValue);
+    }
 
-            agentSignature.Request.Headers.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Name.ShouldBe(HeaderName);
-            agentSignature.Request.Headers[0].Values.Length.ShouldBe(1);
-            agentSignature.Request.Headers[0].Values[0].ShouldBe(RedactedValue);
-        }
+    [Fact]
+    public void GivenRedactedHeader_WhenHttpContextContainsOnlyThatHeader_ThenAgentSignatureHasRedactedHeader()
+    {
+        // ARRANGE
 
-        [Fact]
-        public void GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
+        const string headerName = nameof(headerName);
+        const string headerValue = nameof(headerValue);
+        const string redactedValue = nameof(redactedValue);
+
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            // ARRANGE
+            RedactedHeaders = new[] { headerName },
+            RedactedValue = redactedValue
+        };
 
-            const string QueryStringParamName = nameof(QueryStringParamName);
-            const string QueryStringParamValue = nameof(QueryStringParamValue);
-
-            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
-            {
-                RedactedQueryStringParams = Array.Empty<string>()
-            };
-
-            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
-            {
-                QueryStringParams = new()
-                {
-                    [QueryStringParamName] = new[] { QueryStringParamValue }
-                }
-            });
-
-            // ACT
-
-            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
-
-            // ASSERT
-
-            agentSignature.Request.QueryStringParams.Length.ShouldBe(1);
-            agentSignature.Request.QueryStringParams[0].Name.ShouldBe(QueryStringParamName);
-            agentSignature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
-            agentSignature.Request.QueryStringParams[0].Values[0].ShouldBe(QueryStringParamValue);
-        }
-
-        [Fact]
-        public void GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
+        var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            // ARRANGE
-
-            const string QueryStringParamName = nameof(QueryStringParamName);
-            const string QueryStringParamValue = nameof(QueryStringParamValue);
-            const string RedactedValue = nameof(RedactedValue);
-
-            var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+            Headers = new Dictionary<string, string[]>
             {
-                RedactedQueryStringParams = new[] { QueryStringParamName },
-                RedactedValue = RedactedValue,
-            };
+                [headerName] = new[] { headerValue }
+            }
+        });
 
-            var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
+        // ACT
+
+        var (request, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+
+        // ASSERT
+
+        request.Headers.Length.ShouldBe(1);
+        request.Headers[0].Name.ShouldBe(headerName);
+        request.Headers[0].Values.Length.ShouldBe(1);
+        request.Headers[0].Values[0].ShouldBe(redactedValue);
+    }
+
+    [Fact]
+    public void GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
+    {
+        // ARRANGE
+
+        const string queryStringParamName = nameof(queryStringParamName);
+        const string queryStringParamValue = nameof(queryStringParamValue);
+
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+        {
+            RedactedQueryStringParams = Array.Empty<string>()
+        };
+
+        var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
+        {
+            QueryStringParams = new Dictionary<string, string[]>
             {
-                QueryStringParams = new()
-                {
-                    [QueryStringParamName] = new[] { QueryStringParamValue }
-                }
-            });
+                [queryStringParamName] = new[] { queryStringParamValue }
+            }
+        });
 
-            // ACT
+        // ACT
 
-            var agentSignature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+        var (request, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
 
-            // ASSERT
+        // ASSERT
 
-            agentSignature.Request.QueryStringParams.Length.ShouldBe(1);
-            agentSignature.Request.QueryStringParams[0].Name.ShouldBe(QueryStringParamName);
-            agentSignature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
-            agentSignature.Request.QueryStringParams[0].Values[0].ShouldBe(RedactedValue);
-        }
+        request.QueryStringParams.Length.ShouldBe(1);
+        request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
+        request.QueryStringParams[0].Values.Length.ShouldBe(1);
+        request.QueryStringParams[0].Values[0].ShouldBe(queryStringParamValue);
+    }
+
+    [Fact]
+    public void GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
+    {
+        // ARRANGE
+
+        const string queryStringParamName = nameof(queryStringParamName);
+        const string queryStringParamValue = nameof(queryStringParamValue);
+        const string redactedValue = nameof(redactedValue);
+
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
+        {
+            RedactedQueryStringParams = new[] { queryStringParamName },
+            RedactedValue = redactedValue
+        };
+
+        var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
+        {
+            QueryStringParams = new Dictionary<string, string[]>
+            {
+                [queryStringParamName] = new[] { queryStringParamValue }
+            }
+        });
+
+        // ACT
+
+        var (request, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions);
+
+        // ASSERT
+
+        request.QueryStringParams.Length.ShouldBe(1);
+        request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
+        request.QueryStringParams[0].Values.Length.ShouldBe(1);
+        request.QueryStringParams[0].Values[0].ShouldBe(redactedValue);
     }
 }

@@ -1,29 +1,24 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Tags;
-using EntityDb.Common.Entities;
+﻿using EntityDb.Common.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace EntityDb.Common.Tests.Implementations.Entities
-{
-    public record TransactionEntity
+namespace EntityDb.Common.Tests.Implementations.Entities;
+
+public record TransactionEntity
     (
         ulong VersionNumber = default
     )
-        : IEntity<TransactionEntity>
+    : IEntity<TransactionEntity>
+{
+    public const string MongoCollectionName = "Test";
+    public const string RedisKeyNamespace = "test";
+
+    public static TransactionEntity Construct(Guid entityId)
     {
-        public const string MongoCollectionName = "Test";
-        public const string RedisKeyNamespace = "test";
+        return new TransactionEntity();
+    }
 
-        public static TransactionEntity Construct(Guid entityId)
-        {
-            return new();
-        }
-
-        public ulong GetVersionNumber()
-        {
-            return VersionNumber;
-        }
+    public ulong GetVersionNumber()
+    {
+        return VersionNumber;
     }
 }

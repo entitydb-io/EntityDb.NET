@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
 
-namespace EntityDb.Mvc.Tests.Seeder
+namespace EntityDb.Mvc.Tests.Seeder;
+
+public class HttpContextSeederOptions
 {
-    public class HttpContextSeederOptions
-    {
-        // Request
-        public Dictionary<string, string[]> Headers { get; set; } = new();
-        public Dictionary<string, string[]> QueryStringParams { get; set; } = new();
-        public string Method { get; set; } = "GET";
-        public string Scheme { get; set; } = "https";
-        public string Host { get; set; } = "localhost";
-        public string Path { get; set; } = "/";
-        public string Protocol { get; set; } = "HTTP/1.1";
+    // Request
+    public Dictionary<string, string[]> Headers { get; init; } = new();
+    public Dictionary<string, string[]> QueryStringParams { get; init; } = new();
+    public string Method { get; init; } = "GET";
+    public string Scheme { get; init; } = "https";
+    public string Host{ get; init; } = "localhost";
+    public string Path { get; init; } = "/";
+    public string Protocol { get; init; } = "HTTP/1.1";
 
-        // Connection
-        public bool HasIpAddress { get; set; }
+    // Connection
+    public bool HasIpAddress { get; init; }
 
-        // Claims Principal
-        public string? Role { get; set; }
-    }
+    // Claims Principal
+    public string? Role { get; init; }
 }

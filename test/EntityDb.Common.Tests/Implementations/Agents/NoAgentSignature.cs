@@ -1,4 +1,3 @@
-﻿namespace EntityDb.Common.Tests.Implementations.AgentSignature
-{
-    public record NoAgentSignature;
-}
+﻿namespace EntityDb.Common.Tests.Implementations.Agents;
+
+public record NoAgentSignature;

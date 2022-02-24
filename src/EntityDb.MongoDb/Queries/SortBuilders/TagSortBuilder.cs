@@ -5,34 +5,33 @@ using MongoDB.Driver;
 using System;
 using System.Linq.Expressions;
 
-namespace EntityDb.MongoDb.Queries.SortBuilders
+namespace EntityDb.MongoDb.Queries.SortBuilders;
+
+internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefinition<BsonDocument>>
 {
-    internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefinition<BsonDocument>>
+    public SortDefinition<BsonDocument> EntityId(bool ascending)
     {
-        public SortDefinition<BsonDocument> EntityId(bool ascending)
-        {
-            return Sort(ascending, nameof(TagDocument.EntityId));
-        }
+        return Sort(ascending, nameof(TagDocument.EntityId));
+    }
 
-        public SortDefinition<BsonDocument> EntityVersionNumber(bool ascending)
-        {
-            return Sort(ascending, nameof(TagDocument.EntityVersionNumber));
-        }
+    public SortDefinition<BsonDocument> EntityVersionNumber(bool ascending)
+    {
+        return Sort(ascending, nameof(TagDocument.EntityVersionNumber));
+    }
 
-        public SortDefinition<BsonDocument> TagType(bool ascending)
-        {
-            return SortDataType(ascending);
-        }
+    public SortDefinition<BsonDocument> TagType(bool ascending)
+    {
+        return SortDataType(ascending);
+    }
 
-        public SortDefinition<BsonDocument> TagProperty<TTag>(bool ascending,
-            Expression<Func<TTag, object>> leaseExpression)
-        {
-            return SortDataValue(ascending, leaseExpression);
-        }
+    public SortDefinition<BsonDocument> TagProperty<TTag>(bool ascending,
+        Expression<Func<TTag, object>> leaseExpression)
+    {
+        return SortDataValue(ascending, leaseExpression);
+    }
 
-        protected override string[] GetHoistedFieldNames()
-        {
-            return TagDocument.HoistedFieldNames;
-        }
+    protected override string[] GetHoistedFieldNames()
+    {
+        return TagDocument.HoistedFieldNames;
     }
 }

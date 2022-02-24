@@ -4,29 +4,28 @@ using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace EntityDb.Mvc.Agents
+namespace EntityDb.Mvc.Agents;
+
+internal sealed class HttpContextAgentAccessor : AgentAccessorBase
 {
-    internal sealed class HttpContextAgentAccessor : AgentAccessorBase
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
+
+    public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor, IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
+        _httpContextAccessor = httpContextAccessor;
+        _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
+    }
 
-        public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor, IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory)
+    protected override IAgent CreateAgent()
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext == null)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
+            throw new NoAgentException();
         }
 
-        protected override IAgent CreateAgent()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-
-            if (httpContext == null)
-            {
-                throw new NoAgentException();
-            }
-
-            return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory);
-        }
+        return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory);
     }
 }

@@ -6,79 +6,78 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace EntityDb.Redis.Envelopes
+namespace EntityDb.Redis.Envelopes;
+
+internal sealed record JsonElementEnvelope
 {
-    internal sealed record JsonElementEnvelope
+    public Dictionary<string, string> Headers { get; init; } = default!;
+    public JsonElement Value { get; init; }
+
+    private static JsonElement GetJsonElement(dynamic? @object)
     {
-        public Dictionary<string, string> Headers { get; init; } = default!;
-        public JsonElement Value { get; init; }
+        var json = JsonSerializer.Serialize(@object);
 
-        private static JsonElement GetJsonElement(dynamic? @object)
+        return JsonSerializer.Deserialize<JsonElement>(json);
+    }
+
+    public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
+    {
+        try
         {
-            var json = JsonSerializer.Serialize(@object);
-
-            return JsonSerializer.Deserialize<JsonElement>(json);
+            return (TObject)JsonSerializer.Deserialize(Value.GetRawText(),
+                typeResolver.ResolveType(Headers))!;
         }
-
-        public TObject Reconstruct<TObject>(ILogger logger, ITypeResolver typeResolver)
+        catch (Exception exception)
         {
-            try
-            {
-                return (TObject)JsonSerializer.Deserialize(Value.GetRawText(),
-                    typeResolver.ResolveType(Headers))!;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to reconstruct.");
+            logger.LogError(exception, "Unable to reconstruct.");
 
-                throw new DeserializeException();
-            }
+            throw new DeserializeException();
         }
+    }
 
-        public byte[] Serialize(ILogger logger)
+    public byte[] Serialize(ILogger logger)
+    {
+        try
         {
-            try
-            {
-                return JsonSerializer.SerializeToUtf8Bytes(this, typeof(JsonElementEnvelope));
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to serialize.");
-
-                throw new SerializeException();
-            }
+            return JsonSerializer.SerializeToUtf8Bytes(this, typeof(JsonElementEnvelope));
         }
-
-        public static JsonElementEnvelope Deserialize(byte[] utf8JsonBytes, ILogger logger)
+        catch (Exception exception)
         {
-            try
-            {
-                return (JsonElementEnvelope)JsonSerializer.Deserialize(utf8JsonBytes, typeof(JsonElementEnvelope))!;
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to deserialize.");
+            logger.LogError(exception, "Unable to serialize.");
 
-                throw new DeserializeException();
-            }
+            throw new SerializeException();
         }
+    }
 
-        public static JsonElementEnvelope Deconstruct(dynamic? @object, ILogger logger)
+    public static JsonElementEnvelope Deserialize(byte[] utf8JsonBytes, ILogger logger)
+    {
+        try
         {
-            try
-            {
-                var jsonElement = GetJsonElement(@object);
+            return (JsonElementEnvelope)JsonSerializer.Deserialize(utf8JsonBytes, typeof(JsonElementEnvelope))!;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Unable to deserialize.");
 
-                var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+            throw new DeserializeException();
+        }
+    }
 
-                return new JsonElementEnvelope { Headers = headers, Value = jsonElement };
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Unable to deconstruct.");
+    public static JsonElementEnvelope Deconstruct(dynamic? @object, ILogger logger)
+    {
+        try
+        {
+            var jsonElement = GetJsonElement(@object);
 
-                throw new SerializeException();
-            }
+            var headers = EnvelopeHelper.GetTypeHeaders((@object as object)!.GetType());
+
+            return new JsonElementEnvelope { Headers = headers, Value = jsonElement };
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Unable to deconstruct.");
+
+            throw new SerializeException();
         }
     }
 }

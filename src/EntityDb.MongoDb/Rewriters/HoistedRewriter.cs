@@ -1,57 +1,56 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.IO;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityDb.MongoDb.Rewriters
+namespace EntityDb.MongoDb.Rewriters;
+
+internal class HoistedRewriter : BsonDocumentRewriter
 {
-    internal class HoistedRewriter : BsonDocumentRewriter
+    private readonly string[] _hoistedFieldNames;
+    private readonly string _parentFieldName;
+
+    private bool _foundTopDocument;
+
+    public HoistedRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
+        base(bsonWriter)
     {
-        protected readonly string[] _hoistedFieldNames;
-        protected readonly string _parentFieldName;
+        _parentFieldName = parentFieldName;
+        _hoistedFieldNames = hoistedFieldNames;
+    }
 
-        private bool FoundTopDocument;
-
-        public HoistedRewriter(BsonWriter bsonWriter, string parentFieldName, string[] hoistedFieldNames) :
-            base(bsonWriter)
+    protected override void RewriteDocument(BsonElement[] bsonElements)
+    {
+        if (_foundTopDocument)
         {
-            _parentFieldName = parentFieldName;
-            _hoistedFieldNames = hoistedFieldNames;
+            base.RewriteDocument(bsonElements);
         }
-
-        protected override void RewriteDocument(BsonElement[] bsonElements)
+        else
         {
-            if (FoundTopDocument)
+            _foundTopDocument = true;
+
+            RewriteHoisted(bsonElements);
+        }
+    }
+
+    private void RewriteHoisted(IEnumerable<BsonElement> bsonElements)
+    {
+        _bsonWriter.WriteStartDocument();
+
+        foreach (var bsonElement in bsonElements)
+        {
+            if (_hoistedFieldNames.Contains(bsonElement.Name))
             {
-                base.RewriteDocument(bsonElements);
+                _bsonWriter.WriteName(bsonElement.Name);
             }
             else
             {
-                FoundTopDocument = true;
-
-                RewriteHoisted(bsonElements);
-            }
-        }
-
-        protected void RewriteHoisted(BsonElement[] bsonElements)
-        {
-            _bsonWriter.WriteStartDocument();
-
-            foreach (var bsonElement in bsonElements)
-            {
-                if (_hoistedFieldNames.Contains(bsonElement.Name))
-                {
-                    _bsonWriter.WriteName(bsonElement.Name);
-                }
-                else
-                {
-                    _bsonWriter.WriteName(_parentFieldName + "." + bsonElement.Name);
-                }
-
-                Rewrite(bsonElement.Value);
+                _bsonWriter.WriteName(_parentFieldName + "." + bsonElement.Name);
             }
 
-            _bsonWriter.WriteEndDocument();
+            Rewrite(bsonElement.Value);
         }
+
+        _bsonWriter.WriteEndDocument();
     }
 }

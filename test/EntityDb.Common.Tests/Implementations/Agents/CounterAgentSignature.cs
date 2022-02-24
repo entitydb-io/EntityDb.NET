@@ -1,4 +1,3 @@
-﻿namespace EntityDb.Common.Tests.Implementations.AgentSignature
-{
-    public record CounterAgentSignature(int Number);
-}
+﻿namespace EntityDb.Common.Tests.Implementations.Agents;
+
+public record CounterAgentSignature(int Number);

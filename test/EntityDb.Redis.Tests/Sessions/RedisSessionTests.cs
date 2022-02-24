@@ -4,31 +4,31 @@ using EntityDb.Redis.Sessions;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Common.Snapshots;
 using Xunit;
 
-namespace EntityDb.Redis.Tests.Sessions
+namespace EntityDb.Redis.Tests.Sessions;
+
+public class RedisSessionTests : TestsBase<Startup>
 {
-    public class RedisSessionTests : TestsBase<Startup>
+    public RedisSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
-        public RedisSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    }
+
+    [Fact]
+    public async Task WhenExecutingWriteMethods_ThenThrow()
+    {
+        // ARRANGE
+
+        var readOnlyRedisSession = new RedisSession(default!, new SnapshotSessionOptions
         {
-        }
+            ReadOnly = true
+        });
 
-        [Fact]
-        public async Task WhenExecutingWriteMethods_ThenThrow()
-        {
-            // ARRANGE
+        // ASSERT
 
-            var readOnlyRedisSession = new RedisSession(default!, new()
-            {
-                ReadOnly = true,
-            });
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Insert(default!, default!));
 
-            // ASSERT
-
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Insert(default!, default!));
-
-            await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Delete(default!));
-        }
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Delete(default!));
     }
 }

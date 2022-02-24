@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal interface IEntityDocument : ITransactionDocument
 {
-    internal interface IEntityDocument : ITransactionDocument
-    {
-        Guid EntityId { get; }
-        ulong EntityVersionNumber { get; }
-    }
+    Guid EntityId { get; }
+    ulong EntityVersionNumber { get; }
 }

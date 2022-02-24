@@ -3,31 +3,30 @@ using System;
 using System.CommandLine;
 using System.Threading.Tasks;
 
-namespace EntityDb.MongoDb.Provisioner
+namespace EntityDb.MongoDb.Provisioner;
+
+internal static class Program
 {
-    internal static class Program
+    public static Task<int> Main(string[] args)
     {
-        public static Task<int> Main(string[] args)
-        {
 #if DEBUG
-            if (args.Length == 0)
-            {
-                Console.Write("Please enter args: ");
+        if (args.Length == 0)
+        {
+            Console.Write("Please enter args: ");
 
-                var input = Console.ReadLine() ?? string.Empty;
+            var input = Console.ReadLine() ?? string.Empty;
 
-                args = input.Split(' ');
-            }
+            args = input.Split(' ');
+        }
 #endif
 
-            var rootCommand = new RootCommand();
+        var rootCommand = new RootCommand();
 
-            CreateRole.AddTo(rootCommand);
-            CreateUser.AddTo(rootCommand);
-            CreateCollections.AddTo(rootCommand);
-            CreateCollectionsDirect.AddTo(rootCommand);
+        CreateRole.AddTo(rootCommand);
+        CreateUser.AddTo(rootCommand);
+        CreateCollections.AddTo(rootCommand);
+        CreateCollectionsDirect.AddTo(rootCommand);
 
-            return rootCommand.InvokeAsync(args);
-        }
+        return rootCommand.InvokeAsync(args);
     }
 }

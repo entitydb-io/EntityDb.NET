@@ -4,33 +4,32 @@ using Moq;
 using System.Linq;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Extensions
+namespace EntityDb.Common.Tests.Extensions;
+
+public class EntityExtensions
 {
-    public class EntityExtensions
+    [Theory]
+    [InlineData(2)]
+    public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureReduceIsCalled(
+        int numberOfTimes)
     {
-        [Theory]
-        [InlineData(2)]
-        public void GivenEntityAndRepeatedCommand_WhenExecutingAndReducing_ThenEnsureReduceIsCalled(
-            int numberOfTimes)
-        {
-            // ARRANGE
+        // ARRANGE
 
-            var commandMock = new Mock<ICommand<object>>(MockBehavior.Strict);
+        var commandMock = new Mock<ICommand<object>>(MockBehavior.Strict);
 
-            commandMock
-                .Setup(command => command.Reduce(It.IsAny<object>()))
-                .Returns((object @object) => @object)
-                .Verifiable();
+        commandMock
+            .Setup(command => command.Reduce(It.IsAny<object>()))
+            .Returns((object @object) => @object)
+            .Verifiable();
 
-            var entity = new object();
+        var entity = new object();
 
-            // ACT
+        // ACT
 
-            entity.Reduce(Enumerable.Repeat(commandMock.Object, numberOfTimes));
+        entity.Reduce(Enumerable.Repeat(commandMock.Object, numberOfTimes));
 
-            // ASSERT
+        // ASSERT
 
-            commandMock.Verify(command => command.Reduce(It.IsAny<object>()), Times.Exactly(numberOfTimes));
-        }
+        commandMock.Verify(command => command.Reduce(It.IsAny<object>()), Times.Exactly(numberOfTimes));
     }
 }

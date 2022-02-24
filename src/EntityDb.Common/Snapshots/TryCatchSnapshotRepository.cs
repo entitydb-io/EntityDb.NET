@@ -3,48 +3,47 @@ using EntityDb.Abstractions.Snapshots;
 using System;
 using System.Threading.Tasks;
 
-namespace EntityDb.Common.Snapshots
+namespace EntityDb.Common.Snapshots;
+
+internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWrapper<TEntity>
 {
-    internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWrapper<TEntity>
+    private readonly ILogger _logger;
+
+    public TryCatchSnapshotRepository
+    (
+        ISnapshotRepository<TEntity> snapshotRepository,
+        ILogger logger
+    )
+        : base(snapshotRepository)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        public TryCatchSnapshotRepository
-        (
-            ISnapshotRepository<TEntity> snapshotRepository,
-            ILogger logger
-        )
-            : base(snapshotRepository)
+    protected override async Task<TEntity?> WrapQuery(Task<TEntity?> task)
+    {
+        try
         {
-            _logger = logger;
+            return await task;
         }
-
-        protected override async Task<TEntity?> WrapQuery(Task<TEntity?> task)
+        catch (Exception exception)
         {
-            try
-            {
-                return await task;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed.");
 
-                return default;
-            }
+            return default;
         }
+    }
 
-        protected override async Task<bool> WrapCommand(Task<bool> task)
+    protected override async Task<bool> WrapCommand(Task<bool> task)
+    {
+        try
         {
-            try
-            {
-                return await task;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
+            return await task;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "The operation cannot be completed.");
 
-                return default;
-            }
+            return default;
         }
     }
 }

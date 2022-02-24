@@ -10,69 +10,67 @@ using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
 
-namespace EntityDb.Redis.Snapshots
+namespace EntityDb.Redis.Snapshots;
+
+internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
 {
-    internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
+    private readonly string _connectionString;
+    private readonly string _keyNamespace;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+    private readonly ITypeResolver _typeResolver;
+    private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
+
+    public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
+        ILoggerFactory loggerFactory,
+        ITypeResolver typeResolver, string connectionString, string keyNamespace,
+        ISnapshotStrategy<TEntity>? snapshotStrategy = null)
     {
-        private readonly string _connectionString;
+        _optionsFactory = optionsFactory;
+        _loggerFactory = loggerFactory;
+        _typeResolver = typeResolver;
+        _connectionString = connectionString;
+        _keyNamespace = keyNamespace;
+        _snapshotStrategy = snapshotStrategy;
+    }
 
-        protected readonly string _keyNamespace;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
-        private readonly ITypeResolver _typeResolver;
-        protected readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
+    private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
+    {
+        var configurationOptions = ConfigurationOptions.Parse(_connectionString);
 
-        public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
-            ILoggerFactory loggerFactory,
-            ITypeResolver typeResolver, string connectionString, string keyNamespace,
-            ISnapshotStrategy<TEntity>? snapshotStrategy = null)
-        {
-            _optionsFactory = optionsFactory;
-            _loggerFactory = loggerFactory;
-            _typeResolver = typeResolver;
-            _connectionString = connectionString;
-            _keyNamespace = keyNamespace;
-            _snapshotStrategy = snapshotStrategy;
-        }
+        var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions);
 
-        public async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
-        {
-            var configurationOptions = ConfigurationOptions.Parse(_connectionString);
+        return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
+    }
 
-            var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions);
+    public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
+    {
+        var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
-            return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
-        }
+        var redisSession = await CreateSession(snapshotSessionOptions);
 
-        public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
-        {
-            var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
+        var logger = _loggerFactory.CreateLogger<TEntity>();
 
-            var redisSession = await CreateSession(snapshotSessionOptions);
+        var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
+        (
+            _keyNamespace,
+            _typeResolver,
+            _snapshotStrategy,
+            redisSession,
+            logger
+        );
 
-            var logger = _loggerFactory.CreateLogger<TEntity>();
+        return redisSnapshotRepository.UseTryCatch(logger);
+    }
 
-            var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
-            (
-                _keyNamespace,
-                _typeResolver,
-                _snapshotStrategy,
-                redisSession,
-                logger
-            );
-
-            return redisSnapshotRepository.UseTryCatch(logger);
-        }
-
-        public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
-            string connectionString, string keyNamespace)
-        {
-            return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TEntity>>
-            (
-                serviceProvider,
-                connectionString,
-                keyNamespace
-            );
-        }
+    public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
+        string connectionString, string keyNamespace)
+    {
+        return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TEntity>>
+        (
+            serviceProvider,
+            connectionString,
+            keyNamespace
+        );
     }
 }

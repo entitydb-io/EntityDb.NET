@@ -5,24 +5,23 @@ using MongoDB.Driver;
 using System;
 using System.Linq.Expressions;
 
-namespace EntityDb.MongoDb.Queries.SortBuilders
+namespace EntityDb.MongoDb.Queries.SortBuilders;
+
+internal sealed class AgentSignatureSortBuilder : SortBuilderBase, IAgentSignatureSortBuilder<SortDefinition<BsonDocument>>
 {
-    internal sealed class AgentSignatureSortBuilder : SortBuilderBase, IAgentSignatureSortBuilder<SortDefinition<BsonDocument>>
+    public SortDefinition<BsonDocument> EntityIds(bool ascending)
     {
-        public SortDefinition<BsonDocument> EntityIds(bool ascending)
-        {
-            return Sort(ascending, nameof(AgentSignatureDocument.EntityIds));
-        }
+        return Sort(ascending, nameof(AgentSignatureDocument.EntityIds));
+    }
 
-        public SortDefinition<BsonDocument> AgentSignatureType(bool ascending)
-        {
-            return SortDataType(ascending);
-        }
+    public SortDefinition<BsonDocument> AgentSignatureType(bool ascending)
+    {
+        return SortDataType(ascending);
+    }
 
-        public SortDefinition<BsonDocument> AgentSignatureProperty<TAgentSignature>(bool ascending,
-            Expression<Func<TAgentSignature, object>> agentSignatureExpression)
-        {
-            return SortDataValue(ascending, agentSignatureExpression);
-        }
+    public SortDefinition<BsonDocument> AgentSignatureProperty<TAgentSignature>(bool ascending,
+        Expression<Func<TAgentSignature, object>> agentSignatureExpression)
+    {
+        return SortDataValue(ascending, agentSignatureExpression);
     }
 }

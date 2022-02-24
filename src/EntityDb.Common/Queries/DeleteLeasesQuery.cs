@@ -7,34 +7,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityDb.Common.Queries
+namespace EntityDb.Common.Queries;
+
+internal sealed record DeleteLeasesQuery(Guid EntityId, IReadOnlyCollection<ILease> Leases) : ILeaseQuery
 {
-    internal sealed record DeleteLeasesQuery(Guid EntityId, IReadOnlyCollection<ILease> Leases) : ILeaseQuery
+    public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
     {
-        public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
-        {
-            return builder.And
+        return builder.And
+        (
+            builder.EntityIdIn(EntityId),
+            builder.Or
             (
-                builder.EntityIdIn(EntityId),
-                builder.Or
-                (
-                    Leases
-                        .Select(deleteLease => builder.LeaseMatches((Lease lease) =>
-                            lease.Scope == deleteLease.Scope &&
-                            lease.Label == deleteLease.Label &&
-                            lease.Value == deleteLease.Value))
-                        .ToArray()
-                )
-            );
-        }
-
-        public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
-        {
-            return default;
-        }
-
-        public int? Skip => null;
-
-        public int? Take => null;
+                Leases
+                    .Select(deleteLease => builder.LeaseMatches((Lease lease) =>
+                        lease.Scope == deleteLease.Scope &&
+                        lease.Label == deleteLease.Label &&
+                        lease.Value == deleteLease.Value))
+                    .ToArray()
+            )
+        );
     }
+
+    public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    {
+        return default;
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
 }

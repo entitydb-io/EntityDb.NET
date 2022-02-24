@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models
+namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
+
+internal class MongoDbAtlasResource
 {
-    internal class MongoDbAtlasResource
-    {
-        [JsonPropertyName("db")] public string? Db { get; set; }
+    [JsonPropertyName("db")] public string? Db { get; set; }
 
-        [JsonPropertyName("collection")] public string? Collection { get; set; }
+    [JsonPropertyName("collection")] public string? Collection { get; set; }
 
-        [JsonPropertyName("cluster")] public bool? Cluster { get; set; }
-    }
+    [JsonPropertyName("cluster")] public bool? Cluster { get; set; }
 }

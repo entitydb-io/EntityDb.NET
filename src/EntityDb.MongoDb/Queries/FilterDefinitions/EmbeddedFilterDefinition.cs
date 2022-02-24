@@ -5,42 +5,41 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
-namespace EntityDb.MongoDb.Queries.FilterDefinitions
+namespace EntityDb.MongoDb.Queries.FilterDefinitions;
+
+internal sealed class
+    EmbeddedFilterDefinition<TParentDocument, TEmbeddedDocument> : FilterDefinition<TParentDocument>
 {
-    internal sealed class
-        EmbeddedFilterDefinition<TParentDocument, TEmbeddedDocument> : FilterDefinition<TParentDocument>
+    private readonly FilterDefinition<TEmbeddedDocument> _childFilter;
+    private readonly string[] _hoistedFieldNames;
+    private readonly FieldDefinition<TParentDocument> _parentField;
+
+    public EmbeddedFilterDefinition(FieldDefinition<TParentDocument> parentField,
+        FilterDefinition<TEmbeddedDocument> childFilter, string[] hoistedFieldNames)
     {
-        private readonly FilterDefinition<TEmbeddedDocument> _childFilter;
-        private readonly string[] _hoistedFieldNames;
-        private readonly FieldDefinition<TParentDocument> _parentField;
+        _parentField = parentField;
+        _childFilter = childFilter;
+        _hoistedFieldNames = hoistedFieldNames;
+    }
 
-        public EmbeddedFilterDefinition(FieldDefinition<TParentDocument> parentField,
-            FilterDefinition<TEmbeddedDocument> childFilter, string[] hoistedFieldNames)
-        {
-            _parentField = parentField;
-            _childFilter = childFilter;
-            _hoistedFieldNames = hoistedFieldNames;
-        }
+    public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
+        IBsonSerializerRegistry bsonSerializerRegistry, LinqProvider linqProvider)
+    {
+        var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry, linqProvider);
 
-        public override BsonDocument Render(IBsonSerializer<TParentDocument> parentDocumentSerializer,
-            IBsonSerializerRegistry bsonSerializerRegistry, LinqProvider linqProvider)
-        {
-            var renderedParentField = _parentField.Render(parentDocumentSerializer, bsonSerializerRegistry, linqProvider);
+        var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
 
-            var childDocumentSerializer = bsonSerializerRegistry.GetSerializer<TEmbeddedDocument>();
+        var renderedChildFilter = _childFilter.Render(childDocumentSerializer, bsonSerializerRegistry, linqProvider);
 
-            var renderedChildFilter = _childFilter.Render(childDocumentSerializer, bsonSerializerRegistry, linqProvider);
+        var document = new BsonDocument();
 
-            var document = new BsonDocument();
+        using var bsonWriter = new BsonDocumentWriter(document);
 
-            using var bsonWriter = new BsonDocumentWriter(document);
+        var embeddedFilterRewriter =
+            new HoistedRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
 
-            var embeddedFilterRewriter =
-                new HoistedRewriter(bsonWriter, renderedParentField.FieldName, _hoistedFieldNames);
+        embeddedFilterRewriter.Rewrite(renderedChildFilter);
 
-            embeddedFilterRewriter.Rewrite(renderedChildFilter);
-
-            return document;
-        }
+        return document;
     }
 }

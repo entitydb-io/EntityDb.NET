@@ -3,44 +3,43 @@ using EntityDb.Abstractions.Transactions;
 using System;
 using System.Threading.Tasks;
 
-namespace EntityDb.Common.Transactions
+namespace EntityDb.Common.Transactions;
+
+internal sealed class TryCatchTransactionRepository<TEntity> : TransactionRepositoryWrapper<TEntity>
 {
-    internal sealed class TryCatchTransactionRepository<TEntity> : TransactionRepositoryWrapper<TEntity>
+    private readonly ILogger _logger;
+
+    public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) :
+        base(transactionRepository)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) :
-            base(transactionRepository)
+    protected override async Task<T[]> WrapQuery<T>(Task<T[]> task)
+    {
+        try
         {
-            _logger = logger;
+            return await task;
         }
-
-        protected override async Task<T[]> WrapQuery<T>(Task<T[]> task)
+        catch (Exception exception)
         {
-            try
-            {
-                return await task;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed.");
 
-                return Array.Empty<T>();
-            }
+            return Array.Empty<T>();
         }
+    }
 
-        protected override async Task<bool> WrapCommand(Task<bool> task)
+    protected override async Task<bool> WrapCommand(Task<bool> task)
+    {
+        try
         {
-            try
-            {
-                return await task;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "The operation cannot be completed.");
+            return await task;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "The operation cannot be completed.");
 
-                return default;
-            }
+            return default;
         }
     }
 }

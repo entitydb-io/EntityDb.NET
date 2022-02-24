@@ -5,38 +5,37 @@ using MongoDB.Driver;
 using System;
 using System.Linq.Expressions;
 
-namespace EntityDb.MongoDb.Queries.FilterBuilders
+namespace EntityDb.MongoDb.Queries.FilterBuilders;
+
+internal sealed class LeaseFilterBuilder : FilterBuilderBase, ILeaseFilterBuilder<FilterDefinition<BsonDocument>>
 {
-    internal sealed class LeaseFilterBuilder : FilterBuilderBase, ILeaseFilterBuilder<FilterDefinition<BsonDocument>>
+    public FilterDefinition<BsonDocument> EntityIdIn(params Guid[] entityIds)
     {
-        public FilterDefinition<BsonDocument> EntityIdIn(params Guid[] entityIds)
-        {
-            return In(nameof(LeaseDocument.EntityId), entityIds);
-        }
+        return In(nameof(LeaseDocument.EntityId), entityIds);
+    }
 
-        public FilterDefinition<BsonDocument> EntityVersionNumberGte(ulong entityVersionNumber)
-        {
-            return Gte(nameof(LeaseDocument.EntityVersionNumber), entityVersionNumber);
-        }
+    public FilterDefinition<BsonDocument> EntityVersionNumberGte(ulong entityVersionNumber)
+    {
+        return Gte(nameof(LeaseDocument.EntityVersionNumber), entityVersionNumber);
+    }
 
-        public FilterDefinition<BsonDocument> EntityVersionNumberLte(ulong entityVersionNumber)
-        {
-            return Lte(nameof(LeaseDocument.EntityVersionNumber), entityVersionNumber);
-        }
+    public FilterDefinition<BsonDocument> EntityVersionNumberLte(ulong entityVersionNumber)
+    {
+        return Lte(nameof(LeaseDocument.EntityVersionNumber), entityVersionNumber);
+    }
 
-        public FilterDefinition<BsonDocument> LeaseTypeIn(params Type[] leaseTypes)
-        {
-            return DataTypeIn(leaseTypes);
-        }
+    public FilterDefinition<BsonDocument> LeaseTypeIn(params Type[] leaseTypes)
+    {
+        return DataTypeIn(leaseTypes);
+    }
 
-        public FilterDefinition<BsonDocument> LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
-        {
-            return DataValueMatches(leaseExpression);
-        }
+    public FilterDefinition<BsonDocument> LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
+    {
+        return DataValueMatches(leaseExpression);
+    }
 
-        protected override string[] GetHoistedFieldNames()
-        {
-            return LeaseDocument.HoistedFieldNames;
-        }
+    protected override string[] GetHoistedFieldNames()
+    {
+        return LeaseDocument.HoistedFieldNames;
     }
 }

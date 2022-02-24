@@ -13,204 +13,203 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Transactions
+namespace EntityDb.Common.Tests.Transactions;
+
+public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 {
-    public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
+    public SingleEntityTransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        public SingleEntityTransactionBuilderTests(IServiceProvider serviceProvider) : base(serviceProvider)
-        {
-        }
+    }
 
-        [Fact]
-        public void GivenEntityNotKnown_WhenGettingEntity_ThenThrow()
-        {
-            // ARRANGE
+    [Fact]
+    public void GivenEntityNotKnown_WhenGettingEntity_ThenThrow()
+    {
+        // ARRANGE
 
-            using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope();
 
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(default);
 
-            // ASSERT
+        // ASSERT
 
-            transactionBuilder.IsEntityKnown().ShouldBeFalse();
+        transactionBuilder.IsEntityKnown().ShouldBeFalse();
 
-            Should.Throw<KeyNotFoundException>(() => transactionBuilder.GetEntity());
-        }
+        Should.Throw<KeyNotFoundException>(() => transactionBuilder.GetEntity());
+    }
 
-        [Fact]
-        public void GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity()
-        {
-            // ARRANGE
+    [Fact]
+    public void GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity()
+    {
+        // ARRANGE
 
-            using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope();
 
-            var expectedEntityId = Guid.NewGuid();
+        var expectedEntityId = Guid.NewGuid();
 
-            var expectedEntity = TransactionEntity
-                .Construct(expectedEntityId);
+        var expectedEntity = TransactionEntity
+            .Construct(expectedEntityId);
 
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(expectedEntityId);
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(expectedEntityId);
 
-            transactionBuilder.Load(expectedEntity);
+        transactionBuilder.Load(expectedEntity);
 
-            // ARRANGE ASSERTIONS
+        // ARRANGE ASSERTIONS
 
-            transactionBuilder.IsEntityKnown().ShouldBeTrue();
+        transactionBuilder.IsEntityKnown().ShouldBeTrue();
 
-            // ACT
+        // ACT
 
-            var actualEntityId = transactionBuilder.EntityId;
-            var actualEntity = transactionBuilder.GetEntity();
+        var actualEntityId = transactionBuilder.EntityId;
+        var actualEntity = transactionBuilder.GetEntity();
 
-            // ASSERT
+        // ASSERT
 
-            actualEntityId.ShouldBe(expectedEntityId);
-            actualEntity.ShouldBe(expectedEntity);
-        }
+        actualEntityId.ShouldBe(expectedEntityId);
+        actualEntity.ShouldBe(expectedEntity);
+    }
 
-        [Fact]
-        public void GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
-        {
-            // ARRANGE
+    [Fact]
+    public void GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
+    {
+        // ARRANGE
 
-            using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope();
 
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(default);
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(default);
 
-            // ACT
+        // ACT
 
-            var transaction = transactionBuilder
-                .Add(new Lease(default!, default!, default!))
-                .Build(default!, default);
+        var transaction = transactionBuilder
+            .Add(new Lease(default!, default!, default!))
+            .Build(default!, default);
 
-            // ASSERT
+        // ASSERT
 
-            transaction.Steps.Length.ShouldBe(1);
+        transaction.Steps.Length.ShouldBe(1);
             
-            var leaseTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ILeaseTransactionStep<TransactionEntity>>()!;
+        var leaseTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ILeaseTransactionStep<TransactionEntity>>()!;
 
-            leaseTransactionStep.Leases.Insert.ShouldNotBeEmpty();
-        }
+        leaseTransactionStep.Leases.Insert.ShouldNotBeEmpty();
+    }
 
-        [Fact]
-        public async Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows()
+    [Fact]
+    public async Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows()
+    {
+        // ARRANGE
+
+        var entityId = Guid.NewGuid();
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddScoped(_ =>
+                GetMockedTransactionRepositoryFactory(
+                    new ICommand<TransactionEntity>[] { new DoNothing() }));
+        });
 
-            var entityId = Guid.NewGuid();
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(entityId);
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(
-                        new ICommand<TransactionEntity>[] { new DoNothing() }));
-            });
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(default!);
 
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(entityId);
+        var entity = await entityRepository.GetCurrent(entityId);
 
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(default!);
+        // ACT
 
-            var entity = await entityRepository.GetCurrent(entityId);
+        transactionBuilder.Load(entity);
 
-            // ACT
+        // ASSERT
 
+        Should.Throw<EntityAlreadyKnownException>(() =>
+        {
             transactionBuilder.Load(entity);
+        });
+    }
 
-            // ASSERT
+    [Fact]
+    public void GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionNumberAutoIncrements()
+    {
+        // ARRANGE
 
-            Should.Throw<EntityAlreadyKnownException>(() =>
-            {
-                transactionBuilder.Load(entity);
-            });
-        }
+        const ulong numberOfVersionsToTest = 10;
 
-        [Fact]
-        public void GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionNumberAutoIncrements()
+        var entityId = Guid.NewGuid();
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            // ARRANGE
+            serviceCollection.AddScoped(_ =>
+                GetMockedTransactionRepositoryFactory());
+        });
 
-            const ulong NumberOfVersionsToTest = 10;
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(entityId);
 
-            var entityId = Guid.NewGuid();
+        // ACT
 
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory());
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(entityId);
-
-            // ACT
-
-            for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
-            {
-                transactionBuilder.Append(new DoNothing());
-            }
-
-            var transaction = transactionBuilder.Build(default!, default);
-
-            // ASSERT
-
-            for (ulong i = 1; i <= NumberOfVersionsToTest; i++)
-            {
-                var index = (int)i - 1;
-
-                var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
-
-                commandTransactionStep.NextEntityVersionNumber.ShouldBe(i);
-            }
-        }
-
-        [Fact]
-        public async Task GivenExistingEntity_WhenAppendingNewCommand_ThenTransactionBuilds()
+        for (ulong i = 1; i <= numberOfVersionsToTest; i++)
         {
-            // ARRANGE
-
-            var entityId = Guid.NewGuid();
-
-            using var serviceScope = CreateServiceScope(serviceCollection =>
-            {
-                serviceCollection.AddScoped(_ =>
-                    GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
-            });
-
-            var transactionBuilder = serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
-                .ForSingleEntity(entityId);
-
-            await using var entityRepository = await serviceScope.ServiceProvider
-                .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-                    .CreateRepository(default!);
-
-            var entity = await entityRepository.GetCurrent(entityId);
-
-            // ACT
-
-            var transaction = transactionBuilder
-                .Load(entity)
-                .Append(new DoNothing())
-                .Build(default!, default);
-
-            // ASSERT
-
-            transaction.Steps.Length.ShouldBe(1);
-
-            var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
-
-            commandTransactionStep.Command.ShouldBeEquivalentTo(new DoNothing());
+            transactionBuilder.Append(new DoNothing());
         }
+
+        var transaction = transactionBuilder.Build(default!, default);
+
+        // ASSERT
+
+        for (ulong i = 1; i <= numberOfVersionsToTest; i++)
+        {
+            var index = (int)i - 1;
+
+            var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+            commandTransactionStep.NextEntityVersionNumber.ShouldBe(i);
+        }
+    }
+
+    [Fact]
+    public async Task GivenExistingEntity_WhenAppendingNewCommand_ThenTransactionBuilds()
+    {
+        // ARRANGE
+
+        var entityId = Guid.NewGuid();
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            serviceCollection.AddScoped(_ =>
+                GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
+        });
+
+        var transactionBuilder = serviceScope.ServiceProvider
+            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .ForSingleEntity(entityId);
+
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(default!);
+
+        var entity = await entityRepository.GetCurrent(entityId);
+
+        // ACT
+
+        var transaction = transactionBuilder
+            .Load(entity)
+            .Append(new DoNothing())
+            .Build(default!, default);
+
+        // ASSERT
+
+        transaction.Steps.Length.ShouldBe(1);
+
+        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep<TransactionEntity>>()!;
+
+        commandTransactionStep.Command.ShouldBeEquivalentTo(new DoNothing());
     }
 }
