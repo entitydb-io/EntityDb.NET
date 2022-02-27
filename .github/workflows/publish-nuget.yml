@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_release.outputs.tag_name }}
-      notes: ${{ steps.get_release.outputs.body }}
     steps:
       - id: get_release
         uses: bruceadams/get-release@v1.2.2
@@ -22,8 +21,6 @@ jobs:
     name: Publish to Nuget.org
     runs-on: ubuntu-latest
     needs: extract
-    env:
-      NOTES: ${{ needs.extract.outputs.notes }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -43,6 +40,6 @@ jobs:
       - name: Run Project Tests
         run: dotnet test EntityDb.sln --no-restore -c Debug
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }} /p:PackageReleaseNotes=${Env:NOTES}
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }}
       - name: Publish to Nuget.org
         run: dotnet nuget push */**.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
