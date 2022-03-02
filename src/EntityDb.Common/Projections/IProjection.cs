@@ -6,7 +6,7 @@ namespace EntityDb.Common.Projections;
 ///     Provides basic functionality for the common implementations.
 /// </summary>
 /// <typeparam name="TProjection"></typeparam>
-public interface IStatementProjection<out TProjection>
+public interface IProjection<out TProjection>
 {
     /// <summary>
     ///     Creates a new instance of a <typeparamref name="TProjection" />.
@@ -22,10 +22,10 @@ public interface IStatementProjection<out TProjection>
     ulong GetEntityVersionNumber(Guid entityId);
 
     /// <summary>
-    ///     Returns a projection with a greater entity version number than before.
+    ///     Returns a new <typeparamref name="TProjection"/> that incorporates the commands for a particular entity id.
     /// </summary>
-    /// <param name="entityId">The id of an entity for which to skip a version number.</param>
-    /// <param name="skipCount">The number of entity version numbers to skip.</param>
-    /// <returns></returns>
-    TProjection SkipEntityVersionNumbers(Guid entityId, int skipCount);
+    /// <param name="entityId">The id of the entity.</param>
+    /// <param name="commands">The commands.</param>
+    /// <returns>A new <typeparamref name="TProjection"/> that incorporates <paramref name="commands"/> for <paramref name="entityId"/>.</returns>
+    TProjection Reduce(Guid entityId, params object[] commands);
 }
