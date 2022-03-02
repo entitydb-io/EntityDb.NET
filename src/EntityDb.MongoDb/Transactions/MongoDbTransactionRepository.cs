@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -90,11 +89,11 @@ internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseCla
             .GetData<AgentSignatureDocument, object>();
     }
 
-    public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
+    public Task<object[]> GetCommands(ICommandQuery commandQuery)
     {
         return CommandDocument
             .GetQuery(_mongoSession, commandQuery)
-            .GetData<CommandDocument, ICommand<TEntity>>();
+            .GetData<CommandDocument, object>();
     }
 
     public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
@@ -111,11 +110,11 @@ internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseCla
             .GetData<TagDocument, ITag>();
     }
 
-    public Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
     {
         return CommandDocument
             .GetQuery(_mongoSession, commandQuery)
-            .GetEntityAnnotation<CommandDocument, ICommand<TEntity>>();
+            .GetEntityAnnotation<CommandDocument, object>();
     }
 
     private async Task ExecuteCommandTransactionStep(ITransaction<TEntity> transaction, ICommandTransactionStep<TEntity> commandTransactionStep)

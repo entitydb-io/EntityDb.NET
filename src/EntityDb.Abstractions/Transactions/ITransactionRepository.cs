@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
@@ -86,7 +85,7 @@ public interface ITransactionRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="commandQuery">The command query.</param>
     /// <returns>The commands which are found by <paramref name="commandQuery" />.</returns>
-    Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery);
+    Task<object[]> GetCommands(ICommandQuery commandQuery);
 
     /// <summary>
     ///     Returns the leases which are found by a lease query.
@@ -107,7 +106,7 @@ public interface ITransactionRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="commandQuery">The command query.</param>
     /// <returns>The annotated commands which are found by <paramref name="commandQuery" />.</returns>
-    Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery);
+    Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery);
 
     /// <summary>
     ///     Inserts a single transaction with an atomic commit.

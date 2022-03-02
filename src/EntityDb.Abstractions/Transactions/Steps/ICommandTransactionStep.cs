@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-
-namespace EntityDb.Abstractions.Transactions.Steps;
+﻿namespace EntityDb.Abstractions.Transactions.Steps;
 
 /// <summary>
 ///     Represents a modification to an entity's state.
@@ -11,7 +9,7 @@ public interface ICommandTransactionStep<TEntity> : ITransactionStep<TEntity>
     /// <summary>
     ///     The modifier.
     /// </summary>
-    ICommand<TEntity> Command { get; }
+    object Command { get; }
 
     /// <summary>
     ///     A snapshot of the entity before the command.

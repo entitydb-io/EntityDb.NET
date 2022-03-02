@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
@@ -52,7 +51,7 @@ public class SingleEntityTransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     /// <remarks>
     ///     Call this method to load an entity that already exists before calling
-    ///     <see cref="Append(ICommand{TEntity})"/>.
+    ///     <see cref="Append(object)"/>.
     /// </remarks>
     public SingleEntityTransactionBuilder<TEntity> Load(TEntity entity)
     {
@@ -62,11 +61,11 @@ public class SingleEntityTransactionBuilder<TEntity>
     }
 
     /// <summary>
-    ///     Adds a transaction step that appends a single <see cref="ICommand{TEntity}"/>.
+    ///     Adds a transaction step that appends a single command.
     /// </summary>
     /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public SingleEntityTransactionBuilder<TEntity> Append(ICommand<TEntity> command)
+    public SingleEntityTransactionBuilder<TEntity> Append(object command)
     {
         _transactionBuilder.Append(EntityId, command);
 

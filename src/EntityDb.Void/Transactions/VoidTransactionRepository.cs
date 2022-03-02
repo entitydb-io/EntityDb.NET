@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -57,9 +56,9 @@ internal sealed class VoidTransactionRepository<TEntity> : DisposableResourceBas
         return Task.FromResult(Array.Empty<object>());
     }
 
-    public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
+    public Task<object[]> GetCommands(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<ICommand<TEntity>>());
+        return Task.FromResult(Array.Empty<object>());
     }
 
     public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
@@ -72,9 +71,9 @@ internal sealed class VoidTransactionRepository<TEntity> : DisposableResourceBas
         return Task.FromResult(Array.Empty<ITag>());
     }
 
-    public Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<IEntityAnnotation<ICommand<TEntity>>>());
+        return Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
     }
 
     public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
