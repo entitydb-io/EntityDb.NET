@@ -603,7 +603,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
             serviceCollection.AddSingleton(loggerFactoryMock.Object);
         });
 
-        var transactionStepMock = new Mock<ICommandTransactionStep>(MockBehavior.Strict);
+        var transactionStepMock = new Mock<IAppendCommandTransactionStep>(MockBehavior.Strict);
 
         transactionStepMock
             .SetupGet(step => step.EntityId)
@@ -614,7 +614,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
             .Returns(versionNumber);
             
         transactionStepMock
-            .SetupGet(step => step.NextEntityVersionNumber)
+            .SetupGet(step => step.EntityVersionNumber)
             .Returns(versionNumber);
 
         var transaction = TransactionSeeder.Create(transactionStepMock.Object, transactionStepMock.Object);
@@ -662,7 +662,6 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var entityId = Guid.NewGuid();
 
-
         var firstTransaction = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId)
@@ -689,19 +688,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         // ASSERT
 
-        firstTransaction.Steps.Length.ShouldBe(2);
-        secondTransaction.Steps.Length.ShouldBe(2);
+        firstTransaction.Steps.Length.ShouldBe(1);
+        secondTransaction.Steps.Length.ShouldBe(1);
 
         firstTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
         secondTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
         
-        firstTransaction.Steps[1].ShouldBeAssignableTo<IEntityStep>();
-        secondTransaction.Steps[1].ShouldBeAssignableTo<IEntityStep>();
+        var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-        var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep>()!;
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep>()!;
-
-        firstCommandTransactionStep.NextEntityVersionNumber.ShouldBe(secondCommandTransactionStep.NextEntityVersionNumber);
+        firstCommandTransactionStep.EntityVersionNumber.ShouldBe(secondCommandTransactionStep.EntityVersionNumber);
 
         firstTransactionInserted.ShouldBeTrue();
         secondTransactionInserted.ShouldBeFalse();
@@ -996,13 +992,11 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         transactionInserted.ShouldBeTrue();
 
-        transaction.Steps.Length.ShouldBe(2);
+        transaction.Steps.Length.ShouldBe(1);
 
-        transaction.Steps[1].ShouldBeAssignableTo<IEntityStep>();
+        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep>()!;
-
-        commandTransactionStep.NextEntityVersionNumber.ShouldBe(1ul);
+        commandTransactionStep.EntityVersionNumber.ShouldBe(1ul);
 
         newCommands.Length.ShouldBe(1);
 
@@ -1052,13 +1046,11 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         secondTransactionInserted.ShouldBeTrue();
 
-        secondTransaction.Steps.Length.ShouldBe(2);
+        secondTransaction.Steps.Length.ShouldBe(1);
 
-        secondTransaction.Steps[1].ShouldBeAssignableTo<IEntityStep>();
+        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<ICommandTransactionStep>()!;
-
-        secondCommandTransactionStep.NextEntityVersionNumber.ShouldBe(2ul);
+        secondCommandTransactionStep.EntityVersionNumber.ShouldBe(2ul);
 
         newCommands.Length.ShouldBe(1);
 

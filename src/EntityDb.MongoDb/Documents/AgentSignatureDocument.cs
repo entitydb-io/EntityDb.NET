@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
@@ -21,32 +20,29 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
     private static readonly AgentSignatureSortBuilder SortBuilder = new();
 
     public Guid[] EntityIds { get; init; } = default!;
-
-    private static AgentSignatureDocument Build
+    
+    public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
-        ITransaction transaction,
-        ILogger logger
+        IMongoSession mongoSession,
+        ITransaction transaction
     )
     {
-        return new AgentSignatureDocument
+        var documents = new[]
         {
-            TransactionTimeStamp = transaction.TimeStamp,
-            TransactionId = transaction.Id,
-            EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct().ToArray(),
-            Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, logger)
+            new AgentSignatureDocument
+            {
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct().ToArray(),
+                Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, mongoSession.Logger)
+            }
         };
-    }
-
-    public static InsertDocumentCommand<AgentSignatureDocument> GetInsertCommand
-    (
-        IMongoSession mongoSession
-    )
-    {
-        return new InsertDocumentCommand<AgentSignatureDocument>
+        
+        return new InsertDocumentsCommand<AgentSignatureDocument>
         (
             mongoSession,
             CollectionName,
-            Build
+            documents
         );
     }
 

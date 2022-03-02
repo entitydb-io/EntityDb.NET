@@ -8,7 +8,7 @@ namespace EntityDb.Common.Exceptions;
 /// <summary>
 ///     The exception that is logged when an actor passes a <see cref="ITransaction" /> to an
 ///     <see cref="ITransactionRepository" /> with a
-///     <see cref="ICommandTransactionStep.PreviousEntityVersionNumber" /> that is not the actual
+///     <see cref="IAppendCommandTransactionStep.PreviousEntityVersionNumber" /> that is not the actual
 ///     previous version number.
 /// </summary>
 /// <remarks>

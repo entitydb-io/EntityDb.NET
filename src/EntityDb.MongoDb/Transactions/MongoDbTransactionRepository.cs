@@ -6,6 +6,7 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
+using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
@@ -117,29 +118,44 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetEntityAnnotation<CommandDocument, object>();
     }
 
-    private async Task ExecuteCommandTransactionStep(ITransaction transaction, ICommandTransactionStep commandTransactionStep)
+    private DocumentsCommand ToDocumentsCommand(ITransaction transaction)
     {
-        VersionZeroReservedException.ThrowIfZero(commandTransactionStep.NextEntityVersionNumber);
+        return AgentSignatureDocument.GetInsertCommand(_mongoSession, transaction);
+    }
+    
+    private async Task<DocumentsCommand> ToDocumentsCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep)
+    {
+        VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
 
-        var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, commandTransactionStep.EntityId);
+        var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, appendCommandTransactionStep.EntityId);
 
-        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, commandTransactionStep.PreviousEntityVersionNumber);
+        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, appendCommandTransactionStep.PreviousEntityVersionNumber);
 
-        await CommandDocument.GetInsertCommand(_mongoSession).Execute(transaction, commandTransactionStep);
+        return CommandDocument.GetInsertCommand(_mongoSession, transaction, appendCommandTransactionStep);
     }
 
-    private async Task ExecuteLeaseTransactionStep(ITransaction transaction, ILeaseTransactionStep leaseTransactionStep)
+    private DocumentsCommand ToDocumentsCommand(ITransaction transaction, IAddLeasesTransactionStep addLeasesTransactionStep)
     {
-        await LeaseDocument.GetDeleteCommand(_mongoSession).Execute(transaction, leaseTransactionStep);
-
-        await LeaseDocument.GetInsertCommand(_mongoSession).Execute(transaction, leaseTransactionStep);
+        return LeaseDocument
+            .GetInsertCommand(_mongoSession, transaction, addLeasesTransactionStep);
     }
 
-    private async Task ExecuteTagTransactionStep(ITransaction transaction, ITagTransactionStep tagTransactionStep)
+    private DocumentsCommand ToDocumentsCommand(ITransaction transaction, IAddTagsTransactionStep addTagsTransactionStep)
     {
-        await TagDocument.GetDeleteCommand(_mongoSession).Execute(transaction, tagTransactionStep);
+        return TagDocument
+            .GetInsertCommand(_mongoSession, transaction, addTagsTransactionStep);
+    }
 
-        await TagDocument.GetInsertCommand(_mongoSession).Execute(transaction, tagTransactionStep);
+    private DocumentsCommand ToDocumentsCommand(IDeleteLeasesTransactionStep deleteLeasesTransactionStep)
+    {
+        return LeaseDocument
+            .GetDeleteCommand(_mongoSession, deleteLeasesTransactionStep);
+    }
+
+    private DocumentsCommand ToDocumentsCommand(IDeleteTagsTransactionStep deleteTagsTransactionStep)
+    {
+        return TagDocument
+            .GetDeleteCommand(_mongoSession, deleteTagsTransactionStep);
     }
 
     public async Task<bool> PutTransaction(ITransaction transaction)
@@ -148,26 +164,31 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
         {
             _mongoSession.StartTransaction();
 
-            await AgentSignatureDocument
-                .GetInsertCommand(_mongoSession)
-                .Execute(transaction);
+            await ToDocumentsCommand(transaction).Execute();
 
             foreach (var transactionStep in transaction.Steps)
             {
-                switch (transactionStep)
+                var documentsCommand = transactionStep switch
                 {
-                    case ICommandTransactionStep commandTransactionStep:
-                        await ExecuteCommandTransactionStep(transaction, commandTransactionStep);
-                        break;
-                    
-                    case ILeaseTransactionStep leaseTransactionStep:
-                        await ExecuteLeaseTransactionStep(transaction, leaseTransactionStep);
-                        break;
-                    
-                    case ITagTransactionStep tagTransactionStep:
-                        await ExecuteTagTransactionStep(transaction, tagTransactionStep);
-                        break;
-                }
+                    IAppendCommandTransactionStep commandTransactionStep =>
+                        await ToDocumentsCommand(transaction, commandTransactionStep),
+
+                    IAddLeasesTransactionStep addLeasesTransactionStep =>
+                        ToDocumentsCommand(transaction, addLeasesTransactionStep),
+
+                    IAddTagsTransactionStep addTagsTransactionStep =>
+                        ToDocumentsCommand(transaction, addTagsTransactionStep),
+
+                    IDeleteLeasesTransactionStep deleteLeasesTransactionStep =>
+                        ToDocumentsCommand(deleteLeasesTransactionStep),
+
+                    IDeleteTagsTransactionStep deleteTagsTransactionStep =>
+                        ToDocumentsCommand(deleteTagsTransactionStep),
+
+                    _ => throw new NotImplementedException()
+                };
+
+                await documentsCommand.Execute();
             }
 
             await _mongoSession.CommitTransaction();

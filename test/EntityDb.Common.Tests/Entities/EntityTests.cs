@@ -62,7 +62,7 @@ public class EntityTests : TestsBase<Startup>
             {
                 foreach (var transactionStep in transaction.Steps)
                 {
-                    if (transactionStep is ICommandTransactionStep commandTransactionStep)
+                    if (transactionStep is IAppendCommandTransactionStep commandTransactionStep)
                     {
                         commands.Add(commandTransactionStep.Command);
                     }

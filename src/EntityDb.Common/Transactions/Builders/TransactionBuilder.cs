@@ -48,71 +48,6 @@ public sealed class TransactionBuilder<TEntity>
         _knownEntities.Add(entityId, entity);
     }
 
-    private void AddCommandStep(Guid entityId, object command)
-    {
-        ConstructIfNotKnown(entityId);
-
-        var previousEntity = _knownEntities[entityId];
-        var previousEntityVersionNumber = previousEntity.GetVersionNumber();
-
-        var nextEntity = previousEntity.Reduce(command);
-        var nextEntityVersionNumber = nextEntity.GetVersionNumber();
-
-        _transactionSteps.Add(new CommandTransactionStep
-        {
-            EntityId = entityId,
-            Command = command,
-            PreviousEntityVersionNumber = previousEntityVersionNumber,
-            NextEntityVersionNumber = nextEntityVersionNumber
-        });
-        
-        _transactionSteps.Add(new EntityStep
-        {
-            EntityId = entityId,
-            Entity = nextEntity,
-        });
-        
-        _knownEntities[entityId] = nextEntity;
-    }
-
-    private void AddLeaseTransactionStep(Guid entityId, IEnumerable<ILease> deleteLeases, IEnumerable<ILease> insertLeases)
-    {
-        ConstructIfNotKnown(entityId);
-
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new LeaseTransactionStep
-        {
-            EntityId = entityId,
-            Leases = new TransactionMetaData<ILease>
-            {
-                Delete = deleteLeases.ToImmutableArray(),
-                Insert = insertLeases.ToImmutableArray()
-            },
-            LeasedAtEntityVersionNumber = entityVersionNumber
-        });
-    }
-
-    private void AddTagTransactionStep(Guid entityId, IEnumerable<ITag> deleteTags, IEnumerable<ITag> insertTags)
-    {
-        ConstructIfNotKnown(entityId);
-
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new TagTransactionStep
-        {
-            EntityId = entityId,
-            Tags = new TransactionMetaData<ITag>
-            {
-                Delete = deleteTags.ToImmutableArray(),
-                Insert = insertTags.ToImmutableArray()
-            },
-            TaggedAtEntityVersionNumber = entityVersionNumber
-        });
-    }
-
     /// <summary>
     ///     Returns a single-entity transaction builder, which has a simplified set of methods.
     /// </summary>
@@ -173,7 +108,24 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Append(Guid entityId, object command)
     {
-        AddCommandStep(entityId, command);
+        ConstructIfNotKnown(entityId);
+
+        var previousEntity = _knownEntities[entityId];
+        var previousEntityVersionNumber = previousEntity.GetVersionNumber();
+
+        var entity = previousEntity.Reduce(command);
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AppendCommandTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Command = command,
+            PreviousEntityVersionNumber = previousEntityVersionNumber,
+        });
+        
+        _knownEntities[entityId] = entity;
 
         return this;
     }
@@ -186,7 +138,18 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Add(Guid entityId, params ILease[] leases)
     {
-        AddLeaseTransactionStep(entityId, Array.Empty<ILease>(), leases);
+        ConstructIfNotKnown(entityId);
+
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddLeasesTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases.ToImmutableArray(),
+        });
 
         return this;
     }
@@ -199,7 +162,18 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Add(Guid entityId, params ITag[] tags)
     {
-        AddTagTransactionStep(entityId, Array.Empty<ITag>(), tags);
+        ConstructIfNotKnown(entityId);
+
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddTagsTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags.ToImmutableArray()
+        });
 
         return this;
     }
@@ -212,7 +186,18 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Delete(Guid entityId, params ILease[] leases)
     {
-        AddLeaseTransactionStep(entityId, leases, Array.Empty<ILease>());
+        ConstructIfNotKnown(entityId);
+
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteLeasesTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases.ToImmutableArray(),
+        });
 
         return this;
     }
@@ -225,7 +210,18 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Delete(Guid entityId, params ITag[] tags)
     {
-        AddTagTransactionStep(entityId, tags, Array.Empty<ITag>());
+        ConstructIfNotKnown(entityId);
+
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteTagsTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags.ToImmutableArray()
+        });
 
         return this;
     }

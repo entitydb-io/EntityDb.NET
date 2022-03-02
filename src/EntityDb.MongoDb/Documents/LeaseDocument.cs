@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Queries;
@@ -9,10 +8,7 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -33,62 +29,32 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     public Guid EntityId { get; init; }
     public ulong EntityVersionNumber { get; init; }
 
-    private static IReadOnlyCollection<LeaseDocument>? BuildInsert
+    public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (
+        IMongoSession mongoSession,
         ITransaction transaction,
-        ILeaseTransactionStep leaseTransactionStep,
-        ILogger logger
+        IAddLeasesTransactionStep addLeasesTransactionStep
     )
     {
-        var insertLeases = leaseTransactionStep.Leases.Insert;
-
-        if (insertLeases.Length == 0)
-        {
-            return null;
-        }
-
-        return leaseTransactionStep.Leases.Insert
+        var leaseDocuments = addLeasesTransactionStep.Leases
             .Select(insertLease => new LeaseDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = leaseTransactionStep.EntityId,
-                EntityVersionNumber = leaseTransactionStep.LeasedAtEntityVersionNumber,
+                EntityId = addLeasesTransactionStep.EntityId,
+                EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
                 Value = insertLease.Value,
-                Data = BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+                Data = BsonDocumentEnvelope.Deconstruct(insertLease, mongoSession.Logger)
             })
             .ToArray();
-    }
-
-    private static FilterDefinition<BsonDocument>? BuildDelete
-    (
-        ITransaction transaction,
-        ILeaseTransactionStep leaseTransactionStep
-    )
-    {
-        var deleteLeases = leaseTransactionStep.Leases.Delete;
-
-        if (deleteLeases.Length == 0)
-        {
-            return null;
-        }
-
-        return new DeleteLeasesQuery(leaseTransactionStep.EntityId, deleteLeases)
-            .GetFilter(FilterBuilder);
-    }
-
-    public static InsertDocumentsCommand<ILeaseTransactionStep, LeaseDocument> GetInsertCommand
-    (
-        IMongoSession mongoSession
-    )
-    {
-        return new InsertDocumentsCommand<ILeaseTransactionStep, LeaseDocument>
+        
+        return new InsertDocumentsCommand<LeaseDocument>
         (
             mongoSession,
             CollectionName,
-            BuildInsert
+            leaseDocuments
         );
     }
 
@@ -109,16 +75,20 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
         );
     }
 
-    public static DeleteDocumentsCommand<ILeaseTransactionStep> GetDeleteCommand
+    public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        IDeleteLeasesTransactionStep deleteLeasesTransactionStep
     )
     {
-        return new DeleteDocumentsCommand<ILeaseTransactionStep>
+        var deleteLeasesQuery =
+            new DeleteLeasesQuery(deleteLeasesTransactionStep.EntityId, deleteLeasesTransactionStep.Leases);
+        
+        return new DeleteDocumentsCommand
         (
             mongoSession,
             CollectionName,
-            BuildDelete
+            deleteLeasesQuery.GetFilter(FilterBuilder)
         );
     }
 }

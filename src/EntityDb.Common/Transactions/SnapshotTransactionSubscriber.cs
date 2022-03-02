@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -31,21 +30,19 @@ internal class SnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
         var snapshotRepository =
             await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
 
-        var entityStepGroups = transaction.Steps
-            .Where(step => step is IEntityStep)
-            .Cast<IEntityStep>()
+        var stepGroups = transaction.Steps
             .GroupBy(step => step.EntityId);
 
-        foreach (var entityStepGroup in entityStepGroups)
+        foreach (var stepGroup in stepGroups)
         {
-            var entity = entityStepGroup.Last().Entity;
+            var entity = stepGroup.Last().Entity;
 
             if (entity is not TSnapshot nextSnapshot)
             {
                 return;
             }
             
-            var snapshotId = entityStepGroup.Key;
+            var snapshotId = stepGroup.Key;
             
             var previousSnapshot = await snapshotRepository.GetSnapshot(snapshotId);
 
