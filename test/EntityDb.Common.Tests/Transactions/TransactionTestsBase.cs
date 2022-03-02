@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -340,7 +339,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        ICommand<TransactionEntity>[] GetExpectedResults(bool invert)
+        object[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseCommands
@@ -348,7 +347,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<ICommand<TransactionEntity>[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<object[]> GetActualResults(ITransactionRepository<TransactionEntity> transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetCommands(query.Modify(modifiedQueryOptions));
         }
@@ -1085,7 +1084,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
             var agentSignature = new CounterAgentSignature(i);
 
-            var commands = new ICommand<TransactionEntity>[] { new Count(i) };
+            var commands = new object[] { new Count(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1151,7 +1150,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
             var agentSignature = new CounterAgentSignature(i);
 
-            var commands = new ICommand<TransactionEntity>[] { new Count(i) };
+            var commands = new object[] { new Count(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1212,7 +1211,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
             var agentSignature = new CounterAgentSignature(i);
 
-            var commands = new ICommand<TransactionEntity>[] { new Count(i) };
+            var commands = new object[] { new Count(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1307,7 +1306,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
             var agentSignature = new CounterAgentSignature(i);
 
-            var commands = new ICommand<TransactionEntity>[] { new Count(i) };
+            var commands = new object[] { new Count(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1341,14 +1340,14 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
     private class ExpectedObjects
     {
-        public readonly List<ICommand<TransactionEntity>> FalseCommands = new();
+        public readonly List<object> FalseCommands = new();
         public readonly List<Guid> FalseEntityIds = new();
         public readonly List<ILease> FalseLeases = new();
         public readonly List<object> FalseAgentSignatures = new();
         public readonly List<ITag> FalseTags = new();
         public readonly List<Guid> FalseTransactionIds = new();
 
-        public readonly List<ICommand<TransactionEntity>> TrueCommands = new();
+        public readonly List<object> TrueCommands = new();
         public readonly List<Guid> TrueEntityIds = new();
         public readonly List<ILease> TrueLeases = new();
         public readonly List<object> TrueAgentSignatures = new();
@@ -1361,7 +1360,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
             Guid transactionId,
             Guid entityId,
             object agentSignature,
-            IEnumerable<ICommand<TransactionEntity>> commands,
+            IEnumerable<object> commands,
             IEnumerable<ILease> leases,
             IEnumerable<ITag> tags
         )

@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -64,7 +63,7 @@ internal abstract class TransactionRepositoryWrapper<TEntity> : DisposableResour
         return WrapQuery(_transactionRepository.GetAgentSignatures(agentSignatureQuery));
     }
 
-    public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
+    public Task<object[]> GetCommands(ICommandQuery commandQuery)
     {
         return WrapQuery(_transactionRepository.GetCommands(commandQuery));
     }
@@ -79,7 +78,7 @@ internal abstract class TransactionRepositoryWrapper<TEntity> : DisposableResour
         return WrapQuery(_transactionRepository.GetTags(tagQuery));
     }
 
-    public Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
     {
         return WrapQuery(_transactionRepository.GetAnnotatedCommands(commandQuery));
     }

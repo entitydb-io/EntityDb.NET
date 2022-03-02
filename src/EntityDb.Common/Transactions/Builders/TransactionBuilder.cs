@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
@@ -50,7 +49,7 @@ public sealed class TransactionBuilder<TEntity>
         _knownEntities.Add(entityId, entity);
     }
 
-    private void AddGeneralTransactionStep(Guid entityId, ICommand<TEntity> command)
+    private void AddGeneralTransactionStep(Guid entityId, object command)
     {
         ConstructIfNotKnown(entityId);
 
@@ -149,7 +148,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     /// <remarks>
     ///     Call this method to load an entity that already exists before calling
-    ///     <see cref="Append(Guid, ICommand{TEntity})" />.
+    ///     <see cref="Append(Guid, object)" />.
     /// </remarks>
     public TransactionBuilder<TEntity> Load(Guid entityId, TEntity entity)
     {
@@ -164,12 +163,12 @@ public sealed class TransactionBuilder<TEntity>
     }
 
     /// <summary>
-    ///     Adds a transaction step that appends a single <see cref="ICommand{TEntity}"/> associated with a given entity id.
+    ///     Adds a transaction step that appends a single command associated with a given entity id.
     /// </summary>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Append(Guid entityId, ICommand<TEntity> command)
+    public TransactionBuilder<TEntity> Append(Guid entityId, object command)
     {
         AddGeneralTransactionStep(entityId, command);
 

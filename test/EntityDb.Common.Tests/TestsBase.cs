@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Tests.Implementations.Entities;
@@ -65,9 +64,9 @@ public class TestsBase<TStartup>
     }
 
     protected static ITransactionRepositoryFactory<TransactionEntity> GetMockedTransactionRepositoryFactory(
-        ICommand<TransactionEntity>[]? commands = null)
+        object[]? commands = null)
     {
-        commands ??= Array.Empty<ICommand<TransactionEntity>>();
+        commands ??= Array.Empty<object>();
 
         var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
 

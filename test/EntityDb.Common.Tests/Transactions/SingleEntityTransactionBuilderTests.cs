@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Leases;
@@ -109,7 +108,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         {
             serviceCollection.AddScoped(_ =>
                 GetMockedTransactionRepositoryFactory(
-                    new ICommand<TransactionEntity>[] { new DoNothing() }));
+                    new object[] { new DoNothing() }));
         });
 
         var transactionBuilder = serviceScope.ServiceProvider
@@ -184,7 +183,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.AddScoped(_ =>
-                GetMockedTransactionRepositoryFactory(new ICommand<TransactionEntity>[] { new DoNothing() }));
+                GetMockedTransactionRepositoryFactory(new object[] { new DoNothing() }));
         });
 
         var transactionBuilder = serviceScope.ServiceProvider

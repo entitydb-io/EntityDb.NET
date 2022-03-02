@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
@@ -53,7 +52,7 @@ public class EntityTests : TestsBase<Startup>
 
         var entityId = Guid.NewGuid();
 
-        var commands = new List<ICommand<TransactionEntity>>();
+        var commands = new List<object>();
 
         var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
 
@@ -204,7 +203,7 @@ public class EntityTests : TestsBase<Startup>
 
         var snapshot = new TransactionEntity(1);
 
-        var newCommands = new ICommand<TransactionEntity>[]
+        var newCommands = new object[]
         {
             new DoNothing(),
             new DoNothing()

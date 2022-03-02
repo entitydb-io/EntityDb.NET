@@ -20,4 +20,11 @@ public interface IEntity<out TEntity>
     /// </summary>
     /// <returns></returns>
     ulong GetVersionNumber();
+    
+    /// <summary>
+    ///     Returns a new <typeparamref name="TEntity" /> that incorporates the commands.
+    /// </summary>
+    /// <param name="commands">The commands</param>
+    /// <returns>A new <typeparamref name="TEntity" /> that incorporates <paramref name="commands"/>.</returns>
+    TEntity Reduce(params object[] commands);
 }
