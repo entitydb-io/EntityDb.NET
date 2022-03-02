@@ -30,14 +30,12 @@ public record TransactionEntity
 
         foreach (var command in commands)
         {
-            if (command is IReducer<TransactionEntity> reducer)
-            {
-                newEntity = reducer.Reduce(newEntity);
-            }
-            else
+            if (command is not IReducer<TransactionEntity> reducer)
             {
                 throw new NotImplementedException();
             }
+            
+            newEntity = reducer.Reduce(newEntity);
         }
 
         return newEntity;
