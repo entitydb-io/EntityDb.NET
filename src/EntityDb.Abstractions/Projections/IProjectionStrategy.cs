@@ -15,5 +15,5 @@ public interface IProjectionStrategy<in TProjection>
     /// <param name="projectionId">The id of the projection.</param>
     /// <param name="projectionSnapshot">A snapshot of the projection, if one exists. (This can be used to avoid running a query, if one were necessary.)</param>
     /// <returns>The set of entity ids to query for creating the projection.</returns>
-    Task<Guid[]> GetEntityIds(Guid projectionId, TProjection? projectionSnapshot);
+    Task<Guid[]> GetEntityIds(Guid projectionId, TProjection projectionSnapshot);
 }
