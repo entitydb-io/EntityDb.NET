@@ -10,11 +10,11 @@ namespace EntityDb.MongoDb.Provisioner.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    public static void AddAutoProvisionTestModeMongoDbTransactions<TEntity>(
+    public static void AddAutoProvisionTestModeMongoDbTransactions(
         this IServiceCollection serviceCollection, string databaseName,
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {
-        serviceCollection.Add<ITransactionRepositoryFactory<TEntity>>
+        serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
             serviceProvider =>
@@ -23,7 +23,7 @@ internal static class ServiceCollectionExtensions
 
                 var connectionString = getConnectionString.Invoke(configuration);
 
-                return MongoDbTransactionRepositoryFactory<TEntity>
+                return MongoDbTransactionRepositoryFactory
                     .Create(serviceProvider, connectionString, databaseName)
                     .UseTestMode(testMode)
                     .UseAutoProvisioning();

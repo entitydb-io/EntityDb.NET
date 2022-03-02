@@ -1,7 +1,7 @@
 ﻿using EntityDb.Common.Entities;
 using System;
-using System.Linq;
 using EntityDb.Abstractions.Reducers;
+using EntityDb.Common.Snapshots;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
@@ -9,7 +9,7 @@ public record TransactionEntity
 (
     ulong VersionNumber = default
 )
-: IEntity<TransactionEntity>
+: IEntity<TransactionEntity>, ISnapshot<TransactionEntity>
 {
     public const string MongoCollectionName = "Test";
     public const string RedisKeyNamespace = "test";
@@ -39,5 +39,10 @@ public record TransactionEntity
         }
 
         return newEntity;
+    }
+    
+    public bool ShouldReplace(TransactionEntity? previousSnapshot)
+    {
+        return true;
     }
 }

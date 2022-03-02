@@ -1,6 +1,7 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -8,14 +9,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class SnapshotTransactionSubscriber<TEntity> : TransactionSubscriber<TEntity>
+internal class SnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
+    where TSnapshot : ISnapshot<TSnapshot>
 {
-    private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
+    private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
 
     public SnapshotTransactionSubscriber
     (
-        ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
+        ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
         bool synchronousMode
     ) : base(synchronousMode)
@@ -24,29 +26,42 @@ internal class SnapshotTransactionSubscriber<TEntity> : TransactionSubscriber<TE
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
-    protected override async Task NotifyAsync(ITransaction<TEntity> transaction)
+    protected override async Task NotifyAsync(ITransaction transaction)
     {
         var snapshotRepository =
             await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
 
-        var commandGroups = transaction.Steps
-            .Where(step => step is ICommandTransactionStep<TEntity>)
-            .Cast<ICommandTransactionStep<TEntity>>()
-            .GroupBy(command => command.EntityId);
+        var entityStepGroups = transaction.Steps
+            .Where(step => step is IEntityStep)
+            .Cast<IEntityStep>()
+            .GroupBy(step => step.EntityId);
 
-        foreach (var commandGroup in commandGroups)
+        foreach (var entityStepGroup in entityStepGroups)
         {
-            var entityId = commandGroup.Key;
-            var nextSnapshot = commandGroup.Last().NextEntitySnapshot;
+            var entity = entityStepGroup.Last().Entity;
 
-            await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
+            if (entity is not TSnapshot nextSnapshot)
+            {
+                return;
+            }
+            
+            var snapshotId = entityStepGroup.Key;
+            
+            var previousSnapshot = await snapshotRepository.GetSnapshot(snapshotId);
+
+            if (!nextSnapshot.ShouldReplace(previousSnapshot))
+            {
+                continue;
+            }
+
+            await snapshotRepository.PutSnapshot(snapshotId, nextSnapshot);
         }
     }
 
-    public static SnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
+    public static SnapshotTransactionSubscriber<TSnapshot> Create(IServiceProvider serviceProvider,
         string snapshotSessionOptionsName, bool synchronousMode)
     {
-        return ActivatorUtilities.CreateInstance<SnapshotTransactionSubscriber<TEntity>>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<SnapshotTransactionSubscriber<TSnapshot>>(serviceProvider,
             snapshotSessionOptionsName,
             synchronousMode);
     }

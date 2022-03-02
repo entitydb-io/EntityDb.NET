@@ -6,13 +6,12 @@ namespace EntityDb.Common.Transactions;
 /// <summary>
 ///     Represents an asynchronous subscription to transactions.
 /// </summary>
-/// <typeparam name="TEntity"></typeparam>
-public abstract class TransactionSubscriber<TEntity> : ITransactionSubscriber<TEntity>
+public abstract class TransactionSubscriber : ITransactionSubscriber
 {
     private readonly bool _synchronousMode;
 
     /// <summary>
-    ///     Constructs a new instance of <see cref="TransactionSubscriber{TEntity}" />.
+    ///     Constructs a new instance of <see cref="TransactionSubscriber" />.
     /// </summary>
     /// <param name="synchronousMode">If <c>true</c> then the task will be synchronously awaited before returning.</param>
     protected TransactionSubscriber(bool synchronousMode)
@@ -20,8 +19,8 @@ public abstract class TransactionSubscriber<TEntity> : ITransactionSubscriber<TE
         _synchronousMode = synchronousMode;
     }
 
-    /// <inheritdoc cref="ITransactionSubscriber{TEntity}.Notify(ITransaction{TEntity})" />
-    public void Notify(ITransaction<TEntity> transaction)
+    /// <inheritdoc cref="ITransactionSubscriber.Notify(ITransaction)" />
+    public void Notify(ITransaction transaction)
     {
         var task = Task.Run(async () => await NotifyAsync(transaction).ConfigureAwait(false));
 
@@ -31,7 +30,7 @@ public abstract class TransactionSubscriber<TEntity> : ITransactionSubscriber<TE
         }
     }
 
-    /// <inheritdoc cref="ITransactionSubscriber{TEntity}.Notify(ITransaction{TEntity})" />
+    /// <inheritdoc cref="ITransactionSubscriber.Notify(ITransaction)" />
     /// <returns>A task that handles notification asynchronously.</returns>
-    protected abstract Task NotifyAsync(ITransaction<TEntity> transaction);
+    protected abstract Task NotifyAsync(ITransaction transaction);
 }

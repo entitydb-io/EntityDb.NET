@@ -6,20 +6,20 @@ namespace EntityDb.Common.Snapshots;
 
 internal class TestModeSnapshotManager
 {
-    private readonly List<Guid> _entityIds = new();
+    private readonly List<Guid> _snapshotIds = new();
 
-    public void AddEntityId(Guid entityId)
+    public void AddSnapshotId(Guid snapshotId)
     {
-        _entityIds.Add(entityId);
+        _snapshotIds.Add(snapshotId);
     }
 
-    public void RemoveEntityIds(IEnumerable<Guid> entityIds)
+    public void RemoveSnapshotIds(IEnumerable<Guid> snapshotIds)
     {
-        _entityIds.RemoveAll(entityIds.Contains);
+        _snapshotIds.RemoveAll(snapshotIds.Contains);
     }
 
-    public Guid[] GetDeleteEntityIds()
+    public Guid[] GetDeleteSnapshotIds()
     {
-        return _entityIds.ToArray();
+        return _snapshotIds.ToArray();
     }
 }

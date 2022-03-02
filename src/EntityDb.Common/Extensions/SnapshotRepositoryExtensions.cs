@@ -8,20 +8,20 @@ namespace EntityDb.Common.Extensions;
 
 internal static class SnapshotRepositoryExtensions
 {
-    public static ISnapshotRepository<TEntity> UseTryCatch<TEntity>
+    public static ISnapshotRepository<TSnapshot> UseTryCatch<TSnapshot>
     (
-        this ISnapshotRepository<TEntity> snapshotRepository,
+        this ISnapshotRepository<TSnapshot> snapshotRepository,
         ILogger logger
     )
     {
-        return new TryCatchSnapshotRepository<TEntity>(snapshotRepository, logger);
+        return new TryCatchSnapshotRepository<TSnapshot>(snapshotRepository, logger);
     }
 
-    public static async Task<TEntity?> GetSnapshotOrDefault<TEntity>(this ISnapshotRepository<TEntity>? snapshotRepository, Guid entityId)
+    public static async Task<TSnapshot?> GetSnapshotOrDefault<TSnapshot>(this ISnapshotRepository<TSnapshot>? snapshotRepository, Guid snapshotId)
     {
         if (snapshotRepository != null)
         {
-            return await snapshotRepository.GetSnapshot(entityId);
+            return await snapshotRepository.GetSnapshot(snapshotId);
         }
 
         return default;

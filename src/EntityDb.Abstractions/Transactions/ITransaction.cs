@@ -8,8 +8,7 @@ namespace EntityDb.Abstractions.Transactions;
 ///     Represents a set of objects which must be committed together or not at all. Possible objects include: agentSignatures,
 ///     commands, leases, and tags.
 /// </summary>
-/// <typeparam name="TEntity">The type of entities to be modified.</typeparam>
-public interface ITransaction<TEntity>
+public interface ITransaction
 {
     /// <summary>
     ///     The id associated with the set of objects.
@@ -32,5 +31,5 @@ public interface ITransaction<TEntity>
     /// <remarks>
     ///     <see cref="Steps" /> must be handled in the order they are given.
     /// </remarks>
-    ImmutableArray<ITransactionStep<TEntity>> Steps { get; }
+    ImmutableArray<ITransactionStep> Steps { get; }
 }

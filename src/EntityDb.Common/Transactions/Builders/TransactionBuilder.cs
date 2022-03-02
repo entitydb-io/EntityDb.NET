@@ -5,7 +5,6 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions.Steps;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ using System.Collections.Immutable;
 namespace EntityDb.Common.Transactions.Builders;
 
 /// <summary>
-///     Provides a way to construct an <see cref="ITransaction{TEntity}" />. Note that no operations are permanent until
+///     Provides a way to construct an <see cref="ITransaction" />. Note that no operations are permanent until
 ///     you call <see cref="Build(string, Guid)" /> and pass the result to a transaction repository.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
@@ -22,7 +21,7 @@ public sealed class TransactionBuilder<TEntity>
     where TEntity : IEntity<TEntity>
 {
     private readonly Dictionary<Guid, TEntity> _knownEntities = new();
-    private readonly List<ITransactionStep<TEntity>> _transactionSteps = new();
+    private readonly List<ITransactionStep> _transactionSteps = new();
 
     private readonly IAgentAccessor _agentAccessor;
 
@@ -45,11 +44,11 @@ public sealed class TransactionBuilder<TEntity>
         }
 
         var entity = TEntity.Construct(entityId);
-
+        
         _knownEntities.Add(entityId, entity);
     }
 
-    private void AddGeneralTransactionStep(Guid entityId, object command)
+    private void AddCommandStep(Guid entityId, object command)
     {
         ConstructIfNotKnown(entityId);
 
@@ -59,16 +58,20 @@ public sealed class TransactionBuilder<TEntity>
         var nextEntity = previousEntity.Reduce(command);
         var nextEntityVersionNumber = nextEntity.GetVersionNumber();
 
-        _transactionSteps.Add(new CommandTransactionStep<TEntity>
+        _transactionSteps.Add(new CommandTransactionStep
         {
             EntityId = entityId,
             Command = command,
-            PreviousEntitySnapshot = previousEntity,
             PreviousEntityVersionNumber = previousEntityVersionNumber,
-            NextEntitySnapshot = nextEntity,
             NextEntityVersionNumber = nextEntityVersionNumber
         });
-
+        
+        _transactionSteps.Add(new EntityStep
+        {
+            EntityId = entityId,
+            Entity = nextEntity,
+        });
+        
         _knownEntities[entityId] = nextEntity;
     }
 
@@ -79,7 +82,7 @@ public sealed class TransactionBuilder<TEntity>
         var entity = _knownEntities[entityId];
         var entityVersionNumber = entity.GetVersionNumber();
 
-        _transactionSteps.Add(new LeaseTransactionStep<TEntity>
+        _transactionSteps.Add(new LeaseTransactionStep
         {
             EntityId = entityId,
             Leases = new TransactionMetaData<ILease>
@@ -98,7 +101,7 @@ public sealed class TransactionBuilder<TEntity>
         var entity = _knownEntities[entityId];
         var entityVersionNumber = entity.GetVersionNumber();
 
-        _transactionSteps.Add(new TagTransactionStep<TEntity>
+        _transactionSteps.Add(new TagTransactionStep
         {
             EntityId = entityId,
             Tags = new TransactionMetaData<ITag>
@@ -170,7 +173,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     public TransactionBuilder<TEntity> Append(Guid entityId, object command)
     {
-        AddGeneralTransactionStep(entityId, command);
+        AddCommandStep(entityId, command);
 
         return this;
     }
@@ -228,16 +231,16 @@ public sealed class TransactionBuilder<TEntity>
     }
 
     /// <summary>
-    ///     Returns a new instance of <see cref="ITransaction{TEntity}" />.
+    ///     Returns a new instance of <see cref="ITransaction" />.
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="transactionId">A new id for the new transaction.</param>
-    /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
-    public ITransaction<TEntity> Build(string agentSignatureOptionsName, Guid transactionId)
+    /// <returns>A new instance of <see cref="ITransaction" />.</returns>
+    public ITransaction Build(string agentSignatureOptionsName, Guid transactionId)
     {
         var agent = _agentAccessor.GetAgent();
 
-        var transaction = new Transaction<TEntity>
+        var transaction = new Transaction
         {
             Id = transactionId,
             TimeStamp = agent.GetTimestamp(),

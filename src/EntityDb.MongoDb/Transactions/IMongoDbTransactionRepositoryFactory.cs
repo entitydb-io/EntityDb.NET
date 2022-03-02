@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal interface IMongoDbTransactionRepositoryFactory<TEntity> : ITransactionRepositoryFactory<TEntity>
+internal interface IMongoDbTransactionRepositoryFactory : ITransactionRepositoryFactory
 {
     TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
 
     Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions);
 
-    ITransactionRepository<TEntity> CreateRepository(IMongoSession mongoSession);
+    ITransactionRepository CreateRepository(IMongoSession mongoSession);
 
-    async Task<ITransactionRepository<TEntity>> ITransactionRepositoryFactory<TEntity>.CreateRepository(
+    async Task<ITransactionRepository> ITransactionRepositoryFactory.CreateRepository(
         string transactionSessionOptionsName)
     {
         var transactionSessionOptions = GetTransactionSessionOptions(transactionSessionOptionsName);

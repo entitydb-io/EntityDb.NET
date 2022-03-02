@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal sealed class TryCatchTransactionRepository<TEntity> : TransactionRepositoryWrapper<TEntity>
+internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapper
 {
     private readonly ILogger _logger;
 
-    public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) :
+    public TryCatchTransactionRepository(ITransactionRepository transactionRepository, ILogger logger) :
         base(transactionRepository)
     {
         _logger = logger;

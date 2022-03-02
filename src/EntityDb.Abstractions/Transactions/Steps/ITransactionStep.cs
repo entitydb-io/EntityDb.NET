@@ -5,7 +5,7 @@ namespace EntityDb.Abstractions.Transactions.Steps;
 /// <summary>
 ///     Represents a modification to an entity.
 /// </summary>
-public interface ITransactionStep<TEntity>
+public interface ITransactionStep
 {
     /// <summary>
     ///     The id of the entity.

@@ -22,9 +22,9 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
 
     public Guid[] EntityIds { get; init; } = default!;
 
-    private static AgentSignatureDocument Build<TEntity>
+    private static AgentSignatureDocument Build
     (
-        ITransaction<TEntity> transaction,
+        ITransaction transaction,
         ILogger logger
     )
     {
@@ -37,12 +37,12 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
         };
     }
 
-    public static InsertDocumentCommand<TEntity, AgentSignatureDocument> GetInsertCommand<TEntity>
+    public static InsertDocumentCommand<AgentSignatureDocument> GetInsertCommand
     (
         IMongoSession mongoSession
     )
     {
-        return new InsertDocumentCommand<TEntity, AgentSignatureDocument>
+        return new InsertDocumentCommand<AgentSignatureDocument>
         (
             mongoSession,
             CollectionName,

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 
-internal record DeleteDocumentsCommand<TEntity, TTransactionStep>
+internal record DeleteDocumentsCommand<TTransactionStep>
 (
     IMongoSession MongoSession,
     string CollectionName,
-    Func<ITransaction<TEntity>, TTransactionStep, FilterDefinition<BsonDocument>?> Build
+    Func<ITransaction, TTransactionStep, FilterDefinition<BsonDocument>?> Build
 )
 {
-    public async Task Execute(ITransaction<TEntity> transaction, TTransactionStep transactionStep)
+    public async Task Execute(ITransaction transaction, TTransactionStep transactionStep)
     {
         var filter = Build.Invoke(transaction, transactionStep);
 

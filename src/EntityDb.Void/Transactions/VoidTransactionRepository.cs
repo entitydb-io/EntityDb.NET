@@ -9,75 +9,82 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions;
 
-internal sealed class VoidTransactionRepository<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
+internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, ITransactionRepository
 {
+    private static readonly Task<Guid[]> EmptyGuidArrayTask = Task.FromResult(Array.Empty<Guid>());
+    private static readonly Task<object[]> EmptyObjectArrayTask = Task.FromResult(Array.Empty<object>());
+    private static readonly Task<ILease[]> EmptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
+    private static readonly Task<ITag[]> EmptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
+    private static readonly Task<IEntityAnnotation<object>[]> EmptyEntityAnnotationArrayTask = Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
+    private static readonly Task<bool> TrueBoolTask = Task.FromResult(true);
+    
     public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
     {
-        return Task.FromResult(Array.Empty<Guid>());
+        return EmptyGuidArrayTask;
     }
 
     public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
     {
-        return Task.FromResult(Array.Empty<object>());
+        return EmptyObjectArrayTask;
     }
 
     public Task<object[]> GetCommands(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<object>());
+        return EmptyObjectArrayTask;
     }
 
     public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
     {
-        return Task.FromResult(Array.Empty<ILease>());
+        return EmptyLeaseArrayTask;
     }
 
     public Task<ITag[]> GetTags(ITagQuery tagQuery)
     {
-        return Task.FromResult(Array.Empty<ITag>());
+        return EmptyTagArrayTask;
     }
 
     public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
     {
-        return Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
+        return EmptyEntityAnnotationArrayTask;
     }
 
-    public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    public Task<bool> PutTransaction(ITransaction transaction)
     {
-        return Task.FromResult(true);
+        return TrueBoolTask;
     }
 }

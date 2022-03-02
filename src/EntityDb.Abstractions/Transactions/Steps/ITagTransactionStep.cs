@@ -5,8 +5,7 @@ namespace EntityDb.Abstractions.Transactions.Steps;
 /// <summary>
 ///     Represents a modification to an entity's tags.
 /// </summary>
-/// <typeparam name="TEntity">The type of entity to be modified.</typeparam>
-public interface ITagTransactionStep<TEntity> : ITransactionStep<TEntity>
+public interface ITagTransactionStep : ITransactionStep
 {
     /// <summary>
     ///     The tags of the entity.

@@ -15,7 +15,7 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// <summary>
     ///     The backing transaction repository.
     /// </summary>
-    ITransactionRepository<TEntity> TransactionRepository { get; }
+    ITransactionRepository TransactionRepository { get; }
 
     /// <summary>
     ///     The backing snapshot repository (if snapshot is available).
@@ -42,5 +42,5 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="transaction">The transaction.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-    Task<bool> PutTransaction(ITransaction<TEntity> transaction);
+    Task<bool> PutTransaction(ITransaction transaction);
 }

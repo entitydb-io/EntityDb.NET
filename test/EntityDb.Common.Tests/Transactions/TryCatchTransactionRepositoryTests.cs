@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
 using Moq;
 using Shouldly;
@@ -28,7 +27,7 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
             .Verifiable();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
             .Setup(repository => repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>()))
@@ -83,10 +82,10 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchTransactionRepository = new TryCatchTransactionRepository<TransactionEntity>(transactionRepositoryMock.Object, loggerMock.Object);
+        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object, loggerMock.Object);
 
         // ACT
 

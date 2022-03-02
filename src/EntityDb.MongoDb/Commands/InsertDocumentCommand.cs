@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 
-internal record InsertDocumentCommand<TEntity, TDocument>
+internal record InsertDocumentCommand<TDocument>
 (
     IMongoSession MongoSession,
     string CollectionName,
-    Func<ITransaction<TEntity>, ILogger, TDocument> Build
+    Func<ITransaction, ILogger, TDocument> Build
 )
 {
-    public async Task Execute(ITransaction<TEntity> transaction)
+    public async Task Execute(ITransaction transaction)
     {
         var document = Build.Invoke(transaction, MongoSession.Logger);
 

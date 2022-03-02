@@ -5,9 +5,9 @@ namespace EntityDb.MongoDb.Provisioner.Extensions;
 
 internal static class MongoDbTransactionRepositoryFactoryExtensions
 {
-    public static IMongoDbTransactionRepositoryFactory<TEntity> UseAutoProvisioning<TEntity>(
-        this IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
+    public static IMongoDbTransactionRepositoryFactory UseAutoProvisioning(
+        this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory)
     {
-        return new AutoProvisionMongoDbTransactionRepositoryFactory<TEntity>(mongoDbTransactionRepositoryFactory);
+        return new AutoProvisionMongoDbTransactionRepositoryFactory(mongoDbTransactionRepositoryFactory);
     }
 }

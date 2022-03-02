@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
+internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITransactionRepository
 {
     private readonly IMongoSession _mongoSession;
 
@@ -117,7 +117,7 @@ internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseCla
             .GetEntityAnnotation<CommandDocument, object>();
     }
 
-    private async Task ExecuteCommandTransactionStep(ITransaction<TEntity> transaction, ICommandTransactionStep<TEntity> commandTransactionStep)
+    private async Task ExecuteCommandTransactionStep(ITransaction transaction, ICommandTransactionStep commandTransactionStep)
     {
         VersionZeroReservedException.ThrowIfZero(commandTransactionStep.NextEntityVersionNumber);
 
@@ -125,48 +125,48 @@ internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseCla
 
         OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, commandTransactionStep.PreviousEntityVersionNumber);
 
-        await CommandDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, commandTransactionStep);
+        await CommandDocument.GetInsertCommand(_mongoSession).Execute(transaction, commandTransactionStep);
     }
 
-    private async Task ExecuteLeaseTransactionStep(ITransaction<TEntity> transaction, ILeaseTransactionStep<TEntity> leaseTransactionStep)
+    private async Task ExecuteLeaseTransactionStep(ITransaction transaction, ILeaseTransactionStep leaseTransactionStep)
     {
-        await LeaseDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+        await LeaseDocument.GetDeleteCommand(_mongoSession).Execute(transaction, leaseTransactionStep);
 
-        await LeaseDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+        await LeaseDocument.GetInsertCommand(_mongoSession).Execute(transaction, leaseTransactionStep);
     }
 
-    private async Task ExecuteTagTransactionStep(ITransaction<TEntity> transaction, ITagTransactionStep<TEntity> tagTransactionStep)
+    private async Task ExecuteTagTransactionStep(ITransaction transaction, ITagTransactionStep tagTransactionStep)
     {
-        await TagDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
+        await TagDocument.GetDeleteCommand(_mongoSession).Execute(transaction, tagTransactionStep);
 
-        await TagDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
+        await TagDocument.GetInsertCommand(_mongoSession).Execute(transaction, tagTransactionStep);
     }
 
-    public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    public async Task<bool> PutTransaction(ITransaction transaction)
     {
         try
         {
             _mongoSession.StartTransaction();
 
             await AgentSignatureDocument
-                .GetInsertCommand<TEntity>(_mongoSession)
+                .GetInsertCommand(_mongoSession)
                 .Execute(transaction);
 
             foreach (var transactionStep in transaction.Steps)
             {
-                if (transactionStep is ICommandTransactionStep<TEntity> commandTransactionStep)
+                switch (transactionStep)
                 {
-                    await ExecuteCommandTransactionStep(transaction, commandTransactionStep);
-                }
-
-                if (transactionStep is ILeaseTransactionStep<TEntity> leaseTransactionStep)
-                {
-                    await ExecuteLeaseTransactionStep(transaction, leaseTransactionStep);
-                }
-
-                if (transactionStep is ITagTransactionStep<TEntity> tagTransactionStep)
-                {
-                    await ExecuteTagTransactionStep(transaction, tagTransactionStep);
+                    case ICommandTransactionStep commandTransactionStep:
+                        await ExecuteCommandTransactionStep(transaction, commandTransactionStep);
+                        break;
+                    
+                    case ILeaseTransactionStep leaseTransactionStep:
+                        await ExecuteLeaseTransactionStep(transaction, leaseTransactionStep);
+                        break;
+                    
+                    case ITagTransactionStep tagTransactionStep:
+                        await ExecuteTagTransactionStep(transaction, tagTransactionStep);
+                        break;
                 }
             }
 

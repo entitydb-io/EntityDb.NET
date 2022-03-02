@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Loggers;
+using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
 using EntityDb.Common.Transactions.Builders;
 using EntityDb.Common.TypeResolvers;
@@ -87,20 +87,6 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds an implementation of <see cref="ISnapshotStrategy{TEntity}" /> to a service collection.
-    /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <typeparam name="TSnapshotStrategy"></typeparam>
-    /// <param name="serviceCollection"></param>
-    public static void AddSnapshotStrategy<TEntity, TSnapshotStrategy>(
-        this IServiceCollection serviceCollection)
-        where TSnapshotStrategy : class, ISnapshotStrategy<TEntity>
-    {
-        serviceCollection
-            .AddSingleton<ISnapshotStrategy<TEntity>, TSnapshotStrategy>();
-    }
-
-    /// <summary>
     ///     Adds a transient <see cref="TransactionBuilder{TEntity}"/> and a transient implementation of <see cref="IEntityRepositoryFactory{TEntity}"/> to a service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
@@ -116,15 +102,16 @@ public static class ServiceCollectionExtensions
     /// <summary>
     ///     Adds a transaction subscriber that records snapshots.
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity</typeparam>
+    /// <typeparam name="TSnapshot">The type of the snapshot.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
-    public static void AddSnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
+    public static void AddSnapshotTransactionSubscriber<TSnapshot>(this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool synchronousMode = false)
+        where TSnapshot : ISnapshot<TSnapshot>
     {
-        serviceCollection.AddSingleton<ITransactionSubscriber<TEntity>>(serviceProvider =>
-            SnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
+        serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
+            SnapshotTransactionSubscriber<TSnapshot>.Create(serviceProvider, snapshotSessionOptionsName,
                 synchronousMode));
     }
 }

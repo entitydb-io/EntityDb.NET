@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWrapper<TEntity>
+internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepositoryWrapper<TSnapshot>
 {
     private readonly ILogger _logger;
 
     public TryCatchSnapshotRepository
     (
-        ISnapshotRepository<TEntity> snapshotRepository,
+        ISnapshotRepository<TSnapshot> snapshotRepository,
         ILogger logger
     )
         : base(snapshotRepository)
@@ -19,7 +19,7 @@ internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWr
         _logger = logger;
     }
 
-    protected override async Task<TEntity?> WrapQuery(Task<TEntity?> task)
+    protected override async Task<TSnapshot?> WrapQuery(Task<TSnapshot?> task)
     {
         try
         {

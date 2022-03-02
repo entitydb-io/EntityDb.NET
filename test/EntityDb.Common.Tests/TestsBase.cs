@@ -63,15 +63,15 @@ public class TestsBase<TStartup>
         return new TestServiceScope(singletonServiceProvider, serviceScopeFactory.CreateScope());
     }
 
-    protected static ITransactionRepositoryFactory<TransactionEntity> GetMockedTransactionRepositoryFactory(
+    protected static ITransactionRepositoryFactory GetMockedTransactionRepositoryFactory(
         object[]? commands = null)
     {
         commands ??= Array.Empty<object>();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
             .ReturnsAsync(true);
 
         transactionRepositoryMock
@@ -83,7 +83,7 @@ public class TestsBase<TStartup>
             .Returns(ValueTask.CompletedTask);
 
         var transactionRepositoryFactoryMock =
-            new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+            new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
 
         transactionRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>()))

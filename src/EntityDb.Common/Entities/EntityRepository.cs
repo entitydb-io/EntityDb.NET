@@ -15,15 +15,15 @@ namespace EntityDb.Common.Entities;
 internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
+    private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
     
-    public ITransactionRepository<TEntity> TransactionRepository { get; }
+    public ITransactionRepository TransactionRepository { get; }
     public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
     public EntityRepository
     (
-        IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
-        ITransactionRepository<TEntity> transactionRepository,
+        IEnumerable<ITransactionSubscriber> transactionSubscribers,
+        ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
@@ -63,7 +63,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
             .Reduce(commands);
     }
 
-    public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    public async Task<bool> PutTransaction(ITransaction transaction)
     {
         try
         {
@@ -85,7 +85,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         }
     }
 
-    private void Publish(ITransaction<TEntity> transaction)
+    private void Publish(ITransaction transaction)
     {
         foreach (var transactionSubscriber in _transactionSubscribers)
         {
@@ -96,7 +96,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
     public static EntityRepository<TEntity> Create
     (
         IServiceProvider serviceProvider,
-        ITransactionRepository<TEntity> transactionRepository,
+        ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {

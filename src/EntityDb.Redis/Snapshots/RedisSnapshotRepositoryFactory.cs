@@ -13,26 +13,23 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepositoryFactory<TEntity> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TEntity>
+internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
 {
     private readonly string _connectionString;
     private readonly string _keyNamespace;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
     private readonly ITypeResolver _typeResolver;
-    private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
     public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
         ILoggerFactory loggerFactory,
-        ITypeResolver typeResolver, string connectionString, string keyNamespace,
-        ISnapshotStrategy<TEntity>? snapshotStrategy = null)
+        ITypeResolver typeResolver, string connectionString, string keyNamespace)
     {
         _optionsFactory = optionsFactory;
         _loggerFactory = loggerFactory;
         _typeResolver = typeResolver;
         _connectionString = connectionString;
         _keyNamespace = keyNamespace;
-        _snapshotStrategy = snapshotStrategy;
     }
 
     private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
@@ -44,19 +41,18 @@ internal class RedisSnapshotRepositoryFactory<TEntity> : DisposableResourceBaseC
         return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
     }
 
-    public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName)
     {
         var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
         var redisSession = await CreateSession(snapshotSessionOptions);
 
-        var logger = _loggerFactory.CreateLogger<TEntity>();
+        var logger = _loggerFactory.CreateLogger<TSnapshot>();
 
-        var redisSnapshotRepository = new RedisSnapshotRepository<TEntity>
+        var redisSnapshotRepository = new RedisSnapshotRepository<TSnapshot>
         (
             _keyNamespace,
             _typeResolver,
-            _snapshotStrategy,
             redisSession,
             logger
         );
@@ -64,10 +60,10 @@ internal class RedisSnapshotRepositoryFactory<TEntity> : DisposableResourceBaseC
         return redisSnapshotRepository.UseTryCatch(logger);
     }
 
-    public static RedisSnapshotRepositoryFactory<TEntity> Create(IServiceProvider serviceProvider,
+    public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,
         string connectionString, string keyNamespace)
     {
-        return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TEntity>>
+        return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TSnapshot>>
         (
             serviceProvider,
             connectionString,

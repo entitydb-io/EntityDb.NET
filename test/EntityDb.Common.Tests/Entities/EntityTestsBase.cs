@@ -1,13 +1,9 @@
 ﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions.Builders;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
@@ -22,7 +18,7 @@ public abstract class EntityTestsBase<TStartup> : TestsBase<TStartup>
     {
     }
 
-    private static ITransaction<TransactionEntity> BuildTransaction
+    private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
         Guid entityId,
@@ -51,70 +47,6 @@ public abstract class EntityTestsBase<TStartup> : TestsBase<TStartup>
         }
 
         return transactionBuilder.Build(default!, Guid.NewGuid());
-    }
-
-    [Theory]
-    [InlineData(10, 20)]
-    public async Task
-        GivenSnapshotOnNthVersion_WhenPuttingTransactionWithNthVersion_ThenSnapshotExistsAtNthVersion(
-            ulong expectedSnapshotVersion, ulong expectedCurrentVersion)
-    {
-        // ARRANGE 1
-
-        var snapshotStrategyMock = new Mock<ISnapshotStrategy<TransactionEntity>>(MockBehavior.Strict);
-
-        snapshotStrategyMock
-            .Setup(strategy =>
-                strategy.ShouldPutSnapshot(It.IsAny<TransactionEntity?>(), It.IsAny<TransactionEntity>()))
-            .Returns((TransactionEntity? _, TransactionEntity nextEntity) =>
-                nextEntity.VersionNumber == expectedSnapshotVersion);
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            serviceCollection.RemoveAll(typeof(ISnapshotStrategy<TransactionEntity>));
-
-            serviceCollection.AddSingleton(_ => snapshotStrategyMock.Object);
-        });
-
-        var entityId = Guid.NewGuid();
-
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
-            .CreateRepository(TestSessionOptions.Write,
-                TestSessionOptions.Write);
-
-        var firstTransaction = BuildTransaction(serviceScope, entityId, 1, expectedSnapshotVersion);
-
-        var firstTransactionInserted = await entityRepository.PutTransaction(firstTransaction);
-
-        // ARRANGE 1 ASSERTIONS
-
-        firstTransactionInserted.ShouldBeTrue();
-
-        // ARRANGE 2
-
-        var entity = await entityRepository.GetCurrent(entityId);
-
-        var secondTransaction = BuildTransaction(serviceScope, entityId, expectedSnapshotVersion,
-            expectedCurrentVersion, entity);
-
-        var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
-
-        // ARRANGE 2 ASSERTIONS
-
-        secondTransactionInserted.ShouldBeTrue();
-
-        // ACT
-
-        var current = await entityRepository.GetCurrent(entityId);
-
-        var snapshot = await entityRepository.SnapshotRepository.GetSnapshotOrDefault(entityId);
-
-        // ASSERT
-
-        snapshot.ShouldNotBeNull();
-        snapshot.VersionNumber.ShouldBe(expectedSnapshotVersion);
-        current.VersionNumber.ShouldBe(expectedCurrentVersion);
     }
 
     [Theory]

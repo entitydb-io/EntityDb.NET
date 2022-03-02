@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.Common.Transactions.Steps;
 
-internal sealed record TagTransactionStep<TEntity> : ITagTransactionStep<TEntity>
+internal sealed record TagTransactionStep : ITagTransactionStep
 {
     public Guid EntityId { get; init; }
     public ulong TaggedAtEntityVersionNumber { get; init; }

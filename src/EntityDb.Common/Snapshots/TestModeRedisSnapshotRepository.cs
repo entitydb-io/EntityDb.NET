@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TestModeSnapshotRepository<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
+internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly ISnapshotRepository<TEntity> _snapshotRepository;
+    private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
     private readonly TestModeSnapshotManager _testModeSnapshotManager;
 
     public TestModeSnapshotRepository
     (
-        ISnapshotRepository<TEntity> snapshotRepository,
+        ISnapshotRepository<TSnapshot> snapshotRepository,
         TestModeSnapshotManager testModeSnapshotManager
     )
     {
@@ -20,23 +20,23 @@ internal sealed class TestModeSnapshotRepository<TEntity> : DisposableResourceBa
         _testModeSnapshotManager = testModeSnapshotManager;
     }
 
-    public Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot)
     {
-        _testModeSnapshotManager.AddEntityId(entityId);
+        _testModeSnapshotManager.AddSnapshotId(snapshotId);
 
-        return _snapshotRepository.PutSnapshot(entityId, entity);
+        return _snapshotRepository.PutSnapshot(snapshotId, snapshot);
     }
 
-    public Task<TEntity?> GetSnapshot(Guid entityId)
+    public Task<TSnapshot?> GetSnapshot(Guid snapshotId)
     {
-        return _snapshotRepository.GetSnapshot(entityId);
+        return _snapshotRepository.GetSnapshot(snapshotId);
     }
 
-    public Task<bool> DeleteSnapshots(Guid[] entityIds)
+    public Task<bool> DeleteSnapshots(Guid[] snapshotIds)
     {
-        _testModeSnapshotManager.RemoveEntityIds(entityIds);
+        _testModeSnapshotManager.RemoveSnapshotIds(snapshotIds);
 
-        return _snapshotRepository.DeleteSnapshots(entityIds);
+        return _snapshotRepository.DeleteSnapshots(snapshotIds);
     }
 
     public override async ValueTask DisposeAsync()

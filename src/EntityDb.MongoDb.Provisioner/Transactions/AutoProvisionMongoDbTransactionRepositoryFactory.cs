@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace EntityDb.MongoDb.Provisioner.Transactions;
 
 internal sealed class
-    AutoProvisionMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
+    AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
     private bool _needToProvision = true;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
-        IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
         mongoDbTransactionRepositoryFactory)
     {
     }

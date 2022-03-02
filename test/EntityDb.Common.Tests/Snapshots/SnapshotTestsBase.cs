@@ -28,7 +28,7 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         var expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
 
-        var entityId = Guid.NewGuid();
+        var snapshotId = Guid.NewGuid();
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
@@ -36,9 +36,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         // ACT
 
-        var snapshotInserted = await snapshotRepository.PutSnapshot(entityId, expectedSnapshot);
+        var snapshotInserted = await snapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
 
-        var actualSnapshot = await snapshotRepository.GetSnapshot(entityId);
+        var actualSnapshot = await snapshotRepository.GetSnapshot(snapshotId);
 
         // ASSERT
 
@@ -93,7 +93,7 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        var entityId = Guid.NewGuid();
+        var snapshotId = Guid.NewGuid();
 
         var expectedSnapshot = new TransactionEntity(5000);
 
@@ -111,7 +111,7 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
             .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
             .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
         
-        var inserted = await writeSnapshotRepository.PutSnapshot(entityId, expectedSnapshot);
+        var inserted = await writeSnapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
 
         // ARRANGE ASSERTIONS
 
@@ -119,9 +119,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         // ACT
 
-        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshot(entityId);
+        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshot(snapshotId);
 
-        var readOnlySecondaryPreferredSnapshot = await readOnlySecondaryPreferredSnapshotRepository.GetSnapshot(entityId);
+        var readOnlySecondaryPreferredSnapshot = await readOnlySecondaryPreferredSnapshotRepository.GetSnapshot(snapshotId);
 
         // ASSERT
 

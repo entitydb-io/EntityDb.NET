@@ -23,7 +23,7 @@ public class EntityTests : TestsBase<Startup>
     {
     }
 
-    private static ITransaction<TransactionEntity> BuildTransaction
+    private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
         Guid entityId,
@@ -54,15 +54,15 @@ public class EntityTests : TestsBase<Startup>
 
         var commands = new List<object>();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
-            .ReturnsAsync((ITransaction<TransactionEntity> transaction) =>
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
+            .ReturnsAsync((ITransaction transaction) =>
             {
                 foreach (var transactionStep in transaction.Steps)
                 {
-                    if (transactionStep is ICommandTransactionStep<TransactionEntity> commandTransactionStep)
+                    if (transactionStep is ICommandTransactionStep commandTransactionStep)
                     {
                         commands.Add(commandTransactionStep.Command);
                     }
@@ -81,7 +81,7 @@ public class EntityTests : TestsBase<Startup>
             .Verifiable();
 
         var transactionRepositoryFactoryMock =
-            new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+            new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
 
         transactionRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>()))

@@ -5,7 +5,7 @@ using System;
 
 namespace EntityDb.Common.Transactions.Steps;
 
-internal sealed record LeaseTransactionStep<TEntity> : ILeaseTransactionStep<TEntity>
+internal sealed record LeaseTransactionStep : ILeaseTransactionStep
 {
     public Guid EntityId { get; init; }
     public ulong LeasedAtEntityVersionNumber { get; init; }

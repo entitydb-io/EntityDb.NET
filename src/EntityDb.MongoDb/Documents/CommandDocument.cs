@@ -27,10 +27,10 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
     public Guid EntityId { get; init; }
     public ulong EntityVersionNumber { get; init; }
 
-    private static IReadOnlyCollection<CommandDocument> BuildInsert<TEntity>
+    private static IReadOnlyCollection<CommandDocument> BuildInsert
     (
-        ITransaction<TEntity> transaction,
-        ICommandTransactionStep<TEntity> commandTransactionStep,
+        ITransaction transaction,
+        ICommandTransactionStep commandTransactionStep,
         ILogger logger
     )
     {
@@ -47,12 +47,12 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
         };
     }
 
-    public static InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument> GetInsertCommand<TEntity>
+    public static InsertDocumentsCommand<ICommandTransactionStep, CommandDocument> GetInsertCommand
     (
         IMongoSession mongoSession
     )
     {
-        return new InsertDocumentsCommand<TEntity, ICommandTransactionStep<TEntity>, CommandDocument>
+        return new InsertDocumentsCommand<ICommandTransactionStep, CommandDocument>
         (
             mongoSession,
             CollectionName,

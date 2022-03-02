@@ -11,11 +11,7 @@ namespace EntityDb.Abstractions.Transactions;
 /// <summary>
 ///     Represents an explicit set of objects which represent a complete history of a set of entities.
 /// </summary>
-/// <typeparam name="TEntity">
-///     The type of entity represented by the objects stored in the
-///     <see cref="ITransactionRepository{TEntity}" />.
-/// </typeparam>
-public interface ITransactionRepository<TEntity> : IDisposableResource
+public interface ITransactionRepository : IDisposableResource
 {
     /// <summary>
     ///     Returns the transaction ids which are found by a agentSignature query.
@@ -113,5 +109,5 @@ public interface ITransactionRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="transaction">The transaction.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-    Task<bool> PutTransaction(ITransaction<TEntity> transaction);
+    Task<bool> PutTransaction(ITransaction transaction);
 }

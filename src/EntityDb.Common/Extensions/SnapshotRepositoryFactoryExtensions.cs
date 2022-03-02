@@ -7,14 +7,14 @@ namespace EntityDb.Common.Extensions;
 internal static class SnapshotRepositoryFactoryExtensions
 {
     [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
-    public static ISnapshotRepositoryFactory<TEntity> UseTestMode<TEntity>
+    public static ISnapshotRepositoryFactory<TSnapshot> UseTestMode<TSnapshot>
     (
-        this ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
+        this ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
         bool testMode
     )
     {
         return testMode
-            ? new TestModeSnapshotRepositoryFactory<TEntity>(snapshotRepositoryFactory)
+            ? new TestModeSnapshotRepositoryFactory<TSnapshot>(snapshotRepositoryFactory)
             : snapshotRepositoryFactory;
     }
 }

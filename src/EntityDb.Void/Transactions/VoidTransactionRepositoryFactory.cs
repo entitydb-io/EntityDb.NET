@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions;
 
-internal class VoidTransactionRepositoryFactory<TEntity> : DisposableResourceBaseClass, ITransactionRepositoryFactory<TEntity>
+internal class VoidTransactionRepositoryFactory : DisposableResourceBaseClass, ITransactionRepositoryFactory
 {
-    private static readonly Task<ITransactionRepository<TEntity>> VoidTransactionRepositoryTask =
-        Task.FromResult(new VoidTransactionRepository<TEntity>() as ITransactionRepository<TEntity>);
+    private static readonly Task<ITransactionRepository> VoidTransactionRepositoryTask =
+        Task.FromResult(new VoidTransactionRepository() as ITransactionRepository);
 
-    public Task<ITransactionRepository<TEntity>> CreateRepository(
+    public Task<ITransactionRepository> CreateRepository(
         string transactionSessionOptionsName)
     {
         return VoidTransactionRepositoryTask;

@@ -13,7 +13,7 @@ public class Startup : StartupBase
 
         // Transactions
 
-        serviceCollection.AddAutoProvisionTestModeMongoDbTransactions<TransactionEntity>
+        serviceCollection.AddAutoProvisionTestModeMongoDbTransactions
         (
             TransactionEntity.MongoCollectionName,
             _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",

@@ -33,10 +33,10 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     public Guid EntityId { get; init; }
     public ulong EntityVersionNumber { get; init; }
 
-    private static IReadOnlyCollection<LeaseDocument>? BuildInsert<TEntity>
+    private static IReadOnlyCollection<LeaseDocument>? BuildInsert
     (
-        ITransaction<TEntity> transaction,
-        ILeaseTransactionStep<TEntity> leaseTransactionStep,
+        ITransaction transaction,
+        ILeaseTransactionStep leaseTransactionStep,
         ILogger logger
     )
     {
@@ -62,10 +62,10 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
             .ToArray();
     }
 
-    private static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
+    private static FilterDefinition<BsonDocument>? BuildDelete
     (
-        ITransaction<TEntity> transaction,
-        ILeaseTransactionStep<TEntity> leaseTransactionStep
+        ITransaction transaction,
+        ILeaseTransactionStep leaseTransactionStep
     )
     {
         var deleteLeases = leaseTransactionStep.Leases.Delete;
@@ -79,12 +79,12 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
             .GetFilter(FilterBuilder);
     }
 
-    public static InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument> GetInsertCommand<TEntity>
+    public static InsertDocumentsCommand<ILeaseTransactionStep, LeaseDocument> GetInsertCommand
     (
         IMongoSession mongoSession
     )
     {
-        return new InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument>
+        return new InsertDocumentsCommand<ILeaseTransactionStep, LeaseDocument>
         (
             mongoSession,
             CollectionName,
@@ -109,12 +109,12 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
         );
     }
 
-    public static DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    public static DeleteDocumentsCommand<ILeaseTransactionStep> GetDeleteCommand
     (
         IMongoSession mongoSession
     )
     {
-        return new DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>>
+        return new DeleteDocumentsCommand<ILeaseTransactionStep>
         (
             mongoSession,
             CollectionName,

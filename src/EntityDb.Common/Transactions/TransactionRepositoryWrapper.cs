@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal abstract class TransactionRepositoryWrapper<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
+internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseClass, ITransactionRepository
 {
-    private readonly ITransactionRepository<TEntity> _transactionRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
-    protected TransactionRepositoryWrapper(ITransactionRepository<TEntity> transactionRepository)
+    protected TransactionRepositoryWrapper(ITransactionRepository transactionRepository)
     {
         _transactionRepository = transactionRepository;
     }
@@ -83,7 +83,7 @@ internal abstract class TransactionRepositoryWrapper<TEntity> : DisposableResour
         return WrapQuery(_transactionRepository.GetAnnotatedCommands(commandQuery));
     }
 
-    public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    public Task<bool> PutTransaction(ITransaction transaction)
     {
         return WrapCommand(_transactionRepository.PutTransaction(transaction));
     }

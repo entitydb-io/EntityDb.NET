@@ -11,59 +11,46 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepository<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
+internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
     private readonly IRedisSession _redisSession;
     private readonly string _keyNamespace;
     private readonly ILogger _logger;
     private readonly ITypeResolver _typeResolver;
-    private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
 
     public RedisSnapshotRepository
     (
         string keyNamespace,
         ITypeResolver typeResolver,
-        ISnapshotStrategy<TEntity>? snapshotStrategy,
         IRedisSession redisSession,
         ILogger logger
     )
     {
         _keyNamespace = keyNamespace;
         _typeResolver = typeResolver;
-        _snapshotStrategy = snapshotStrategy;
         _redisSession = redisSession;
         _logger = logger;
     }
 
-    private RedisKey GetSnapshotKey(Guid entityId)
+    private RedisKey GetSnapshotKey(Guid snapshotId)
     {
-        return $"{_keyNamespace}#{entityId}";
+        return $"{_keyNamespace}#{snapshotId}";
     }
 
-    public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public async Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot)
     {
-        if (_snapshotStrategy != null)
-        {
-            var previousSnapshot = await GetSnapshot(entityId);
-
-            if (!_snapshotStrategy.ShouldPutSnapshot(previousSnapshot, entity))
-            {
-                return false;
-            }
-        }
-
-        var snapshotKey = GetSnapshotKey(entityId);
+        var snapshotKey = GetSnapshotKey(snapshotId);
 
         var snapshotValue = JsonElementEnvelope
-            .Deconstruct(entity, _logger)
+            .Deconstruct(snapshot, _logger)
             .Serialize(_logger);
 
         return await _redisSession.Insert(snapshotKey, snapshotValue);
     }
 
-    public async Task<TEntity?> GetSnapshot(Guid entityId)
+    public async Task<TSnapshot?> GetSnapshot(Guid snapshotId)
     {
-        var snapshotKey = GetSnapshotKey(entityId);
+        var snapshotKey = GetSnapshotKey(snapshotId);
         var snapshotValue = await _redisSession.Find(snapshotKey);
 
         if (!snapshotValue.HasValue)
@@ -73,12 +60,12 @@ internal class RedisSnapshotRepository<TEntity> : DisposableResourceBaseClass, I
 
         return JsonElementEnvelope
             .Deserialize(snapshotValue, _logger)
-            .Reconstruct<TEntity>(_logger, _typeResolver);
+            .Reconstruct<TSnapshot>(_logger, _typeResolver);
     }
 
-    public async Task<bool> DeleteSnapshots(Guid[] entityIds)
+    public async Task<bool> DeleteSnapshots(Guid[] snapshotIds)
     {
-        var snapshotKeys = entityIds.Select(GetSnapshotKey);
+        var snapshotKeys = snapshotIds.Select(GetSnapshotKey);
 
         return await _redisSession.Delete(snapshotKeys);
     }
