@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
@@ -15,7 +16,7 @@ internal record MongoSession
     ILogger Logger,
     ITypeResolver TypeResolver,
     TransactionSessionOptions TransactionSessionOptions
-) : IMongoSession
+) : DisposableResourceBaseRecord, IMongoSession
 {
     private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
 
@@ -109,13 +110,9 @@ internal record MongoSession
     [ExcludeFromCodeCoverage(Justification = "Tests should run with the Debug configuration, and should not execute this method.")]
     public async Task CommitTransaction()
     {
-#if DEBUG
-        await Task.FromException(new CannotWriteInReadOnlyModeException());
-#else
-            AssertNotReadOnly();
+        AssertNotReadOnly();
 
-            await ClientSessionHandle.CommitTransactionAsync();
-#endif
+        await ClientSessionHandle.CommitTransactionAsync();
     }
 
     public async Task AbortTransaction()
@@ -125,7 +122,7 @@ internal record MongoSession
         await ClientSessionHandle.AbortTransactionAsync();
     }
 
-    public ValueTask DisposeAsync()
+    public override ValueTask DisposeAsync()
     {
         ClientSessionHandle.Dispose();
 

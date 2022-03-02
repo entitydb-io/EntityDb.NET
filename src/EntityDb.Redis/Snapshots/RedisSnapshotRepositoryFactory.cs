@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.Sessions;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
+internal class RedisSnapshotRepositoryFactory<TEntity> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TEntity>
 {
     private readonly string _connectionString;
     private readonly string _keyNamespace;

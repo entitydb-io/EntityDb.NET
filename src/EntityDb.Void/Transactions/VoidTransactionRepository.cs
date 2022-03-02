@@ -4,12 +4,13 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Disposables;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions;
 
-internal sealed class VoidTransactionRepository<TEntity> : ITransactionRepository<TEntity>
+internal sealed class VoidTransactionRepository<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
 {
     public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
     {

@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities;
 
-internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
+internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
     private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
@@ -74,7 +75,7 @@ internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await TransactionRepository.DisposeAsync();
 

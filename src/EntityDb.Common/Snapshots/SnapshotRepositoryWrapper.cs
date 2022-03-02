@@ -1,10 +1,11 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Disposables;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal abstract class SnapshotRepositoryWrapper<TEntity> : ISnapshotRepository<TEntity>
+internal abstract class SnapshotRepositoryWrapper<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
 {
     private readonly ISnapshotRepository<TEntity> _snapshotRepository;
 
@@ -31,9 +32,9 @@ internal abstract class SnapshotRepositoryWrapper<TEntity> : ISnapshotRepository
         return WrapCommand(_snapshotRepository.DeleteSnapshots(entityIds));
     }
 
-    public virtual ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return _snapshotRepository.DisposeAsync();
+        await _snapshotRepository.DisposeAsync();
     }
 
     protected abstract Task<TEntity?> WrapQuery(Task<TEntity?> task);

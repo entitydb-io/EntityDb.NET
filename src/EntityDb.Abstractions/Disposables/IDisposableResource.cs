@@ -8,15 +8,4 @@ namespace EntityDb.Abstractions.Disposables;
 /// </summary>
 public interface IDisposableResource : IDisposable, IAsyncDisposable
 {
-    /// <inheritdoc/>
-    void IDisposable.Dispose()
-    {
-        DisposeAsync().AsTask().Wait();
-    }
-
-    /// <inheritdoc/>
-    ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
 }

@@ -1,4 +1,5 @@
-﻿using EntityDb.Common.Exceptions;
+﻿using EntityDb.Common.Disposables;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Snapshots;
 using StackExchange.Redis;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions;
 
-internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : IRedisSession
+internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : DisposableResourceBaseRecord, IRedisSession
 {
     private CommandFlags GetCommandFlags()
     {
@@ -33,6 +34,8 @@ internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer
     {
         AssertNotReadOnly();
 
+        ConnectionMultiplexer.GetDatabase();
+        
         var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
 
         var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
@@ -66,10 +69,15 @@ internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer
         return deleteSnapshotTasks.All(task => task.Result);
     }
 
-    public ValueTask DisposeAsync()
+    public override void Dispose()
+    {
+        
+    }
+    
+    public override ValueTask DisposeAsync()
     {
         ConnectionMultiplexer.Dispose();
-
+        
         return ValueTask.CompletedTask;
     }
 }

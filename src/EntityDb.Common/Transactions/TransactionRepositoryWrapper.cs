@@ -4,12 +4,13 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Disposables;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal abstract class TransactionRepositoryWrapper<TEntity> : ITransactionRepository<TEntity>
+internal abstract class TransactionRepositoryWrapper<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
 {
     private readonly ITransactionRepository<TEntity> _transactionRepository;
 
@@ -88,9 +89,9 @@ internal abstract class TransactionRepositoryWrapper<TEntity> : ITransactionRepo
         return WrapCommand(_transactionRepository.PutTransaction(transaction));
     }
 
-    public virtual ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return _transactionRepository.DisposeAsync();
+        await _transactionRepository.DisposeAsync();
     }
 
     protected abstract Task<T[]> WrapQuery<T>(Task<T[]> task);

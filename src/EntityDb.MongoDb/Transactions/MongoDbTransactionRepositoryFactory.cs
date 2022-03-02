@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal class MongoDbTransactionRepositoryFactory<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
+internal class MongoDbTransactionRepositoryFactory<TEntity> : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory<TEntity>
 {
     private readonly ILoggerFactory _loggerFactory;
     private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;

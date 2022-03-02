@@ -1,11 +1,12 @@
 ﻿using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
+internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory<TEntity>
 {
     private readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
 
@@ -33,8 +34,8 @@ internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : IM
         return _mongoDbTransactionRepositoryFactory.CreateRepository(mongoSession);
     }
 
-    public virtual ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return _mongoDbTransactionRepositoryFactory.DisposeAsync();
+        await _mongoDbTransactionRepositoryFactory.DisposeAsync();
     }
 }

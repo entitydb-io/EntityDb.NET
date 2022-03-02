@@ -5,6 +5,7 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal class MongoDbTransactionRepository<TEntity> : ITransactionRepository<TEntity>
+internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
 {
     private readonly IMongoSession _mongoSession;
 
@@ -182,7 +183,7 @@ internal class MongoDbTransactionRepository<TEntity> : ITransactionRepository<TE
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await _mongoSession.DisposeAsync();
     }

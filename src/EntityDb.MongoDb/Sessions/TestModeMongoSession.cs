@@ -1,12 +1,13 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Transactions;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
 
-internal record TestModeMongoSession(IMongoSession MongoSession) : IMongoSession
+internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
 {
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
     public ILogger Logger => MongoSession.Logger;

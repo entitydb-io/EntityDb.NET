@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Common.Disposables;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
+internal class RedisSnapshotRepository<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
 {
     private readonly IRedisSession _redisSession;
     private readonly string _keyNamespace;
@@ -82,7 +83,7 @@ internal class RedisSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
         return await _redisSession.Delete(snapshotKeys);
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await _redisSession.DisposeAsync();
     }

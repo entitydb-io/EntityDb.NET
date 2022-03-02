@@ -1,9 +1,10 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Disposables;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TestModeSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
+internal sealed class TestModeSnapshotRepositoryFactory<TEntity> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TEntity>
 {
     private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
     private readonly TestModeSnapshotManager _testModeSnapshotManager = new();
@@ -23,7 +24,7 @@ internal sealed class TestModeSnapshotRepositoryFactory<TEntity> : ISnapshotRepo
         return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _testModeSnapshotManager);
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
 
