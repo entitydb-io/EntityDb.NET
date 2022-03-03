@@ -1,13 +1,14 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Queries;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Projections;
 
-internal sealed class ProjectionRepository<TProjection, TEntity> : IProjectionRepository<TProjection>
+internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableResourceBaseClass, IProjectionRepository<TProjection>
     where TProjection : IProjection<TProjection>
 {
     private readonly IProjectionStrategy<TProjection> _projectionStrategy;
