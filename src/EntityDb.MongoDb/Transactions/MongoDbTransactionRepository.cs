@@ -185,7 +185,7 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
                     IDeleteTagsTransactionStep deleteTagsTransactionStep =>
                         ToDocumentsCommand(deleteTagsTransactionStep),
 
-                    _ => throw new NotImplementedException()
+                    _ => throw new NotSupportedException()
                 };
 
                 await documentsCommand.Execute();
