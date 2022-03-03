@@ -2,7 +2,10 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Disposables;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
@@ -32,6 +35,8 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
     public async Task<TProjection> GetCurrent(Guid projectionId)
     {
         var projection = await SnapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
+
+        var previousProjection = projection;
         
         var entityIds = await _projectionStrategy.GetEntityIds(projectionId, projection);
         
@@ -46,9 +51,22 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
             projection = projection.Reduce(entityId, commands);
         }
         
-        //TODO: Store the new projection as a snapshot if it changed
+        if (!ReferenceEquals(previousProjection, projection))
+        {
+            await SnapshotRepository.PutSnapshot(projectionId, projection);
+        }
         
-        //TODO: Don't return default
-        return default!;
+        return projection;
+    }
+    
+    public static ProjectionRepository<TProjection, TEntity> Create
+    (
+        IServiceProvider serviceProvider,
+        ITransactionRepository<TEntity> transactionRepository,
+        ISnapshotRepository<TEntity> snapshotRepository
+    )
+    {
+        return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection, TEntity>>(serviceProvider,
+            transactionRepository, snapshotRepository);
     }
 }
