@@ -21,6 +21,7 @@ public interface IProjection<out TProjection>
     /// <returns></returns>
     ulong GetEntityVersionNumber(Guid entityId);
 
+    //TODO: Reduce should handle IEntityAnnotation<object>[], allowing access to full transaction information
     /// <summary>
     ///     Returns a new <typeparamref name="TProjection"/> that incorporates the commands for a particular entity id.
     /// </summary>

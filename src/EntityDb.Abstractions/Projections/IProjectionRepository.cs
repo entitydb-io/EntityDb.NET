@@ -11,6 +11,8 @@ namespace EntityDb.Abstractions.Projections;
 /// <typeparam name="TProjection">The type of the projection.</typeparam>
 public interface IProjectionRepository<TProjection> : IDisposableResource
 {
+    //TODO: Getter for the projection strategy here
+
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>

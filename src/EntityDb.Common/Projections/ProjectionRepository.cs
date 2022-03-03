@@ -40,6 +40,8 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
         
         var entityIds = await _projectionStrategy.GetEntityIds(projectionId, projection);
         
+        //TODO: Handle Empty Case
+        
         foreach (var entityId in entityIds)
         {
             var entityVersionNumber = projection.GetEntityVersionNumber(entityId);
@@ -50,6 +52,8 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
 
             projection = projection.Reduce(entityId, commands);
         }
+
+        //TODO: Move to Transaction Subscriber?
         
         if (!ReferenceEquals(previousProjection, projection))
         {
