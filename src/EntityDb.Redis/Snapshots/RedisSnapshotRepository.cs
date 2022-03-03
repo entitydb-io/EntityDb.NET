@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.TypeResolvers;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,12 +32,12 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         _logger = logger;
     }
 
-    private RedisKey GetSnapshotKey(Guid snapshotId)
+    private RedisKey GetSnapshotKey(Id snapshotId)
     {
         return $"{_keyNamespace}#{snapshotId}";
     }
 
-    public async Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot)
+    public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
         var snapshotKey = GetSnapshotKey(snapshotId);
 
@@ -48,7 +48,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         return await _redisSession.Insert(snapshotKey, snapshotValue);
     }
 
-    public async Task<TSnapshot?> GetSnapshot(Guid snapshotId)
+    public async Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
         var snapshotKey = GetSnapshotKey(snapshotId);
         var snapshotValue = await _redisSession.Find(snapshotKey);
@@ -63,7 +63,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
             .Reconstruct<TSnapshot>(_logger, _typeResolver);
     }
 
-    public async Task<bool> DeleteSnapshots(Guid[] snapshotIds)
+    public async Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
         var snapshotKeys = snapshotIds.Select(GetSnapshotKey);
 

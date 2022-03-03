@@ -1,12 +1,12 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using System;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -19,7 +19,7 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
 
     private static readonly AgentSignatureSortBuilder SortBuilder = new();
 
-    public Guid[] EntityIds { get; init; } = default!;
+    public Id[] EntityIds { get; init; } = default!;
     
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (

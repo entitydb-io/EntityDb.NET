@@ -1,3 +1,3 @@
 ﻿namespace EntityDb.Common.Tests.Implementations.Agents;
 
-public record CounterAgentSignature(int Number);
+public record CounterAgentSignature(ulong Number);

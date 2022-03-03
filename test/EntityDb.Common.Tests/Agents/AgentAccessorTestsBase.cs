@@ -85,7 +85,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ASSERT
 
-            Should.NotThrow(() => agent.GetTimestamp());
+            Should.NotThrow(() => agent.GetTimeStamp());
         }
     }
 

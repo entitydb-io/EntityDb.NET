@@ -3,8 +3,8 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
@@ -18,42 +18,42 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         _transactionRepository = transactionRepository;
     }
 
-    public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return WrapQuery(_transactionRepository.GetTransactionIds(agentSignatureQuery));
     }
 
-    public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery)
     {
         return WrapQuery(_transactionRepository.GetTransactionIds(commandQuery));
     }
 
-    public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery)
     {
         return WrapQuery(_transactionRepository.GetTransactionIds(leaseQuery));
     }
 
-    public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
+    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery)
     {
         return WrapQuery(_transactionRepository.GetTransactionIds(tagQuery));
     }
 
-    public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return WrapQuery(_transactionRepository.GetEntityIds(agentSignatureQuery));
     }
 
-    public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery)
     {
         return WrapQuery(_transactionRepository.GetEntityIds(commandQuery));
     }
 
-    public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery)
     {
         return WrapQuery(_transactionRepository.GetEntityIds(leaseQuery));
     }
 
-    public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
+    public Task<Id[]> GetEntityIds(ITagQuery tagQuery)
     {
         return WrapQuery(_transactionRepository.GetEntityIds(tagQuery));
     }

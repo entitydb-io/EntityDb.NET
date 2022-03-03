@@ -4,9 +4,11 @@ using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Serializers;
 using EntityDb.MongoDb.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
@@ -21,6 +23,13 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     private readonly string _connectionString;
     private readonly string _databaseName;
 
+    static MongoDbTransactionRepositoryFactory()
+    {
+        BsonSerializer.RegisterSerializer(new IdSerializer());
+        BsonSerializer.RegisterSerializer(new TimeStampSerializer());
+        BsonSerializer.RegisterSerializer(new VersionNumberSerializer());
+    }
+    
     public MongoDbTransactionRepositoryFactory
     (
         IOptionsFactory<TransactionSessionOptions> optionsFactory,

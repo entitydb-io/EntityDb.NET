@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
+using System;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -18,7 +19,7 @@ public interface ICommandFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes commands with an entity id which is contained in
     ///     <paramref name="entityIds" />.
     /// </returns>
-    TFilter EntityIdIn(params Guid[] entityIds);
+    TFilter EntityIdIn(params Id[] entityIds);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes commands with an entity version number greater than or
@@ -29,7 +30,7 @@ public interface ICommandFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes commands with an entity version number greater than or
     ///     equal to <paramref name="entityVersionNumber" />.
     /// </returns>
-    TFilter EntityVersionNumberGte(ulong entityVersionNumber);
+    TFilter EntityVersionNumberGte(VersionNumber entityVersionNumber);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes commands with an entity version number less than or
@@ -40,7 +41,7 @@ public interface ICommandFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes commands with an entity version number less than or equal
     ///     to <paramref name="entityVersionNumber" />.
     /// </returns>
-    TFilter EntityVersionNumberLte(ulong entityVersionNumber);
+    TFilter EntityVersionNumberLte(VersionNumber entityVersionNumber);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes commands whose type is contained in a set of command

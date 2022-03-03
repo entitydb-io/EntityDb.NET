@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using System;
 
 namespace EntityDb.Common.Exceptions;
@@ -14,15 +15,15 @@ namespace EntityDb.Common.Exceptions;
 ///     Version Zero is reserved for an entity that has not yet been created/persisted.
 /// </remarks>
 public class VersionZeroReservedException : Exception
-{
+{   
     /// <summary>
     ///     Throws a new <see cref="VersionZeroReservedException" /> if <paramref name="versionNumber" /> is
     ///     equal to zero.
     /// </summary>
     /// <param name="versionNumber"></param>
-    public static void ThrowIfZero(ulong versionNumber)
+    public static void ThrowIfZero(VersionNumber versionNumber)
     {
-        if (versionNumber == 0)
+        if (versionNumber == VersionNumber.MinValue)
         {
             throw new VersionZeroReservedException();
         }

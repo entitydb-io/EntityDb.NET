@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Commands;
@@ -27,56 +28,56 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
         _mongoSession = mongoSession;
     }
 
-    public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return AgentSignatureDocument
             .GetQuery(_mongoSession, agentSignatureQuery)
             .GetTransactionIds();
     }
 
-    public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery)
     {
         return CommandDocument
             .GetQuery(_mongoSession, commandQuery)
             .GetTransactionIds();
     }
 
-    public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery)
     {
         return LeaseDocument
             .GetQuery(_mongoSession, leaseQuery)
             .GetTransactionIds();
     }
 
-    public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
+    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery)
     {
         return TagDocument
             .GetQuery(_mongoSession, tagQuery)
             .GetTransactionIds();
     }
 
-    public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return AgentSignatureDocument
             .GetQuery(_mongoSession, agentSignatureQuery)
             .GetEntitiesIds();
     }
 
-    public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery)
     {
         return CommandDocument
             .GetQuery(_mongoSession, commandQuery)
             .GetEntityIds();
     }
 
-    public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery)
     {
         return LeaseDocument
             .GetQuery(_mongoSession, leaseQuery)
             .GetEntityIds();
     }
 
-    public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
+    public Task<Id[]> GetEntityIds(ITagQuery tagQuery)
     {
         return TagDocument
             .GetQuery(_mongoSession, tagQuery)

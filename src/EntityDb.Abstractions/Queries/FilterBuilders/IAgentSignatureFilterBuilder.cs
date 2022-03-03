@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
+using System;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -18,7 +19,7 @@ public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes agentSignatures with any entity id which is contained in
     ///     <paramref name="entityIds" />.
     /// </returns>
-    TFilter EntityIdsIn(params Guid[] entityIds);
+    TFilter EntityIdsIn(params Id[] entityIds);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures whose type is contained in a set of agentSignature

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
@@ -21,9 +22,9 @@ public abstract class EntityTestsBase<TStartup> : TestsBase<TStartup>
     private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
-        Guid entityId,
-        ulong from,
-        ulong to,
+        Id entityId,
+        VersionNumber from,
+        VersionNumber to,
         TransactionEntity? entity = null
     )
     {
@@ -36,9 +37,9 @@ public abstract class EntityTestsBase<TStartup> : TestsBase<TStartup>
             transactionBuilder.Load(entity);
         }
 
-        for (var i = from; i <= to; i++)
+        for (var i = from; i.Value <= to.Value; i = i.Next())
         {
-            if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber >= i)
+            if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber.Value >= i.Value)
             {
                 continue;
             }
@@ -46,25 +47,29 @@ public abstract class EntityTestsBase<TStartup> : TestsBase<TStartup>
             transactionBuilder.Append(new DoNothing());
         }
 
-        return transactionBuilder.Build(default!, Guid.NewGuid());
+        return transactionBuilder.Build(default!, Id.NewId());
     }
 
     [Theory]
-    [InlineData(10, 5)]
-    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(ulong versionNumberN, ulong versionNumberM)
+    [InlineData(10UL, 5UL)]
+    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(ulong n, ulong m)
     {
         // ARRANGE
 
+        var versionNumberN = new VersionNumber(n);
+
+        var versionNumberM = new VersionNumber(m);
+        
         using var serviceScope = CreateServiceScope();
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         await using var entityRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
             .CreateRepository(TestSessionOptions.Write,
                 TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, 1, versionNumberN);
+        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 

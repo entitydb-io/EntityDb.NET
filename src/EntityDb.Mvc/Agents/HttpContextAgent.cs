@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace EntityDb.Mvc.Agents;
 
@@ -12,9 +12,9 @@ internal record HttpContextAgent(HttpContext HttpContext, IOptionsFactory<HttpCo
         return HttpContext.User.IsInRole(role);
     }
 
-    public DateTime GetTimestamp()
+    public TimeStamp GetTimeStamp()
     {
-        return DateTime.UtcNow;
+        return TimeStamp.UtcNow;
     }
 
     public object GetSignature(string signatureOptionsName)

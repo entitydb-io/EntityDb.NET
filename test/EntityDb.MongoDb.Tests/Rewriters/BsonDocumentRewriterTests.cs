@@ -18,7 +18,7 @@ public class BsonDocumentRewriterTests
             ["Double"] = BsonDouble.Create(0.0),
             ["String"] = BsonString.Create(""),
             ["Boolean"] = BsonBoolean.True,
-            ["DateTime"] = BsonDateTime.Create(DateTime.UtcNow),
+            ["TimeStamp"] = BsonDateTime.Create(DateTime.UtcNow),
             ["Null"] = BsonNull.Value,
             ["RegularExpression"] = BsonRegularExpression.Create(new Regex("$abc^")),
             ["Int32"] = BsonInt32.Create(0),

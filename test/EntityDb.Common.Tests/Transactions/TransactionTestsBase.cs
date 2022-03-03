@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -123,7 +124,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseTransactionIds
@@ -131,7 +132,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -147,7 +148,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseTransactionIds
@@ -155,7 +156,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -171,7 +172,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseTransactionIds
@@ -179,7 +180,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -195,7 +196,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseTransactionIds
@@ -203,7 +204,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -219,7 +220,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseEntityIds
@@ -227,7 +228,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -243,7 +244,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseEntityIds
@@ -251,7 +252,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -267,7 +268,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseEntityIds
@@ -275,7 +276,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -291,7 +292,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         ExpectedObjects expectedObjects
     )
     {
-        Guid[] GetExpectedResults(bool invert)
+        Id[] GetExpectedResults(bool invert)
         {
             return (invert
                     ? expectedObjects.FalseEntityIds
@@ -299,7 +300,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
                 .ToArray();
         }
 
-        Task<Guid[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -407,10 +408,10 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
-        Guid transactionId,
-        Guid entityId,
-        IEnumerable<int> counts,
-        DateTime? timeStampOverride = null,
+        Id transactionId,
+        Id entityId,
+        IEnumerable<ulong> counts,
+        TimeStamp? timeStampOverride = null,
         object? agentSignatureOverride = null
     )
     {
@@ -446,12 +447,12 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         return transaction;
     }
 
-    private static Guid[] GetSortedGuids(int numberOfGuids)
+    private static Id[] GetSortedIds(int numberOfIds)
     {
         return Enumerable
-            .Range(1, numberOfGuids)
-            .Select(_ => Guid.NewGuid())
-            .OrderBy(guid => guid)
+            .Range(1, numberOfIds)
+            .Select(_ => Id.NewId())
+            .OrderBy(id => id.Value)
             .ToArray();
     }
 
@@ -507,7 +508,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope();
 
-        var transactionId = Guid.NewGuid();
+        var transactionId = Id.NewId();
             
             
         var firstTransaction = serviceScope.ServiceProvider
@@ -582,7 +583,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        const ulong versionNumber = 0UL;
+        var versionNumber = new VersionNumber(0);
             
         var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
@@ -607,7 +608,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         transactionStepMock
             .SetupGet(step => step.EntityId)
-            .Returns(default(Guid));
+            .Returns(default(Id));
             
         transactionStepMock
             .SetupGet(step => step.PreviousEntityVersionNumber)
@@ -660,19 +661,19 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
             serviceCollection.AddSingleton(loggerFactoryMock.Object);
         });
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         var firstTransaction = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
             
         var secondTransaction = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
             
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -766,21 +767,21 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        const int expectedCount = 5;
+        const ulong expectedCount = 5;
         
         using var serviceScope = CreateServiceScope();
 
-        var transactionTimeStamp = DateTime.UtcNow;
+        var transactionTimeStamp = TimeStamp.UtcNow;
 
-        var expectedTransactionId = Guid.NewGuid();
-        var expectedEntityId = Guid.NewGuid();
+        var expectedTransactionId = Id.NewId();
+        var expectedEntityId = Id.NewId();
         var expectedTransactionTimeStamps = new[]
         {
             transactionTimeStamp,
 
-            // A .NET DateTime can be more precise than milliseconds.
+            // A TimeStamp can be more precise than milliseconds.
             // This allows for database types that cannot be more precise than milliseconds.
-            transactionTimeStamp - TimeSpan.FromTicks(transactionTimeStamp.Ticks % TimeSpan.TicksPerMillisecond)
+            transactionTimeStamp.WithMillisecondPrecision()
         };
 
         var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
@@ -792,7 +793,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
-        var commandQuery = new GetCurrentEntityQuery(expectedEntityId, 0);
+        var commandQuery = new GetCurrentEntityQuery(expectedEntityId, VersionNumber.MinValue);
 
         // ARRANGE ASSERTIONS
 
@@ -808,7 +809,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         annotatedCommands[0].TransactionId.ShouldBe(expectedTransactionId);
         annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
-        annotatedCommands[0].EntityVersionNumber.ShouldBe(1ul);
+        annotatedCommands[0].EntityVersionNumber.ShouldBe(new VersionNumber(1));
             
         var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<Count>()!;
 
@@ -824,17 +825,17 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope();
 
-        var expectedEntity = new TransactionEntity { VersionNumber = 1 };
+        var expectedEntity = new TransactionEntity(new VersionNumber(1));
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
 
         var entityRepository = EntityRepository<TransactionEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
-        var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), entityId,
-            new[] { 0 });
+        var transaction = BuildTransaction(serviceScope, Id.NewId(), entityId,
+            new[] { 0UL });
 
         var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
@@ -858,7 +859,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope();
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         var transactionBuilder = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
@@ -874,7 +875,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var initialTransaction = transactionBuilder
             .Add(tag)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -890,7 +891,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var finalTransaction = transactionBuilder
             .Delete(tag)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -912,7 +913,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope();
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         var transactionBuilder = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
@@ -928,7 +929,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var initialTransaction = transactionBuilder
             .Add(lease)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -944,7 +945,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var finalTransaction = transactionBuilder
             .Delete(lease)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -974,9 +975,9 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var transaction = transactionBuilder
             .Append(expectedCommand)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
-        var versionOneCommandQuery = new EntityVersionNumberQuery(1, 1);
+        var versionOneCommandQuery = new EntityVersionNumberQuery(new VersionNumber(1), new VersionNumber(1));
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -996,7 +997,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-        commandTransactionStep.EntityVersionNumber.ShouldBe(1ul);
+        commandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
         newCommands.Length.ShouldBe(1);
 
@@ -1019,13 +1020,13 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var firstTransaction = transactionBuilder
             .Append(new Count(1))
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
         var secondTransaction = transactionBuilder
             .Append(expectedCommand)
-            .Build(default!, Guid.NewGuid());
+            .Build(default!, Id.NewId());
 
-        var versionTwoCommandQuery = new EntityVersionNumberQuery(2, 2);
+        var versionTwoCommandQuery = new EntityVersionNumberQuery(new VersionNumber(2), new VersionNumber(2));
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
@@ -1050,7 +1051,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-        secondCommandTransactionStep.EntityVersionNumber.ShouldBe(2ul);
+        secondCommandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(2));
 
         newCommands.Length.ShouldBe(1);
 
@@ -1058,29 +1059,29 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(60, 20, 30)]
+    [InlineData(60UL, 20UL, 30UL)]
     public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(
-        int timeSpanInMinutes, int gteInMinutes, int lteInMinutes)
+        ulong timeSpanInMinutes, ulong gteInMinutes, ulong lteInMinutes)
     {
         using var serviceScope = CreateServiceScope();
 
-        var originTimeStamp = DateTime.UnixEpoch;
+        var originTimeStamp = TimeStamp.UnixEpoch;
 
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
-        var transactionIds = GetSortedGuids(timeSpanInMinutes);
-        var entityIds = GetSortedGuids(timeSpanInMinutes);
+        var transactionIds = GetSortedIds((int)timeSpanInMinutes);
+        var entityIds = GetSortedIds((int)timeSpanInMinutes);
 
-        DateTime? gte = null;
-        DateTime? lte = null;
+        TimeStamp? gte = null;
+        TimeStamp? lte = null;
 
-        for (var i = 1; i <= timeSpanInMinutes; i++)
+        for (var i = 1UL; i <= timeSpanInMinutes; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
 
-            var currentTimeStamp = originTimeStamp.AddMinutes(i);
+            var currentTimeStamp = new TimeStamp(originTimeStamp.Value.AddMinutes(i));
 
             var agentSignature = new CounterAgentSignature(i);
 
@@ -1129,21 +1130,21 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(10, 5)]
+    [InlineData(10UL, 5UL)]
     public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(
-        int numberOfTransactionIds, int whichTransactionId)
+        ulong numberOfTransactionIds, ulong whichTransactionId)
     {
         using var serviceScope = CreateServiceScope();
 
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
-        Guid? transactionId = null;
+        Id? transactionId = null;
 
-        var transactionIds = GetSortedGuids(numberOfTransactionIds);
-        var entityIds = GetSortedGuids(numberOfTransactionIds);
+        var transactionIds = GetSortedIds((int)numberOfTransactionIds);
+        var entityIds = GetSortedIds((int)numberOfTransactionIds);
 
-        for (var i = 1; i <= numberOfTransactionIds; i++)
+        for (var i = 1UL; i <= numberOfTransactionIds; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
@@ -1190,21 +1191,21 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(10, 5)]
+    [InlineData(10UL, 5UL)]
     public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
-        int numberOfEntityIds, int whichEntityId)
+        ulong numberOfEntityIds, ulong whichEntityId)
     {
         using var serviceScope = CreateServiceScope();
 
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
-        Guid? entityId = null;
+        Id? entityId = null;
 
-        var transactionIds = GetSortedGuids(numberOfEntityIds);
-        var entityIds = GetSortedGuids(numberOfEntityIds);
+        var transactionIds = GetSortedIds((int)numberOfEntityIds);
+        var entityIds = GetSortedIds((int)numberOfEntityIds);
 
-        for (var i = 1; i <= numberOfEntityIds; i++)
+        for (var i = 1UL; i <= numberOfEntityIds; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
@@ -1251,16 +1252,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(20, 5, 15)]
+    [InlineData(20, 5UL, 15UL)]
     public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(
-        int numberOfVersionNumbers, int gteAsInt, int lteAsInt)
+        ulong numberOfVersionNumbers, ulong gte, ulong lte)
     {
         using var serviceScope = CreateServiceScope();
 
-        var counts = new List<int>();
+        var counts = new List<ulong>();
         var expectedObjects = new ExpectedObjects();
 
-        for (var i = 1; i <= numberOfVersionNumbers; i++)
+        for (var i = 1UL; i <= numberOfVersionNumbers; i++)
         {
             var command = new Count(i);
 
@@ -1270,15 +1271,15 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
             counts.Add(i);
 
-            expectedObjects.Add(gteAsInt <= i && i <= lteAsInt, default, default, default!, new[] { command },
+            expectedObjects.Add(gte <= i && i <= lte, default, default, default!, new[] { command },
                 leases, tags);
         }
 
-        var transaction = BuildTransaction(serviceScope, Guid.NewGuid(), Guid.NewGuid(), counts.ToArray());
+        var transaction = BuildTransaction(serviceScope, Id.NewId(), Id.NewId(), counts.ToArray());
 
         var transactions = new List<ITransaction> { transaction };
 
-        var query = new EntityVersionNumberQuery((ulong)gteAsInt, (ulong)lteAsInt);
+        var query = new EntityVersionNumberQuery(new VersionNumber(gte), new VersionNumber(lte));
 
         await InsertTransactions(serviceScope, transactions);
         await TestGetCommands(serviceScope, query, expectedObjects);
@@ -1287,19 +1288,19 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(20, 5, 15)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(int countTo,
-        int gte, int lte)
+    [InlineData(20UL, 5UL, 15UL)]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(ulong countTo,
+        ulong gte, ulong lte)
     {
         using var serviceScope = CreateServiceScope();
 
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
-        var transactionIds = GetSortedGuids(countTo);
-        var entityIds = GetSortedGuids(countTo);
+        var transactionIds = GetSortedIds((int)countTo);
+        var entityIds = GetSortedIds((int)countTo);
 
-        for (var i = 1; i <= countTo; i++)
+        for (var i = 1UL; i <= countTo; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
@@ -1341,24 +1342,24 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     private class ExpectedObjects
     {
         public readonly List<object> FalseCommands = new();
-        public readonly List<Guid> FalseEntityIds = new();
+        public readonly List<Id> FalseEntityIds = new();
         public readonly List<ILease> FalseLeases = new();
         public readonly List<object> FalseAgentSignatures = new();
         public readonly List<ITag> FalseTags = new();
-        public readonly List<Guid> FalseTransactionIds = new();
+        public readonly List<Id> FalseTransactionIds = new();
 
         public readonly List<object> TrueCommands = new();
-        public readonly List<Guid> TrueEntityIds = new();
+        public readonly List<Id> TrueEntityIds = new();
         public readonly List<ILease> TrueLeases = new();
         public readonly List<object> TrueAgentSignatures = new();
         public readonly List<ITag> TrueTags = new();
-        public readonly List<Guid> TrueTransactionIds = new();
+        public readonly List<Id> TrueTransactionIds = new();
 
         public void Add
         (
             bool condition,
-            Guid transactionId,
-            Guid entityId,
+            Id transactionId,
+            Id entityId,
             object agentSignature,
             IEnumerable<object> commands,
             IEnumerable<ILease> leases,

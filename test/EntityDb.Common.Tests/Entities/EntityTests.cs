@@ -13,6 +13,7 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
@@ -26,21 +27,21 @@ public class EntityTests : TestsBase<Startup>
     private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
-        Guid entityId,
-        ulong from,
-        ulong to
+        Id entityId,
+        VersionNumber from,
+        VersionNumber to
     )
     {
         var transactionBuilder = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId);
 
-        for (var i = from; i <= to; i++)
+        for (var i = from; i.Value <= to.Value; i = i.Next())
         {
             transactionBuilder.Append(new DoNothing());
         }
 
-        return transactionBuilder.Build(default!, Guid.NewGuid());
+        return transactionBuilder.Build(default!, Id.NewId());
     }
 
     [Fact]
@@ -48,9 +49,9 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        const ulong expectedVersionNumber = 10;
+        var expectedVersionNumber = new VersionNumber(10);
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         var commands = new List<object>();
 
@@ -96,7 +97,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, 1, expectedVersionNumber);
+        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -201,7 +202,7 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var snapshot = new TransactionEntity(1);
+        var snapshot = new TransactionEntity(new VersionNumber(1));
 
         var newCommands = new object[]
         {
@@ -227,7 +228,7 @@ public class EntityTests : TestsBase<Startup>
 
         snapshotOrDefault.ShouldNotBe(default);
         snapshotOrDefault.ShouldNotBe(snapshot);
-        snapshotOrDefault.VersionNumber.ShouldBe(snapshot.VersionNumber + Convert.ToUInt64(newCommands.Length));
+        snapshotOrDefault.VersionNumber.ShouldBe(new VersionNumber(snapshot.VersionNumber.Value + Convert.ToUInt64(newCommands.Length)));
     }
 
     [Fact]

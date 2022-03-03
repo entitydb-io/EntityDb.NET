@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Tests.Implementations.Leases;
 
-public record CountLease(int Number) : ILease
+public record CountLease(ulong Number) : ILease
 {
     public string Scope => $"{Number}";
     public string Label => "";

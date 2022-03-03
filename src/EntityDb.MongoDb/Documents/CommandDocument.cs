@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
@@ -9,7 +10,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents;
@@ -22,8 +22,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
 
     private static readonly CommandSortBuilder SortBuilder = new();
 
-    public Guid EntityId { get; init; }
-    public ulong EntityVersionNumber { get; init; }
+    public Id EntityId { get; init; }
+    public VersionNumber EntityVersionNumber { get; init; }
     
     public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
     (
@@ -69,10 +69,10 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
         );
     }
 
-    public static Task<ulong> GetLastEntityVersionNumber
+    public static Task<VersionNumber> GetLastEntityVersionNumber
     (
         IMongoSession mongoSession,
-        Guid entityId
+        Id entityId
     )
     {
         var commandQuery = new GetLastEntityVersionQuery(entityId);

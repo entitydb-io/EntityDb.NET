@@ -1,4 +1,6 @@
-﻿namespace EntityDb.Abstractions.Transactions.Steps;
+﻿using EntityDb.Abstractions.ValueObjects;
+
+namespace EntityDb.Abstractions.Transactions.Steps;
 
 /// <summary>
 ///     Represents a transaction step that appends a command.
@@ -16,5 +18,5 @@ public interface IAppendCommandTransactionStep : ITransactionStep
     /// <remarks>
     ///     The value zero is reserved to indicate that this command is the first command.
     /// </remarks>
-    ulong PreviousEntityVersionNumber { get; }
+    VersionNumber PreviousEntityVersionNumber { get; }
 }

@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
@@ -20,19 +20,19 @@ internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResource
         _testModeSnapshotManager = testModeSnapshotManager;
     }
 
-    public Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot)
+    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
         _testModeSnapshotManager.AddSnapshotId(snapshotId);
 
         return _snapshotRepository.PutSnapshot(snapshotId, snapshot);
     }
 
-    public Task<TSnapshot?> GetSnapshot(Guid snapshotId)
+    public Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
         return _snapshotRepository.GetSnapshot(snapshotId);
     }
 
-    public Task<bool> DeleteSnapshots(Guid[] snapshotIds)
+    public Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
         _testModeSnapshotManager.RemoveSnapshotIds(snapshotIds);
 

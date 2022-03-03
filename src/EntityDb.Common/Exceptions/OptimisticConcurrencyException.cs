@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -24,7 +25,7 @@ public sealed class OptimisticConcurrencyException : Exception
     /// </summary>
     /// <param name="expectedPreviousVersionNumber">The expected previous version number.</param>
     /// <param name="actualPreviousVersionNumber">The actual previous version number.</param>
-    public static void ThrowIfMismatch(ulong expectedPreviousVersionNumber, ulong actualPreviousVersionNumber)
+    public static void ThrowIfMismatch(VersionNumber expectedPreviousVersionNumber, VersionNumber actualPreviousVersionNumber)
     {
         if (expectedPreviousVersionNumber != actualPreviousVersionNumber)
         {

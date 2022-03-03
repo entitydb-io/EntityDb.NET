@@ -3,10 +3,10 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions.Steps;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -14,13 +14,13 @@ namespace EntityDb.Common.Transactions.Builders;
 
 /// <summary>
 ///     Provides a way to construct an <see cref="ITransaction" />. Note that no operations are permanent until
-///     you call <see cref="Build(string, Guid)" /> and pass the result to a transaction repository.
+///     you call <see cref="Build(string, Id)" /> and pass the result to a transaction repository.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
 public sealed class TransactionBuilder<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly Dictionary<Guid, TEntity> _knownEntities = new();
+    private readonly Dictionary<Id, TEntity> _knownEntities = new();
     private readonly List<ITransactionStep> _transactionSteps = new();
 
     private readonly IAgentAccessor _agentAccessor;
@@ -36,7 +36,7 @@ public sealed class TransactionBuilder<TEntity>
         _agentAccessor = agentAccessor;
     }
 
-    private void ConstructIfNotKnown(Guid entityId)
+    private void ConstructIfNotKnown(Id entityId)
     {
         if (IsEntityKnown(entityId))
         {
@@ -53,7 +53,7 @@ public sealed class TransactionBuilder<TEntity>
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <returns>A single-entity transaction builder, which has a simplified set of methods.</returns>
-    public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Guid entityId)
+    public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Id entityId)
     {
         return new SingleEntityTransactionBuilder<TEntity>(this, entityId);
     }
@@ -63,7 +63,7 @@ public sealed class TransactionBuilder<TEntity>
     /// </summary>
     /// <param name="entityId">The id associated with the entity.</param>
     /// <returns>A <typeparamref name="TEntity"/> associated with <paramref name="entityId"/>, if it is known.</returns>
-    public TEntity GetEntity(Guid entityId)
+    public TEntity GetEntity(Id entityId)
     {
         return _knownEntities[entityId];
     }
@@ -73,7 +73,7 @@ public sealed class TransactionBuilder<TEntity>
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <returns><c>true</c> if a <typeparamref name="TEntity"/> associated with <paramref name="entityId"/> is in memory, or else <c>false</c>.</returns>
-    public bool IsEntityKnown(Guid entityId)
+    public bool IsEntityKnown(Id entityId)
     {
         return _knownEntities.ContainsKey(entityId);
     }
@@ -86,9 +86,9 @@ public sealed class TransactionBuilder<TEntity>
     /// <returns>The transaction builder.</returns>
     /// <remarks>
     ///     Call this method to load an entity that already exists before calling
-    ///     <see cref="Append(Guid, object)" />.
+    ///     <see cref="Append(Id, object)" />.
     /// </remarks>
-    public TransactionBuilder<TEntity> Load(Guid entityId, TEntity entity)
+    public TransactionBuilder<TEntity> Load(Id entityId, TEntity entity)
     {
         if (IsEntityKnown(entityId))
         {
@@ -106,7 +106,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Append(Guid entityId, object command)
+    public TransactionBuilder<TEntity> Append(Id entityId, object command)
     {
         ConstructIfNotKnown(entityId);
 
@@ -136,7 +136,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="leases">The leases to be added to the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Add(Guid entityId, params ILease[] leases)
+    public TransactionBuilder<TEntity> Add(Id entityId, params ILease[] leases)
     {
         ConstructIfNotKnown(entityId);
 
@@ -160,7 +160,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="tags">The tags to be added to the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Add(Guid entityId, params ITag[] tags)
+    public TransactionBuilder<TEntity> Add(Id entityId, params ITag[] tags)
     {
         ConstructIfNotKnown(entityId);
 
@@ -184,7 +184,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Delete(Guid entityId, params ILease[] leases)
+    public TransactionBuilder<TEntity> Delete(Id entityId, params ILease[] leases)
     {
         ConstructIfNotKnown(entityId);
 
@@ -208,7 +208,7 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
     /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity"/>.</param>
     /// <returns>The transaction builder.</returns>
-    public TransactionBuilder<TEntity> Delete(Guid entityId, params ITag[] tags)
+    public TransactionBuilder<TEntity> Delete(Id entityId, params ITag[] tags)
     {
         ConstructIfNotKnown(entityId);
 
@@ -232,14 +232,14 @@ public sealed class TransactionBuilder<TEntity>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="transactionId">A new id for the new transaction.</param>
     /// <returns>A new instance of <see cref="ITransaction" />.</returns>
-    public ITransaction Build(string agentSignatureOptionsName, Guid transactionId)
+    public ITransaction Build(string agentSignatureOptionsName, Id transactionId)
     {
         var agent = _agentAccessor.GetAgent();
 
         var transaction = new Transaction
         {
             Id = transactionId,
-            TimeStamp = agent.GetTimestamp(),
+            TimeStamp = agent.GetTimeStamp(),
             AgentSignature = agent.GetSignature(agentSignatureOptionsName),
             Steps = _transactionSteps.ToImmutableArray()
         };

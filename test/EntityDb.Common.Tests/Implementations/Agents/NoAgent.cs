@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Agents;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Agents;
 
@@ -10,9 +10,9 @@ public class NoAgent : IAgent
         return false;
     }
 
-    public DateTime GetTimestamp()
+    public TimeStamp GetTimeStamp()
     {
-        return DateTime.UtcNow;
+        return TimeStamp.UtcNow;
     }
 
     public object GetSignature(string signatureOptionsName)

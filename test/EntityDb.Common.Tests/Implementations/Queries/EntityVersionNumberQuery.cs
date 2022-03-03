@@ -1,10 +1,11 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record EntityVersionNumberQuery(ulong Gte, ulong Lte) : ICommandQuery, ILeaseQuery, ITagQuery
+public record EntityVersionNumberQuery(VersionNumber Gte, VersionNumber Lte) : ICommandQuery, ILeaseQuery, ITagQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {

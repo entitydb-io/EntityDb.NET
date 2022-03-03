@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System;
 using System.Linq;
 using System.Security.Claims;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Mvc.Tests.Seeder;
 
@@ -16,7 +16,7 @@ public static class HttpContextSeeder
 
         connectionInfoMock
             .SetupGet(info => info.Id)
-            .Returns(Guid.NewGuid().ToString());
+            .Returns(Id.NewId().ToString());
 
         var faker = new Faker();
 

@@ -1,13 +1,13 @@
 using EntityDb.Abstractions.Annotations;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Annotations;
 
 internal record EntityAnnotation<TData>
 (
-    Guid TransactionId,
-    DateTime TransactionTimeStamp,
-    Guid EntityId,
-    ulong EntityVersionNumber,
+    Id TransactionId,
+    TimeStamp TransactionTimeStamp,
+    Id EntityId,
+    VersionNumber EntityVersionNumber,
     TData Data
 ) : IEntityAnnotation<TData>;

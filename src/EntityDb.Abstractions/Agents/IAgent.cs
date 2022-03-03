@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Agents;
 
@@ -18,7 +18,7 @@ public interface IAgent
     ///     Returns the timestamp, as decided by the agent.
     /// </summary>
     /// <returns></returns>
-    DateTime GetTimestamp();
+    TimeStamp GetTimeStamp();
 
     /// <summary>
     ///     Returns an object that represents the signature of the agent.

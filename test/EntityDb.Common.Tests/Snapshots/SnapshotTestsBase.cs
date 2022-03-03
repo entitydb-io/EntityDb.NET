@@ -8,6 +8,7 @@ using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -26,9 +27,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope();
 
-        var expectedSnapshot = new TransactionEntity { VersionNumber = 300 };
+        var expectedSnapshot = new TransactionEntity { VersionNumber = new VersionNumber(300) };
 
-        var snapshotId = Guid.NewGuid();
+        var snapshotId = Id.NewId();
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
@@ -93,9 +94,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        var snapshotId = Guid.NewGuid();
+        var snapshotId = Id.NewId();
 
-        var expectedSnapshot = new TransactionEntity(5000);
+        var expectedSnapshot = new TransactionEntity(new VersionNumber(5000));
 
         using var serviceScope = CreateServiceScope();
 

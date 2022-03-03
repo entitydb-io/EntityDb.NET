@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
@@ -42,7 +43,7 @@ internal static class DocumentQueryExtensions
             ProjectionBuilder.Include(nameof(IEntityDocument.EntityVersionNumber))
         );
 
-    public static async Task<ulong> GetEntityVersionNumber<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static async Task<VersionNumber> GetEntityVersionNumber<TDocument>(this DocumentQuery<TDocument> documentQuery)
         where TDocument : IEntityDocument
     {
         var documents = await documentQuery.Execute(EntityVersionNumberProjection);
@@ -54,11 +55,11 @@ internal static class DocumentQueryExtensions
             : document.EntityVersionNumber;
     }
 
-    private static async Task<Guid[]> GetGuids<TDocument>
+    private static async Task<Id[]> GetIds<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         ProjectionDefinition<BsonDocument, TDocument> projection,
-        Func<List<TDocument>, IEnumerable<Guid>> mapToGuids
+        Func<List<TDocument>, IEnumerable<Id>> mapToIds
     )
     {
         var skip = documentQuery.Skip;
@@ -68,21 +69,21 @@ internal static class DocumentQueryExtensions
 
         var documents = await documentQuery.Execute(projection);
 
-        var guids = mapToGuids
+        var ids= mapToIds
             .Invoke(documents)
             .Distinct();
 
         if (skip.HasValue)
         {
-            guids = guids.Skip(skip.Value);
+            ids = ids.Skip(skip.Value);
         }
 
         if (limit.HasValue)
         {
-            guids = guids.Take(limit.Value);
+            ids = ids.Take(limit.Value);
         }
 
-        return guids.ToArray();
+        return ids.ToArray();
     }
 
     public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(this DocumentQuery<TDocument> documentQuery)
@@ -112,30 +113,30 @@ internal static class DocumentQueryExtensions
             .ToArray();
     }
 
-    public static Task<Guid[]> GetEntityIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetEntityIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
         where TDocument : IEntityDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
             EntityIdProjection,
             documents => documents.Select(document => document.EntityId)
         );
     }
 
-    public static Task<Guid[]> GetEntitiesIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetEntitiesIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
         where TDocument : IEntitiesDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
             EntityIdsProjection,
             documents => documents.SelectMany(document => document.EntityIds)
         );
     }
 
-    public static Task<Guid[]> GetTransactionIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetTransactionIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
         where TDocument : ITransactionDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
             TransactionIdProjection,
             documents => documents.Select(document => document.TransactionId)

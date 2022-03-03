@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Extensions;
@@ -17,7 +17,7 @@ internal static class SnapshotRepositoryExtensions
         return new TryCatchSnapshotRepository<TSnapshot>(snapshotRepository, logger);
     }
 
-    public static async Task<TSnapshot?> GetSnapshotOrDefault<TSnapshot>(this ISnapshotRepository<TSnapshot>? snapshotRepository, Guid snapshotId)
+    public static async Task<TSnapshot?> GetSnapshotOrDefault<TSnapshot>(this ISnapshotRepository<TSnapshot>? snapshotRepository, Id snapshotId)
     {
         if (snapshotRepository != null)
         {

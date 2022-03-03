@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Entities;
 
@@ -13,13 +13,13 @@ public interface IEntity<out TEntity>
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <returns>A new instance of <typeparamref name="TEntity" />.</returns>
-    abstract static TEntity Construct(Guid entityId);
+    abstract static TEntity Construct(Id entityId);
 
     /// <summary>
     ///     Returns the version number of the entity.
     /// </summary>
     /// <returns></returns>
-    ulong GetVersionNumber();
+    VersionNumber GetVersionNumber();
     
     /// <summary>
     ///     Returns a new <typeparamref name="TEntity" /> that incorporates the commands.

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 
@@ -103,7 +104,7 @@ public class TestsBase<TStartup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Guid>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>()))
             .ReturnsAsync(snapshot);
 
         snapshotRepositoryMock

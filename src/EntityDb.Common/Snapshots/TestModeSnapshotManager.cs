@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,19 +6,19 @@ namespace EntityDb.Common.Snapshots;
 
 internal class TestModeSnapshotManager
 {
-    private readonly List<Guid> _snapshotIds = new();
+    private readonly List<Id> _snapshotIds = new();
 
-    public void AddSnapshotId(Guid snapshotId)
+    public void AddSnapshotId(Id snapshotId)
     {
         _snapshotIds.Add(snapshotId);
     }
 
-    public void RemoveSnapshotIds(IEnumerable<Guid> snapshotIds)
+    public void RemoveSnapshotIds(IEnumerable<Id> snapshotIds)
     {
         _snapshotIds.RemoveAll(snapshotIds.Contains);
     }
 
-    public Guid[] GetDeleteSnapshotIds()
+    public Id[] GetDeleteSnapshotIds()
     {
         return _snapshotIds.ToArray();
     }

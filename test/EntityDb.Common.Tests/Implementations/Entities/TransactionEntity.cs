@@ -1,25 +1,26 @@
 ﻿using EntityDb.Common.Entities;
 using System;
 using EntityDb.Abstractions.Reducers;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
 public record TransactionEntity
 (
-    ulong VersionNumber = default
+    VersionNumber VersionNumber = default
 )
 : IEntity<TransactionEntity>, ISnapshot<TransactionEntity>
 {
     public const string MongoCollectionName = "Test";
     public const string RedisKeyNamespace = "test";
 
-    public static TransactionEntity Construct(Guid entityId)
+    public static TransactionEntity Construct(Id entityId)
     {
         return new TransactionEntity();
     }
 
-    public ulong GetVersionNumber()
+    public VersionNumber GetVersionNumber()
     {
         return VersionNumber;
     }

@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Snapshots;
@@ -15,7 +15,7 @@ public interface ISnapshotRepository<TSnapshot> : IDisposableResource
     /// </summary>
     /// <param name="snapshotId">The id of the snapshot.</param>
     /// <returns>A <typeparamref name="TSnapshot" /> snapshot or <c>default(<typeparamref name="TSnapshot" />)</c>.</returns>
-    Task<TSnapshot?> GetSnapshot(Guid snapshotId);
+    Task<TSnapshot?> GetSnapshot(Id snapshotId);
 
     /// <summary>
     ///     Inserts a <typeparamref name="TSnapshot" /> snapshot.
@@ -23,12 +23,12 @@ public interface ISnapshotRepository<TSnapshot> : IDisposableResource
     /// <param name="snapshotId">The id of the snapshot.</param>
     /// <param name="snapshot">The snapshot.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-    Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot);
+    Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot);
 
     /// <summary>
     ///     Deletes multiple <typeparamref name="TSnapshot" /> snapshots.
     /// </summary>
     /// <param name="snapshotIds">The ids of the snapshots to delete.</param>
     /// <returns><c>true</c> if the deletes all succeeded, or <c>false</c> if any deletes failed.</returns>
-    Task<bool> DeleteSnapshots(Guid[] snapshotIds);
+    Task<bool> DeleteSnapshots(Id[] snapshotIds);
 }

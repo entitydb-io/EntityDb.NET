@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Immutable;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.Agents;
 using EntityDb.Common.Transactions;
 
@@ -13,8 +13,8 @@ public static class TransactionSeeder
     {
         return new Transaction
         {
-            Id = Guid.NewGuid(),
-            TimeStamp = DateTime.UtcNow,
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
             AgentSignature = new NoAgentSignature(),
             Steps = transactionSteps.ToImmutableArray()
         };

@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions.Steps;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions;
@@ -13,12 +13,12 @@ public interface ITransaction
     /// <summary>
     ///     The id associated with the set of objects.
     /// </summary>
-    Guid Id { get; }
+    Id Id { get; }
 
     /// <summary>
     ///     The date and time associated with the set of objects.
     /// </summary>
-    DateTime TimeStamp { get; }
+    TimeStamp TimeStamp { get; }
 
     /// <summary>
     ///     The signature of the agent who requested this transaction.

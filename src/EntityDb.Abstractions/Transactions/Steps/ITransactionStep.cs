@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Transactions.Steps;
 
@@ -10,7 +10,7 @@ public interface ITransactionStep
     /// <summary>
     ///     The id of the entity.
     /// </summary>
-    Guid EntityId { get; }
+    Id EntityId { get; }
     
     /// <summary>
     ///     The state of the entity associated with this step.
@@ -20,5 +20,5 @@ public interface ITransactionStep
     /// <summary>
     ///     The version number associated with this step.
     /// </summary>
-    ulong EntityVersionNumber { get; }
+    VersionNumber EntityVersionNumber { get; }
 }

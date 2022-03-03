@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
 using EntityDb.MongoDb.Envelopes;
@@ -8,7 +9,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using System;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -26,8 +26,8 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     public string Scope { get; init; } = default!;
     public string Label { get; init; } = default!;
     public string Value { get; init; } = default!;
-    public Guid EntityId { get; init; }
-    public ulong EntityVersionNumber { get; init; }
+    public Id EntityId { get; init; }
+    public VersionNumber EntityVersionNumber { get; init; }
 
     public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (

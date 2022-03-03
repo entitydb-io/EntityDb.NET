@@ -6,6 +6,7 @@ using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -30,15 +31,15 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Guid>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Guid>(), It.IsAny<TransactionEntity>()))
+            .Setup(repository => repository.PutSnapshot(It.IsAny<Id>(), It.IsAny<TransactionEntity>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Guid[]>()))
+            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>()))
             .ThrowsAsync(new NotImplementedException());
 
         var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerMock.Object);

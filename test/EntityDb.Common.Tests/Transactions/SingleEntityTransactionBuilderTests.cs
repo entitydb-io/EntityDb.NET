@@ -10,6 +10,7 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -45,7 +46,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope();
 
-        var expectedEntityId = Guid.NewGuid();
+        var expectedEntityId = Id.NewId();
 
         var expectedEntity = TransactionEntity
             .Construct(expectedEntityId);
@@ -102,7 +103,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -138,9 +139,9 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        const ulong numberOfVersionsToTest = 10;
+        var numberOfVersionsToTest = new VersionNumber(10);
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -154,7 +155,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         // ACT
 
-        for (ulong i = 1; i <= numberOfVersionsToTest; i++)
+        for (var i = new VersionNumber(1); i.Value <= numberOfVersionsToTest.Value; i = i.Next())
         {
             transactionBuilder.Append(new DoNothing());
         }
@@ -163,13 +164,13 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         // ASSERT
 
-        for (ulong i = 1; i <= numberOfVersionsToTest; i++)
+        for (var v = new VersionNumber(1); v.Value <= numberOfVersionsToTest.Value; v = v.Next())
         {
-            var index = (int)(i - 1);
+            var index = (int)(v.Value - 1);
 
             var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
 
-            commandTransactionStep.EntityVersionNumber.ShouldBe(i);
+            commandTransactionStep.EntityVersionNumber.ShouldBe(v);
         }
     }
 
@@ -178,7 +179,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {

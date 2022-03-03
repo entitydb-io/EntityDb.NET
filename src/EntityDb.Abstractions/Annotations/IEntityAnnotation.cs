@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Annotations;
 
@@ -12,22 +12,22 @@ public interface IEntityAnnotation<out TData>
     /// <summary>
     ///     The transaction id associated with the data.
     /// </summary>
-    Guid TransactionId { get; }
+    Id TransactionId { get; }
 
     /// <summary>
     ///     The transaction timestamp associated with the data.
     /// </summary>
-    DateTime TransactionTimeStamp { get; }
+    TimeStamp TransactionTimeStamp { get; }
 
     /// <summary>
     ///     The entity id associated with the data.
     /// </summary>
-    Guid EntityId { get; }
+    Id EntityId { get; }
 
     /// <summary>
     ///     The entity version number associated with the data.
     /// </summary>
-    ulong EntityVersionNumber { get; }
+    VersionNumber EntityVersionNumber { get; }
 
     /// <summary>
     ///     The data.

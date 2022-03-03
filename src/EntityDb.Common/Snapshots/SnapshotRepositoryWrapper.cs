@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
@@ -17,17 +17,17 @@ internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourc
         _snapshotRepository = snapshotRepository;
     }
 
-    public virtual Task<bool> PutSnapshot(Guid snapshotId, TSnapshot snapshot)
+    public virtual Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
         return WrapCommand(_snapshotRepository.PutSnapshot(snapshotId, snapshot));
     }
 
-    public virtual Task<TSnapshot?> GetSnapshot(Guid snapshotId)
+    public virtual Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
         return WrapQuery(_snapshotRepository.GetSnapshot(snapshotId));
     }
 
-    public virtual Task<bool> DeleteSnapshots(Guid[] snapshotIds)
+    public virtual Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
         return WrapCommand(_snapshotRepository.DeleteSnapshots(snapshotIds));
     }

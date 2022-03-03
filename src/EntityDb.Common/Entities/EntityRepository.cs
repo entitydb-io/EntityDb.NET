@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -32,7 +33,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TEntity> GetCurrent(Guid entityId)
+    public async Task<TEntity> GetCurrent(Id entityId)
     {
         var entity = await SnapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
 
@@ -44,7 +45,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         entity = entity.Reduce(commands);
 
-        if (entity.GetVersionNumber() == 0)
+        if (entity.GetVersionNumber() == VersionNumber.MinValue)
         {
             throw new EntityNotCreatedException();
         }
@@ -52,7 +53,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         return entity;
     }
 
-    public async Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber)
+    public async Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber)
     {
         var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
 
