@@ -122,7 +122,7 @@ public sealed class TransactionBuilder<TEntity>
             Entity = entity,
             EntityVersionNumber = entityVersionNumber,
             Command = command,
-            PreviousEntityVersionNumber = previousEntityVersionNumber,
+            PreviousEntityVersionNumber = previousEntityVersionNumber
         });
         
         _knownEntities[entityId] = entity;
@@ -148,7 +148,7 @@ public sealed class TransactionBuilder<TEntity>
             EntityId = entityId,
             Entity = entity,
             EntityVersionNumber = entityVersionNumber,
-            Leases = leases.ToImmutableArray(),
+            Leases = leases.ToImmutableArray()
         });
 
         return this;
@@ -196,7 +196,7 @@ public sealed class TransactionBuilder<TEntity>
             EntityId = entityId,
             Entity = entity,
             EntityVersionNumber = entityVersionNumber,
-            Leases = leases.ToImmutableArray(),
+            Leases = leases.ToImmutableArray()
         });
 
         return this;

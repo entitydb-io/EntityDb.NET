@@ -1,7 +1,7 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Extensions;

@@ -1,14 +1,16 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
+using EntityDb.Common.TypeResolvers;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
@@ -17,17 +19,23 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
 {
     private readonly string _connectionString;
     private readonly string _keyNamespace;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly ILogger<ISnapshotRepositoryFactory<TSnapshot>> _logger;
+    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
-    private readonly ITypeResolver _typeResolver;
 
-    public RedisSnapshotRepositoryFactory(IOptionsFactory<SnapshotSessionOptions> optionsFactory,
-        ILoggerFactory loggerFactory,
-        ITypeResolver typeResolver, string connectionString, string keyNamespace)
+    public RedisSnapshotRepositoryFactory
+    (
+        IOptionsFactory<SnapshotSessionOptions> optionsFactory,
+        ILogger<ISnapshotRepositoryFactory<TSnapshot>> logger,
+        IEnvelopeService<JsonElement> envelopeService,
+        ITypeResolver typeResolver,
+        string connectionString,
+        string keyNamespace
+    )
     {
         _optionsFactory = optionsFactory;
-        _loggerFactory = loggerFactory;
-        _typeResolver = typeResolver;
+        _logger = logger;
+        _envelopeService = envelopeService;
         _connectionString = connectionString;
         _keyNamespace = keyNamespace;
     }
@@ -47,17 +55,14 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
 
         var redisSession = await CreateSession(snapshotSessionOptions);
 
-        var logger = _loggerFactory.CreateLogger<TSnapshot>();
-
         var redisSnapshotRepository = new RedisSnapshotRepository<TSnapshot>
         (
+            _envelopeService,
             _keyNamespace,
-            _typeResolver,
-            redisSession,
-            logger
+            redisSession
         );
 
-        return redisSnapshotRepository.UseTryCatch(logger);
+        return redisSnapshotRepository.UseTryCatch(_logger);
     }
 
     public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,

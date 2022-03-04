@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
+using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,11 @@ namespace EntityDb.MongoDb.Extensions;
 [ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
 public static class ServiceCollectionExtensions
 {
+    internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection, bool removeTypeDiscriminatorProperty)
+    {
+        serviceCollection.AddSingleton(serviceProvider => BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
+    }
+    
     /// <summary>
     ///     Adds a production-ready implementation of <see cref="ITransactionRepositoryFactory" /> to a service
     ///     collection.
@@ -26,6 +32,8 @@ public static class ServiceCollectionExtensions
         string databaseName, Func<IConfiguration, string> getConnectionString,
         bool testMode = false)
     {
+        serviceCollection.AddBsonDocumentEnvelopeService(true);
+        
         serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,

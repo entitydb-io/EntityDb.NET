@@ -1,10 +1,7 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Entities;
-using EntityDb.Common.Loggers;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
 using EntityDb.Common.Transactions.Builders;
@@ -59,20 +56,6 @@ public static class ServiceCollectionExtensions
     public static void AddLifoTypeResolver(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<ITypeResolver, LifoTypeResolver>();
-    }
-
-    /// <summary>
-    ///     Adds an internal implementation of <see cref="ILoggerFactory" /> to a service collection.
-    /// </summary>
-    /// <param name="serviceCollection">The service collection.</param>
-    /// <remarks>
-    ///     Uses the Microsoft.Extensions.Logging framework under the hood.
-    /// </remarks>
-    public static void AddDefaultLogger(this IServiceCollection serviceCollection)
-    {
-        serviceCollection.AddLogging();
-
-        serviceCollection.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();
     }
 
     /// <summary>

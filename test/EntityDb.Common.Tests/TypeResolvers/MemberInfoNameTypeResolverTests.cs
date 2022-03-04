@@ -16,17 +16,17 @@ public class MemberInfoNameTypeResolverTests
 
         var expectedType = typeof(string);
 
-        var headers = new Dictionary<string, string>
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
             [EnvelopeHelper.MemberInfoName] = expectedType.Name
-        };
+        });
 
         var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { expectedType });
 
         // ACT
 
-        var resolved = typeResolver.TryResolveType(headers, out var actualType);
+        var resolved = typeResolver.TryResolveType(envelopeHeaders, out var actualType);
 
         // ASSERT
 
@@ -41,7 +41,7 @@ public class MemberInfoNameTypeResolverTests
 
         var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { typeof(string) });
 
-        var headers = new Dictionary<string, string>();
+        var headers = new EnvelopeHeaders(new Dictionary<string, string>());
 
         // ACT
 
@@ -60,15 +60,15 @@ public class MemberInfoNameTypeResolverTests
 
         var typeResolver = new MemberInfoNamePartialTypeResolver(Array.Empty<Type>());
 
-        var headers = new Dictionary<string, string>
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
             [EnvelopeHelper.MemberInfoName] = ""
-        };
+        });
 
         // ACT
 
-        var resolved = typeResolver.TryResolveType(headers, out var actualType);
+        var resolved = typeResolver.TryResolveType(envelopeHeaders, out var actualType);
 
         // ASSERT
 

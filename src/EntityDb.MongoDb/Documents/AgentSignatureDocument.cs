@@ -1,12 +1,12 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -23,7 +23,7 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
     
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
-        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction
     )
     {
@@ -34,13 +34,12 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
                 EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct().ToArray(),
-                Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, mongoSession.Logger)
+                Data = envelopeService.Deconstruct(transaction.AgentSignature)
             }
         };
         
         return new InsertDocumentsCommand<AgentSignatureDocument>
         (
-            mongoSession,
             CollectionName,
             documents
         );
@@ -48,13 +47,11 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
 
     public static DocumentQuery<AgentSignatureDocument> GetQuery
     (
-        IMongoSession mongoSession,
         IAgentSignatureQuery agentSignatureQuery
     )
     {
         return new DocumentQuery<AgentSignatureDocument>
         (
-            mongoSession,
             CollectionName,
             agentSignatureQuery.GetFilter(FilterBuilder),
             agentSignatureQuery.GetSort(SortBuilder),

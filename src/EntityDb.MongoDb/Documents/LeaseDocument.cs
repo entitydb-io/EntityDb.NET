@@ -2,13 +2,13 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -31,7 +31,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (
-        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
         IAddLeasesTransactionStep addLeasesTransactionStep
     )
@@ -46,13 +46,12 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
                 Value = insertLease.Value,
-                Data = BsonDocumentEnvelope.Deconstruct(insertLease, mongoSession.Logger)
+                Data = envelopeService.Deconstruct(insertLease)
             })
             .ToArray();
         
         return new InsertDocumentsCommand<LeaseDocument>
         (
-            mongoSession,
             CollectionName,
             leaseDocuments
         );
@@ -60,13 +59,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static DocumentQuery<LeaseDocument> GetQuery
     (
-        IMongoSession mongoSession,
         ILeaseQuery leaseQuery
     )
     {
         return new DocumentQuery<LeaseDocument>
         (
-            mongoSession,
             CollectionName,
             leaseQuery.GetFilter(FilterBuilder),
             leaseQuery.GetSort(SortBuilder),
@@ -77,7 +74,6 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IMongoSession mongoSession,
         IDeleteLeasesTransactionStep deleteLeasesTransactionStep
     )
     {
@@ -86,7 +82,6 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
         
         return new DeleteDocumentsCommand
         (
-            mongoSession,
             CollectionName,
             deleteLeasesQuery.GetFilter(FilterBuilder)
         );

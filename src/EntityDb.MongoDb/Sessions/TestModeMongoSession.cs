@@ -1,33 +1,41 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
-using EntityDb.Common.Disposables;
+﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Transactions;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
 
 internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
 {
+    public ILogger<IMongoSession> Logger => MongoSession.Logger;
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
-    public ILogger Logger => MongoSession.Logger;
-    public ITypeResolver TypeResolver => MongoSession.TypeResolver;
+    public IClientSessionHandle ClientSessionHandle => MongoSession.ClientSessionHandle;
 
     public Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments)
     {
         return MongoSession.Insert(collectionName, bsonDocuments);
     }
 
-    public IFindFluent<TDocument, TDocument> Find<TDocument>(string collectionName,
-        FilterDefinition<TDocument> filter)
+    public Task<List<TDocument>> Find<TDocument>
+    (
+        string collectionName,
+        FilterDefinition<BsonDocument> filterDefinition,
+        ProjectionDefinition<BsonDocument, TDocument> projectionDefinition,
+        SortDefinition<BsonDocument>? sortDefinition,
+        int? skip,
+        int? limit
+    )
     {
-        return MongoSession.Find(collectionName, filter);
+        return MongoSession.Find(collectionName, filterDefinition, projectionDefinition, sortDefinition, skip, limit);
     }
 
     public Task Delete<TDocument>(string collectionName,
-        FilterDefinition<TDocument> documentFilter)
+        FilterDefinition<TDocument> filterDefinition)
     {
-        return MongoSession.Delete(collectionName, documentFilter);
+        return MongoSession.Delete(collectionName, filterDefinition);
     }
 
     public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)

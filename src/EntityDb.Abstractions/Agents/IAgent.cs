@@ -8,13 +8,6 @@ namespace EntityDb.Abstractions.Agents;
 public interface IAgent
 {
     /// <summary>
-    ///     Returns whether or not the agent has a particular role.
-    /// </summary>
-    /// <param name="role">The role.</param>
-    /// <returns>Whether or not the agent has a particular role.</returns>
-    bool HasRole(string role);
-
-    /// <summary>
     ///     Returns the timestamp, as decided by the agent.
     /// </summary>
     /// <returns></returns>

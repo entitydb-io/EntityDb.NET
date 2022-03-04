@@ -1,18 +1,18 @@
 ﻿using EntityDb.MongoDb.Sessions;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 
 internal record InsertDocumentsCommand<TDocument>
 (
-    IMongoSession MongoSession,
     string CollectionName,
     TDocument[] Documents
-) : DocumentsCommand
+)
 {
-    public override async Task Execute()
+    public async Task Execute(IMongoSession mongoSession)
     {
-        await MongoSession
+        await mongoSession
             .Insert(CollectionName, Documents);
     }
 }

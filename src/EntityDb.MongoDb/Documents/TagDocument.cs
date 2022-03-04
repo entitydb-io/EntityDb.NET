@@ -2,13 +2,13 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -30,7 +30,7 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static InsertDocumentsCommand<TagDocument> GetInsertCommand
     (
-        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
         IAddTagsTransactionStep addTagsTransactionStep
     )
@@ -44,13 +44,12 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
                 EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
                 Label = insertTag.Label,
                 Value = insertTag.Value,
-                Data = BsonDocumentEnvelope.Deconstruct(insertTag, mongoSession.Logger)
+                Data = envelopeService.Deconstruct(insertTag)
             })
             .ToArray();
         
         return new InsertDocumentsCommand<TagDocument>
         (
-            mongoSession,
             CollectionName,
             tagDocuments
         );
@@ -58,13 +57,11 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static DocumentQuery<TagDocument> GetQuery
     (
-        IMongoSession mongoSession,
         ITagQuery tagQuery
     )
     {
         return new DocumentQuery<TagDocument>
         (
-            mongoSession,
             CollectionName,
             tagQuery.GetFilter(FilterBuilder),
             tagQuery.GetSort(SortBuilder),
@@ -75,7 +72,6 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IMongoSession mongoSession,
         IDeleteTagsTransactionStep deleteTagsTransactionStep
     )
     {
@@ -83,7 +79,6 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
         return new DeleteDocumentsCommand
         (
-            mongoSession,
             CollectionName,
             deleteTagsQuery.GetFilter(FilterBuilder)
         );

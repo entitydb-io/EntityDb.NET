@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Transactions;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 

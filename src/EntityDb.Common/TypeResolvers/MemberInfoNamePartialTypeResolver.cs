@@ -15,9 +15,9 @@ internal sealed class MemberInfoNamePartialTypeResolver : IPartialTypeResolver
         _typeDictionary = types.ToDictionary(type => type.Name, type => type);
     }
 
-    public bool TryResolveType(IReadOnlyDictionary<string, string> headers, [NotNullWhen(true)] out Type? resolvedType)
+    public bool TryResolveType(EnvelopeHeaders envelopeHeaders, [NotNullWhen(true)] out Type? resolvedType)
     {
-        if (EnvelopeHelper.NotThisPlatform(headers) || !EnvelopeHelper.TryGetMemberInfoName(headers, out var memberInfoName) || !_typeDictionary.TryGetValue(memberInfoName, out var type))
+        if (EnvelopeHelper.NotThisPlatform(envelopeHeaders) || !EnvelopeHelper.TryGetMemberInfoName(envelopeHeaders, out var memberInfoName) || !_typeDictionary.TryGetValue(memberInfoName, out var type))
         {
             resolvedType = null;
             return false;

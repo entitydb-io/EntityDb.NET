@@ -1,24 +1,33 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
 using EntityDb.Common.Transactions;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
 
 internal interface IMongoSession : IDisposableResource
 {
+    ILogger<IMongoSession> Logger { get; }
     IMongoDatabase MongoDatabase { get; }
-    ILogger Logger { get; }
-    ITypeResolver TypeResolver { get; }
+    IClientSessionHandle ClientSessionHandle { get; }
 
     Task Insert<TDocument>(string collectionName,
         TDocument[] bsonDocuments);
-    IFindFluent<TDocument, TDocument> Find<TDocument>(string collectionName,
-        FilterDefinition<TDocument> documentFilter);
+    Task<List<TDocument>> Find<TDocument>
+    (
+        string collectionName,
+        FilterDefinition<BsonDocument> filterDefinition,
+        ProjectionDefinition<BsonDocument, TDocument> projectionDefinition,
+        SortDefinition<BsonDocument>? sortDefinition,
+        int? skip,
+        int? limit
+    );
+        
     Task Delete<TDocument>(string collectionName,
-        FilterDefinition<TDocument> documentFilter);
+        FilterDefinition<TDocument> filterDefinition);
 
     void StartTransaction();
     Task CommitTransaction();

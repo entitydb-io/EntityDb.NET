@@ -14,6 +14,8 @@ internal static class ServiceCollectionExtensions
         this IServiceCollection serviceCollection, string databaseName,
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {
+        serviceCollection.AddBsonDocumentEnvelopeService(true);
+
         serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,

@@ -7,14 +7,13 @@ namespace EntityDb.MongoDb.Commands;
 
 internal record DeleteDocumentsCommand
 (
-    IMongoSession MongoSession,
     string CollectionName,
     FilterDefinition<BsonDocument> FilterDefinition
-) : DocumentsCommand
+)
 {
-    public override async Task Execute()
+    public async Task Execute(IMongoSession mongoSession)
     {
-        await MongoSession
+        await mongoSession
             .Delete(CollectionName, FilterDefinition);
     }
 }

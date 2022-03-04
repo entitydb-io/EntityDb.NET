@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Common.TypeResolvers;
 using System;
 
 namespace EntityDb.Common.Exceptions;

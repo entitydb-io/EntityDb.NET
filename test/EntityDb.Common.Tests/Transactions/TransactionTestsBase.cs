@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
@@ -30,6 +29,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -89,7 +89,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         var expectedFalseResults = getExpectedResults.Invoke(true);
         var reversedExpectedTrueResults = expectedTrueResults.Reverse().ToArray();
         var reversedExpectedFalseResults = expectedFalseResults.Reverse().ToArray();
-        var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1);
+        var expectedSkipTakeResults = expectedTrueResults.Skip(1).Take(1).ToArray();
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -110,11 +110,11 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         // ASSERT
 
-        actualTrueResults.SequenceEqual(expectedTrueResults).ShouldBeTrue();
-        actualFalseResults.SequenceEqual(expectedFalseResults).ShouldBeTrue();
-        reversedActualTrueResults.SequenceEqual(reversedExpectedTrueResults).ShouldBeTrue();
-        reversedActualFalseResults.SequenceEqual(reversedExpectedFalseResults).ShouldBeTrue();
-        actualSkipTakeResults.SequenceEqual(expectedSkipTakeResults).ShouldBeTrue();
+        actualTrueResults.ShouldBeEquivalentTo(expectedTrueResults);
+        actualFalseResults.ShouldBeEquivalentTo(expectedFalseResults);
+        reversedActualTrueResults.ShouldBeEquivalentTo(reversedExpectedTrueResults);
+        reversedActualFalseResults.ShouldBeEquivalentTo(reversedExpectedFalseResults);
+        actualSkipTakeResults.ShouldBeEquivalentTo(expectedSkipTakeResults);
     }
 
     private static async Task TestGetTransactionIds
@@ -461,23 +461,13 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
-            .Verifiable();
-
-        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
-
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
-            .Returns(loggerMock.Object);
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<CannotWriteInReadOnlyModeException>();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
-
-            serviceCollection.AddSingleton(loggerFactoryMock.Object);
+            
+            serviceCollection.AddSingleton(loggerFactory);
         });
 
         var transaction = serviceScope.ServiceProvider
@@ -498,7 +488,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         inserted.ShouldBeFalse();
 
-        loggerMock.Verify();
+        loggerVerifier.Invoke(Times.Once());
     }
 
     [Fact]
@@ -584,24 +574,14 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         // ARRANGE
 
         var versionNumber = new VersionNumber(0);
-            
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<VersionZeroReservedException>(), It.IsAny<string>()))
-            .Verifiable();
-
-        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
-
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
-            .Returns(loggerMock.Object);
-
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<VersionZeroReservedException>();
+        
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
-            serviceCollection.AddSingleton(loggerFactoryMock.Object);
+            serviceCollection.AddSingleton(loggerFactory);
         });
 
         var transactionStepMock = new Mock<IAppendCommandTransactionStep>(MockBehavior.Strict);
@@ -633,7 +613,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         transactionInserted.ShouldBeFalse();
 
-        loggerMock.Verify();
+        loggerVerifier.Invoke(Times.Once());
     }
 
     [Fact]
@@ -642,23 +622,13 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<OptimisticConcurrencyException>(), It.IsAny<string>()))
-            .Verifiable();
-
-        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
-
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
-            .Returns(loggerMock.Object);
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<OptimisticConcurrencyException>();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
-
-            serviceCollection.AddSingleton(loggerFactoryMock.Object);
+            
+            serviceCollection.AddSingleton(loggerFactory);
         });
 
         var entityId = Id.NewId();
@@ -678,7 +648,6 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
             .CreateRepository(TestSessionOptions.Write);
-
 
         // ACT
 
@@ -703,7 +672,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         firstTransactionInserted.ShouldBeTrue();
         secondTransactionInserted.ShouldBeFalse();
 
-        loggerMock.Verify();
+        loggerVerifier.Invoke(Times.Once());
     }
 
     [Fact]
@@ -900,7 +869,7 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         // ASSERT
 
         finalTransactionInserted.ShouldBeTrue();
-
+        
         expectedInitialTags.SequenceEqual(actualInitialTags).ShouldBeTrue();
 
         actualFinalTags.ShouldBeEmpty();

@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
+using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Extensions;
 

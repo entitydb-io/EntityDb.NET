@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Moq;
@@ -7,6 +6,7 @@ using Shouldly;
 using System;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -22,11 +22,7 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
-            .Verifiable();
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
 
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
 
@@ -42,7 +38,7 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
             .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerMock.Object);
+        var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerFactory.CreateLogger<object>());
 
         // ACT
 
@@ -56,6 +52,6 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         inserted.ShouldBeFalse();
         deleted.ShouldBeFalse();
 
-        loggerMock.Verify(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()), Times.Exactly(3));
+        loggerVerifier.Invoke(Times.Exactly(3));
     }
 }

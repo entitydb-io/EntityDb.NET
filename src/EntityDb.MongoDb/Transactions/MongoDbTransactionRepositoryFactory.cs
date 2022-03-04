@@ -1,13 +1,14 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Disposables;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Serializers;
 using EntityDb.MongoDb.Sessions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
@@ -17,9 +18,10 @@ namespace EntityDb.MongoDb.Transactions;
 
 internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<ITransactionRepositoryFactory> _logger;
+    private readonly IEnvelopeService<BsonDocument> _envelopeService;
     private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
-    private readonly ITypeResolver _typeResolver;
     private readonly string _connectionString;
     private readonly string _databaseName;
 
@@ -32,16 +34,18 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     
     public MongoDbTransactionRepositoryFactory
     (
+        IServiceProvider serviceProvider,
         IOptionsFactory<TransactionSessionOptions> optionsFactory,
-        ILoggerFactory loggerFactory,
-        ITypeResolver typeResolver,
+        ILogger<ITransactionRepositoryFactory> logger,
+        IEnvelopeService<BsonDocument> envelopeService,
         string connectionString,
         string databaseName
     )
     {
+        _serviceProvider = serviceProvider;
         _optionsFactory = optionsFactory;
-        _loggerFactory = loggerFactory;
-        _typeResolver = typeResolver;
+        _logger = logger;
+        _envelopeService = envelopeService;
         _connectionString = connectionString;
         _databaseName = databaseName;
     }
@@ -53,8 +57,6 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
 
     public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
     {
-        var logger = _loggerFactory.CreateLogger<MongoDbTransactionRepositoryFactory>();
-
         var mongoClient = new MongoClient(_connectionString);
 
         var mongoDatabase = mongoClient.GetDatabase(_databaseName);
@@ -64,12 +66,11 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
             CausalConsistency = true
         });
 
-        return new MongoSession
+        return MongoSession.Create
         (
+            _serviceProvider,
             mongoDatabase,
             clientSessionHandle,
-            logger,
-            _typeResolver,
             transactionSessionOptions
         );
     }
@@ -81,10 +82,11 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     {
         var mongoDbTransactionRepository = new MongoDbTransactionRepository
         (
-            mongoSession
+            mongoSession,
+            _envelopeService
         );
 
-        return mongoDbTransactionRepository.UseTryCatch(mongoSession.Logger);
+        return mongoDbTransactionRepository.UseTryCatch(_logger);
     }
 
     public static MongoDbTransactionRepositoryFactory Create(IServiceProvider serviceProvider,

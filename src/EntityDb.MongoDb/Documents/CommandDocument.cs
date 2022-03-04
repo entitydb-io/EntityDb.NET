@@ -2,14 +2,15 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents;
@@ -27,7 +28,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
     
     public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
     (
-        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
         IAppendCommandTransactionStep appendCommandTransactionStep
     )
@@ -40,13 +41,12 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = appendCommandTransactionStep.EntityId,
                 EntityVersionNumber = appendCommandTransactionStep.EntityVersionNumber,
-                Data = BsonDocumentEnvelope.Deconstruct(appendCommandTransactionStep.Command, mongoSession.Logger)
+                Data = envelopeService.Deconstruct(appendCommandTransactionStep.Command)
             }
         };
         
         return new InsertDocumentsCommand<CommandDocument>
         (
-            mongoSession,
             CollectionName,
             documents
         );
@@ -54,13 +54,11 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
 
     public static DocumentQuery<CommandDocument> GetQuery
     (
-        IMongoSession mongoSession,
         ICommandQuery commandQuery
     )
     {
         return new DocumentQuery<CommandDocument>
         (
-            mongoSession,
             CollectionName,
             commandQuery.GetFilter(FilterBuilder),
             commandQuery.GetSort(SortBuilder),
@@ -77,12 +75,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
     {
         var commandQuery = new GetLastEntityVersionQuery(entityId);
 
-        var documentQuery = GetQuery
-        (
-            mongoSession,
-            commandQuery
-        );
+        var documentQuery = GetQuery(commandQuery);
 
-        return documentQuery.GetEntityVersionNumber();
+        return documentQuery.GetEntityVersionNumber(mongoSession);
     }
 }

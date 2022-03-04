@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;

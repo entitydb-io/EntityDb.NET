@@ -1,9 +1,12 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
+using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Text.Json;
 
 namespace EntityDb.Redis.Extensions;
 
@@ -24,6 +27,8 @@ public static class ServiceCollectionExtensions
     public static void AddRedisSnapshots<TSnapshot>(this IServiceCollection serviceCollection, string keyNamespace,
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {
+        serviceCollection.AddSingleton<IEnvelopeService<JsonElement>, JsonElementEnvelopeService>();
+        
         serviceCollection.Add
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,

@@ -1,35 +1,32 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using EntityDb.Redis.Envelopes;
+using EntityDb.Common.Envelopes;
+using EntityDb.Common.Extensions;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
 internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly IRedisSession _redisSession;
+    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _keyNamespace;
-    private readonly ILogger _logger;
-    private readonly ITypeResolver _typeResolver;
+    private readonly IRedisSession _redisSession;
 
     public RedisSnapshotRepository
     (
+        IEnvelopeService<JsonElement> envelopeService,
         string keyNamespace,
-        ITypeResolver typeResolver,
-        IRedisSession redisSession,
-        ILogger logger
+        IRedisSession redisSession
     )
     {
+        _envelopeService = envelopeService;
         _keyNamespace = keyNamespace;
-        _typeResolver = typeResolver;
         _redisSession = redisSession;
-        _logger = logger;
     }
 
     private RedisKey GetSnapshotKey(Id snapshotId)
@@ -41,9 +38,8 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
     {
         var snapshotKey = GetSnapshotKey(snapshotId);
 
-        var snapshotValue = JsonElementEnvelope
-            .Deconstruct(snapshot, _logger)
-            .Serialize(_logger);
+        var snapshotValue = _envelopeService
+            .DeconstructAndSerialize(snapshot);
 
         return await _redisSession.Insert(snapshotKey, snapshotValue);
     }
@@ -58,9 +54,8 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
             return default;
         }
 
-        return JsonElementEnvelope
-            .Deserialize(snapshotValue, _logger)
-            .Reconstruct<TSnapshot>(_logger, _typeResolver);
+        return _envelopeService
+            .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue);
     }
 
     public async Task<bool> DeleteSnapshots(Id[] snapshotIds)

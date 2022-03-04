@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +8,7 @@ using Shouldly;
 using System;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -53,23 +53,13 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<CannotWriteInReadOnlyModeException>(), It.IsAny<string>()))
-            .Verifiable();
-
-        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
-
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<Type>()))
-            .Returns(loggerMock.Object);
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<CannotWriteInReadOnlyModeException>();
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
-            serviceCollection.AddSingleton(loggerFactoryMock.Object);
+            serviceCollection.AddSingleton(loggerFactory);
         });
 
         var snapshot = new TransactionEntity();
@@ -86,7 +76,7 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         inserted.ShouldBeFalse();
 
-        loggerMock.Verify();
+        loggerVerifier.Invoke(Times.Once());
     }
 
     [Fact]

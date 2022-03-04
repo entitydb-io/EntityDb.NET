@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
-using EntityDb.MongoDb.Envelopes;
+using EntityDb.Common.Envelopes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -11,5 +11,5 @@ internal abstract record DocumentBase : ITransactionDocument
 
     public TimeStamp TransactionTimeStamp { get; init; }
     public Id TransactionId { get; init; }
-    public BsonDocumentEnvelope Data { get; init; } = default!;
+    public Envelope<BsonDocument> Data { get; init; } = default!;
 }

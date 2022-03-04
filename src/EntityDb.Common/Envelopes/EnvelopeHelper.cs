@@ -14,46 +14,46 @@ internal static class EnvelopeHelper
     public const string TypeFullName = nameof(TypeFullName);
     public const string MemberInfoName = nameof(MemberInfoName);
 
-    public static bool NotThisPlatform(IReadOnlyDictionary<string, string> headers)
+    public static bool NotThisPlatform(EnvelopeHeaders envelopeHeaders)
     {
-        return !headers.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
+        return !envelopeHeaders.Value.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
     }
 
     public static bool TryGetAssemblyFullName
     (
-        IReadOnlyDictionary<string, string> headers,
+        EnvelopeHeaders envelopeHeaders,
         [NotNullWhen(true)] out string? assemblyFullName
     )
     {
-        return headers.TryGetValue(AssemblyFullName, out assemblyFullName);
+        return envelopeHeaders.Value.TryGetValue(AssemblyFullName, out assemblyFullName);
     }
 
     public static bool TryGetTypeFullName
     (
-        IReadOnlyDictionary<string, string> headers,
+        EnvelopeHeaders envelopeHeaders,
         [NotNullWhen(true)] out string? typeFullName
     )
     {
-        return headers.TryGetValue(TypeFullName, out typeFullName);
+        return envelopeHeaders.Value.TryGetValue(TypeFullName, out typeFullName);
     }
 
     public static bool TryGetMemberInfoName
     (
-        IReadOnlyDictionary<string, string> headers,
+        EnvelopeHeaders envelopeHeaders,
         [NotNullWhen(true)] out string? memberInfoName
     )
     {
-        return headers.TryGetValue(MemberInfoName, out memberInfoName);
+        return envelopeHeaders.Value.TryGetValue(MemberInfoName, out memberInfoName);
     }
 
-    public static Dictionary<string, string> GetTypeHeaders
+    public static EnvelopeHeaders GetEnvelopeHeaders
     (
         Type type,
         bool includeFullNames = true,
         bool includeMemberInfoName = true
     )
     {
-        var headers = new Dictionary<string, string> { [Platform] = ThisPlatform, [Type] = type.Name };
+        var value = new Dictionary<string, string> { [Platform] = ThisPlatform, [Type] = type.Name };
 
         if (includeFullNames)
         {
@@ -61,23 +61,23 @@ internal static class EnvelopeHelper
 
             if (assemblyFullName != null)
             {
-                headers.Add(AssemblyFullName, assemblyFullName);
+                value.Add(AssemblyFullName, assemblyFullName);
             }
 
             var typeFullName = type.FullName;
 
             if (typeFullName != null)
             {
-                headers.Add(TypeFullName, typeFullName);
+                value.Add(TypeFullName, typeFullName);
             }
         }
 
         if (includeMemberInfoName)
         {
-            headers.Add(MemberInfoName, type.Name);
+            value.Add(MemberInfoName, type.Name);
         }
 
-        return headers;
+        return new EnvelopeHeaders(value);
     }
 
     public static IEnumerable<string> GetTypeHeaderValues(this IEnumerable<Type> types)

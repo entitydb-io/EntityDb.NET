@@ -4,11 +4,12 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 
@@ -57,11 +58,67 @@ public class TestsBase<TStartup>
             var loggerFactory = singletonServiceProvider.GetRequiredService<ILoggerFactory>();
 
             loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            loggerFactory.AddProvider(new DebugLoggerProvider());
         }
 
         var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
         return new TestServiceScope(singletonServiceProvider, serviceScopeFactory.CreateScope());
+    }
+
+    protected static (ILoggerFactory Logger, Action<Times> LoggerVerifier) GetMockedLoggerFactory<TException>()
+        where TException : Exception
+    {
+        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+
+        loggerMock
+            .Setup(logger => logger.Log
+            (
+                It.IsAny<LogLevel>(),
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<TException>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+            ));
+        
+        loggerMock
+            .Setup(logger => logger.Log
+            (
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<TException>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+            ))
+            .Verifiable();
+
+        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+        loggerFactoryMock
+            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
+            .Returns(loggerMock.Object);
+
+        loggerFactoryMock
+            .Setup(factory => factory.AddProvider(It.IsAny<ILoggerProvider>()));
+
+        void Verifier(Times times)
+        {
+            loggerMock
+                .Verify
+                (
+                    logger => logger.Log
+                    (
+                        LogLevel.Error,
+                        It.IsAny<EventId>(),
+                        It.IsAny<It.IsAnyType>(),
+                        It.IsAny<TException>(),
+                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                    ),
+                    times
+                );
+        }
+
+        return (loggerFactoryMock.Object, Verifier);
     }
 
     protected static ITransactionRepositoryFactory GetMockedTransactionRepositoryFactory(

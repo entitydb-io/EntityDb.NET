@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
