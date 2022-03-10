@@ -1,6 +1,7 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
@@ -15,24 +16,24 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
     where TProjection : IProjection<TProjection>
 {
     private readonly IProjectionStrategy<TProjection> _projectionStrategy;
-    private readonly ITransactionRepository<TEntity> _transactionRepository;
     
+    public ITransactionRepository TransactionRepository { get; }
     public ISnapshotRepository<TProjection> SnapshotRepository { get; }
     
     public ProjectionRepository
     (
         IProjectionStrategy<TProjection> projectionStrategy,
         ISnapshotRepository<TProjection> snapshotRepository,
-        ITransactionRepository<TEntity> transactionRepository
+        ITransactionRepository transactionRepository
     )
     {
         _projectionStrategy = projectionStrategy;
-        _transactionRepository = transactionRepository;
         
+        TransactionRepository = transactionRepository;
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TProjection> GetCurrent(Guid projectionId)
+    public async Task<TProjection> GetCurrent(Id projectionId)
     {
         var projection = await SnapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
 
@@ -48,7 +49,7 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
             
             var commandQuery = new GetCurrentEntityQuery(entityId, entityVersionNumber);
 
-            var commands = await _transactionRepository.GetCommands(commandQuery);
+            var commands = await TransactionRepository.GetCommands(commandQuery);
 
             projection = projection.Reduce(entityId, commands);
         }
@@ -66,7 +67,7 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
     public static ProjectionRepository<TProjection, TEntity> Create
     (
         IServiceProvider serviceProvider,
-        ITransactionRepository<TEntity> transactionRepository,
+        ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity> snapshotRepository
     )
     {

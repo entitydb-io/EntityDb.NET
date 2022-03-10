@@ -1,5 +1,7 @@
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using System;
 using System.Threading.Tasks;
 
@@ -13,6 +15,8 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
 {
     //TODO: Getter for the projection strategy here
 
+    ITransactionRepository TransactionRepository { get; }
+    
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>
@@ -23,5 +27,5 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// </summary>
     /// <param name="projectionId">The id of the projection.</param>
     /// <returns>The current state of a <typeparamref name="TProjection" />.</returns>
-    Task<TProjection> GetCurrent(Guid projectionId);
+    Task<TProjection> GetCurrent(Id projectionId);
 }

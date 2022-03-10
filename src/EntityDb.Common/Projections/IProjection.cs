@@ -1,3 +1,4 @@
+using EntityDb.Abstractions.ValueObjects;
 using System;
 
 namespace EntityDb.Common.Projections;
@@ -13,13 +14,13 @@ public interface IProjection<out TProjection>
     /// </summary>
     /// <param name="projectionId">The id of the entity.</param>
     /// <returns>A new instance of <typeparamref name="TProjection" />.</returns>
-    abstract static TProjection Construct(Guid projectionId);
+    abstract static TProjection Construct(Id projectionId);
 
     /// <summary>
     ///     Returns the current version number of an entity.
     /// </summary>
     /// <returns></returns>
-    ulong GetEntityVersionNumber(Guid entityId);
+    VersionNumber GetEntityVersionNumber(Id entityId);
 
     //TODO: Reduce should handle IEntityAnnotation<object>[], allowing access to full transaction information
     /// <summary>
@@ -28,5 +29,5 @@ public interface IProjection<out TProjection>
     /// <param name="entityId">The id of the entity.</param>
     /// <param name="commands">The commands.</param>
     /// <returns>A new <typeparamref name="TProjection"/> that incorporates <paramref name="commands"/> for <paramref name="entityId"/>.</returns>
-    TProjection Reduce(Guid entityId, params object[] commands);
+    TProjection Reduce(Id entityId, params object[] commands);
 }
