@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
 
@@ -18,7 +18,7 @@ public interface IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction timestamp greater than or
     ///     equal to <paramref name="transactionTimeStamp" />.
     /// </returns>
-    TFilter TransactionTimeStampGte(DateTime transactionTimeStamp);
+    TFilter TransactionTimeStampGte(TimeStamp transactionTimeStamp);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a transaction timestamp less than or
@@ -29,7 +29,7 @@ public interface IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction timestamp less than or equal
     ///     to <paramref name="transactionTimeStamp" />.
     /// </returns>
-    TFilter TransactionTimeStampLte(DateTime transactionTimeStamp);
+    TFilter TransactionTimeStampLte(TimeStamp transactionTimeStamp);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an transaction id which is contained in a
@@ -40,7 +40,7 @@ public interface IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction id which is contained in
     ///     <paramref name="transactionIds" />.
     /// </returns>
-    TFilter TransactionIdIn(params Guid[] transactionIds);
+    TFilter TransactionIdIn(params Id[] transactionIds);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that excludes objects which do match a filter.

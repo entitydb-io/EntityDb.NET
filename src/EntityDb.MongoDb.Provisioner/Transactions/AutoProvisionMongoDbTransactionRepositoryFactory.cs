@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 namespace EntityDb.MongoDb.Provisioner.Transactions;
 
 internal sealed class
-    AutoProvisionMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
+    AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    private bool _needToProvision = true;
+    private static readonly object Lock = new();
+    private static Task? _provisionTask;
+    private static bool _provisioned;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
-        IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
         mongoDbTransactionRepositoryFactory)
     {
     }
@@ -21,14 +23,21 @@ internal sealed class
     {
         var mongoSession = await base.CreateSession(transactionSessionOptions);
 
-        if (!_needToProvision)
+        if (_provisioned)
         {
             return mongoSession;
         }
 
-        _needToProvision = false;
+        lock (Lock)
+        {
+            _provisionTask ??=
+                mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
+                    .DatabaseName);
+        }
 
-        await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace.DatabaseName);
+        await _provisionTask;
+        
+        _provisioned = true;
 
         return mongoSession;
     }

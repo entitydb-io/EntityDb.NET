@@ -2,14 +2,14 @@
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Leases;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record DeleteLeasesQuery(Guid EntityId, IReadOnlyCollection<ILease> Leases) : ILeaseQuery
+internal sealed record DeleteLeasesQuery(Id EntityId, IReadOnlyCollection<ILease> Leases) : ILeaseQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
     {

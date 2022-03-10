@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Queries;
 
-internal abstract record GetEntityQuery(Guid EntityId) : ICommandQuery
+internal abstract record GetEntityQuery(Id EntityId) : ICommandQuery
 {
     protected abstract TFilter GetSubFilter<TFilter>(ICommandFilterBuilder<TFilter> builder);
 

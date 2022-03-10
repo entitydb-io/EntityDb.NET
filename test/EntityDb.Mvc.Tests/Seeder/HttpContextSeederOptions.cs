@@ -15,7 +15,4 @@ public class HttpContextSeederOptions
 
     // Connection
     public bool HasIpAddress { get; init; }
-
-    // Claims Principal
-    public string? Role { get; init; }
 }

@@ -15,8 +15,8 @@ public abstract class StartupBase : IStartup
     {
         // Logging
 
-        serviceCollection.AddDefaultLogger();
-
+        serviceCollection.AddLogging();
+        
         // Resolving
 
         serviceCollection.AddLifoTypeResolver();

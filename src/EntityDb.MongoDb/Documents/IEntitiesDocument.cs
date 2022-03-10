@@ -1,8 +1,8 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.MongoDb.Documents;
 
 internal interface IEntitiesDocument : ITransactionDocument
 {
-    Guid[] EntityIds { get; }
+    Id[] EntityIds { get; }
 }

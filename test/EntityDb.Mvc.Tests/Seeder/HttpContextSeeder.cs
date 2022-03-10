@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System;
 using System.Linq;
-using System.Security.Claims;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Mvc.Tests.Seeder;
 
@@ -16,7 +15,7 @@ public static class HttpContextSeeder
 
         connectionInfoMock
             .SetupGet(info => info.Id)
-            .Returns(Guid.NewGuid().ToString());
+            .Returns(Id.NewId().ToString());
 
         var faker = new Faker();
 
@@ -90,23 +89,6 @@ public static class HttpContextSeeder
         return httpRequestMock.Object;
     }
 
-    private static ClaimsPrincipal CreateClaimsPrincipal(HttpContextSeederOptions httpContextSeederOptions)
-    {
-        var claimsPrincipal = new ClaimsPrincipal();
-        var claimsIdentity = new ClaimsIdentity();
-
-        if (httpContextSeederOptions.Role != null)
-        {
-            var claim = new Claim(ClaimTypes.Role, httpContextSeederOptions.Role);
-
-            claimsIdentity.AddClaim(claim);
-        }
-
-        claimsPrincipal.AddIdentity(claimsIdentity);
-
-        return claimsPrincipal;
-    }
-
     public static HttpContext CreateHttpContext(HttpContextSeederOptions httpContextSeederOptions)
     {
         var httpContextMock = new Mock<HttpContext>(MockBehavior.Strict);
@@ -118,10 +100,6 @@ public static class HttpContextSeeder
         httpContextMock
             .SetupGet(context => context.Connection)
             .Returns(CreateConnectionInfo(httpContextSeederOptions));
-
-        httpContextMock
-            .SetupGet(context => context.User)
-            .Returns(CreateClaimsPrincipal(httpContextSeederOptions));
 
         return httpContextMock.Object;
     }

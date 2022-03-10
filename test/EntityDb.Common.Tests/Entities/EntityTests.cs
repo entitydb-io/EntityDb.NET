@@ -13,6 +13,7 @@ using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
@@ -23,24 +24,78 @@ public class EntityTests : TestsBase<Startup>
     {
     }
 
-    private static ITransaction<TransactionEntity> BuildTransaction
+    private static ITransaction BuildTransaction
     (
         IServiceScope serviceScope,
-        Guid entityId,
-        ulong from,
-        ulong to
+        Id entityId,
+        VersionNumber from,
+        VersionNumber to,
+        TransactionEntity? entity = null
     )
     {
         var transactionBuilder = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId);
 
-        for (var i = from; i <= to; i++)
+        if (entity != null)
         {
+            transactionBuilder.Load(entity);
+        }
+
+        for (var i = from; i.Value <= to.Value; i = i.Next())
+        {
+            if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber.Value >= i.Value)
+            {
+                continue;
+            }
+
             transactionBuilder.Append(new DoNothing());
         }
 
-        return transactionBuilder.Build(default!, Guid.NewGuid());
+        return transactionBuilder.Build(default!, Id.NewId());
+    }
+
+    [Theory]
+    [MemberData(nameof(AddTransactionsAndSnapshots))]
+    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(AddTransactionsDelegate addTransactionsDelegate, AddSnapshotsDelegate addSnapshotsDelegate)
+    {
+        // ARRANGE
+
+        const ulong n = 10UL;
+        const ulong m = 5UL;
+        
+        var versionNumberN = new VersionNumber(n);
+
+        var versionNumberM = new VersionNumber(m);
+        
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+            addSnapshotsDelegate.Invoke(serviceCollection);
+        });
+
+        var entityId = Id.NewId();
+
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(TestSessionOptions.Write,
+                TestSessionOptions.Write);
+
+        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
+
+        var transactionInserted = await entityRepository.PutTransaction(transaction);
+
+        // ARRANGE ASSERTIONS
+
+        transactionInserted.ShouldBeTrue();
+
+        // ACT
+
+        var entityAtVersionM = await entityRepository.GetAtVersion(entityId, versionNumberM);
+
+        // ASSERT
+
+        entityAtVersionM.VersionNumber.ShouldBe(versionNumberM);
     }
 
     [Fact]
@@ -48,21 +103,21 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        const ulong expectedVersionNumber = 10;
+        var expectedVersionNumber = new VersionNumber(10);
 
-        var entityId = Guid.NewGuid();
+        var entityId = Id.NewId();
 
         var commands = new List<object>();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
-            .ReturnsAsync((ITransaction<TransactionEntity> transaction) =>
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
+            .ReturnsAsync((ITransaction transaction) =>
             {
                 foreach (var transactionStep in transaction.Steps)
                 {
-                    if (transactionStep is ICommandTransactionStep<TransactionEntity> commandTransactionStep)
+                    if (transactionStep is IAppendCommandTransactionStep commandTransactionStep)
                     {
                         commands.Add(commandTransactionStep.Command);
                     }
@@ -81,7 +136,7 @@ public class EntityTests : TestsBase<Startup>
             .Verifiable();
 
         var transactionRepositoryFactoryMock =
-            new Mock<ITransactionRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+            new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
 
         transactionRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
@@ -96,7 +151,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, 1, expectedVersionNumber);
+        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -201,7 +256,7 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var snapshot = new TransactionEntity(1);
+        var snapshot = new TransactionEntity(new VersionNumber(1));
 
         var newCommands = new object[]
         {
@@ -227,7 +282,7 @@ public class EntityTests : TestsBase<Startup>
 
         snapshotOrDefault.ShouldNotBe(default);
         snapshotOrDefault.ShouldNotBe(snapshot);
-        snapshotOrDefault.VersionNumber.ShouldBe(snapshot.VersionNumber + Convert.ToUInt64(newCommands.Length));
+        snapshotOrDefault.VersionNumber.ShouldBe(new VersionNumber(snapshot.VersionNumber.Value + Convert.ToUInt64(newCommands.Length)));
     }
 
     [Fact]

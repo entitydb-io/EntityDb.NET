@@ -4,170 +4,193 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
+using MongoDB.Bson;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal class MongoDbTransactionRepository<TEntity> : DisposableResourceBaseClass, ITransactionRepository<TEntity>
+internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITransactionRepository
 {
     private readonly IMongoSession _mongoSession;
+    private readonly IEnvelopeService<BsonDocument> _envelopeService;
 
     public MongoDbTransactionRepository
     (
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService
     )
     {
         _mongoSession = mongoSession;
+        _envelopeService = envelopeService;
     }
 
-    public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return AgentSignatureDocument
-            .GetQuery(_mongoSession, agentSignatureQuery)
-            .GetTransactionIds();
+            .GetQuery(agentSignatureQuery)
+            .GetTransactionIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery)
     {
         return CommandDocument
-            .GetQuery(_mongoSession, commandQuery)
-            .GetTransactionIds();
+            .GetQuery(commandQuery)
+            .GetTransactionIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery)
     {
         return LeaseDocument
-            .GetQuery(_mongoSession, leaseQuery)
-            .GetTransactionIds();
+            .GetQuery(leaseQuery)
+            .GetTransactionIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
+    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery)
     {
         return TagDocument
-            .GetQuery(_mongoSession, tagQuery)
-            .GetTransactionIds();
+            .GetQuery(tagQuery)
+            .GetTransactionIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
     {
         return AgentSignatureDocument
-            .GetQuery(_mongoSession, agentSignatureQuery)
-            .GetEntitiesIds();
+            .GetQuery(agentSignatureQuery)
+            .GetEntitiesIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery)
     {
         return CommandDocument
-            .GetQuery(_mongoSession, commandQuery)
-            .GetEntityIds();
+            .GetQuery(commandQuery)
+            .GetEntityIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery)
     {
         return LeaseDocument
-            .GetQuery(_mongoSession, leaseQuery)
-            .GetEntityIds();
+            .GetQuery(leaseQuery)
+            .GetEntityIds(_mongoSession);
     }
 
-    public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
+    public Task<Id[]> GetEntityIds(ITagQuery tagQuery)
     {
         return TagDocument
-            .GetQuery(_mongoSession, tagQuery)
-            .GetEntityIds();
+            .GetQuery(tagQuery)
+            .GetEntityIds(_mongoSession);
     }
 
     public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
     {
         return AgentSignatureDocument
-            .GetQuery(_mongoSession, agentSignatureQuery)
-            .GetData<AgentSignatureDocument, object>();
+            .GetQuery(agentSignatureQuery)
+            .GetData<AgentSignatureDocument, object>(_mongoSession, _envelopeService);
     }
 
     public Task<object[]> GetCommands(ICommandQuery commandQuery)
     {
         return CommandDocument
-            .GetQuery(_mongoSession, commandQuery)
-            .GetData<CommandDocument, object>();
+            .GetQuery(commandQuery)
+            .GetData<CommandDocument, object>(_mongoSession, _envelopeService);
     }
 
     public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
     {
         return LeaseDocument
-            .GetQuery(_mongoSession, leaseQuery)
-            .GetData<LeaseDocument, ILease>();
+            .GetQuery(leaseQuery)
+            .GetData<LeaseDocument, ILease>(_mongoSession, _envelopeService);
     }
 
     public Task<ITag[]> GetTags(ITagQuery tagQuery)
     {
         return TagDocument
-            .GetQuery(_mongoSession, tagQuery)
-            .GetData<TagDocument, ITag>();
+            .GetQuery(tagQuery)
+            .GetData<TagDocument, ITag>(_mongoSession, _envelopeService);
     }
 
     public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
     {
         return CommandDocument
-            .GetQuery(_mongoSession, commandQuery)
-            .GetEntityAnnotation<CommandDocument, object>();
+            .GetQuery(commandQuery)
+            .GetEntityAnnotation<CommandDocument, object>(_mongoSession, _envelopeService);
     }
 
-    private async Task ExecuteCommandTransactionStep(ITransaction<TEntity> transaction, ICommandTransactionStep<TEntity> commandTransactionStep)
+    private async Task PutAgentSignature(ITransaction transaction)
     {
-        VersionZeroReservedException.ThrowIfZero(commandTransactionStep.NextEntityVersionNumber);
-
-        var previousVersionNumber = await CommandDocument.GetLastEntityVersionNumber(_mongoSession, commandTransactionStep.EntityId);
-
-        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, commandTransactionStep.PreviousEntityVersionNumber);
-
-        await CommandDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, commandTransactionStep);
+        await AgentSignatureDocument
+            .GetInsertCommand(_envelopeService, transaction)
+            .Execute(_mongoSession);
     }
-
-    private async Task ExecuteLeaseTransactionStep(ITransaction<TEntity> transaction, ILeaseTransactionStep<TEntity> leaseTransactionStep)
+    
+    private async Task PutCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep)
     {
-        await LeaseDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+        VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
 
-        await LeaseDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, leaseTransactionStep);
+        var previousVersionNumber = await CommandDocument
+            .GetLastEntityVersionNumber(_mongoSession, appendCommandTransactionStep.EntityId);
+
+        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, appendCommandTransactionStep.PreviousEntityVersionNumber);
+
+        await CommandDocument
+            .GetInsertCommand(_envelopeService, transaction, appendCommandTransactionStep)
+            .Execute(_mongoSession);
     }
 
-    private async Task ExecuteTagTransactionStep(ITransaction<TEntity> transaction, ITagTransactionStep<TEntity> tagTransactionStep)
+    private async Task PutLeases(ITransaction transaction, IAddLeasesTransactionStep addLeasesTransactionStep)
     {
-        await TagDocument.GetDeleteCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
-
-        await TagDocument.GetInsertCommand<TEntity>(_mongoSession).Execute(transaction, tagTransactionStep);
+        await LeaseDocument
+            .GetInsertCommand(_envelopeService, transaction, addLeasesTransactionStep)
+            .Execute(_mongoSession);
     }
 
-    public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    private async Task PutTags(ITransaction transaction, IAddTagsTransactionStep addTagsTransactionStep)
+    {
+        await TagDocument
+            .GetInsertCommand(_envelopeService, transaction, addTagsTransactionStep)
+            .Execute(_mongoSession);
+    }
+
+    private async Task DeleteLeases(IDeleteLeasesTransactionStep deleteLeasesTransactionStep)
+    {
+        await LeaseDocument
+            .GetDeleteCommand(deleteLeasesTransactionStep)
+            .Execute(_mongoSession);
+    }
+
+    private async Task DeleteTags(IDeleteTagsTransactionStep deleteTagsTransactionStep)
+    {
+        await TagDocument
+            .GetDeleteCommand(deleteTagsTransactionStep)
+            .Execute(_mongoSession);
+    }
+
+    public async Task<bool> PutTransaction(ITransaction transaction)
     {
         try
         {
             _mongoSession.StartTransaction();
 
-            await AgentSignatureDocument
-                .GetInsertCommand<TEntity>(_mongoSession)
-                .Execute(transaction);
+            await PutAgentSignature(transaction);
 
             foreach (var transactionStep in transaction.Steps)
             {
-                if (transactionStep is ICommandTransactionStep<TEntity> commandTransactionStep)
+                await (transactionStep switch
                 {
-                    await ExecuteCommandTransactionStep(transaction, commandTransactionStep);
-                }
-
-                if (transactionStep is ILeaseTransactionStep<TEntity> leaseTransactionStep)
-                {
-                    await ExecuteLeaseTransactionStep(transaction, leaseTransactionStep);
-                }
-
-                if (transactionStep is ITagTransactionStep<TEntity> tagTransactionStep)
-                {
-                    await ExecuteTagTransactionStep(transaction, tagTransactionStep);
-                }
+                    IAppendCommandTransactionStep appendCommandTransactionStep => PutCommand(transaction, appendCommandTransactionStep),
+                    IAddLeasesTransactionStep addLeasesTransactionStep => PutLeases(transaction, addLeasesTransactionStep),
+                    IAddTagsTransactionStep addTagsTransactionStep => PutTags(transaction, addTagsTransactionStep),
+                    IDeleteLeasesTransactionStep deleteLeasesTransactionStep => DeleteLeases(deleteLeasesTransactionStep),
+                    IDeleteTagsTransactionStep deleteTagsTransactionStep => DeleteTags(deleteTagsTransactionStep),
+                    _ => throw new NotSupportedException()
+                });
             }
 
             await _mongoSession.CommitTransaction();

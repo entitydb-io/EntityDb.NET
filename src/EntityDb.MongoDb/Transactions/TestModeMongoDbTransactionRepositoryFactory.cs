@@ -1,15 +1,16 @@
 ﻿using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
 internal class
-    TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
+    TestModeMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
     private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 
-    public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
+    public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
     {
     }
 

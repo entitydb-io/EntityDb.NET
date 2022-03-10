@@ -20,7 +20,7 @@ public class MongoSessionTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var mongoSession = new MongoSession(default!, default!, default!, default!, new TransactionSessionOptions
+        var mongoSession = new MongoSession(default!, default!, default!, new TransactionSessionOptions
         {
             ReadOnly = true
         });

@@ -1,9 +1,9 @@
 using EntityDb.Abstractions.Queries.FilterBuilders;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record GetEntityAtVersionQuery(Guid EntityId, ulong LteVersionNumber) : GetEntityQuery(EntityId)
+internal sealed record GetEntityAtVersionQuery(Id EntityId, VersionNumber LteVersionNumber) : GetEntityQuery(EntityId)
 {
     protected override TFilter GetSubFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {

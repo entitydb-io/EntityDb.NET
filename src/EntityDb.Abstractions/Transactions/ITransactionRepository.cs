@@ -3,7 +3,7 @@ using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Transactions;
@@ -11,67 +11,63 @@ namespace EntityDb.Abstractions.Transactions;
 /// <summary>
 ///     Represents an explicit set of objects which represent a complete history of a set of entities.
 /// </summary>
-/// <typeparam name="TEntity">
-///     The type of entity represented by the objects stored in the
-///     <see cref="ITransactionRepository{TEntity}" />.
-/// </typeparam>
-public interface ITransactionRepository<TEntity> : IDisposableResource
+public interface ITransactionRepository : IDisposableResource
 {
     /// <summary>
     ///     Returns the transaction ids which are found by a agentSignature query.
     /// </summary>
     /// <param name="agentSignatureQuery">The agentSignature query.</param>
     /// <returns>The transaction ids which are found by <paramref name="agentSignatureQuery" />.</returns>
-    Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery);
+    Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery);
 
     /// <summary>
     ///     Returns the transaction ids which are found by a command query.
     /// </summary>
     /// <param name="commandQuery">The command query.</param>
     /// <returns>The transaction ids which are found by <paramref name="commandQuery" />.</returns>
-    Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery);
+    Task<Id[]> GetTransactionIds(ICommandQuery commandQuery);
 
     /// <summary>
     ///     Returns the transaction ids which are found by a lease query.
     /// </summary>
     /// <param name="leaseQuery">The lease query.</param>
     /// <returns>The transaction ids which are found by <paramref name="leaseQuery" />.</returns>
-    Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery);
+    Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery);
 
     /// <summary>
     ///     Returns the transaction ids which are found by a tag query.
     /// </summary>
     /// <param name="tagQuery">The tag query.</param>
     /// <returns>The transaction ids which are found by <paramref name="tagQuery" />.</returns>
-    Task<Guid[]> GetTransactionIds(ITagQuery tagQuery);
+    Task<Id[]> GetTransactionIds(ITagQuery tagQuery);
 
     /// <summary>
     ///     Returns the entity ids which are found by a agentSignature query.
     /// </summary>
     /// <param name="agentSignatureQuery">The agentSignature query.</param>
     /// <returns>The entity ids which are found by <paramref name="agentSignatureQuery" />.</returns>
-    Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery);
+    Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery);
 
     /// <summary>
     ///     Returns the entity ids which are found by a command query.
     /// </summary>
     /// <param name="commandQuery">The command query.</param>
     /// <returns>The entity ids which are found by <paramref name="commandQuery" />.</returns>
-    Task<Guid[]> GetEntityIds(ICommandQuery commandQuery);
+    Task<Id[]> GetEntityIds(ICommandQuery commandQuery);
 
     /// <summary>
     ///     Returns the entity ids which are found by a lease query.
     /// </summary>
     /// <param name="leaseQuery">The lease query.</param>
     /// <returns>The entity ids which are found by <paramref name="leaseQuery" />.</returns>
-    Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery);
+    Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery);
 
     /// <summary>
     ///     Returns the entity ids which are found by a tag query.
     /// </summary>
     /// <param name="tagQuery">The tag query.</param>
     /// <returns>The entity ids which are found by <paramref name="tagQuery" />.</returns>
-    Task<Guid[]> GetEntityIds(ITagQuery tagQuery);
+    Task<Id[]> GetEntityIds(ITagQuery tagQuery);
 
     /// <summary>
     ///     Returns the agentSignatures which are found by a agentSignature query.
@@ -113,5 +109,5 @@ public interface ITransactionRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="transaction">The transaction.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-    Task<bool> PutTransaction(ITransaction<TEntity> transaction);
+    Task<bool> PutTransaction(ITransaction transaction);
 }

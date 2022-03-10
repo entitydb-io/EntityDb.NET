@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory<TEntity>
+internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
 {
-    private readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
+    private readonly IMongoDbTransactionRepositoryFactory _mongoDbTransactionRepositoryFactory;
 
     protected MongoDbTransactionRepositoryFactoryWrapper(
-        IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory)
     {
         _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
     }
@@ -26,7 +26,7 @@ internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : Di
         return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions);
     }
 
-    public virtual ITransactionRepository<TEntity> CreateRepository
+    public virtual ITransactionRepository CreateRepository
     (
         IMongoSession mongoSession
     )

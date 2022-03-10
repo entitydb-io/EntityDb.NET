@@ -14,7 +14,7 @@ public class DefaultTypeResolverTests
     {
         // ARRANGE
 
-        var headers = new Dictionary<string, string>();
+        var headers = new EnvelopeHeaders(new Dictionary<string, string>());
 
         var typeResolver = new DefaultPartialTypeResolver();
 
@@ -37,7 +37,7 @@ public class DefaultTypeResolverTests
 
         var expectedType = record.GetType();
 
-        var headers = EnvelopeHelper.GetTypeHeaders(expectedType, true, false);
+        var headers = EnvelopeHelper.GetEnvelopeHeaders(expectedType, true, false);
 
         var typeResolver = new DefaultPartialTypeResolver();
 
@@ -56,7 +56,7 @@ public class DefaultTypeResolverTests
     {
         // ARRANGE
 
-        var headers = EnvelopeHelper.GetTypeHeaders(typeof(object), false);
+        var headers = EnvelopeHelper.GetEnvelopeHeaders(typeof(object), false);
 
         var typeResolver = new DefaultPartialTypeResolver();
 
@@ -77,11 +77,14 @@ public class DefaultTypeResolverTests
 
         var typeResolver = new DefaultPartialTypeResolver();
 
-        var headers = new Dictionary<string, string> { [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform };
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
+        {
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform
+        });
 
         // ACT
 
-        var resolved = typeResolver.TryResolveType(headers, out var actualType);
+        var resolved = typeResolver.TryResolveType(envelopeHeaders, out var actualType);
 
         // ASSERT
 
@@ -96,16 +99,16 @@ public class DefaultTypeResolverTests
 
         var typeResolver = new DefaultPartialTypeResolver();
 
-        var headers = new Dictionary<string, string>
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
             [EnvelopeHelper.AssemblyFullName] = "Garbage",
             [EnvelopeHelper.TypeFullName] = "Garbage",
             [EnvelopeHelper.MemberInfoName] = "Garbage"
-        };
+        });
 
         // ASSERT
 
-        Should.Throw<FileNotFoundException>(() => typeResolver.TryResolveType(headers, out _));
+        Should.Throw<FileNotFoundException>(() => typeResolver.TryResolveType(envelopeHeaders, out _));
     }
 }

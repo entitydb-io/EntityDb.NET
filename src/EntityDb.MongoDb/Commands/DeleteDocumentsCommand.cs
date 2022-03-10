@@ -1,29 +1,19 @@
-﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.MongoDb.Sessions;
+﻿using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 
-internal record DeleteDocumentsCommand<TEntity, TTransactionStep>
+internal record DeleteDocumentsCommand
 (
-    IMongoSession MongoSession,
     string CollectionName,
-    Func<ITransaction<TEntity>, TTransactionStep, FilterDefinition<BsonDocument>?> Build
+    FilterDefinition<BsonDocument> FilterDefinition
 )
 {
-    public async Task Execute(ITransaction<TEntity> transaction, TTransactionStep transactionStep)
+    public async Task Execute(IMongoSession mongoSession)
     {
-        var filter = Build.Invoke(transaction, transactionStep);
-
-        if (filter == null)
-        {
-            return;
-        }
-
-        await MongoSession
-            .Delete(CollectionName, filter);
+        await mongoSession
+            .Delete(CollectionName, FilterDefinition);
     }
 }

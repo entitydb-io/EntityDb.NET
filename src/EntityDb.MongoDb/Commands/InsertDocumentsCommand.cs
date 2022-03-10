@@ -1,35 +1,18 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.MongoDb.Sessions;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using EntityDb.MongoDb.Sessions;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 
-internal record InsertDocumentsCommand<TEntity, TTransactionStep, TDocument>
+internal record InsertDocumentsCommand<TDocument>
 (
-    IMongoSession MongoSession,
     string CollectionName,
-    Func<ITransaction<TEntity>, TTransactionStep, ILogger, IReadOnlyCollection<TDocument>?> Build
+    TDocument[] Documents
 )
 {
-    public async Task Execute(ITransaction<TEntity> transaction, TTransactionStep transactionStep)
+    public async Task Execute(IMongoSession mongoSession)
     {
-        var documents = Build.Invoke(transaction, transactionStep, MongoSession.Logger);
-
-        if (documents == null)
-        {
-            return;
-        }
-
-        var bsonDocuments = documents
-            .Select(document => document.ToBsonDocument())
-            .ToArray();
-
-        await MongoSession
-            .Insert(CollectionName, bsonDocuments);
+        await mongoSession
+            .Insert(CollectionName, Documents);
     }
 }

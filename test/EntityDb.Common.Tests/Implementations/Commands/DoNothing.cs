@@ -7,6 +7,6 @@ public record DoNothing : IReducer<TransactionEntity>
 {
     public TransactionEntity Reduce(TransactionEntity entity)
     {
-        return entity with { VersionNumber = entity.VersionNumber + 1 };
+        return entity with { VersionNumber = entity.VersionNumber.Next() };
     }
 }

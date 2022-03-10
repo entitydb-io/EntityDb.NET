@@ -10,12 +10,15 @@ internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEnti
     where TEntity : IEntity<TEntity>
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
     private readonly ISnapshotRepositoryFactory<TEntity>? _snapshotRepositoryFactory;
-    private readonly ITransactionRepositoryFactory<TEntity> _transactionRepositoryFactory;
 
-    public EntityRepositoryFactory(IServiceProvider serviceProvider,
-        ITransactionRepositoryFactory<TEntity> transactionRepositoryFactory,
-        ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory = null)
+    public EntityRepositoryFactory
+    (
+        IServiceProvider serviceProvider,
+        ITransactionRepositoryFactory transactionRepositoryFactory,
+        ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory = null
+    )
     {
         _serviceProvider = serviceProvider;
         _transactionRepositoryFactory = transactionRepositoryFactory;

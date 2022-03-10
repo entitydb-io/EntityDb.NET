@@ -58,20 +58,4 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             }
         };
     }
-
-    protected override HttpContextSeederOptions GetAgentAccessorConfigurationWithRole(string role)
-    {
-        return new HttpContextSeederOptions
-        {
-            Role = role
-        };
-    }
-
-    protected override HttpContextSeederOptions GetAgentAccessorConfigurationWithoutRole(string role)
-    {
-        return new HttpContextSeederOptions
-        {
-            Role = $"Not{role}"
-        };
-    }
 }

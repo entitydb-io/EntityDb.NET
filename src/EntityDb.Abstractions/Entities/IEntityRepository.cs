@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Entities;
@@ -15,7 +15,7 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// <summary>
     ///     The backing transaction repository.
     /// </summary>
-    ITransactionRepository<TEntity> TransactionRepository { get; }
+    ITransactionRepository TransactionRepository { get; }
 
     /// <summary>
     ///     The backing snapshot repository (if snapshot is available).
@@ -27,7 +27,7 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <returns>The current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.</returns>
-    Task<TEntity> GetCurrent(Guid entityId);
+    Task<TEntity> GetCurrent(Id entityId);
 
     /// <summary>
     ///     Returns a previous state of <typeparamref name="TEntity" />.
@@ -35,12 +35,12 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// <param name="entityId">The id of the entity.</param>
     /// <param name="lteVersionNumber">The version of the entity to fetch.</param>
     /// <returns>A previous state of <typeparamref name="TEntity" />.</returns>
-    Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber);
+    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber);
 
     /// <summary>
     ///     Inserts a single transaction with an atomic commit.
     /// </summary>
     /// <param name="transaction">The transaction.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-    Task<bool> PutTransaction(ITransaction<TEntity> transaction);
+    Task<bool> PutTransaction(ITransaction transaction);
 }

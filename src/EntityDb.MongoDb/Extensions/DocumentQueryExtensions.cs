@@ -1,7 +1,10 @@
 ﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
+using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
+using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
@@ -42,10 +45,14 @@ internal static class DocumentQueryExtensions
             ProjectionBuilder.Include(nameof(IEntityDocument.EntityVersionNumber))
         );
 
-    public static async Task<ulong> GetEntityVersionNumber<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static async Task<VersionNumber> GetEntityVersionNumber<TDocument>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession
+    )
         where TDocument : IEntityDocument
     {
-        var documents = await documentQuery.Execute(EntityVersionNumberProjection);
+        var documents = await documentQuery.Execute(mongoSession, EntityVersionNumberProjection);
 
         var document = documents.SingleOrDefault();
 
@@ -54,11 +61,12 @@ internal static class DocumentQueryExtensions
             : document.EntityVersionNumber;
     }
 
-    private static async Task<Guid[]> GetGuids<TDocument>
+    private static async Task<Id[]> GetIds<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession,
         ProjectionDefinition<BsonDocument, TDocument> projection,
-        Func<List<TDocument>, IEnumerable<Guid>> mapToGuids
+        Func<List<TDocument>, IEnumerable<Id>> mapToIds
     )
     {
         var skip = documentQuery.Skip;
@@ -66,29 +74,34 @@ internal static class DocumentQueryExtensions
 
         documentQuery = documentQuery with { Skip = null, Limit = null };
 
-        var documents = await documentQuery.Execute(projection);
+        var documents = await documentQuery.Execute(mongoSession, projection);
 
-        var guids = mapToGuids
+        var ids= mapToIds
             .Invoke(documents)
             .Distinct();
 
         if (skip.HasValue)
         {
-            guids = guids.Skip(skip.Value);
+            ids = ids.Skip(skip.Value);
         }
 
         if (limit.HasValue)
         {
-            guids = guids.Take(limit.Value);
+            ids = ids.Take(limit.Value);
         }
 
-        return guids.ToArray();
+        return ids.ToArray();
     }
 
-    public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>(this DocumentQuery<TDocument> documentQuery)
+    public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession, 
+        IEnvelopeService<BsonDocument> envelopeService
+    )
         where TDocument : IEntityDocument
     {
-        var documents = await documentQuery.Execute(NoDocumentIdProjection);
+        var documents = await documentQuery.Execute(mongoSession, NoDocumentIdProjection);
 
         return documents
             .Select(document => new EntityAnnotation<TData>
@@ -97,46 +110,66 @@ internal static class DocumentQueryExtensions
                 document.TransactionTimeStamp,
                 document.EntityId,
                 document.EntityVersionNumber,
-                document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.TypeResolver)
+                envelopeService.Reconstruct<TData>(document.Data)
             ))
             .ToArray<IEntityAnnotation<TData>>();
     }
 
-    public static async Task<TData[]> GetData<TDocument, TData>(this DocumentQuery<TDocument> documentQuery)
+    public static async Task<TData[]> GetData<TDocument, TData>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession, 
+        IEnvelopeService<BsonDocument> envelopeService
+    )
         where TDocument : ITransactionDocument
     {
-        var documents = await documentQuery.Execute(DataProjection);
+        var documents = await documentQuery.Execute(mongoSession, DataProjection);
 
         return documents
-            .Select(document => document.Data.Reconstruct<TData>(documentQuery.MongoSession.Logger, documentQuery.MongoSession.TypeResolver))
+            .Select(document => envelopeService.Reconstruct<TData>(document.Data))
             .ToArray();
     }
 
-    public static Task<Guid[]> GetEntityIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetEntityIds<TDocument>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession
+    )
         where TDocument : IEntityDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
+            mongoSession,
             EntityIdProjection,
             documents => documents.Select(document => document.EntityId)
         );
     }
 
-    public static Task<Guid[]> GetEntitiesIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetEntitiesIds<TDocument>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession
+    )
         where TDocument : IEntitiesDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
+            mongoSession,
             EntityIdsProjection,
             documents => documents.SelectMany(document => document.EntityIds)
         );
     }
 
-    public static Task<Guid[]> GetTransactionIds<TDocument>(this DocumentQuery<TDocument> documentQuery)
+    public static Task<Id[]> GetTransactionIds<TDocument>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession
+    )
         where TDocument : ITransactionDocument
     {
-        return documentQuery.GetGuids
+        return documentQuery.GetIds
         (
+            mongoSession,
             TransactionIdProjection,
             documents => documents.Select(document => document.TransactionId)
         );

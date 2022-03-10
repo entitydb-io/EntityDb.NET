@@ -1,7 +1,6 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,17 +9,17 @@ namespace EntityDb.Common.TypeResolvers;
 
 internal sealed class LifoTypeResolver : ITypeResolver
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<LifoTypeResolver> _logger;
     private readonly IPartialTypeResolver[] _partialTypeResolvers;
 
-    public LifoTypeResolver(ILoggerFactory loggerFactory,
+    public LifoTypeResolver(ILogger<LifoTypeResolver> logger,
         IEnumerable<IPartialTypeResolver> partialTypeResolvers)
     {
-        _logger = loggerFactory.CreateLogger<LifoTypeResolver>();
+        _logger = logger;
         _partialTypeResolvers = partialTypeResolvers.Reverse().ToArray();
     }
 
-    public Type ResolveType(IReadOnlyDictionary<string, string> headers)
+    public Type ResolveType(EnvelopeHeaders headers)
     {
         foreach (var partialTypeResolver in _partialTypeResolvers)
         {
@@ -34,7 +33,7 @@ internal sealed class LifoTypeResolver : ITypeResolver
             catch (Exception exception)
             {
                 _logger.LogError(exception,
-                    "Type resolver threw an exception. Moving on to next type resolver.");
+                    "Type resolver threw an exception. Moving on to next partial type resolver.");
             }
         }
 

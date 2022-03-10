@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record GetLastEntityVersionQuery(Guid EntityId) : ICommandQuery
+internal sealed record GetLastEntityVersionQuery(Id EntityId) : ICommandQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {

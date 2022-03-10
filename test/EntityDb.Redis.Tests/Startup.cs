@@ -1,7 +1,5 @@
-﻿using EntityDb.Common.Extensions;
-using EntityDb.Common.Tests;
+﻿using EntityDb.Common.Tests;
 using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,15 +11,6 @@ public class Startup : StartupBase
     {
         base.AddServices(serviceCollection);
 
-        // Snapshots
-
-        serviceCollection.AddSnapshotStrategy<TransactionEntity, TransactionEntitySnapshotStrategy>();
-
-        serviceCollection.AddRedisSnapshots<TransactionEntity>
-        (
-            TransactionEntity.RedisKeyNamespace,
-            _ => "127.0.0.1:6379",
-            true
-        );
+        serviceCollection.AddJsonElementEnvelopeService();
     }
 }

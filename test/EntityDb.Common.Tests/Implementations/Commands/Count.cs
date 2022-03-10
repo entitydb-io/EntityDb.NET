@@ -3,13 +3,13 @@ using EntityDb.Common.Tests.Implementations.Entities;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record Count(int Number) : IReducer<TransactionEntity>
+public record Count(ulong Number) : IReducer<TransactionEntity>
 {
     public TransactionEntity Reduce(TransactionEntity entity)
     {
         return entity with
         {
-            VersionNumber = entity.VersionNumber + 1
+            VersionNumber = entity.VersionNumber.Next()
         };
     }
 }

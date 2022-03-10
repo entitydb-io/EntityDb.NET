@@ -1,3 +1,4 @@
+using EntityDb.Abstractions.ValueObjects;
 using System;
 using System.Linq.Expressions;
 
@@ -18,7 +19,7 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes tags with an entity id which is contained in
     ///     <paramref name="entityIds" />.
     /// </returns>
-    TFilter EntityIdIn(params Guid[] entityIds);
+    TFilter EntityIdIn(params Id[] entityIds);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes tags with an entity version number greater than or
@@ -29,7 +30,7 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes tags with an entity version number greater than or equal
     ///     to <paramref name="entityVersionNumber" />.
     /// </returns>
-    TFilter EntityVersionNumberGte(ulong entityVersionNumber);
+    TFilter EntityVersionNumberGte(VersionNumber entityVersionNumber);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes tags with an entity version number less than or equal
@@ -40,7 +41,7 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     A <typeparamref name="TFilter" /> that only includes tags with an entity version number less than or equal to
     ///     <paramref name="entityVersionNumber" />.
     /// </returns>
-    TFilter EntityVersionNumberLte(ulong entityVersionNumber);
+    TFilter EntityVersionNumberLte(VersionNumber entityVersionNumber);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes tags whose type is contained in a set of tag types.

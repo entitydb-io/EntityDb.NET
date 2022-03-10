@@ -1,69 +1,52 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using EntityDb.Redis.Envelopes;
+using EntityDb.Common.Envelopes;
+using EntityDb.Common.Extensions;
 using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
-using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepository<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
+internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly IRedisSession _redisSession;
+    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _keyNamespace;
-    private readonly ILogger _logger;
-    private readonly ITypeResolver _typeResolver;
-    private readonly ISnapshotStrategy<TEntity>? _snapshotStrategy;
+    private readonly IRedisSession _redisSession;
 
     public RedisSnapshotRepository
     (
+        IEnvelopeService<JsonElement> envelopeService,
         string keyNamespace,
-        ITypeResolver typeResolver,
-        ISnapshotStrategy<TEntity>? snapshotStrategy,
-        IRedisSession redisSession,
-        ILogger logger
+        IRedisSession redisSession
     )
     {
+        _envelopeService = envelopeService;
         _keyNamespace = keyNamespace;
-        _typeResolver = typeResolver;
-        _snapshotStrategy = snapshotStrategy;
         _redisSession = redisSession;
-        _logger = logger;
     }
 
-    private RedisKey GetSnapshotKey(Guid entityId)
+    private RedisKey GetSnapshotKey(Id snapshotId)
     {
-        return $"{_keyNamespace}#{entityId}";
+        return $"{_keyNamespace}#{snapshotId}";
     }
 
-    public async Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
-        if (_snapshotStrategy != null)
-        {
-            var previousSnapshot = await GetSnapshot(entityId);
+        var snapshotKey = GetSnapshotKey(snapshotId);
 
-            if (!_snapshotStrategy.ShouldPutSnapshot(previousSnapshot, entity))
-            {
-                return false;
-            }
-        }
-
-        var snapshotKey = GetSnapshotKey(entityId);
-
-        var snapshotValue = JsonElementEnvelope
-            .Deconstruct(entity, _logger)
-            .Serialize(_logger);
+        var snapshotValue = _envelopeService
+            .DeconstructAndSerialize(snapshot);
 
         return await _redisSession.Insert(snapshotKey, snapshotValue);
     }
 
-    public async Task<TEntity?> GetSnapshot(Guid entityId)
+    public async Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
-        var snapshotKey = GetSnapshotKey(entityId);
+        var snapshotKey = GetSnapshotKey(snapshotId);
         var snapshotValue = await _redisSession.Find(snapshotKey);
 
         if (!snapshotValue.HasValue)
@@ -71,14 +54,13 @@ internal class RedisSnapshotRepository<TEntity> : DisposableResourceBaseClass, I
             return default;
         }
 
-        return JsonElementEnvelope
-            .Deserialize(snapshotValue, _logger)
-            .Reconstruct<TEntity>(_logger, _typeResolver);
+        return _envelopeService
+            .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue);
     }
 
-    public async Task<bool> DeleteSnapshots(Guid[] entityIds)
+    public async Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
-        var snapshotKeys = entityIds.Select(GetSnapshotKey);
+        var snapshotKeys = snapshotIds.Select(GetSnapshotKey);
 
         return await _redisSession.Delete(snapshotKeys);
     }

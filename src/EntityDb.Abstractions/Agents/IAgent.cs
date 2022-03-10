@@ -1,4 +1,4 @@
-﻿using System;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Agents;
 
@@ -8,17 +8,10 @@ namespace EntityDb.Abstractions.Agents;
 public interface IAgent
 {
     /// <summary>
-    ///     Returns whether or not the agent has a particular role.
-    /// </summary>
-    /// <param name="role">The role.</param>
-    /// <returns>Whether or not the agent has a particular role.</returns>
-    bool HasRole(string role);
-
-    /// <summary>
     ///     Returns the timestamp, as decided by the agent.
     /// </summary>
     /// <returns></returns>
-    DateTime GetTimestamp();
+    TimeStamp GetTimeStamp();
 
     /// <summary>
     ///     Returns an object that represents the signature of the agent.

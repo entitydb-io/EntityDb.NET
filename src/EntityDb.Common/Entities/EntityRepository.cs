@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -15,15 +16,15 @@ namespace EntityDb.Common.Entities;
 internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
+    private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
     
-    public ITransactionRepository<TEntity> TransactionRepository { get; }
+    public ITransactionRepository TransactionRepository { get; }
     public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
     public EntityRepository
     (
-        IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
-        ITransactionRepository<TEntity> transactionRepository,
+        IEnumerable<ITransactionSubscriber> transactionSubscribers,
+        ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
@@ -32,7 +33,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TEntity> GetCurrent(Guid entityId)
+    public async Task<TEntity> GetCurrent(Id entityId)
     {
         var entity = await SnapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
 
@@ -44,7 +45,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         entity = entity.Reduce(commands);
 
-        if (entity.GetVersionNumber() == 0)
+        if (entity.GetVersionNumber() == VersionNumber.MinValue)
         {
             throw new EntityNotCreatedException();
         }
@@ -52,7 +53,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         return entity;
     }
 
-    public async Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber)
+    public async Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber)
     {
         var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
 
@@ -63,7 +64,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
             .Reduce(commands);
     }
 
-    public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
+    public async Task<bool> PutTransaction(ITransaction transaction)
     {
         try
         {
@@ -85,7 +86,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         }
     }
 
-    private void Publish(ITransaction<TEntity> transaction)
+    private void Publish(ITransaction transaction)
     {
         foreach (var transactionSubscriber in _transactionSubscribers)
         {
@@ -96,7 +97,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
     public static EntityRepository<TEntity> Create
     (
         IServiceProvider serviceProvider,
-        ITransactionRepository<TEntity> transactionRepository,
+        ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {

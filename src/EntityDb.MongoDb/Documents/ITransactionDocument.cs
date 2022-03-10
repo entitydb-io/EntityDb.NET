@@ -1,6 +1,6 @@
-﻿using EntityDb.MongoDb.Envelopes;
+﻿using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using MongoDB.Bson;
-using System;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -11,9 +11,9 @@ internal interface ITransactionDocument
     ObjectId? _id { get; }
 #pragma warning restore IDE1006 // Naming Styles
 
-    Guid TransactionId { get; }
+    Id TransactionId { get; }
 
-    DateTime TransactionTimeStamp { get; }
+    TimeStamp TransactionTimeStamp { get; }
 
-    BsonDocumentEnvelope Data { get; }
+    Envelope<BsonDocument> Data { get; }
 }

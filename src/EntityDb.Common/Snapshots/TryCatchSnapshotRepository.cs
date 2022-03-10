@@ -1,25 +1,26 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWrapper<TEntity>
+internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepositoryWrapper<TSnapshot>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<TryCatchSnapshotRepository<TSnapshot>> _logger;
 
     public TryCatchSnapshotRepository
     (
-        ISnapshotRepository<TEntity> snapshotRepository,
-        ILogger logger
+        ISnapshotRepository<TSnapshot> snapshotRepository,
+        ILogger<TryCatchSnapshotRepository<TSnapshot>> logger
     )
         : base(snapshotRepository)
     {
         _logger = logger;
     }
 
-    protected override async Task<TEntity?> WrapQuery(Task<TEntity?> task)
+    protected override async Task<TSnapshot?> WrapQuery(Task<TSnapshot?> task)
     {
         try
         {
@@ -45,5 +46,12 @@ internal sealed class TryCatchSnapshotRepository<TEntity> : SnapshotRepositoryWr
 
             return default;
         }
+    }
+
+    public static ISnapshotRepository<TSnapshot> Create(IServiceProvider serviceProvider,
+        ISnapshotRepository<TSnapshot> snapshotRepository)
+    {
+        return ActivatorUtilities.CreateInstance<TryCatchSnapshotRepository<TSnapshot>>(serviceProvider,
+            snapshotRepository);
     }
 }

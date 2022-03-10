@@ -1,11 +1,11 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record TransactionIdQuery(Guid TransactionId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
+public record TransactionIdQuery(Id TransactionId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
     ITagQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)

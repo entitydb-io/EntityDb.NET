@@ -1,12 +1,11 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
 using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -22,13 +21,9 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
 
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
-            .Verifiable();
-
-        var transactionRepositoryMock = new Mock<ITransactionRepository<TransactionEntity>>(MockBehavior.Strict);
+        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
             .Setup(repository => repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>()))
@@ -83,10 +78,10 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction<TransactionEntity>>()))
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchTransactionRepository = new TryCatchTransactionRepository<TransactionEntity>(transactionRepositoryMock.Object, loggerMock.Object);
+        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object, loggerFactory.CreateLogger<TryCatchTransactionRepository>());
 
         // ACT
 
@@ -121,7 +116,7 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         tags.ShouldBeEmpty();
         annotatedCommands.ShouldBeEmpty();
         inserted.ShouldBeFalse();
-
-        loggerMock.Verify(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()), Times.Exactly(14));
+        
+        loggerVerifier.Invoke(Times.Exactly(14));
     }
 }

@@ -1,42 +1,42 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TestModeSnapshotRepository<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
+internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly ISnapshotRepository<TEntity> _snapshotRepository;
-    private readonly TestModeSnapshotManager _testModeSnapshotManager;
+    private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
+    private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager;
 
     public TestModeSnapshotRepository
     (
-        ISnapshotRepository<TEntity> snapshotRepository,
-        TestModeSnapshotManager testModeSnapshotManager
+        ISnapshotRepository<TSnapshot> snapshotRepository,
+        TestModeSnapshotManager<TSnapshot> testModeSnapshotManager
     )
     {
         _snapshotRepository = snapshotRepository;
         _testModeSnapshotManager = testModeSnapshotManager;
     }
 
-    public Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
-        _testModeSnapshotManager.AddEntityId(entityId);
+        _testModeSnapshotManager.AddSnapshotId(this, snapshotId);
 
-        return _snapshotRepository.PutSnapshot(entityId, entity);
+        return _snapshotRepository.PutSnapshot(snapshotId, snapshot);
     }
 
-    public Task<TEntity?> GetSnapshot(Guid entityId)
+    public Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
-        return _snapshotRepository.GetSnapshot(entityId);
+        return _snapshotRepository.GetSnapshot(snapshotId);
     }
 
-    public Task<bool> DeleteSnapshots(Guid[] entityIds)
+    public Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
-        _testModeSnapshotManager.RemoveEntityIds(entityIds);
+        _testModeSnapshotManager.RemoveSnapshotIds(this, snapshotIds);
 
-        return _snapshotRepository.DeleteSnapshots(entityIds);
+        return _snapshotRepository.DeleteSnapshots(snapshotIds);
     }
 
     public override async ValueTask DisposeAsync()

@@ -8,11 +8,11 @@ namespace EntityDb.MongoDb.Rewriters;
 
 internal class BsonDocumentRewriter
 {
-    protected readonly BsonWriter _bsonWriter;
+    protected readonly BsonWriter BsonWriter;
 
     public BsonDocumentRewriter(BsonWriter bsonWriter)
     {
-        _bsonWriter = bsonWriter;
+        BsonWriter = bsonWriter;
     }
 
     public void Rewrite(BsonValue bsonValue)
@@ -35,28 +35,28 @@ internal class BsonDocumentRewriter
 
     private void RewriteArray(IEnumerable<BsonValue> bsonValues)
     {
-        _bsonWriter.WriteStartArray();
+        BsonWriter.WriteStartArray();
 
         foreach (var bsonValue in bsonValues)
         {
             Rewrite(bsonValue);
         }
 
-        _bsonWriter.WriteEndArray();
+        BsonWriter.WriteEndArray();
     }
 
     protected virtual void RewriteDocument(BsonElement[] bsonElements)
     {
-        _bsonWriter.WriteStartDocument();
+        BsonWriter.WriteStartDocument();
 
         foreach (var bsonElement in bsonElements)
         {
-            _bsonWriter.WriteName(bsonElement.Name);
+            BsonWriter.WriteName(bsonElement.Name);
 
             Rewrite(bsonElement.Value);
         }
 
-        _bsonWriter.WriteEndDocument();
+        BsonWriter.WriteEndDocument();
     }
 
     private void RewriteScalar(BsonValue bsonValue)
@@ -64,43 +64,43 @@ internal class BsonDocumentRewriter
         switch (bsonValue.BsonType)
         {
             case BsonType.Double:
-                _bsonWriter.WriteDouble(bsonValue.AsDouble);
+                BsonWriter.WriteDouble(bsonValue.AsDouble);
                 break;
 
             case BsonType.String:
-                _bsonWriter.WriteString(bsonValue.AsString);
+                BsonWriter.WriteString(bsonValue.AsString);
                 break;
 
             case BsonType.Boolean:
-                _bsonWriter.WriteBoolean(bsonValue.AsBoolean);
+                BsonWriter.WriteBoolean(bsonValue.AsBoolean);
                 break;
 
             case BsonType.DateTime:
-                _bsonWriter.WriteDateTime(bsonValue.AsBsonDateTime.MillisecondsSinceEpoch);
+                BsonWriter.WriteDateTime(bsonValue.AsBsonDateTime.MillisecondsSinceEpoch);
                 break;
 
             case BsonType.Null:
-                _bsonWriter.WriteNull();
+                BsonWriter.WriteNull();
                 break;
 
             case BsonType.RegularExpression:
-                _bsonWriter.WriteRegularExpression(bsonValue.AsBsonRegularExpression);
+                BsonWriter.WriteRegularExpression(bsonValue.AsBsonRegularExpression);
                 break;
 
             case BsonType.Int32:
-                _bsonWriter.WriteInt32(bsonValue.AsInt32);
+                BsonWriter.WriteInt32(bsonValue.AsInt32);
                 break;
 
             case BsonType.Timestamp:
-                _bsonWriter.WriteTimestamp(bsonValue.AsBsonTimestamp.Value);
+                BsonWriter.WriteTimestamp(bsonValue.AsBsonTimestamp.Value);
                 break;
 
             case BsonType.Int64:
-                _bsonWriter.WriteInt64(bsonValue.AsInt64);
+                BsonWriter.WriteInt64(bsonValue.AsInt64);
                 break;
 
             case BsonType.Decimal128:
-                _bsonWriter.WriteDecimal128(bsonValue.AsDecimal128);
+                BsonWriter.WriteDecimal128(bsonValue.AsDecimal128);
                 break;
 
             default:

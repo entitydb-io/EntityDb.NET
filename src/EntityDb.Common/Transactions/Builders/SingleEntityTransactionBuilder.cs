@@ -1,8 +1,8 @@
 ﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
-using System;
 
 namespace EntityDb.Common.Transactions.Builders;
 
@@ -18,9 +18,9 @@ public class SingleEntityTransactionBuilder<TEntity>
     /// <summary>
     ///     The id used for all transaction builder methods, where applicable.
     /// </summary>
-    public Guid EntityId { get; }
+    public Id EntityId { get; }
 
-    internal SingleEntityTransactionBuilder(TransactionBuilder<TEntity> transactionBuilder, Guid entityId)
+    internal SingleEntityTransactionBuilder(TransactionBuilder<TEntity> transactionBuilder, Id entityId)
     {
         _transactionBuilder = transactionBuilder;
         EntityId = entityId;
@@ -121,17 +121,17 @@ public class SingleEntityTransactionBuilder<TEntity>
     }
 
     /// <summary>
-    ///     Returns a new instance of <see cref="ITransaction{TEntity}" />.
+    ///     Returns a new instance of <see cref="ITransaction" />.
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="transactionId">A new id for the new transaction.</param>
-    /// <returns>A new instance of <see cref="ITransaction{TEntity}" />.</returns>
+    /// <returns>A new instance of <see cref="ITransaction" />.</returns>
     /// <remarks>
     ///     Note that this is just a proxy for a <see cref="TransactionBuilder{TEntity}"/>,
     ///     and does NOT filter out steps for entity ids not associated with this
     ///     <see cref="SingleEntityTransactionBuilder{TEntity}"/>.
     /// </remarks>
-    public ITransaction<TEntity> Build(string agentSignatureOptionsName, Guid transactionId)
+    public ITransaction Build(string agentSignatureOptionsName, Id transactionId)
     {
         return _transactionBuilder.Build(agentSignatureOptionsName, transactionId);
     }

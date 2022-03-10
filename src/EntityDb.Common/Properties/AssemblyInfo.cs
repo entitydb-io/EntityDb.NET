@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 // src
+[assembly: InternalsVisibleTo("EntityDb.InMemory")]
 [assembly: InternalsVisibleTo("EntityDb.MongoDb")]
 [assembly: InternalsVisibleTo("EntityDb.MongoDb.Provisioner")]
 [assembly: InternalsVisibleTo("EntityDb.Mvc")]

@@ -1,11 +1,14 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Entities;
 using Moq;
 using Shouldly;
 using System;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -21,27 +24,31 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
-            .Verifiable();
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
 
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Guid>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Guid>(), It.IsAny<TransactionEntity>()))
+            .Setup(repository => repository.PutSnapshot(It.IsAny<Id>(), It.IsAny<TransactionEntity>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Guid[]>()))
+            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerMock.Object);
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+            serviceCollection.AddSingleton(loggerFactory);
+        });
+
+        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TransactionEntity>
+            .Create(serviceScope.ServiceProvider, snapshotRepositoryMock.Object);
 
         // ACT
 
@@ -55,6 +62,6 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         inserted.ShouldBeFalse();
         deleted.ShouldBeFalse();
 
-        loggerMock.Verify(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()), Times.Exactly(3));
+        loggerVerifier.Invoke(Times.Exactly(3));
     }
 }

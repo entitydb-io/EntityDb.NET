@@ -35,22 +35,22 @@ internal class HoistedRewriter : BsonDocumentRewriter
 
     private void RewriteHoisted(IEnumerable<BsonElement> bsonElements)
     {
-        _bsonWriter.WriteStartDocument();
+        BsonWriter.WriteStartDocument();
 
         foreach (var bsonElement in bsonElements)
         {
             if (_hoistedFieldNames.Contains(bsonElement.Name))
             {
-                _bsonWriter.WriteName(bsonElement.Name);
+                BsonWriter.WriteName(bsonElement.Name);
             }
             else
             {
-                _bsonWriter.WriteName(_parentFieldName + "." + bsonElement.Name);
+                BsonWriter.WriteName(_parentFieldName + "." + bsonElement.Name);
             }
 
             Rewrite(bsonElement.Value);
         }
 
-        _bsonWriter.WriteEndDocument();
+        BsonWriter.WriteEndDocument();
     }
 }

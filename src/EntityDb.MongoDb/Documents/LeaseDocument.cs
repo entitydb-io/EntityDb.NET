@@ -1,18 +1,14 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
@@ -30,77 +26,44 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     public string Scope { get; init; } = default!;
     public string Label { get; init; } = default!;
     public string Value { get; init; } = default!;
-    public Guid EntityId { get; init; }
-    public ulong EntityVersionNumber { get; init; }
+    public Id EntityId { get; init; }
+    public VersionNumber EntityVersionNumber { get; init; }
 
-    private static IReadOnlyCollection<LeaseDocument>? BuildInsert<TEntity>
+    public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (
-        ITransaction<TEntity> transaction,
-        ILeaseTransactionStep<TEntity> leaseTransactionStep,
-        ILogger logger
+        IEnvelopeService<BsonDocument> envelopeService,
+        ITransaction transaction,
+        IAddLeasesTransactionStep addLeasesTransactionStep
     )
     {
-        var insertLeases = leaseTransactionStep.Leases.Insert;
-
-        if (insertLeases.Length == 0)
-        {
-            return null;
-        }
-
-        return leaseTransactionStep.Leases.Insert
+        var leaseDocuments = addLeasesTransactionStep.Leases
             .Select(insertLease => new LeaseDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = leaseTransactionStep.EntityId,
-                EntityVersionNumber = leaseTransactionStep.LeasedAtEntityVersionNumber,
+                EntityId = addLeasesTransactionStep.EntityId,
+                EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
                 Value = insertLease.Value,
-                Data = BsonDocumentEnvelope.Deconstruct(insertLease, logger)
+                Data = envelopeService.Deconstruct(insertLease)
             })
             .ToArray();
-    }
-
-    private static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
-    (
-        ITransaction<TEntity> transaction,
-        ILeaseTransactionStep<TEntity> leaseTransactionStep
-    )
-    {
-        var deleteLeases = leaseTransactionStep.Leases.Delete;
-
-        if (deleteLeases.Length == 0)
-        {
-            return null;
-        }
-
-        return new DeleteLeasesQuery(leaseTransactionStep.EntityId, deleteLeases)
-            .GetFilter(FilterBuilder);
-    }
-
-    public static InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument> GetInsertCommand<TEntity>
-    (
-        IMongoSession mongoSession
-    )
-    {
-        return new InsertDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>, LeaseDocument>
+        
+        return new InsertDocumentsCommand<LeaseDocument>
         (
-            mongoSession,
             CollectionName,
-            BuildInsert
+            leaseDocuments
         );
     }
 
     public static DocumentQuery<LeaseDocument> GetQuery
     (
-        IMongoSession mongoSession,
         ILeaseQuery leaseQuery
     )
     {
         return new DocumentQuery<LeaseDocument>
         (
-            mongoSession,
             CollectionName,
             leaseQuery.GetFilter(FilterBuilder),
             leaseQuery.GetSort(SortBuilder),
@@ -109,16 +72,18 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
         );
     }
 
-    public static DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>> GetDeleteCommand<TEntity>
+    public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IMongoSession mongoSession
+        IDeleteLeasesTransactionStep deleteLeasesTransactionStep
     )
     {
-        return new DeleteDocumentsCommand<TEntity, ILeaseTransactionStep<TEntity>>
+        var deleteLeasesQuery =
+            new DeleteLeasesQuery(deleteLeasesTransactionStep.EntityId, deleteLeasesTransactionStep.Leases);
+        
+        return new DeleteDocumentsCommand
         (
-            mongoSession,
             CollectionName,
-            BuildDelete
+            deleteLeasesQuery.GetFilter(FilterBuilder)
         );
     }
 }

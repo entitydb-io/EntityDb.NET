@@ -1,35 +1,35 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal abstract class SnapshotRepositoryWrapper<TEntity> : DisposableResourceBaseClass, ISnapshotRepository<TEntity>
+internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly ISnapshotRepository<TEntity> _snapshotRepository;
+    private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
 
     protected SnapshotRepositoryWrapper
     (
-        ISnapshotRepository<TEntity> snapshotRepository
+        ISnapshotRepository<TSnapshot> snapshotRepository
     )
     {
         _snapshotRepository = snapshotRepository;
     }
 
-    public virtual Task<bool> PutSnapshot(Guid entityId, TEntity entity)
+    public virtual Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
-        return WrapCommand(_snapshotRepository.PutSnapshot(entityId, entity));
+        return WrapCommand(_snapshotRepository.PutSnapshot(snapshotId, snapshot));
     }
 
-    public virtual Task<TEntity?> GetSnapshot(Guid entityId)
+    public virtual Task<TSnapshot?> GetSnapshot(Id snapshotId)
     {
-        return WrapQuery(_snapshotRepository.GetSnapshot(entityId));
+        return WrapQuery(_snapshotRepository.GetSnapshot(snapshotId));
     }
 
-    public virtual Task<bool> DeleteSnapshots(Guid[] entityIds)
+    public virtual Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
-        return WrapCommand(_snapshotRepository.DeleteSnapshots(entityIds));
+        return WrapCommand(_snapshotRepository.DeleteSnapshots(snapshotIds));
     }
 
     public override async ValueTask DisposeAsync()
@@ -37,7 +37,7 @@ internal abstract class SnapshotRepositoryWrapper<TEntity> : DisposableResourceB
         await _snapshotRepository.DisposeAsync();
     }
 
-    protected abstract Task<TEntity?> WrapQuery(Task<TEntity?> task);
+    protected abstract Task<TSnapshot?> WrapQuery(Task<TSnapshot?> task);
 
     protected abstract Task<bool> WrapCommand(Task<bool> task);
 }

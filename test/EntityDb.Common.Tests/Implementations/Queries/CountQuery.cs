@@ -10,7 +10,7 @@ using EntityDb.Common.Tests.Implementations.Tags;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record CountQuery(int Gte, int Lte) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
+public record CountQuery(ulong Gte, ulong Lte) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
     ITagQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)

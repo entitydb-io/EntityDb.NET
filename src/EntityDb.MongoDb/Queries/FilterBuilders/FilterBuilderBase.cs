@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries.FilterBuilders;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.FilterDefinitions;
@@ -14,17 +15,17 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
 {
     private static readonly FilterDefinitionBuilder<BsonDocument> FilterBuilder = Builders<BsonDocument>.Filter;
 
-    public FilterDefinition<BsonDocument> TransactionTimeStampGte(DateTime timeStamp)
+    public FilterDefinition<BsonDocument> TransactionTimeStampGte(TimeStamp timeStamp)
     {
         return Gte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
     }
 
-    public FilterDefinition<BsonDocument> TransactionTimeStampLte(DateTime timeStamp)
+    public FilterDefinition<BsonDocument> TransactionTimeStampLte(TimeStamp timeStamp)
     {
         return Lte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
     }
 
-    public FilterDefinition<BsonDocument> TransactionIdIn(params Guid[] transactionIds)
+    public FilterDefinition<BsonDocument> TransactionIdIn(params Id[] transactionIds)
     {
         return In(nameof(DocumentBase.TransactionId), transactionIds);
     }
