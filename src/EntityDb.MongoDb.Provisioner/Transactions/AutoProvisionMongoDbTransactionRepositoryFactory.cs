@@ -10,7 +10,8 @@ internal sealed class
     AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
     private static readonly object Lock = new();
-    private static bool _needToProvision = true;
+    private static Task? _provisionTask;
+    private static bool _provisioned;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
         IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
@@ -22,18 +23,22 @@ internal sealed class
     {
         var mongoSession = await base.CreateSession(transactionSessionOptions);
 
-        if (!_needToProvision)
+        if (_provisioned)
         {
             return mongoSession;
         }
 
         lock (Lock)
         {
-            _needToProvision = false;
-
-            mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace.DatabaseName).Wait();
-
-            return mongoSession;
+            _provisionTask ??=
+                mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
+                    .DatabaseName);
         }
+
+        await _provisionTask;
+        
+        _provisioned = true;
+
+        return mongoSession;
     }
 }
