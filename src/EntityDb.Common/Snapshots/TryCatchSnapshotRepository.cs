@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -7,12 +8,12 @@ namespace EntityDb.Common.Snapshots;
 
 internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepositoryWrapper<TSnapshot>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<TryCatchSnapshotRepository<TSnapshot>> _logger;
 
     public TryCatchSnapshotRepository
     (
         ISnapshotRepository<TSnapshot> snapshotRepository,
-        ILogger logger
+        ILogger<TryCatchSnapshotRepository<TSnapshot>> logger
     )
         : base(snapshotRepository)
     {
@@ -45,5 +46,12 @@ internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepository
 
             return default;
         }
+    }
+
+    public static ISnapshotRepository<TSnapshot> Create(IServiceProvider serviceProvider,
+        ISnapshotRepository<TSnapshot> snapshotRepository)
+    {
+        return ActivatorUtilities.CreateInstance<TryCatchSnapshotRepository<TSnapshot>>(serviceProvider,
+            snapshotRepository);
     }
 }

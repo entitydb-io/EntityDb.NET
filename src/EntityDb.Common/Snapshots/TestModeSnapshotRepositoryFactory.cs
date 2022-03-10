@@ -7,7 +7,7 @@ namespace EntityDb.Common.Snapshots;
 internal sealed class TestModeSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
 {
     private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
-    private readonly TestModeSnapshotManager _testModeSnapshotManager = new();
+    private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager = new();
 
     public TestModeSnapshotRepositoryFactory
     (
@@ -26,12 +26,7 @@ internal sealed class TestModeSnapshotRepositoryFactory<TSnapshot> : DisposableR
 
     public override async ValueTask DisposeAsync()
     {
-        var deleteSnapshotIds = _testModeSnapshotManager.GetDeleteSnapshotIds();
-
-        var snapshotRepository = await CreateRepository("");
-
-        await snapshotRepository.DeleteSnapshots(deleteSnapshotIds);
-
+        await _testModeSnapshotManager.DisposeAsync();
         await _snapshotRepositoryFactory.DisposeAsync();
     }
 }

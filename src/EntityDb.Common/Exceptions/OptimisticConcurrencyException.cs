@@ -15,7 +15,7 @@ namespace EntityDb.Common.Exceptions;
 /// <remarks>
 ///     A program will not be able to catch this exception if it is thrown.
 ///     <see cref="ITransactionRepository.PutTransaction(ITransaction)" /> will return false, and this
-///     exception will be logged using the injected <see cref="ILogger" />.
+///     exception will be logged using the injected <see cref="ILogger{TCategoryName}" />.
 /// </remarks>
 public sealed class OptimisticConcurrencyException : Exception
 {

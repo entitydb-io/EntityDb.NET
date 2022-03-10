@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -7,10 +9,13 @@ namespace EntityDb.Common.Transactions;
 
 internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapper
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<TryCatchTransactionRepository> _logger;
 
-    public TryCatchTransactionRepository(ITransactionRepository transactionRepository, ILogger logger) :
-        base(transactionRepository)
+    public TryCatchTransactionRepository
+    (
+        ITransactionRepository transactionRepository,
+        ILogger<TryCatchTransactionRepository> logger
+    ) : base(transactionRepository)
     {
         _logger = logger;
     }
@@ -23,7 +28,7 @@ internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapp
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed");
 
             return Array.Empty<T>();
         }
@@ -37,9 +42,16 @@ internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapp
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed");
 
             return default;
         }
+    }
+
+    public static ITransactionRepository Create(IServiceProvider serviceProvider,
+        ITransactionRepository transactionRepository)
+    {
+        return ActivatorUtilities.CreateInstance<TryCatchTransactionRepository>(serviceProvider,
+            transactionRepository);
     }
 }

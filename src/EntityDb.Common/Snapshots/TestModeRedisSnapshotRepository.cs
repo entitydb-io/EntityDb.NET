@@ -8,12 +8,12 @@ namespace EntityDb.Common.Snapshots;
 internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
-    private readonly TestModeSnapshotManager _testModeSnapshotManager;
+    private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager;
 
     public TestModeSnapshotRepository
     (
         ISnapshotRepository<TSnapshot> snapshotRepository,
-        TestModeSnapshotManager testModeSnapshotManager
+        TestModeSnapshotManager<TSnapshot> testModeSnapshotManager
     )
     {
         _snapshotRepository = snapshotRepository;
@@ -22,7 +22,7 @@ internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResource
 
     public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
     {
-        _testModeSnapshotManager.AddSnapshotId(snapshotId);
+        _testModeSnapshotManager.AddSnapshotId(this, snapshotId);
 
         return _snapshotRepository.PutSnapshot(snapshotId, snapshot);
     }
@@ -34,7 +34,7 @@ internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResource
 
     public Task<bool> DeleteSnapshots(Id[] snapshotIds)
     {
-        _testModeSnapshotManager.RemoveSnapshotIds(snapshotIds);
+        _testModeSnapshotManager.RemoveSnapshotIds(this, snapshotIds);
 
         return _snapshotRepository.DeleteSnapshots(snapshotIds);
     }
