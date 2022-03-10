@@ -9,7 +9,7 @@ namespace EntityDb.MongoDb.Provisioner.Transactions;
 internal sealed class
     AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    private static object _lock = new();
+    private static readonly object Lock = new();
     private static bool _needToProvision = true;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
@@ -27,7 +27,7 @@ internal sealed class
             return mongoSession;
         }
 
-        lock (_lock)
+        lock (Lock)
         {
             _needToProvision = false;
 
