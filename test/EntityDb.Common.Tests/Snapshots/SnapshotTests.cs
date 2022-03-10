@@ -6,33 +6,40 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
-public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
-    where TStartup : IStartup, new()
+public sealed class SnapshotTests : TestsBase<Startup>
 {
-    protected SnapshotTestsBase(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public SnapshotTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
     }
 
-    [Fact]
-    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot()
+    [Theory]
+    [MemberData(nameof(AddSnapshots))]
+    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(AddSnapshotsDelegate addSnapshotsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addSnapshotsDelegate.Invoke(serviceCollection);
+        });
 
         var expectedSnapshot = new TransactionEntity { VersionNumber = new VersionNumber(300) };
 
         var snapshotId = Id.NewId();
 
-        await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+        await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
+            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>();
+        
+        await using var snapshotRepository = await snapshotRepositoryFactory
             .CreateRepository(TestSessionOptions.Write);
 
         // ACT
@@ -48,8 +55,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
         actualSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
     }
 
-    [Fact]
-    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged()
+    [Theory]
+    [MemberData(nameof(AddSnapshots))]
+    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(AddSnapshotsDelegate addSnapshotsDelegate)
     {
         // ARRANGE
 
@@ -57,6 +65,8 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            addSnapshotsDelegate.Invoke(serviceCollection);
+            
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
             serviceCollection.AddSingleton(loggerFactory);
@@ -79,8 +89,9 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    [Fact]
-    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot()
+    [Theory]
+    [MemberData(nameof(AddSnapshots))]
+    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(AddSnapshotsDelegate addSnapshotsDelegate)
     {
         // ARRANGE
 
@@ -88,8 +99,11 @@ public abstract class SnapshotTestsBase<TStartup> : TestsBase<TStartup>
 
         var expectedSnapshot = new TransactionEntity(new VersionNumber(5000));
 
-        using var serviceScope = CreateServiceScope();
-
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addSnapshotsDelegate.Invoke(serviceCollection);
+        });
+        
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
             .CreateRepository(TestSessionOptions.Write);

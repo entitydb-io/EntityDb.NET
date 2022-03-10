@@ -29,19 +29,73 @@ public class EntityTests : TestsBase<Startup>
         IServiceScope serviceScope,
         Id entityId,
         VersionNumber from,
-        VersionNumber to
+        VersionNumber to,
+        TransactionEntity? entity = null
     )
     {
         var transactionBuilder = serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TransactionEntity>>()
             .ForSingleEntity(entityId);
 
+        if (entity != null)
+        {
+            transactionBuilder.Load(entity);
+        }
+
         for (var i = from; i.Value <= to.Value; i = i.Next())
         {
+            if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber.Value >= i.Value)
+            {
+                continue;
+            }
+
             transactionBuilder.Append(new DoNothing());
         }
 
         return transactionBuilder.Build(default!, Id.NewId());
+    }
+
+    [Theory]
+    [MemberData(nameof(AddTransactionsAndSnapshots))]
+    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(AddTransactionsDelegate addTransactionsDelegate, AddSnapshotsDelegate addSnapshotsDelegate)
+    {
+        // ARRANGE
+
+        const ulong n = 10UL;
+        const ulong m = 5UL;
+        
+        var versionNumberN = new VersionNumber(n);
+
+        var versionNumberM = new VersionNumber(m);
+        
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+            addSnapshotsDelegate.Invoke(serviceCollection);
+        });
+
+        var entityId = Id.NewId();
+
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .CreateRepository(TestSessionOptions.Write,
+                TestSessionOptions.Write);
+
+        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
+
+        var transactionInserted = await entityRepository.PutTransaction(transaction);
+
+        // ARRANGE ASSERTIONS
+
+        transactionInserted.ShouldBeTrue();
+
+        // ACT
+
+        var entityAtVersionM = await entityRepository.GetAtVersion(entityId, versionNumberM);
+
+        // ASSERT
+
+        entityAtVersionM.VersionNumber.ShouldBe(versionNumberM);
     }
 
     [Fact]

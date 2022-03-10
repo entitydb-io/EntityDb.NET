@@ -6,6 +6,8 @@ using Shouldly;
 using System;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
@@ -38,7 +40,15 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
             .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerFactory.CreateLogger<object>());
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            serviceCollection.RemoveAll(typeof(ILoggerFactory));
+
+            serviceCollection.AddSingleton(loggerFactory);
+        });
+
+        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TransactionEntity>
+            .Create(serviceScope.ServiceProvider, snapshotRepositoryMock.Object);
 
         // ACT
 

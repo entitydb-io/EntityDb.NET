@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Tests;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,13 +12,6 @@ public class Startup : StartupBase
     {
         base.AddServices(serviceCollection);
 
-        // Transactions
-
-        serviceCollection.AddAutoProvisionTestModeMongoDbTransactions
-        (
-            TransactionEntity.MongoCollectionName,
-            _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
-            true
-        );
+        serviceCollection.AddBsonDocumentEnvelopeService(true);
     }
 }

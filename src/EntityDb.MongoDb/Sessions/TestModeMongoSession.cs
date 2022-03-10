@@ -10,7 +10,6 @@ namespace EntityDb.MongoDb.Sessions;
 
 internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
 {
-    public ILogger<IMongoSession> Logger => MongoSession.Logger;
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
     public IClientSessionHandle ClientSessionHandle => MongoSession.ClientSessionHandle;
 

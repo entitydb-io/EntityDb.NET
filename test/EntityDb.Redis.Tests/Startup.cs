@@ -11,13 +11,6 @@ public class Startup : StartupBase
     {
         base.AddServices(serviceCollection);
 
-        // Snapshots
-        
-        serviceCollection.AddRedisSnapshots<TransactionEntity>
-        (
-            TransactionEntity.RedisKeyNamespace,
-            _ => "127.0.0.1:6379",
-            true
-        );
+        serviceCollection.AddJsonElementEnvelopeService();
     }
 }

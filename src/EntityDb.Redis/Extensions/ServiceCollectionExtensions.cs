@@ -15,6 +15,11 @@ namespace EntityDb.Redis.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+    internal static void AddJsonElementEnvelopeService(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddSingleton<IEnvelopeService<JsonElement>, JsonElementEnvelopeService>();
+    }
+    
     /// <summary>
     ///     Adds a production-ready implementation of <see cref="ISnapshotRepositoryFactory{TEntity}" /> to a service
     ///     collection.
@@ -27,7 +32,7 @@ public static class ServiceCollectionExtensions
     public static void AddRedisSnapshots<TSnapshot>(this IServiceCollection serviceCollection, string keyNamespace,
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {
-        serviceCollection.AddSingleton<IEnvelopeService<JsonElement>, JsonElementEnvelopeService>();
+        serviceCollection.AddJsonElementEnvelopeService();
         
         serviceCollection.Add
         (

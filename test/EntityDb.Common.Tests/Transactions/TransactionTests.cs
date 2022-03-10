@@ -29,15 +29,15 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.MongoDb.Provisioner.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
 
-public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
-    where TStartup : IStartup, new()
+public sealed class TransactionTests : TestsBase<Startup>
 {
-    protected TransactionTestsBase(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public TransactionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
     }
 
@@ -456,8 +456,9 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
             .ToArray();
     }
 
-    [Fact]
-    public async Task GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
@@ -465,6 +466,8 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            addTransactionsDelegate.Invoke(serviceCollection);
+            
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
             
             serviceCollection.AddSingleton(loggerFactory);
@@ -491,12 +494,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    [Fact]
-    public async Task GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var transactionId = Id.NewId();
             
@@ -527,14 +534,18 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         secondTransactionInserted.ShouldBeFalse();
     }
 
-    [Fact]
-    public async Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
         const int repeatCount = 2;
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var transaction = (serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TransactionEntity>>()
@@ -567,9 +578,10 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         transactionInserted.ShouldBeFalse();
     }
 
-    [Fact]
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
     public async Task
-        GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged()
+        GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
@@ -579,6 +591,8 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            addTransactionsDelegate.Invoke(serviceCollection);
+            
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
             serviceCollection.AddSingleton(loggerFactory);
@@ -616,9 +630,10 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    [Fact]
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
     public async Task
-        GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged()
+        GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
@@ -626,6 +641,8 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            addTransactionsDelegate.Invoke(serviceCollection);
+            
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
             
             serviceCollection.AddSingleton(loggerFactory);
@@ -675,12 +692,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    [Fact]
-    public async Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var tag = TagSeeder.Create();
             
@@ -703,12 +724,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         transactionInserted.ShouldBeTrue();
     }
 
-    [Fact]
-    public async Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var lease = LeaseSeeder.Create();
             
@@ -731,14 +756,18 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         transactionInserted.ShouldBeFalse();
     }
 
-    [Fact]
-    public async Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
         const ulong expectedCount = 5;
         
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var transactionTimeStamp = TimeStamp.UtcNow;
 
@@ -787,12 +816,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         expectedTransactionTimeStamps.Contains(annotatedCommands[0].TransactionTimeStamp).ShouldBeTrue();
     }
 
-    [Fact]
-    public async Task GivenEntityInserted_WhenGettingEntity_ThenReturnEntity()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenEntityInserted_WhenGettingEntity_ThenReturnEntity(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var expectedEntity = new TransactionEntity(new VersionNumber(1));
 
@@ -821,12 +854,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         actualEntity.ShouldBeEquivalentTo(expectedEntity);
     }
 
-    [Fact]
-    public async Task GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var entityId = Id.NewId();
 
@@ -875,12 +912,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         actualFinalTags.ShouldBeEmpty();
     }
 
-    [Fact]
-    public async Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var entityId = Id.NewId();
 
@@ -929,12 +970,16 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         actualFinalLeases.ShouldBeEmpty();
     }
 
-    [Fact]
-    public async Task GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand()
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var expectedCommand = new Count(1);
 
@@ -973,13 +1018,17 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
         newCommands[0].ShouldBeEquivalentTo(expectedCommand);
     }
 
-    [Fact]
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
     public async Task
-        GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand()
+        GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand(AddTransactionsDelegate addTransactionsDelegate)
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
 
         var expectedCommand = new Count(2);
 
@@ -1028,12 +1077,17 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(60UL, 20UL, 30UL)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(
-        ulong timeSpanInMinutes, ulong gteInMinutes, ulong lteInMinutes)
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(AddTransactionsDelegate addTransactionsDelegate)
     {
-        using var serviceScope = CreateServiceScope();
+        const ulong timeSpanInMinutes = 60UL;
+        const ulong gteInMinutes = 20UL;
+        const ulong lteInMinutes = 30UL;
 
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
         var originTimeStamp = TimeStamp.UnixEpoch;
 
         var transactions = new List<ITransaction>();
@@ -1099,12 +1153,17 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(10UL, 5UL)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(
-        ulong numberOfTransactionIds, ulong whichTransactionId)
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(AddTransactionsDelegate addTransactionsDelegate)
     {
-        using var serviceScope = CreateServiceScope();
+        const ulong numberOfTransactionIds = 10UL;
+        const ulong whichTransactionId = 5UL;
 
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
+        
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
@@ -1160,12 +1219,17 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(10UL, 5UL)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
-        ulong numberOfEntityIds, ulong whichEntityId)
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(AddTransactionsDelegate addTransactionsDelegate)
     {
-        using var serviceScope = CreateServiceScope();
+        const ulong numberOfEntityIds = 10UL;
+        const ulong whichEntityId = 5UL;
 
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
+        
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 
@@ -1221,12 +1285,18 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(20, 5UL, 15UL)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(
-        ulong numberOfVersionNumbers, ulong gte, ulong lte)
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(AddTransactionsDelegate addTransactionsDelegate)
     {
-        using var serviceScope = CreateServiceScope();
+        const ulong numberOfVersionNumbers = 20;
+        const ulong gte = 5UL;
+        const ulong lte = 15UL;
 
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
+        
         var counts = new List<ulong>();
         var expectedObjects = new ExpectedObjects();
 
@@ -1257,12 +1327,18 @@ public abstract class TransactionTestsBase<TStartup> : TestsBase<TStartup>
     }
 
     [Theory]
-    [InlineData(20UL, 5UL, 15UL)]
-    public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(ulong countTo,
-        ulong gte, ulong lte)
+    [MemberData(nameof(AddTransactions))]
+    public async Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(AddTransactionsDelegate addTransactionsDelegate)
     {
-        using var serviceScope = CreateServiceScope();
+        const ulong countTo = 20UL;
+        const ulong gte = 5UL;
+        const ulong lte = 15UL;
 
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            addTransactionsDelegate.Invoke(serviceCollection);
+        });
+        
         var transactions = new List<ITransaction>();
         var expectedObjects = new ExpectedObjects();
 

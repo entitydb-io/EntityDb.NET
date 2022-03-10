@@ -6,8 +6,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.InMemory.Extensions;
+using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 using Xunit.DependencyInjection;
@@ -18,7 +23,8 @@ namespace EntityDb.Common.Tests;
 public class TestsBase<TStartup>
     where TStartup : IStartup, new()
 {
-    private record TestServiceScope(ServiceProvider SingletonServiceProvider, IServiceScope ServiceScope) : IServiceScope
+    private record TestServiceScope
+        (ServiceProvider SingletonServiceProvider, IServiceScope ServiceScope) : IServiceScope
     {
         public IServiceProvider ServiceProvider => ServiceScope.ServiceProvider;
 
@@ -30,6 +36,10 @@ public class TestsBase<TStartup>
         }
     }
 
+    public delegate void AddTransactionsDelegate(IServiceCollection serviceCollection);
+
+    public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
+
     private readonly IConfiguration _configuration;
     private readonly ITestOutputHelperAccessor? _testOutputHelperAccessor;
 
@@ -39,6 +49,51 @@ public class TestsBase<TStartup>
         _testOutputHelperAccessor = startupServiceProvider.GetService<ITestOutputHelperAccessor>();
     }
 
+    
+    private static readonly AddTransactionsDelegate[] AllAddTransactionsDelegates =
+    {
+        serviceCollection =>
+        {
+            serviceCollection.AddAutoProvisionMongoDbTransactions
+            (
+                TransactionEntity.MongoCollectionName,
+                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
+                true
+            );
+        }
+    };
+
+    private static readonly AddSnapshotsDelegate[] AllAddSnapshotsDelegates =
+    {
+        serviceCollection =>
+        {
+            serviceCollection.AddRedisSnapshots<TransactionEntity>
+            (
+                TransactionEntity.RedisKeyNamespace,
+                _ => "127.0.0.1:6379",
+                true
+            );
+        },
+        serviceCollection =>
+        {
+            serviceCollection.AddInMemorySnapshots<TransactionEntity>
+            (
+                testMode: true
+            );
+        }
+    };
+
+    public static IEnumerable<object[]> AddTransactionsAndSnapshots() =>
+        from addTransactionsDelegate in AllAddTransactionsDelegates
+        from addSnapshotsDelegate in AllAddSnapshotsDelegates
+        select new object[] { addTransactionsDelegate, addSnapshotsDelegate };
+
+    public static IEnumerable<object[]> AddTransactions() => AllAddTransactionsDelegates
+        .Select(addTransactionsDelegate => new object[] { addTransactionsDelegate });
+
+    public static IEnumerable<object[]> AddSnapshots() => AllAddSnapshotsDelegates
+        .Select(addSnapshotsDelegate => new object[] { addSnapshotsDelegate });
+    
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
     {
         var serviceCollection = new ServiceCollection();

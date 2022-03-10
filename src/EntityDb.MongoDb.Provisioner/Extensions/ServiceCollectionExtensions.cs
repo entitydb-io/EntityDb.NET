@@ -10,7 +10,7 @@ namespace EntityDb.MongoDb.Provisioner.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    public static void AddAutoProvisionTestModeMongoDbTransactions(
+    public static void AddAutoProvisionMongoDbTransactions(
         this IServiceCollection serviceCollection, string databaseName,
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {

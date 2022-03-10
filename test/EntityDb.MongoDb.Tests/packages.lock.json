@@ -485,6 +485,14 @@
         "resolved": "5.0.0",
         "contentHash": "c5JVjuVAm4f7E9Vj+v09Z9s2ZsqFDjBpcsyS3M9xRo0bEdm/LVZSzLxxNvfvAwRiiE8nwe1h2G4OwiwlzFKXlA=="
       },
+      "Pipelines.Sockets.Unofficial": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "7hzHplEIVOGBl5zOQZGX/DiJDHjq+RVRVrYgDiqXb6RriqWAdacXxp+XO9WSrATCEXyNOUOQg9aqQArsjase/A==",
+        "dependencies": {
+          "System.IO.Pipelines": "5.0.0"
+        }
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -652,6 +660,15 @@
         "type": "Transitive",
         "resolved": "0.30.1",
         "contentHash": "XqD4TpfyYGa7QTPzaGlMVbcecKnXy4YmYLDWrU+JIj7IuRNl7DH2END+Ll7ekWIY8o3dAMWLFDE1xdhfIWD1nw=="
+      },
+      "StackExchange.Redis": {
+        "type": "Transitive",
+        "resolved": "2.2.88",
+        "contentHash": "JJi1jcO3/ZiamBhlsC/TR8aZmYf+nqpGzMi0HRRCy5wJkUPmMnRp0kBA6V84uhU8b531FHSdTDaFCAyCUJomjA==",
+        "dependencies": {
+          "Pipelines.Sockets.Unofficial": "2.2.0",
+          "System.Diagnostics.PerformanceCounter": "5.0.0"
+        }
       },
       "System.AppContext": {
         "type": "Transitive",
@@ -1107,6 +1124,11 @@
         "type": "Transitive",
         "resolved": "5.0.0",
         "contentHash": "ebfUwKsgZF4HTwaRUj67SrJdsM4O62Fxsd6u1bSk3MNgvU8yjyfEK0xQmUFUqOYJi1IcL4HENoccl4SKVPndYw=="
+      },
+      "System.IO.Pipelines": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "irMYm3vhVgRsYvHTU5b2gsT2CwT/SMM6LZFzuJjpIvT5Z4CshxNsaoBC1X/LltwuR3Opp8d6jOS/60WwOb7Q2Q=="
       },
       "System.IO.Pipes.AccessControl": {
         "type": "Transitive",
@@ -1871,12 +1893,21 @@
         "dependencies": {
           "Bogus": "34.0.1",
           "EntityDb.Common": "1.0.0",
+          "EntityDb.InMemory": "1.0.0",
+          "EntityDb.MongoDb.Provisioner": "1.0.0",
+          "EntityDb.Redis": "1.0.0",
           "Microsoft.NET.Test.Sdk": "17.0.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",
           "Xunit.DependencyInjection": "8.3.0",
           "Xunit.DependencyInjection.Logging": "8.0.0",
           "xunit": "2.4.1"
+        }
+      },
+      "entitydb.inmemory": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common": "1.0.0"
         }
       },
       "entitydb.mongodb": {
@@ -1891,6 +1922,13 @@
         "dependencies": {
           "EntityDb.MongoDb": "1.0.0",
           "System.CommandLine": "2.0.0-beta1.21216.1"
+        }
+      },
+      "entitydb.redis": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common": "1.0.0",
+          "StackExchange.Redis": "2.2.88"
         }
       }
     }

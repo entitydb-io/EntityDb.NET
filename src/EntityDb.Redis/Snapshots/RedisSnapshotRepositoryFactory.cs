@@ -17,24 +17,24 @@ namespace EntityDb.Redis.Snapshots;
 
 internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _connectionString;
     private readonly string _keyNamespace;
-    private readonly ILogger<ISnapshotRepositoryFactory<TSnapshot>> _logger;
-    private readonly IEnvelopeService<JsonElement> _envelopeService;
-    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
 
     public RedisSnapshotRepositoryFactory
     (
+        IServiceProvider serviceProvider,
         IOptionsFactory<SnapshotSessionOptions> optionsFactory,
-        ILogger<ISnapshotRepositoryFactory<TSnapshot>> logger,
         IEnvelopeService<JsonElement> envelopeService,
         ITypeResolver typeResolver,
         string connectionString,
         string keyNamespace
     )
     {
+        _serviceProvider = serviceProvider;
         _optionsFactory = optionsFactory;
-        _logger = logger;
         _envelopeService = envelopeService;
         _connectionString = connectionString;
         _keyNamespace = keyNamespace;
@@ -61,8 +61,8 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
             _keyNamespace,
             redisSession
         );
-
-        return redisSnapshotRepository.UseTryCatch(_logger);
+        
+        return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, redisSnapshotRepository);
     }
 
     public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,

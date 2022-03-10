@@ -11,7 +11,7 @@ namespace EntityDb.Redis.Envelopes;
 internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions();
-    private readonly ILogger<IEnvelopeService<JsonElement>> _logger;
+    private readonly ILogger<JsonElementEnvelopeService> _logger;
     private readonly ITypeResolver _typeResolver;
 
     static JsonElementEnvelopeService()
@@ -21,7 +21,7 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
     
     public JsonElementEnvelopeService
     (
-        ILogger<IEnvelopeService<JsonElement>> logger,
+        ILogger<JsonElementEnvelopeService> logger,
         ITypeResolver typeResolver
     )
     {

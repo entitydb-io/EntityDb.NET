@@ -10,7 +10,6 @@ namespace EntityDb.MongoDb.Sessions;
 
 internal interface IMongoSession : IDisposableResource
 {
-    ILogger<IMongoSession> Logger { get; }
     IMongoDatabase MongoDatabase { get; }
     IClientSessionHandle ClientSessionHandle { get; }
 

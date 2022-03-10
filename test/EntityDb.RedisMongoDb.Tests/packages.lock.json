@@ -1893,6 +1893,8 @@
         "dependencies": {
           "Bogus": "34.0.1",
           "EntityDb.Common": "1.0.0",
+          "EntityDb.MongoDb.Provisioner": "1.0.0",
+          "EntityDb.Redis": "1.0.0",
           "Microsoft.NET.Test.Sdk": "17.0.0",
           "Moq": "4.16.1",
           "Shouldly": "4.0.3",

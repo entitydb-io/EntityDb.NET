@@ -14,7 +14,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
 {
     public const string TypeDiscriminatorPropertyName = "_t";
     
-    private readonly ILogger<IEnvelopeService<BsonDocument>> _logger;
+    private readonly ILogger<BsonDocumentEnvelopeService> _logger;
     private readonly ITypeResolver _typeResolver;
     private readonly bool _removeTypeDiscriminatorProperty;
 
@@ -23,7 +23,12 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         BsonSerializer.RegisterSerializer(new EnvelopeSerializer());
     }
     
-    public BsonDocumentEnvelopeService(ILogger<IEnvelopeService<BsonDocument>> logger, ITypeResolver typeResolver, bool removeTypeDiscriminatorProperty)
+    public BsonDocumentEnvelopeService
+    (
+        ILogger<BsonDocumentEnvelopeService> logger,
+        ITypeResolver typeResolver,
+        bool removeTypeDiscriminatorProperty
+    )
     {
         _logger = logger;
         _typeResolver = typeResolver;

@@ -19,7 +19,6 @@ namespace EntityDb.MongoDb.Transactions;
 internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ITransactionRepositoryFactory> _logger;
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
     private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
     private readonly string _connectionString;
@@ -36,7 +35,6 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     (
         IServiceProvider serviceProvider,
         IOptionsFactory<TransactionSessionOptions> optionsFactory,
-        ILogger<ITransactionRepositoryFactory> logger,
         IEnvelopeService<BsonDocument> envelopeService,
         string connectionString,
         string databaseName
@@ -44,7 +42,6 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     {
         _serviceProvider = serviceProvider;
         _optionsFactory = optionsFactory;
-        _logger = logger;
         _envelopeService = envelopeService;
         _connectionString = connectionString;
         _databaseName = databaseName;
@@ -86,7 +83,7 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
             _envelopeService
         );
 
-        return mongoDbTransactionRepository.UseTryCatch(_logger);
+        return TryCatchTransactionRepository.Create(_serviceProvider, mongoDbTransactionRepository);
     }
 
     public static MongoDbTransactionRepositoryFactory Create(IServiceProvider serviceProvider,

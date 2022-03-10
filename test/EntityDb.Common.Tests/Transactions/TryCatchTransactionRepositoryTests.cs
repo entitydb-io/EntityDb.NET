@@ -81,7 +81,7 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object, loggerFactory.CreateLogger<object>());
+        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object, loggerFactory.CreateLogger<TryCatchTransactionRepository>());
 
         // ACT
 

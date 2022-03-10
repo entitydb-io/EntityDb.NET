@@ -14,7 +14,7 @@ namespace EntityDb.MongoDb.Sessions;
 
 internal record MongoSession
 (
-    ILogger<IMongoSession> Logger,
+    ILogger<MongoSession> Logger,
     IMongoDatabase MongoDatabase,
     IClientSessionHandle ClientSessionHandle,
     TransactionSessionOptions TransactionSessionOptions
