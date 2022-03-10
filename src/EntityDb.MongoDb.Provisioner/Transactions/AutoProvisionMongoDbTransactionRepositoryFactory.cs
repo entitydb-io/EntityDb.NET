@@ -9,7 +9,8 @@ namespace EntityDb.MongoDb.Provisioner.Transactions;
 internal sealed class
     AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    private bool _needToProvision = true;
+    private static object _lock = new();
+    private static bool _needToProvision = true;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
         IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
@@ -26,10 +27,13 @@ internal sealed class
             return mongoSession;
         }
 
-        _needToProvision = false;
+        lock (_lock)
+        {
+            _needToProvision = false;
 
-        await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace.DatabaseName);
+            mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace.DatabaseName).Wait();
 
-        return mongoSession;
+            return mongoSession;
+        }
     }
 }
