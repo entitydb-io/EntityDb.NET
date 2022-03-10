@@ -43,6 +43,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDb.InMemory", "src\EntityDb.InMemory\EntityDb.InMemory.csproj", "{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,6 +120,7 @@ Global
 		{B8B6E5A5-5154-4629-9A38-9F0E65575F30} = {92484C44-2754-4C1D-BD46-98D83E4020EE}
 		{FA2AD2E9-84DA-4667-BF46-140B0B050563} = {92484C44-2754-4C1D-BD46-98D83E4020EE}
 		{BD226A77-E572-4FD8-B6C3-335EA4AC6E1F} = {92484C44-2754-4C1D-BD46-98D83E4020EE}
+		{31C5BEDB-9B04-4FE4-9AF5-AE682C0E7643} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E9D288EE-9351-4018-ABE8-B0968AEB0465}
