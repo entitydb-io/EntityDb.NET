@@ -83,18 +83,18 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a transaction subscriber that records snapshots.
+    ///     Adds a transaction subscriber that records snapshots of entities.
     /// </summary>
     /// <typeparam name="TSnapshot">The type of the snapshot.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
-    public static void AddSnapshotTransactionSubscriber<TSnapshot>(this IServiceCollection serviceCollection,
+    public static void AddEntitySnapshotTransactionSubscriber<TSnapshot>(this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool synchronousMode = false)
         where TSnapshot : ISnapshot<TSnapshot>
     {
         serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
-            SnapshotTransactionSubscriber<TSnapshot>.Create(serviceProvider, snapshotSessionOptionsName,
+            EntitySnapshotTransactionSubscriber<TSnapshot>.Create(serviceProvider, snapshotSessionOptionsName,
                 synchronousMode));
     }
 }

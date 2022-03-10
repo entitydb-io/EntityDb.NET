@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class SnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
+internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
     where TSnapshot : ISnapshot<TSnapshot>
 {
     private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
 
-    public SnapshotTransactionSubscriber
+    public EntitySnapshotTransactionSubscriber
     (
         ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
@@ -55,10 +55,10 @@ internal class SnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
         }
     }
 
-    public static SnapshotTransactionSubscriber<TSnapshot> Create(IServiceProvider serviceProvider,
+    public static EntitySnapshotTransactionSubscriber<TSnapshot> Create(IServiceProvider serviceProvider,
         string snapshotSessionOptionsName, bool synchronousMode)
     {
-        return ActivatorUtilities.CreateInstance<SnapshotTransactionSubscriber<TSnapshot>>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TSnapshot>>(serviceProvider,
             snapshotSessionOptionsName,
             synchronousMode);
     }
