@@ -6,10 +6,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 

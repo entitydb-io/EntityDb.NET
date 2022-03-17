@@ -1,4 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Sessions;
@@ -9,5 +10,5 @@ internal interface IInMemorySession<TSnapshot>
 
     Task<TSnapshot?> Get(Id snapshotId);
 
-    Task<bool> Delete(Id[] snapshotIds);
+    Task<bool> Delete(IEnumerable<Id> snapshotIds);
 }

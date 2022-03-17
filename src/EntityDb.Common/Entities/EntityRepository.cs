@@ -9,6 +9,7 @@ using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities;
@@ -33,7 +34,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TEntity> GetCurrent(Id entityId)
+    public async Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
     {
         var entity = await SnapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
 
@@ -41,7 +42,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
 
-        var commands = await TransactionRepository.GetCommands(commandQuery);
+        var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
 
         entity = entity.Reduce(commands);
 
@@ -53,22 +54,22 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         return entity;
     }
 
-    public async Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber)
+    public async Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default)
     {
         var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
 
-        var commands = await TransactionRepository.GetCommands(commandQuery);
+        var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
 
         return TEntity
             .Construct(entityId)
             .Reduce(commands);
     }
 
-    public async Task<bool> PutTransaction(ITransaction transaction)
+    public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await TransactionRepository.PutTransaction(transaction);
+            return await TransactionRepository.PutTransaction(transaction, cancellationToken);
         }
         finally
         {

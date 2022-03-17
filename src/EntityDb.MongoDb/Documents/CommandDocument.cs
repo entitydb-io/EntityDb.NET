@@ -11,6 +11,7 @@ using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents;
@@ -70,13 +71,14 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
     public static Task<VersionNumber> GetLastEntityVersionNumber
     (
         IMongoSession mongoSession,
-        Id entityId
+        Id entityId,
+        CancellationToken cancellationToken
     )
     {
         var commandQuery = new GetLastEntityVersionQuery(entityId);
 
         var documentQuery = GetQuery(commandQuery);
 
-        return documentQuery.GetEntityVersionNumber(mongoSession);
+        return documentQuery.GetEntityVersionNumber(mongoSession, cancellationToken);
     }
 }

@@ -2,9 +2,7 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.InMemory.Sessions;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Snapshots;
@@ -18,18 +16,18 @@ internal class InMemorySnapshotRepository<TSnapshot> : DisposableResourceBaseCla
         _inMemorySession = inMemorySession;
     }
 
-    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
+    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Insert(snapshotId, snapshot);
+        return _inMemorySession.Insert(snapshotId, snapshot).WaitAsync(cancellationToken);
     }
 
-    public Task<TSnapshot?> GetSnapshot(Id snapshotId)
+    public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Get(snapshotId);
+        return _inMemorySession.Get(snapshotId).WaitAsync(cancellationToken);
     }
 
-    public Task<bool> DeleteSnapshots(Id[] snapshotIds)
+    public Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Delete(snapshotIds);
+        return _inMemorySession.Delete(snapshotIds).WaitAsync(cancellationToken);
     }
 }

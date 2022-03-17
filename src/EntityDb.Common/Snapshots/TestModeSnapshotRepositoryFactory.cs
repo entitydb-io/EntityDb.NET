@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
@@ -17,9 +18,9 @@ internal sealed class TestModeSnapshotRepositoryFactory<TSnapshot> : DisposableR
         _snapshotRepositoryFactory = snapshotRepositoryFactory;
     }
 
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
     {
-        var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
+        var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
 
         return new TestModeSnapshotRepository<TSnapshot>(snapshotRepository, _testModeSnapshotManager);
     }

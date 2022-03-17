@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 
 namespace EntityDb.Common.Exceptions;
 
@@ -14,7 +15,7 @@ namespace EntityDb.Common.Exceptions;
 /// </summary>
 /// <remarks>
 ///     A program will not be able to catch this exception if it is thrown.
-///     <see cref="ITransactionRepository.PutTransaction(ITransaction)" /> will return false, and this
+///     <see cref="ITransactionRepository.PutTransaction(ITransaction, CancellationToken)" /> will return false, and this
 ///     exception will be logged using the injected <see cref="ILogger{TCategoryName}" />.
 /// </remarks>
 public sealed class OptimisticConcurrencyException : Exception

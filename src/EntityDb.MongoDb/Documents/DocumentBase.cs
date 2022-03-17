@@ -11,5 +11,5 @@ internal abstract record DocumentBase : ITransactionDocument
 
     public TimeStamp TransactionTimeStamp { get; init; }
     public Id TransactionId { get; init; }
-    public Envelope<BsonDocument> Data { get; init; } = default!;
+    public Envelope<BsonDocument> Data { get; init; }
 }

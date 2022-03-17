@@ -1,5 +1,4 @@
 ﻿using EntityDb.Common.Tests;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 

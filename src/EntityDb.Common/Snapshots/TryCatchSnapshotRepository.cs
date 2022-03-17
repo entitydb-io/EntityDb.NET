@@ -28,7 +28,7 @@ internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepository
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed");
 
             return default;
         }
@@ -42,7 +42,7 @@ internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepository
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "The operation cannot be completed.");
+            _logger.LogError(exception, "The operation cannot be completed");
 
             return default;
         }

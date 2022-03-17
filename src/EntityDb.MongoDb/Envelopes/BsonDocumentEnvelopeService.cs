@@ -52,7 +52,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Unable to deconstruct.");
+            _logger.LogError(exception, "Unable to deconstruct");
 
             throw new SerializeException();
         }
@@ -66,7 +66,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Unable to serialize.");
+            _logger.LogError(exception, "Unable to serialize");
 
             throw new SerializeException();
         }
@@ -82,7 +82,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Unable to deserialize.");
+            _logger.LogError(exception, "Unable to deserialize");
 
             throw new DeserializeException();
         }
@@ -96,7 +96,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Unable to reconstruct.");
+            _logger.LogError(exception, "Unable to reconstruct");
 
             throw new DeserializeException();
         }

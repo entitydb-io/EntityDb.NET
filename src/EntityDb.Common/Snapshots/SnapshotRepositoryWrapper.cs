@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
@@ -17,19 +18,19 @@ internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourc
         _snapshotRepository = snapshotRepository;
     }
 
-    public virtual Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
+    public virtual Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        return WrapCommand(_snapshotRepository.PutSnapshot(snapshotId, snapshot));
+        return WrapCommand(_snapshotRepository.PutSnapshot(snapshotId, snapshot, cancellationToken));
     }
 
-    public virtual Task<TSnapshot?> GetSnapshot(Id snapshotId)
+    public virtual Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
     {
-        return WrapQuery(_snapshotRepository.GetSnapshot(snapshotId));
+        return WrapQuery(_snapshotRepository.GetSnapshot(snapshotId, cancellationToken));
     }
 
-    public virtual Task<bool> DeleteSnapshots(Id[] snapshotIds)
+    public virtual Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
     {
-        return WrapCommand(_snapshotRepository.DeleteSnapshots(snapshotIds));
+        return WrapCommand(_snapshotRepository.DeleteSnapshots(snapshotIds, cancellationToken));
     }
 
     public override async ValueTask DisposeAsync()

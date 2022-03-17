@@ -2,6 +2,7 @@
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
@@ -21,9 +22,9 @@ internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableR
         return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
     }
 
-    public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
+    public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
     {
-        return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions);
+        return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions, cancellationToken);
     }
 
     public virtual ITransactionRepository CreateRepository

@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities;
@@ -26,10 +27,10 @@ internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEnti
     }
 
     public async Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
-        string? snapshotSessionOptionsName = null)
+        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
     {
         var transactionRepository =
-            await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName);
+            await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
 
         if (_snapshotRepositoryFactory == null || snapshotSessionOptionsName == null)
         {
@@ -37,7 +38,7 @@ internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEnti
                 transactionRepository);
         }
 
-        var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
+        var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
 
         return EntityRepository<TEntity>.Create(_serviceProvider,
             transactionRepository, snapshotRepository);

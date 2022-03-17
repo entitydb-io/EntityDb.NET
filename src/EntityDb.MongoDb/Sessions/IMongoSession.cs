@@ -1,9 +1,9 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Common.Transactions;
-using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
@@ -14,7 +14,8 @@ internal interface IMongoSession : IDisposableResource
     IClientSessionHandle ClientSessionHandle { get; }
 
     Task Insert<TDocument>(string collectionName,
-        TDocument[] bsonDocuments);
+        TDocument[] bsonDocuments, CancellationToken cancellationToken);
+    
     Task<List<TDocument>> Find<TDocument>
     (
         string collectionName,
@@ -22,14 +23,15 @@ internal interface IMongoSession : IDisposableResource
         ProjectionDefinition<BsonDocument, TDocument> projectionDefinition,
         SortDefinition<BsonDocument>? sortDefinition,
         int? skip,
-        int? limit
+        int? limit,
+        CancellationToken cancellationToken
     );
         
     Task Delete<TDocument>(string collectionName,
-        FilterDefinition<TDocument> filterDefinition);
+        FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken);
 
     void StartTransaction();
-    Task CommitTransaction();
+    Task CommitTransaction(CancellationToken cancellationToken);
     Task AbortTransaction();
 
     IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions);

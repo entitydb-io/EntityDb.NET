@@ -26,7 +26,7 @@ internal class InMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
         return _dictionary.GetValueOrDefault(snapshotId);
     }
 
-    public async Task<bool> Delete(Id[] snapshotIds)
+    public async Task<bool> Delete(IEnumerable<Id> snapshotIds)
     {
         await Task.Yield();
 

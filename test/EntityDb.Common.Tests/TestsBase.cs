@@ -8,6 +8,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.InMemory.Extensions;
@@ -184,11 +185,11 @@ public class TestsBase<TStartup>
         var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
+            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(commands);
 
         transactionRepositoryMock
@@ -199,7 +200,7 @@ public class TestsBase<TStartup>
             new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
 
         transactionRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
+            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(transactionRepositoryMock.Object);
 
         transactionRepositoryFactoryMock
@@ -216,7 +217,7 @@ public class TestsBase<TStartup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshot);
 
         snapshotRepositoryMock
@@ -226,7 +227,7 @@ public class TestsBase<TStartup>
         var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
+            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshotRepositoryMock.Object);
 
         snapshotRepositoryFactoryMock

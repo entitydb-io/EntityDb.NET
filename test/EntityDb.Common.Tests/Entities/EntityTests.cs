@@ -12,6 +12,7 @@ using Moq;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using Xunit;
@@ -112,8 +113,8 @@ public class EntityTests : TestsBase<Startup>
         var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>()))
-            .ReturnsAsync((ITransaction transaction) =>
+            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ITransaction transaction, CancellationToken _) =>
             {
                 foreach (var transactionStep in transaction.Steps)
                 {
@@ -131,7 +132,7 @@ public class EntityTests : TestsBase<Startup>
             .Returns(ValueTask.CompletedTask);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>()))
+            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => commands.ToArray())
             .Verifiable();
 
@@ -139,7 +140,7 @@ public class EntityTests : TestsBase<Startup>
             new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
 
         transactionRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>()))
+            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(transactionRepositoryMock.Object);
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -168,7 +169,7 @@ public class EntityTests : TestsBase<Startup>
         currenEntity.VersionNumber.ShouldBe(expectedVersionNumber);
 
         transactionRepositoryMock
-            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>()), Times.Once);
+            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

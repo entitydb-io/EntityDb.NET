@@ -1,8 +1,8 @@
 ﻿using EntityDb.MongoDb.Sessions;
-using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Queries;
@@ -16,8 +16,8 @@ internal record DocumentQuery<TDocument>
     int? Limit
 )
 {
-    public Task<List<TDocument>> Execute(IMongoSession mongoSession, ProjectionDefinition<BsonDocument, TDocument> projection)
+    public Task<List<TDocument>> Execute(IMongoSession mongoSession, ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
     {
-        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit);
+        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, cancellationToken);
     }
 }

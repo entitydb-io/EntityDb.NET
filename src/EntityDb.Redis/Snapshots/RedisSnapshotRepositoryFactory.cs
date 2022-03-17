@@ -1,16 +1,15 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.TypeResolvers;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
@@ -40,20 +39,20 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         _keyNamespace = keyNamespace;
     }
 
-    private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions)
+    private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions, CancellationToken cancellationToken)
     {
         var configurationOptions = ConfigurationOptions.Parse(_connectionString);
 
-        var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions);
+        var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions).WaitAsync(cancellationToken);
 
         return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
     }
 
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
     {
         var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
-        var redisSession = await CreateSession(snapshotSessionOptions);
+        var redisSession = await CreateSession(snapshotSessionOptions, cancellationToken);
 
         var redisSnapshotRepository = new RedisSnapshotRepository<TSnapshot>
         (

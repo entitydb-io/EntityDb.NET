@@ -29,7 +29,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.MongoDb.Provisioner.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 

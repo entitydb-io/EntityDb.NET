@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;

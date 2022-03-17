@@ -1,15 +1,10 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
-using EntityDb.Common.Envelopes;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
-using EntityDb.Common.TypeResolvers;
 using EntityDb.InMemory.Sessions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Snapshots;
@@ -32,7 +27,7 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
         _optionsFactory = optionsFactory;
     }
 
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
     {
         await Task.Yield();
         
@@ -43,6 +38,8 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
             : _inMemorySession;
 
         var inMemorySnapshotRepository = new InMemorySnapshotRepository<TSnapshot>(inMemorySession);
+        
+        cancellationToken.ThrowIfCancellationRequested();
 
         return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, inMemorySnapshotRepository);
     }

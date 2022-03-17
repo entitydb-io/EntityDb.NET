@@ -1,9 +1,9 @@
 ﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Transactions;
-using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
@@ -13,9 +13,9 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
     public IClientSessionHandle ClientSessionHandle => MongoSession.ClientSessionHandle;
 
-    public Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments)
+    public Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments, CancellationToken cancellationToken)
     {
-        return MongoSession.Insert(collectionName, bsonDocuments);
+        return MongoSession.Insert(collectionName, bsonDocuments, cancellationToken);
     }
 
     public Task<List<TDocument>> Find<TDocument>
@@ -25,16 +25,26 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         ProjectionDefinition<BsonDocument, TDocument> projectionDefinition,
         SortDefinition<BsonDocument>? sortDefinition,
         int? skip,
-        int? limit
+        int? limit,
+        CancellationToken cancellationToken
     )
     {
-        return MongoSession.Find(collectionName, filterDefinition, projectionDefinition, sortDefinition, skip, limit);
+        return MongoSession.Find
+        (
+            collectionName,
+            filterDefinition,
+            projectionDefinition,
+            sortDefinition,
+            skip,
+            limit,
+            cancellationToken
+        );
     }
 
     public Task Delete<TDocument>(string collectionName,
-        FilterDefinition<TDocument> filterDefinition)
+        FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken)
     {
-        return MongoSession.Delete(collectionName, filterDefinition);
+        return MongoSession.Delete(collectionName, filterDefinition, cancellationToken);
     }
 
     public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
@@ -50,7 +60,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         // Test Mode Transactions are started in the Test Mode Repository Factory
     }
 
-    public Task CommitTransaction()
+    public Task CommitTransaction(CancellationToken cancellationToken)
     {
         // Test Mode Transactions are never committed
         return Task.CompletedTask;

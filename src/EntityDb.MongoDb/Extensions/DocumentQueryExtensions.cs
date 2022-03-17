@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Extensions;
@@ -48,11 +49,12 @@ internal static class DocumentQueryExtensions
     public static async Task<VersionNumber> GetEntityVersionNumber<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        CancellationToken cancellationToken
     )
         where TDocument : IEntityDocument
     {
-        var documents = await documentQuery.Execute(mongoSession, EntityVersionNumberProjection);
+        var documents = await documentQuery.Execute(mongoSession, EntityVersionNumberProjection, cancellationToken);
 
         var document = documents.SingleOrDefault();
 
@@ -66,7 +68,8 @@ internal static class DocumentQueryExtensions
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         ProjectionDefinition<BsonDocument, TDocument> projection,
-        Func<List<TDocument>, IEnumerable<Id>> mapToIds
+        Func<List<TDocument>, IEnumerable<Id>> mapToIds,
+        CancellationToken cancellationToken
     )
     {
         var skip = documentQuery.Skip;
@@ -74,7 +77,7 @@ internal static class DocumentQueryExtensions
 
         documentQuery = documentQuery with { Skip = null, Limit = null };
 
-        var documents = await documentQuery.Execute(mongoSession, projection);
+        var documents = await documentQuery.Execute(mongoSession, projection, cancellationToken);
 
         var ids= mapToIds
             .Invoke(documents)
@@ -97,11 +100,12 @@ internal static class DocumentQueryExtensions
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession, 
-        IEnvelopeService<BsonDocument> envelopeService
+        IEnvelopeService<BsonDocument> envelopeService,
+        CancellationToken cancellationToken
     )
         where TDocument : IEntityDocument
     {
-        var documents = await documentQuery.Execute(mongoSession, NoDocumentIdProjection);
+        var documents = await documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
 
         return documents
             .Select(document => new EntityAnnotation<TData>
@@ -119,11 +123,12 @@ internal static class DocumentQueryExtensions
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession, 
-        IEnvelopeService<BsonDocument> envelopeService
+        IEnvelopeService<BsonDocument> envelopeService,
+        CancellationToken cancellationToken
     )
         where TDocument : ITransactionDocument
     {
-        var documents = await documentQuery.Execute(mongoSession, DataProjection);
+        var documents = await documentQuery.Execute(mongoSession, DataProjection, cancellationToken);
 
         return documents
             .Select(document => envelopeService.Reconstruct<TData>(document.Data))
@@ -133,7 +138,8 @@ internal static class DocumentQueryExtensions
     public static Task<Id[]> GetEntityIds<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        CancellationToken cancellationToken
     )
         where TDocument : IEntityDocument
     {
@@ -141,14 +147,16 @@ internal static class DocumentQueryExtensions
         (
             mongoSession,
             EntityIdProjection,
-            documents => documents.Select(document => document.EntityId)
+            documents => documents.Select(document => document.EntityId),
+            cancellationToken
         );
     }
 
     public static Task<Id[]> GetEntitiesIds<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        CancellationToken cancellationToken
     )
         where TDocument : IEntitiesDocument
     {
@@ -156,14 +164,16 @@ internal static class DocumentQueryExtensions
         (
             mongoSession,
             EntityIdsProjection,
-            documents => documents.SelectMany(document => document.EntityIds)
+            documents => documents.SelectMany(document => document.EntityIds),
+            cancellationToken
         );
     }
 
     public static Task<Id[]> GetTransactionIds<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession
+        IMongoSession mongoSession,
+        CancellationToken cancellationToken
     )
         where TDocument : ITransactionDocument
     {
@@ -171,7 +181,8 @@ internal static class DocumentQueryExtensions
         (
             mongoSession,
             TransactionIdProjection,
-            documents => documents.Select(document => document.TransactionId)
+            documents => documents.Select(document => document.TransactionId),
+            cancellationToken
         );
     }
 }

@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Entities;
@@ -13,7 +14,8 @@ public interface IEntityRepositoryFactory<TEntity>
     /// </summary>
     /// <param name="transactionSessionOptionsName">The agent's use case for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="IEntityRepository{TEntity}" />.</returns>
     Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
-        string? snapshotSessionOptionsName = null);
+        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default);
 }

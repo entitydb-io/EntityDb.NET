@@ -27,13 +27,13 @@ public class MongoSessionTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Insert<object>(default!, default!));
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Insert<object>(default!, default!, default));
 
-        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Delete<object>(default!, default!));
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.Delete<object>(default!, default!, default));
 
         Should.Throw<CannotWriteInReadOnlyModeException>(() => mongoSession.StartTransaction());
 
-        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.CommitTransaction());
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.CommitTransaction(default));
 
         await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => mongoSession.AbortTransaction());
     }

@@ -33,7 +33,7 @@ internal sealed class LifoTypeResolver : ITypeResolver
             catch (Exception exception)
             {
                 _logger.LogError(exception,
-                    "Type resolver threw an exception. Moving on to next partial type resolver.");
+                    "Type resolver threw an exception. Moving on to next partial type resolver");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions;
@@ -10,8 +11,8 @@ internal class VoidTransactionRepositoryFactory : DisposableResourceBaseClass, I
         Task.FromResult(new VoidTransactionRepository() as ITransactionRepository);
 
     public Task<ITransactionRepository> CreateRepository(
-        string transactionSessionOptionsName)
+        string transactionSessionOptionsName, CancellationToken cancellationToken = default)
     {
-        return VoidTransactionRepositoryTask;
+        return VoidTransactionRepositoryTask.WaitAsync(cancellationToken);
     }
 }

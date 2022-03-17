@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
@@ -50,7 +51,7 @@ internal record MongoSession
         }
     }
 
-    public async Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments)
+    public async Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
@@ -68,7 +69,8 @@ internal record MongoSession
             .InsertManyAsync
             (
                 ClientSessionHandle,
-                bsonDocuments
+                bsonDocuments,
+                cancellationToken: cancellationToken
             );
     }
 
@@ -79,7 +81,8 @@ internal record MongoSession
         ProjectionDefinition<BsonDocument, TDocument> projection,
         SortDefinition<BsonDocument>? sort,
         int? skip,
-        int? limit
+        int? limit,
+        CancellationToken cancellationToken
     )
     {
         var find = MongoDatabase
@@ -117,11 +120,11 @@ internal record MongoSession
                 find.ToString()
             );
 
-        return find.ToListAsync();
+        return find.ToListAsync(cancellationToken);
     }
 
     public async Task Delete<TDocument>(string collectionName,
-        FilterDefinition<TDocument> filterDefinition)
+        FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
@@ -140,7 +143,8 @@ internal record MongoSession
             .DeleteManyAsync
             (
                 ClientSessionHandle,
-                filterDefinition
+                filterDefinition,
+                cancellationToken: cancellationToken
             );
     }
 
@@ -164,11 +168,11 @@ internal record MongoSession
     }
 
     [ExcludeFromCodeCoverage(Justification = "Tests should run with the Debug configuration, and should not execute this method.")]
-    public async Task CommitTransaction()
+    public async Task CommitTransaction(CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
-        await ClientSessionHandle.CommitTransactionAsync();
+        await ClientSessionHandle.CommitTransactionAsync(cancellationToken);
     }
 
     public async Task AbortTransaction()

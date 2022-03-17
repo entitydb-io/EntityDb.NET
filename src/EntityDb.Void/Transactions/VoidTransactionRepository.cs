@@ -6,6 +6,7 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Void.Transactions;
@@ -19,73 +20,73 @@ internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, I
     private static readonly Task<IEntityAnnotation<object>[]> EmptyEntityAnnotationArrayTask = Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
     private static readonly Task<bool> TrueBoolTask = Task.FromResult(true);
     
-    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery)
+    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery)
+    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery)
+    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<Id[]> GetEntityIds(ITagQuery tagQuery)
+    public Task<Id[]> GetEntityIds(ITagQuery tagQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyIdArrayTask;
+        return EmptyIdArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
+    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyObjectArrayTask;
+        return EmptyObjectArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<object[]> GetCommands(ICommandQuery commandQuery)
+    public Task<object[]> GetCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyObjectArrayTask;
+        return EmptyObjectArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
+    public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyLeaseArrayTask;
+        return EmptyLeaseArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<ITag[]> GetTags(ITagQuery tagQuery)
+    public Task<ITag[]> GetTags(ITagQuery tagQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyTagArrayTask;
+        return EmptyTagArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
-        return EmptyEntityAnnotationArrayTask;
+        return EmptyEntityAnnotationArrayTask.WaitAsync(cancellationToken);
     }
 
-    public Task<bool> PutTransaction(ITransaction transaction)
+    public Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
     {
-        return TrueBoolTask;
+        return TrueBoolTask.WaitAsync(cancellationToken);
     }
 }

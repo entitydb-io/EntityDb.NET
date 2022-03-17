@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Sessions;
@@ -23,7 +24,7 @@ internal class ReadOnlyInMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
         return _inMemorySession.Get(snapshotId);
     }
 
-    public Task<bool> Delete(Id[] snapshotIds)
+    public Task<bool> Delete(IEnumerable<Id> snapshotIds)
     {
         return Task.FromException<bool>(new CannotWriteInReadOnlyModeException());
     }

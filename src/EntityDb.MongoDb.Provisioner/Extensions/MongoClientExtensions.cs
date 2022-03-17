@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Extensions;
@@ -75,12 +76,13 @@ public static class MongoClientExtensions
     /// </summary>
     /// <param name="mongoClient">The mongo client.</param>
     /// <param name="entityName">The name of the entity, which is used as the database name.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An asynchronous task that, when complete, signals that the collections have been provisioned.</returns>
     /// <remarks>
     ///     You should ONLY use this in your code for integration testing. Real databases should be provisioned using the
     ///     dotnet tool EntityDb.MongoDb.Provisioner.
     /// </remarks>
-    public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName)
+    public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName, CancellationToken cancellationToken = default)
     {
         var mongoDatabase = mongoClient.GetDatabase(entityName);
 
@@ -88,17 +90,17 @@ public static class MongoClientExtensions
         {
             var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
-            var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync();
-            var entityCollectionNames = await entityCollectionNameCursor.ToListAsync();
+            var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken);
+            var entityCollectionNames = await entityCollectionNameCursor.ToListAsync(cancellationToken);
 
             if (entityCollectionNames.Contains(collectionName))
             {
                 continue;
             }
 
-            await mongoDatabase.CreateCollectionAsync(collectionName);
+            await mongoDatabase.CreateCollectionAsync(collectionName, cancellationToken: cancellationToken);
 
-            await mongoCollection.Indexes.CreateManyAsync(collectionIndices);
+            await mongoCollection.Indexes.CreateManyAsync(collectionIndices, cancellationToken);
         }
     }
 }

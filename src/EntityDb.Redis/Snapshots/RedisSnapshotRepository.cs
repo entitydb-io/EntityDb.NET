@@ -7,6 +7,7 @@ using EntityDb.Redis.Sessions;
 using StackExchange.Redis;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
@@ -34,20 +35,20 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         return $"{_keyNamespace}#{snapshotId}";
     }
 
-    public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot)
+    public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
         var snapshotKey = GetSnapshotKey(snapshotId);
 
         var snapshotValue = _envelopeService
             .DeconstructAndSerialize(snapshot);
 
-        return await _redisSession.Insert(snapshotKey, snapshotValue);
+        return await _redisSession.Insert(snapshotKey, snapshotValue).WaitAsync(cancellationToken);
     }
 
-    public async Task<TSnapshot?> GetSnapshot(Id snapshotId)
+    public async Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
     {
         var snapshotKey = GetSnapshotKey(snapshotId);
-        var snapshotValue = await _redisSession.Find(snapshotKey);
+        var snapshotValue = await _redisSession.Find(snapshotKey).WaitAsync(cancellationToken);
 
         if (!snapshotValue.HasValue)
         {
@@ -58,11 +59,11 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
             .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue);
     }
 
-    public async Task<bool> DeleteSnapshots(Id[] snapshotIds)
+    public async Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
     {
         var snapshotKeys = snapshotIds.Select(GetSnapshotKey);
 
-        return await _redisSession.Delete(snapshotKeys);
+        return await _redisSession.Delete(snapshotKeys).WaitAsync(cancellationToken);
     }
 
     public override async ValueTask DisposeAsync()

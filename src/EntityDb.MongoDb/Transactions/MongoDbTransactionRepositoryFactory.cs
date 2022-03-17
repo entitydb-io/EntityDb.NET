@@ -1,17 +1,16 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Serializers;
 using EntityDb.MongoDb.Sessions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
@@ -52,7 +51,7 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         return _optionsFactory.Create(transactionSessionOptionsName);
     }
 
-    public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
+    public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
     {
         var mongoClient = new MongoClient(_connectionString);
 
@@ -61,7 +60,7 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         var clientSessionHandle = await mongoClient.StartSessionAsync(new ClientSessionOptions
         {
             CausalConsistency = true
-        });
+        }, cancellationToken);
 
         return MongoSession.Create
         (

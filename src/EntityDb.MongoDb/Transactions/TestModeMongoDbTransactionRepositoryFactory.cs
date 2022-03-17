@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
-using Microsoft.Extensions.Logging.Abstractions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
@@ -14,7 +14,7 @@ internal class
     {
     }
 
-    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
+    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
     {
         if (_sessions.HasValue)
         {
@@ -25,7 +25,7 @@ internal class
         var normalSession = await base.CreateSession(new TransactionSessionOptions
         {
             ReadOnly = false
-        });
+        }, cancellationToken);
         
         var testModeSession = new TestModeMongoSession(normalSession);
 

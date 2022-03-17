@@ -2,12 +2,13 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Threading;
 
 namespace EntityDb.Common.Exceptions;
 
 /// <summary>
 ///     The exception that is thrown when an actor passes an <see cref="ITransaction" /> to
-///     <see cref="ITransactionRepository.PutTransaction(ITransaction)" /> with on a
+///     <see cref="ITransactionRepository.PutTransaction(ITransaction, CancellationToken)" /> with on a
 ///     <see cref="ITransactionStep"/> that implements <see cref="IAppendCommandTransactionStep"/>
 ///     and the value of <see cref="ITransactionStep.EntityVersionNumber"/> is equal to <c>0</c>.
 /// </summary>

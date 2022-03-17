@@ -34,7 +34,7 @@ internal class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
         return new Envelope<BsonDocument>(headers, value);
     }
 
-    private EnvelopeHeaders DeserializeHeaders(BsonDeserializationContext context)
+    private static EnvelopeHeaders DeserializeHeaders(BsonDeserializationContext context)
     {
         var value = new Dictionary<string, string>();
 
@@ -76,7 +76,7 @@ internal class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
         context.Writer.WriteEndDocument();
     }
 
-    private void SerializeHeaders(BsonSerializationContext context, EnvelopeHeaders envelopeHeaders)
+    private static void SerializeHeaders(BsonSerializationContext context, EnvelopeHeaders envelopeHeaders)
     {
         context.Writer.WriteStartDocument();
 

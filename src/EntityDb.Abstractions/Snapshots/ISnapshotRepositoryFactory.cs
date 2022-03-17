@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Snapshots;
@@ -13,6 +14,7 @@ public interface ISnapshotRepositoryFactory<TSnapshot> : IDisposableResource
     ///     Create a new instance of <see cref="ISnapshotRepository{TSnapshot}" />
     /// </summary>
     /// <param name="snapshotSessionOptionsName">The agent's use case for the repository.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ISnapshotRepository{TSnapshot}" />.</returns>
-    Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName);
+    Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default);
 }
