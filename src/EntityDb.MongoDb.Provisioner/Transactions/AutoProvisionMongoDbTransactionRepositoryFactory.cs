@@ -10,8 +10,7 @@ namespace EntityDb.MongoDb.Provisioner.Transactions;
 internal sealed class
     AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    private static readonly object Lock = new();
-    private static Task? _provisionTask;
+    private static readonly SemaphoreSlim Lock = new(1);
     private static bool _provisioned;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
@@ -24,21 +23,19 @@ internal sealed class
     {
         var mongoSession = await base.CreateSession(transactionSessionOptions, cancellationToken);
 
+        await Lock.WaitAsync(cancellationToken);
+
         if (_provisioned)
         {
             return mongoSession;
         }
-
-        lock (Lock)
-        {
-            _provisionTask ??=
-                mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
-                    .DatabaseName, cancellationToken);
-        }
-
-        await _provisionTask;
+        
+        await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
+            .DatabaseName, cancellationToken);
         
         _provisioned = true;
+        
+        Lock.Release();
 
         return mongoSession;
     }
