@@ -84,7 +84,7 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionsAdders =
     {
-        new("MongoDb", serviceCollection =>
+        new("MongoDb<TestEntity>", serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
@@ -102,7 +102,7 @@ public class TestsBase<TStartup>
 
     private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
     {
-        new("Redis", AddEntitySnapshotsSharedResources + (serviceCollection =>
+        new("Redis<TestEntity>", AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddRedisSnapshots<TestEntity>
             (
@@ -111,7 +111,7 @@ public class TestsBase<TStartup>
                 true
             );
         })),
-        new("InMemory", AddEntitySnapshotsSharedResources + (serviceCollection =>
+        new("InMemory<TestEntity>", AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddInMemorySnapshots<TestEntity>
             (
