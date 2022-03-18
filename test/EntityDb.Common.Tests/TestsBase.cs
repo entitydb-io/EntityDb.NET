@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
