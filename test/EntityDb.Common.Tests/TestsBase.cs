@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
@@ -94,7 +96,7 @@ public class TestsBase<TStartup>
         })
     };
 
-    private static readonly SnapshotsAdder[] AllSnapshotsAdders =
+    private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
     {
         new("Redis", serviceCollection =>
         {
@@ -114,15 +116,15 @@ public class TestsBase<TStartup>
         })
     };
 
-    public static IEnumerable<object[]> AddTransactionsAndSnapshots() =>
+    public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots() =>
         from transactionsAdder in AllTransactionsAdders
-        from snapshotsAdder in AllSnapshotsAdders
+        from snapshotsAdder in AllEntitySnapshotsAdders
         select new object[] { transactionsAdder, snapshotsAdder };
 
     public static IEnumerable<object[]> AddTransactions() => AllTransactionsAdders
         .Select(transactionsAdder => new object[] { transactionsAdder });
 
-    public static IEnumerable<object[]> AddSnapshots() => AllSnapshotsAdders
+    public static IEnumerable<object[]> AddEntitySnapshots() => AllEntitySnapshotsAdders
         .Select(snapshotsAdder => new object[] { snapshotsAdder });
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)

@@ -20,14 +20,14 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddEntitySnapshots))]
+    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(SnapshotsAdder entitySnapshotsAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            entitySnapshotsAdder.Add(serviceCollection);
         });
 
         var expectedSnapshot = new TestEntity { VersionNumber = new VersionNumber(300) };
@@ -54,8 +54,8 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddEntitySnapshots))]
+    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder entitySnapshotsAdder)
     {
         // ARRANGE
 
@@ -63,7 +63,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            entitySnapshotsAdder.Add(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
@@ -88,8 +88,8 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddEntitySnapshots))]
+    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder entitySnapshotsAdder)
     {
         // ARRANGE
 
@@ -99,7 +99,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            entitySnapshotsAdder.Add(serviceCollection);
         });
         
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider
