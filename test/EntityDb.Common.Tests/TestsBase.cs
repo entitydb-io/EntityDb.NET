@@ -15,6 +15,7 @@ using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Debug;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
@@ -105,6 +106,9 @@ public class TestsBase<TStartup>
 
         startup.AddServices(serviceCollection);
 
+        serviceCollection.AddSingleton<ILoggerProvider, DebugLoggerProvider>();
+        serviceCollection.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
+        
         configureServices?.Invoke(serviceCollection);
 
         var singletonServiceProvider = serviceCollection.BuildServiceProvider();
@@ -112,9 +116,8 @@ public class TestsBase<TStartup>
         if (_testOutputHelperAccessor != null)
         {
             var loggerFactory = singletonServiceProvider.GetRequiredService<ILoggerFactory>();
-
+            
             loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
-            loggerFactory.AddProvider(new DebugLoggerProvider());
         }
 
         var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
