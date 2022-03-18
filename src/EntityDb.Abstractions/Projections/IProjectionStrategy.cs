@@ -1,5 +1,4 @@
 using EntityDb.Abstractions.ValueObjects;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Projections;
@@ -15,8 +14,13 @@ public interface IProjectionStrategy<in TProjection>
     /// </summary>
     /// <param name="projectionId">The id of the projection.</param>
     /// <param name="projectionSnapshot">A snapshot of the projection, if one exists. (This can be used to avoid running a query, if one were necessary.)</param>
-    /// <returns>The set of entity ids to query for creating the projection.</returns>
+    /// <returns>The set of entity ids to query for running the projection.</returns>
     Task<Id[]> GetEntityIds(Id projectionId, TProjection projectionSnapshot);
 
-    //TODO: Method to map [entityId, entity] to [projectionId (nullable)]
+    /// <summary>
+    ///     Map an entity id to a set of projection ids.
+    /// </summary>
+    /// <param name="entityId">The id of th entity.</param>
+    /// <returns>The set of projection ids to query for running the projection.</returns>
+    Task<Id[]> GetProjectionIds(Id entityId);
 }

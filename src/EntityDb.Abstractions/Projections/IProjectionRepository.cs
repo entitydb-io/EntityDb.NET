@@ -2,7 +2,6 @@ using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
-using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Projections;
@@ -13,8 +12,14 @@ namespace EntityDb.Abstractions.Projections;
 /// <typeparam name="TProjection">The type of the projection.</typeparam>
 public interface IProjectionRepository<TProjection> : IDisposableResource
 {
-    //TODO: Getter for the projection strategy here
+    /// <summary>
+    ///     The strategy for mapping between projection id and entity id.
+    /// </summary>
+    IProjectionStrategy<TProjection> ProjectionStrategy { get; }
 
+    /// <summary>
+    ///     The backing transaction repository.
+    /// </summary>
     ITransactionRepository TransactionRepository { get; }
     
     /// <summary>

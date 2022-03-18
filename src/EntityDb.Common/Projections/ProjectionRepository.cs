@@ -3,8 +3,6 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using EntityDb.Common.Entities;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -12,11 +10,10 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Projections;
 
-internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableResourceBaseClass, IProjectionRepository<TProjection>
+internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass, IProjectionRepository<TProjection>
     where TProjection : IProjection<TProjection>
 {
-    private readonly IProjectionStrategy<TProjection> _projectionStrategy;
-    
+    public IProjectionStrategy<TProjection> ProjectionStrategy { get; }
     public ITransactionRepository TransactionRepository { get; }
     public ISnapshotRepository<TProjection> SnapshotRepository { get; }
     
@@ -27,8 +24,7 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
         ITransactionRepository transactionRepository
     )
     {
-        _projectionStrategy = projectionStrategy;
-        
+        ProjectionStrategy = projectionStrategy;
         TransactionRepository = transactionRepository;
         SnapshotRepository = snapshotRepository;
     }
@@ -37,11 +33,12 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
     {
         var projection = await SnapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
 
-        var previousProjection = projection;
-        
-        var entityIds = await _projectionStrategy.GetEntityIds(projectionId, projection);
-        
-        //TODO: Handle Empty Case
+        var entityIds = await ProjectionStrategy.GetEntityIds(projectionId, projection);
+
+        if (entityIds.Length == 0)
+        {
+            return projection;
+        }
         
         foreach (var entityId in entityIds)
         {
@@ -49,29 +46,22 @@ internal sealed class ProjectionRepository<TProjection, TEntity> : DisposableRes
             
             var commandQuery = new GetCurrentEntityQuery(entityId, entityVersionNumber);
 
-            var commands = await TransactionRepository.GetCommands(commandQuery);
+            var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery);
 
-            projection = projection.Reduce(entityId, commands);
+            projection = projection.Reduce(annotatedCommands);
         }
 
-        //TODO: Move to Transaction Subscriber?
-        
-        if (!ReferenceEquals(previousProjection, projection))
-        {
-            await SnapshotRepository.PutSnapshot(projectionId, projection);
-        }
-        
         return projection;
     }
     
-    public static ProjectionRepository<TProjection, TEntity> Create
+    public static ProjectionRepository<TProjection> Create
     (
         IServiceProvider serviceProvider,
         ITransactionRepository transactionRepository,
-        ISnapshotRepository<TEntity> snapshotRepository
+        ISnapshotRepository<TProjection> snapshotRepository
     )
     {
-        return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection, TEntity>>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
             transactionRepository, snapshotRepository);
     }
 }

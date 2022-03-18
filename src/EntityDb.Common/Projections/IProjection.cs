@@ -1,5 +1,5 @@
+using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.ValueObjects;
-using System;
 
 namespace EntityDb.Common.Projections;
 
@@ -22,12 +22,10 @@ public interface IProjection<out TProjection>
     /// <returns></returns>
     VersionNumber GetEntityVersionNumber(Id entityId);
 
-    //TODO: Reduce should handle IEntityAnnotation<object>[], allowing access to full transaction information
     /// <summary>
     ///     Returns a new <typeparamref name="TProjection"/> that incorporates the commands for a particular entity id.
     /// </summary>
-    /// <param name="entityId">The id of the entity.</param>
-    /// <param name="commands">The commands.</param>
-    /// <returns>A new <typeparamref name="TProjection"/> that incorporates <paramref name="commands"/> for <paramref name="entityId"/>.</returns>
-    TProjection Reduce(Id entityId, params object[] commands);
+    /// <param name="annotatedCommands">The annotated commands.</param>
+    /// <returns>A new <typeparamref name="TProjection"/> that incorporates <paramref name="annotatedCommands"/>.</returns>
+    TProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands);
 }

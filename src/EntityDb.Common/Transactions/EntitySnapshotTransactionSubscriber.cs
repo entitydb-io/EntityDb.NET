@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
-    where TSnapshot : ISnapshot<TSnapshot>
+internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscriber
+    where TEntity : ISnapshot<TEntity>
 {
-    private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
+    private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
 
     public EntitySnapshotTransactionSubscriber
     (
-        ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
+        ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
         bool synchronousMode
     ) : base(synchronousMode)
@@ -37,7 +37,7 @@ internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubsc
         {
             var entity = stepGroup.Last().Entity;
 
-            if (entity is not TSnapshot nextSnapshot)
+            if (entity is not TEntity nextSnapshot)
             {
                 return;
             }
@@ -55,10 +55,10 @@ internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubsc
         }
     }
 
-    public static EntitySnapshotTransactionSubscriber<TSnapshot> Create(IServiceProvider serviceProvider,
+    public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
         string snapshotSessionOptionsName, bool synchronousMode)
     {
-        return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TSnapshot>>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TEntity>>(serviceProvider,
             snapshotSessionOptionsName,
             synchronousMode);
     }

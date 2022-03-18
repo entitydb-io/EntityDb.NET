@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
+using EntityDb.Common.Projections;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.Transactions;
 using EntityDb.Common.Transactions.Builders;
@@ -85,16 +86,33 @@ public static class ServiceCollectionExtensions
     /// <summary>
     ///     Adds a transaction subscriber that records snapshots of entities.
     /// </summary>
-    /// <typeparam name="TSnapshot">The type of the snapshot.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
-    public static void AddEntitySnapshotTransactionSubscriber<TSnapshot>(this IServiceCollection serviceCollection,
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool synchronousMode = false)
-        where TSnapshot : ISnapshot<TSnapshot>
+        where TEntity : ISnapshot<TEntity>
     {
         serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
-            EntitySnapshotTransactionSubscriber<TSnapshot>.Create(serviceProvider, snapshotSessionOptionsName,
+            EntitySnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
+                synchronousMode));
+    }
+
+    /// <summary>
+    ///     Adds a transaction subscriber that records snapshots of projections.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
+    /// <param name="synchronousMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
+    /// <typeparam name="TProjection">The type of the projection.</typeparam>
+    public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
+        this IServiceCollection serviceCollection,
+        string snapshotSessionOptionsName, bool synchronousMode = false)
+        where TProjection : IProjection<TProjection>, ISnapshot<TProjection>
+    {
+        serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
+            ProjectionSnapshotTransactionSubscriber<TProjection>.Create(serviceProvider, snapshotSessionOptionsName,
                 synchronousMode));
     }
 }
