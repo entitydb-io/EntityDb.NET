@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
@@ -58,7 +59,7 @@ public class TestsBase<TStartup>
 
     public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
 
-    public record SnapshotsAdder(string Name, AddSnapshotsDelegate AddSnapshotsDelegate)
+    public record SnapshotsAdder(string Name, Type SnapshotType, AddSnapshotsDelegate AddSnapshotsDelegate)
     {
         public void Add(IServiceCollection serviceCollection)
         {
@@ -102,7 +103,7 @@ public class TestsBase<TStartup>
 
     private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
     {
-        new("Redis<TestEntity>", AddEntitySnapshotsSharedResources + (serviceCollection =>
+        new("Redis<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddRedisSnapshots<TestEntity>
             (
@@ -111,9 +112,33 @@ public class TestsBase<TStartup>
                 true
             );
         })),
-        new("InMemory<TestEntity>", AddEntitySnapshotsSharedResources + (serviceCollection =>
+        new("InMemory<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddInMemorySnapshots<TestEntity>
+            (
+                testMode: true
+            );
+        }))
+    };
+
+    private static readonly AddSnapshotsDelegate AddOneToOneProjectionSnapshotsSharedResources = serviceCollection =>
+    {
+    };
+
+    private static readonly SnapshotsAdder[] AllOneToOneProjectionSnapshotsAdders =
+    {
+        new("Redis<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+        {
+            serviceCollection.AddRedisSnapshots<OneToOneProjection>
+            (
+                OneToOneProjection.RedisKeyNamespace,
+                _ => "127.0.0.1:6379",
+                true
+            );
+        })),
+        new("InMemory<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+        {
+            serviceCollection.AddInMemorySnapshots<OneToOneProjection>
             (
                 testMode: true
             );
@@ -129,6 +154,9 @@ public class TestsBase<TStartup>
         .Select(transactionsAdder => new object[] { transactionsAdder });
 
     public static IEnumerable<object[]> AddEntitySnapshots() => AllEntitySnapshotsAdders
+        .Select(snapshotsAdder => new object[] { snapshotsAdder });
+
+    public static IEnumerable<object[]> AddOneToOneProjectionSnapshots() => AllOneToOneProjectionSnapshotsAdders
         .Select(snapshotsAdder => new object[] { snapshotsAdder });
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)

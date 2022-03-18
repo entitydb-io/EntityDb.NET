@@ -257,7 +257,7 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var snapshot = new TestEntity(new VersionNumber(1));
+        var snapshot = new TestEntity(default, new VersionNumber(1));
 
         var newCommands = new object[]
         {

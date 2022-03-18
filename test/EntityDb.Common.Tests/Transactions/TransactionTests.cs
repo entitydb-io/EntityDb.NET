@@ -826,9 +826,8 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionsAdder.Add(serviceCollection);
         });
 
-        var expectedEntity = new TestEntity(new VersionNumber(1));
-
         var entityId = Id.NewId();
+        var expectedEntity = new TestEntity(entityId, new VersionNumber(1));
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
