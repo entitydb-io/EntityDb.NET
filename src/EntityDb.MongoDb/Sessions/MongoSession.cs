@@ -128,14 +128,17 @@ internal record MongoSession
     {
         AssertNotReadOnly();
 
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
+        var command = MongoDatabase.GetCollection<TDocument>(collectionName).Find(filterDefinition).ToString()!.Replace("find", "deleteMany");
+
         Logger
             .LogInformation
             (
-                "Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}",
+                "Started Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
-                ClientSessionHandle.ServerSession.Id.ToString(),
-                MongoDatabase.GetCollection<TDocument>(collectionName).Find(filterDefinition).ToString()!.Replace("find", "deleteMany")
+                serverSessionId,
+                command
             );
         
         var deleteResult = await MongoDatabase
@@ -148,7 +151,15 @@ internal record MongoSession
             );
         
         Logger
-            .LogInformation("MongoDb Delete Finished.\n\nDeleted Count: {DeletedCount}\n\nIs Acknowledged: {IsAcknowledged}", deleteResult.DeletedCount, deleteResult.IsAcknowledged);
+            .LogInformation(
+                "Finished Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}\n\nDeleted Count: {DeletedCount}\n\nIs Acknowledged: {IsAcknowledged}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                command,
+                deleteResult.DeletedCount,
+                deleteResult.IsAcknowledged
+            );
     }
 
     public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
