@@ -8,17 +8,19 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Logging.Debug;
+using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
+using Xunit.Sdk;
 
 namespace EntityDb.Common.Tests;
 
@@ -43,15 +45,16 @@ public class TestsBase<TStartup>
     public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
 
     private readonly IConfiguration _configuration;
-    private readonly ITestOutputHelperAccessor? _testOutputHelperAccessor;
+    private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
+    private readonly ITest _test;
 
     protected TestsBase(IServiceProvider startupServiceProvider)
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
-        _testOutputHelperAccessor = startupServiceProvider.GetService<ITestOutputHelperAccessor>();
+        _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
+        _test = (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output) as ITest)!;
     }
 
-    
     private static readonly AddTransactionsDelegate[] AllAddTransactionsDelegates =
     {
         serviceCollection =>
@@ -95,7 +98,7 @@ public class TestsBase<TStartup>
 
     public static IEnumerable<object[]> AddSnapshots() => AllAddSnapshotsDelegates
         .Select(addSnapshotsDelegate => new object[] { addSnapshotsDelegate });
-    
+
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
     {
         var serviceCollection = new ServiceCollection();
@@ -103,22 +106,28 @@ public class TestsBase<TStartup>
         var startup = new TStartup();
 
         serviceCollection.AddSingleton(_configuration);
+        serviceCollection.AddSingleton(_test);
+
+        serviceCollection.RemoveAll(typeof(ILogger<>));
+        serviceCollection.RemoveAll(typeof(ILoggerFactory));
+        
+        serviceCollection.AddSingleton(LoggerFactory.Create(builder =>
+        {
+            builder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            builder.AddDebug();
+            builder.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+            });
+        }));
 
         startup.AddServices(serviceCollection);
 
-        serviceCollection.AddSingleton<ILoggerProvider, DebugLoggerProvider>();
-        serviceCollection.AddSingleton<ILoggerProvider, ConsoleLoggerProvider>();
-        
         configureServices?.Invoke(serviceCollection);
-
+        
+        serviceCollection.AddSingleton(typeof(ILogger<>), typeof(TestLogger<>));
+        
         var singletonServiceProvider = serviceCollection.BuildServiceProvider();
-
-        if (_testOutputHelperAccessor != null)
-        {
-            var loggerFactory = singletonServiceProvider.GetRequiredService<ILoggerFactory>();
-            
-            loggerFactory.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
-        }
 
         var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
@@ -128,8 +137,16 @@ public class TestsBase<TStartup>
     protected static (ILoggerFactory Logger, Action<Times> LoggerVerifier) GetMockedLoggerFactory<TException>()
         where TException : Exception
     {
+        var disposableMock = new Mock<IDisposable>(MockBehavior.Strict);
+
+        disposableMock.Setup(disposable => disposable.Dispose());
+        
         var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
+        loggerMock
+            .Setup(logger => logger.BeginScope(It.IsAny<It.IsAnyType>()))
+            .Returns(disposableMock.Object);
+        
         loggerMock
             .Setup(logger => logger.Log
             (
