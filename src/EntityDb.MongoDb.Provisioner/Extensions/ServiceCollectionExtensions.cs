@@ -28,7 +28,7 @@ internal static class ServiceCollectionExtensions
                 return MongoDbTransactionRepositoryFactory
                     .Create(serviceProvider, connectionString, databaseName)
                     .UseTestMode(testMode)
-                    .UseAutoProvisioning();
+                    .UseAutoProvisioning(serviceProvider);
             }
         );
     }

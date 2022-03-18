@@ -1,13 +1,15 @@
 ﻿using EntityDb.MongoDb.Provisioner.Transactions;
 using EntityDb.MongoDb.Transactions;
+using System;
 
 namespace EntityDb.MongoDb.Provisioner.Extensions;
 
 internal static class MongoDbTransactionRepositoryFactoryExtensions
 {
     public static IMongoDbTransactionRepositoryFactory UseAutoProvisioning(
-        this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory)
+        this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory,
+        IServiceProvider serviceProvider)
     {
-        return new AutoProvisionMongoDbTransactionRepositoryFactory(mongoDbTransactionRepositoryFactory);
+        return AutoProvisionMongoDbTransactionRepositoryFactory.Create(serviceProvider, mongoDbTransactionRepositoryFactory);
     }
 }
