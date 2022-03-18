@@ -148,6 +148,8 @@ internal record MongoSession
                 query,
                 documents.Count
             );
+
+        return documents;
     }
 
     public async Task Delete<TDocument>(string collectionName,
