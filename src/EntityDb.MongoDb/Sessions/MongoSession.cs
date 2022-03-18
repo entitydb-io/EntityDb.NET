@@ -138,7 +138,7 @@ internal record MongoSession
                 MongoDatabase.GetCollection<TDocument>(collectionName).Find(filterDefinition).ToString()!.Replace("find", "deleteMany")
             );
         
-        await MongoDatabase
+        var deleteResult = await MongoDatabase
             .GetCollection<TDocument>(collectionName)
             .DeleteManyAsync
             (
@@ -146,6 +146,9 @@ internal record MongoSession
                 filterDefinition,
                 cancellationToken: cancellationToken
             );
+        
+        Logger
+            .LogInformation("MongoDb Delete Finished.\n\nDeleted Count: {DeletedCount}\n\nIs Acknowledged: {IsAcknowledged}", deleteResult.DeletedCount, deleteResult.IsAcknowledged);
     }
 
     public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
