@@ -21,13 +21,13 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSnapshots))]
-    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(AddSnapshotsDelegate addSnapshotsDelegate)
+    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(SnapshotsAdder snapshotsAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            addSnapshotsDelegate.Invoke(serviceCollection);
+            snapshotsAdder.Add(serviceCollection);
         });
 
         var expectedSnapshot = new TransactionEntity { VersionNumber = new VersionNumber(300) };
@@ -55,7 +55,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSnapshots))]
-    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(AddSnapshotsDelegate addSnapshotsDelegate)
+    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder snapshotsAdder)
     {
         // ARRANGE
 
@@ -63,7 +63,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            addSnapshotsDelegate.Invoke(serviceCollection);
+            snapshotsAdder.Add(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
@@ -89,7 +89,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSnapshots))]
-    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(AddSnapshotsDelegate addSnapshotsDelegate)
+    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder snapshotsAdder)
     {
         // ARRANGE
 
@@ -99,7 +99,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            addSnapshotsDelegate.Invoke(serviceCollection);
+            snapshotsAdder.Add(serviceCollection);
         });
         
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider

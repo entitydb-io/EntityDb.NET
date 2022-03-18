@@ -58,7 +58,7 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndSnapshots))]
-    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(AddTransactionsDelegate addTransactionsDelegate, AddSnapshotsDelegate addSnapshotsDelegate)
+    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
     {
         // ARRANGE
 
@@ -71,8 +71,8 @@ public class EntityTests : TestsBase<Startup>
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            addTransactionsDelegate.Invoke(serviceCollection);
-            addSnapshotsDelegate.Invoke(serviceCollection);
+            transactionsAdder.Add(serviceCollection);
+            snapshotsAdder.Add(serviceCollection);
         });
 
         var entityId = Id.NewId();

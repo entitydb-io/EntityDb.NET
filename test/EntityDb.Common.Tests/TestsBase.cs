@@ -39,10 +39,36 @@ public class TestsBase<TStartup>
             SingletonServiceProvider.Dispose();
         }
     }
-
+    
     public delegate void AddTransactionsDelegate(IServiceCollection serviceCollection);
 
+    public record TransactionsAdder(string Name, AddTransactionsDelegate AddTransactionsDelegate)
+    {
+        public void Add(IServiceCollection serviceCollection)
+        {
+            AddTransactionsDelegate.Invoke(serviceCollection);
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
     public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
+
+    public record SnapshotsAdder(string Name, AddSnapshotsDelegate AddSnapshotsDelegate)
+    {
+        public void Add(IServiceCollection serviceCollection)
+        {
+            AddSnapshotsDelegate.Invoke(serviceCollection);
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
 
     private readonly IConfiguration _configuration;
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
@@ -55,9 +81,9 @@ public class TestsBase<TStartup>
         _test = (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output) as ITest)!;
     }
 
-    private static readonly AddTransactionsDelegate[] AllAddTransactionsDelegates =
+    private static readonly TransactionsAdder[] AllTransactionsAdders =
     {
-        serviceCollection =>
+        new("MongoDb", serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
@@ -65,12 +91,12 @@ public class TestsBase<TStartup>
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
                 true
             );
-        }
+        })
     };
 
-    private static readonly AddSnapshotsDelegate[] AllAddSnapshotsDelegates =
+    private static readonly SnapshotsAdder[] AllSnapshotsAdders =
     {
-        serviceCollection =>
+        new("Redis", serviceCollection =>
         {
             serviceCollection.AddRedisSnapshots<TransactionEntity>
             (
@@ -78,26 +104,26 @@ public class TestsBase<TStartup>
                 _ => "127.0.0.1:6379",
                 true
             );
-        },
-        serviceCollection =>
+        }),
+        new("InMemory", serviceCollection =>
         {
             serviceCollection.AddInMemorySnapshots<TransactionEntity>
             (
                 testMode: true
             );
-        }
+        })
     };
 
     public static IEnumerable<object[]> AddTransactionsAndSnapshots() =>
-        from addTransactionsDelegate in AllAddTransactionsDelegates
-        from addSnapshotsDelegate in AllAddSnapshotsDelegates
-        select new object[] { addTransactionsDelegate, addSnapshotsDelegate };
+        from transactionsAdder in AllTransactionsAdders
+        from snapshotsAdder in AllSnapshotsAdders
+        select new object[] { transactionsAdder, snapshotsAdder };
 
-    public static IEnumerable<object[]> AddTransactions() => AllAddTransactionsDelegates
-        .Select(addTransactionsDelegate => new object[] { addTransactionsDelegate });
+    public static IEnumerable<object[]> AddTransactions() => AllTransactionsAdders
+        .Select(transactionsAdder => new object[] { transactionsAdder });
 
-    public static IEnumerable<object[]> AddSnapshots() => AllAddSnapshotsDelegates
-        .Select(addSnapshotsDelegate => new object[] { addSnapshotsDelegate });
+    public static IEnumerable<object[]> AddSnapshots() => AllSnapshotsAdders
+        .Select(snapshotsAdder => new object[] { snapshotsAdder });
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
     {
