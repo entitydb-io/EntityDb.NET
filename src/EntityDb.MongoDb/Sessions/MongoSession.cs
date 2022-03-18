@@ -55,13 +55,16 @@ internal record MongoSession
     {
         AssertNotReadOnly();
 
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
+        
         Logger
             .LogInformation
             (
-                "Running MongoDb Insert on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}",
+                "Started Running MongoDb Insert on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nDocuments Inserted: {DocumentsInserted}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
-                ClientSessionHandle.ServerSession.Id.ToString()
+                serverSessionId,
+                bsonDocuments.Length
             );
         
         await MongoDatabase
@@ -72,9 +75,19 @@ internal record MongoSession
                 bsonDocuments,
                 cancellationToken: cancellationToken
             );
+        
+        Logger
+            .LogInformation
+            (
+                "Finished Running MongoDb Insert on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nDocuments Inserted: {DocumentsInserted}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                bsonDocuments.Length
+            );
     }
 
-    public Task<List<TDocument>> Find<TDocument>
+    public async Task<List<TDocument>> Find<TDocument>
     (
         string collectionName,
         FilterDefinition<BsonDocument> filter,
@@ -109,18 +122,32 @@ internal record MongoSession
         {
             find = find.Limit(limit);
         }
+
+        var query = find.ToString();
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
         
         Logger
             .LogInformation
             (
-                "Running MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}",
+                "Started Running MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
-                ClientSessionHandle.ServerSession.Id.ToString(),
-                find.ToString()
+                serverSessionId,
+                query
             );
 
-        return find.ToListAsync(cancellationToken);
+        var documents = await find.ToListAsync(cancellationToken);
+        
+        Logger
+            .LogInformation
+            (
+                "Finished Running MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}\n\nDocuments Returned: {DocumentsReturned}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                query,
+                documents.Count
+            );
     }
 
     public async Task Delete<TDocument>(string collectionName,
@@ -149,16 +176,15 @@ internal record MongoSession
                 filterDefinition,
                 cancellationToken: cancellationToken
             );
-        
+
         Logger
             .LogInformation(
-                "Finished Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}\n\nDeleted Count: {DeletedCount}\n\nIs Acknowledged: {IsAcknowledged}",
+                "Finished Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}\n\nDocuments Deleted: {DocumentsDeleted}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
                 serverSessionId,
                 command,
-                deleteResult.DeletedCount,
-                deleteResult.IsAcknowledged
+                deleteResult.IsAcknowledged ? "(Not Available)" : deleteResult.DeletedCount
             );
     }
 
