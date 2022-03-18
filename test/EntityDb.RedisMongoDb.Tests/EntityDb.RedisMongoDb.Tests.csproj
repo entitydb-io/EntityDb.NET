@@ -1,8 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <ItemGroup>
-        <ProjectReference Include="..\EntityDb.MongoDb.Tests\EntityDb.MongoDb.Tests.csproj" />
-        <ProjectReference Include="..\EntityDb.Redis.Tests\EntityDb.Redis.Tests.csproj" />
-    </ItemGroup>
-
-</Project>
