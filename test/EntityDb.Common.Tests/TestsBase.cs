@@ -96,9 +96,14 @@ public class TestsBase<TStartup>
         })
     };
 
+    private static readonly AddSnapshotsDelegate AddEntitySnapshotsSharedResources = serviceCollection =>
+    {
+        serviceCollection.AddEntitySnapshotTransactionSubscriber<TestEntity>(TestSessionOptions.Write, true);
+    };
+
     private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
     {
-        new("Redis", serviceCollection =>
+        new("Redis", AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddRedisSnapshots<TestEntity>
             (
@@ -106,14 +111,14 @@ public class TestsBase<TStartup>
                 _ => "127.0.0.1:6379",
                 true
             );
-        }),
-        new("InMemory", serviceCollection =>
+        })),
+        new("InMemory", AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
             serviceCollection.AddInMemorySnapshots<TestEntity>
             (
                 testMode: true
             );
-        })
+        }))
     };
 
     public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots() =>
