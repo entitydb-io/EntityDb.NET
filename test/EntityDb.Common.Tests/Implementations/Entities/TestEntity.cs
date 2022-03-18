@@ -6,18 +6,18 @@ using EntityDb.Common.Snapshots;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
-public record TransactionEntity
+public record TestEntity
 (
     VersionNumber VersionNumber = default
 )
-: IEntity<TransactionEntity>, ISnapshot<TransactionEntity>
+: IEntity<TestEntity>, ISnapshot<TestEntity>
 {
     public const string MongoCollectionName = "Test";
-    public const string RedisKeyNamespace = "test";
+    public const string RedisKeyNamespace = "test-entity";
 
-    public static TransactionEntity Construct(Id entityId)
+    public static TestEntity Construct(Id entityId)
     {
-        return new TransactionEntity();
+        return new TestEntity();
     }
 
     public VersionNumber GetVersionNumber()
@@ -25,13 +25,13 @@ public record TransactionEntity
         return VersionNumber;
     }
 
-    public TransactionEntity Reduce(object[] commands)
+    public TestEntity Reduce(object[] commands)
     {
         var newEntity = this;
 
         foreach (var command in commands)
         {
-            if (command is not IReducer<TransactionEntity> reducer)
+            if (command is not IReducer<TestEntity> reducer)
             {
                 throw new NotImplementedException();
             }
@@ -42,8 +42,8 @@ public record TransactionEntity
         return newEntity;
     }
     
-    public bool ShouldReplace(TransactionEntity? previousSnapshot)
+    public bool ShouldReplace(TestEntity? previousSnapshot)
     {
-        return true;
+        return !Equals(previousSnapshot);
     }
 }

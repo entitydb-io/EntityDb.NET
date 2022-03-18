@@ -87,7 +87,7 @@ public class TestsBase<TStartup>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
-                TransactionEntity.MongoCollectionName,
+                TestEntity.MongoCollectionName,
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
                 true
             );
@@ -98,16 +98,16 @@ public class TestsBase<TStartup>
     {
         new("Redis", serviceCollection =>
         {
-            serviceCollection.AddRedisSnapshots<TransactionEntity>
+            serviceCollection.AddRedisSnapshots<TestEntity>
             (
-                TransactionEntity.RedisKeyNamespace,
+                TestEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379",
                 true
             );
         }),
         new("InMemory", serviceCollection =>
         {
-            serviceCollection.AddInMemorySnapshots<TransactionEntity>
+            serviceCollection.AddInMemorySnapshots<TestEntity>
             (
                 testMode: true
             );
@@ -255,12 +255,12 @@ public class TestsBase<TStartup>
         return transactionRepositoryFactoryMock.Object;
     }
 
-    protected static ISnapshotRepositoryFactory<TransactionEntity> GetMockedSnapshotRepositoryFactory
+    protected static ISnapshotRepositoryFactory<TestEntity> GetMockedSnapshotRepositoryFactory
     (
-        TransactionEntity? snapshot = null
+        TestEntity? snapshot = null
     )
     {
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
             .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
@@ -270,7 +270,7 @@ public class TestsBase<TStartup>
             .Setup(repository => repository.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))

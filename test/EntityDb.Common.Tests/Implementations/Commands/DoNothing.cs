@@ -3,9 +3,9 @@ using EntityDb.Common.Tests.Implementations.Entities;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record DoNothing : IReducer<TransactionEntity>
+public record DoNothing : IReducer<TestEntity>
 {
-    public TransactionEntity Reduce(TransactionEntity entity)
+    public TestEntity Reduce(TestEntity entity)
     {
         return entity with { VersionNumber = entity.VersionNumber.Next() };
     }

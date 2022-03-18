@@ -3,9 +3,9 @@ using EntityDb.Common.Tests.Implementations.Entities;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record Count(ulong Number) : IReducer<TransactionEntity>
+public record Count(ulong Number) : IReducer<TestEntity>
 {
-    public TransactionEntity Reduce(TransactionEntity entity)
+    public TestEntity Reduce(TestEntity entity)
     {
         return entity with
         {

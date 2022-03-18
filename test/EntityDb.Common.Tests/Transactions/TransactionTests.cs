@@ -415,7 +415,7 @@ public sealed class TransactionTests : TestsBase<Startup>
     )
     {
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         foreach (var count in counts)
@@ -473,7 +473,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         });
 
         var transaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
             .Build(default!, default);
@@ -508,13 +508,13 @@ public sealed class TransactionTests : TestsBase<Startup>
             
             
         var firstTransaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
             .Build(default!, transactionId);
             
         var secondTransaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
             .Build(default!, transactionId);
@@ -547,7 +547,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         });
 
         var transaction = (serviceScope.ServiceProvider
-                .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+                .GetRequiredService<TransactionBuilder<TestEntity>>()
                 .ForSingleEntity(default)
                 .Append(CommandSeeder.Create())
                 .Build(default!, default)
@@ -650,13 +650,13 @@ public sealed class TransactionTests : TestsBase<Startup>
         var entityId = Id.NewId();
 
         var firstTransaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
             .Build(default!, Id.NewId());
             
         var secondTransaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
             .Build(default!, Id.NewId());
@@ -705,7 +705,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var tag = TagSeeder.Create();
             
         var transaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Add(tag)
             .Add(tag)
@@ -737,7 +737,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var lease = LeaseSeeder.Create();
             
         var transaction = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Add(lease)
             .Add(lease)
@@ -826,14 +826,14 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionsAdder.Add(serviceCollection);
         });
 
-        var expectedEntity = new TransactionEntity(new VersionNumber(1));
+        var expectedEntity = new TestEntity(new VersionNumber(1));
 
         var entityId = Id.NewId();
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
 
-        var entityRepository = EntityRepository<TransactionEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
+        var entityRepository = EntityRepository<TestEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
         var transaction = BuildTransaction(serviceScope, Id.NewId(), entityId,
             new[] { 0UL });
@@ -867,7 +867,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var entityId = Id.NewId();
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         var tag = new Tag("Foo", "Bar");
@@ -925,7 +925,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var entityId = Id.NewId();
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         var lease = new Lease("Foo", "Bar", "Baz");
@@ -983,7 +983,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var expectedCommand = new Count(1);
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
         var transaction = transactionBuilder
@@ -1032,7 +1032,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var expectedCommand = new Count(2);
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
         var firstTransaction = transactionBuilder

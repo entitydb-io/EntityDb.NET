@@ -30,12 +30,12 @@ public sealed class SnapshotTests : TestsBase<Startup>
             snapshotsAdder.Add(serviceCollection);
         });
 
-        var expectedSnapshot = new TransactionEntity { VersionNumber = new VersionNumber(300) };
+        var expectedSnapshot = new TestEntity { VersionNumber = new VersionNumber(300) };
 
         var snapshotId = Id.NewId();
 
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>();
+            .GetRequiredService<ISnapshotRepositoryFactory<TestEntity>>();
         
         await using var snapshotRepository = await snapshotRepositoryFactory
             .CreateRepository(TestSessionOptions.Write);
@@ -70,10 +70,10 @@ public sealed class SnapshotTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var snapshot = new TransactionEntity();
+        var snapshot = new TestEntity();
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.ReadOnly);
         
         // ACT
@@ -95,7 +95,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         var snapshotId = Id.NewId();
 
-        var expectedSnapshot = new TransactionEntity(new VersionNumber(5000));
+        var expectedSnapshot = new TestEntity(new VersionNumber(5000));
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -103,15 +103,15 @@ public sealed class SnapshotTests : TestsBase<Startup>
         });
         
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.Write);
         
         await using var readOnlySnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.ReadOnly);
         
         await using var readOnlySecondaryPreferredSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
         
         var inserted = await writeSnapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
