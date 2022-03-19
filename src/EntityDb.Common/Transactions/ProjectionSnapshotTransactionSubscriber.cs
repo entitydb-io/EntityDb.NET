@@ -2,11 +2,13 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,24 +43,30 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
             .Where(step => step is IAppendCommandTransactionStep)
             .Cast<IAppendCommandTransactionStep>();
 
+        var projectionCache = new Dictionary<Id, TProjection>();
+        
         foreach (var stepGroup in steps)
         {
             var projectionIds = await _projectionStrategy.GetProjectionIds(stepGroup.EntityId);
-
-            if (projectionIds.Length == 0)
-            {
-                continue;
-            }
-
+            
             foreach (var projectionId in projectionIds)
             {
-                var projection = await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
+                projectionCache.TryGetValue(projectionId, out var projection);
+                
+                projection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
 
+                var previousProjection = projection;
+                
                 var annotatedCommand = EntityAnnotation<object>.CreateFrom(transaction, stepGroup, stepGroup.Command);
 
                 projection = projection.Reduce(annotatedCommand);
-                
-                await snapshotRepository.PutSnapshot(projectionId, projection);
+
+                if (projection.ShouldReplace(previousProjection))
+                {
+                    await snapshotRepository.PutSnapshot(projectionId, projection);
+                }
+
+                projectionCache[projectionId] = projection;
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
@@ -97,6 +98,22 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
             EntitySnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
                 synchronousMode));
+    }
+
+    /// <summary>
+    ///     Adds a projection strategy.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <typeparam name="TProjection">The type of the projection.</typeparam>
+    /// <typeparam name="TProjectionStrategy">The type of the projection strategy.</typeparam>
+    public static void AddProjection<TProjection, TProjectionStrategy>(
+        this IServiceCollection serviceCollection)
+        where TProjection : IProjection<TProjection>
+        where TProjectionStrategy : class, IProjectionStrategy<TProjection>
+    {
+        serviceCollection.AddSingleton<IProjectionStrategy<TProjection>, TProjectionStrategy>();
+        serviceCollection
+            .AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TProjection>>();
     }
 
     /// <summary>

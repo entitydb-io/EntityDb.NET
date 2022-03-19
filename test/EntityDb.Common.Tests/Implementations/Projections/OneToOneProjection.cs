@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
@@ -12,7 +13,7 @@ public record OneToOneProjection
 (
     Id Id,
     VersionNumber EntityVersionNumber = default
-) : IProjection<OneToOneProjection>, ISnapshot<OneToOneProjection>, ISnapshotWithVersionNumber<OneToOneProjection>
+) : IProjection<OneToOneProjection>, ISnapshot<OneToOneProjection>, ISnapshotWithVersionNumber<OneToOneProjection>, ISnapshotWithShouldReplaceLogic<OneToOneProjection>
 {
     public const string RedisKeyNamespace = "one-to-one-projection";
     
@@ -50,8 +51,15 @@ public record OneToOneProjection
         return newProjection;
     }
 
+    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldReplaceLogic { get; } = new();
+
     public bool ShouldReplace(OneToOneProjection? previousSnapshot)
     {
+        if (ShouldReplaceLogic.Value != null)
+        {
+            return ShouldReplaceLogic.Value.Invoke(this, previousSnapshot);
+        }
+        
         return !Equals(previousSnapshot);
     }
 }

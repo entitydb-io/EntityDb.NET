@@ -123,6 +123,8 @@ public class TestsBase<TStartup>
 
     private static readonly AddSnapshotsDelegate AddOneToOneProjectionSnapshotsSharedResources = serviceCollection =>
     {
+        serviceCollection.AddProjection<OneToOneProjection, SingleEntityProjectionStrategy>();
+        serviceCollection.AddProjectionSnapshotTransactionSubscriber<OneToOneProjection>(TestSessionOptions.Write, true);
     };
 
     private static readonly SnapshotsAdder[] AllOneToOneProjectionSnapshotsAdders =
@@ -148,6 +150,11 @@ public class TestsBase<TStartup>
     public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots() =>
         from transactionsAdder in AllTransactionsAdders
         from snapshotsAdder in AllEntitySnapshotsAdders
+        select new object[] { transactionsAdder, snapshotsAdder };
+    
+    public static IEnumerable<object[]> AddTransactionsAndOneToOneProjectionSnapshots() =>
+        from transactionsAdder in AllTransactionsAdders
+        from snapshotsAdder in AllOneToOneProjectionSnapshotsAdders
         select new object[] { transactionsAdder, snapshotsAdder };
 
     public static IEnumerable<object[]> AddTransactions() => AllTransactionsAdders

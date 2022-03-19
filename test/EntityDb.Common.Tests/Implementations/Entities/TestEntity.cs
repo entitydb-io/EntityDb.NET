@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Entities;
 using System;
+using System.Threading;
 using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
@@ -47,7 +48,7 @@ public record TestEntity
 
         return newEntity;
     }
-    
+
     public bool ShouldReplace(TestEntity? previousSnapshot)
     {
         return !Equals(previousSnapshot);
