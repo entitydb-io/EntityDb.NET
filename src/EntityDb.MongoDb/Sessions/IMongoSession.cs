@@ -11,7 +11,6 @@ namespace EntityDb.MongoDb.Sessions;
 internal interface IMongoSession : IDisposableResource
 {
     IMongoDatabase MongoDatabase { get; }
-    IClientSessionHandle ClientSessionHandle { get; }
 
     Task Insert<TDocument>(string collectionName,
         TDocument[] bsonDocuments, CancellationToken cancellationToken);
