@@ -44,7 +44,7 @@ public class TestsBase<TStartup>
     
     public delegate void AddTransactionsDelegate(IServiceCollection serviceCollection);
 
-    public record TransactionsAdder(string Name, AddTransactionsDelegate AddTransactionsDelegate)
+    public record TransactionsAdder(string Name, Type EntityType, AddTransactionsDelegate AddTransactionsDelegate)
     {
         public void Add(IServiceCollection serviceCollection)
         {
@@ -85,7 +85,7 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionsAdders =
     {
-        new("MongoDb<TestEntity>", serviceCollection =>
+        new("MongoDb<TestEntity>", typeof(TestEntity), serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
