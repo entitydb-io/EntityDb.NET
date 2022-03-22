@@ -34,30 +34,35 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
+    public Task<ISnapshotRepository<TProjection>> CreateSnapshotRepository()
+    {
+        return _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
+    }
+
     protected override async Task NotifyAsync(ITransaction transaction)
     {
-        var snapshotRepository =
-            await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
-
-        var steps = transaction.Steps
-            .Where(step => step is IAppendCommandTransactionStep)
-            .Cast<IAppendCommandTransactionStep>();
+        await using var snapshotRepository = await CreateSnapshotRepository();
 
         var projectionCache = new Dictionary<Id, TProjection>();
         
-        foreach (var stepGroup in steps)
+        foreach (var step in transaction.Steps)
         {
-            var projectionIds = await _projectionStrategy.GetProjectionIds(stepGroup.EntityId);
+            if (step is not IAppendCommandTransactionStep appendCommandTransactionStep)
+            {
+                continue;
+            }
+            
+            var projectionIds = await _projectionStrategy.GetProjectionIds(appendCommandTransactionStep.EntityId);
             
             foreach (var projectionId in projectionIds)
             {
-                projectionCache.TryGetValue(projectionId, out var projection);
+                projectionCache.TryGetValue(projectionId, out var previousProjection);
                 
-                projection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
+                previousProjection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
 
-                var previousProjection = projection;
+                var projection = previousProjection;
                 
-                var annotatedCommand = EntityAnnotation<object>.CreateFrom(transaction, stepGroup, stepGroup.Command);
+                var annotatedCommand = EntityAnnotation<object>.CreateFrom(transaction, appendCommandTransactionStep, appendCommandTransactionStep.Command);
 
                 projection = projection.Reduce(annotatedCommand);
 

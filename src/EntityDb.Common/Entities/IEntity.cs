@@ -16,9 +16,15 @@ public interface IEntity<out TEntity>
     abstract static TEntity Construct(Id entityId);
 
     /// <summary>
+    ///     Returns the id of the entity.
+    /// </summary>
+    /// <returns>The id of this entity.</returns>
+    Id GetId();
+    
+    /// <summary>
     ///     Returns the version number of the entity.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The id of this entity.</returns>
     VersionNumber GetVersionNumber();
     
     /// <summary>

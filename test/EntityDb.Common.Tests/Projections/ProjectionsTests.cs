@@ -8,10 +8,13 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
+using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 using Shouldly;
 using Xunit;
 
@@ -42,6 +45,51 @@ public class ProjectionsTests : TestsBase<Startup>
         
         // ASSERT
     }
+
+    private async Task
+        Generic_GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+        where TProjection : IProjection<TProjection>
+    {
+        // ARRANGE
+
+        var projectionId = Id.NewId();
+        var expectedProjection = TProjection.Construct(projectionId);
+
+        var mockProjectionStrategy = new Mock<IProjectionStrategy<TProjection>>();
+
+        mockProjectionStrategy
+            .Setup(strategy => strategy.GetEntityIds(It.IsAny<Id>(), It.IsAny<TProjection>()))
+            .ReturnsAsync(Array.Empty<Id>());
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            transactionsAdder.Add(serviceCollection);
+            snapshotsAdder.Add(serviceCollection);
+            
+            serviceCollection.RemoveAll(typeof(IProjectionStrategy<>));
+
+            serviceCollection.AddSingleton(mockProjectionStrategy.Object);
+        });
+
+        var projectionStrategy = serviceScope.ServiceProvider
+            .GetRequiredService<IProjectionStrategy<TProjection>>();
+        
+        await using var projectionRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+
+        // ACT
+
+        var actualEntityIds = await projectionStrategy.GetEntityIds(projectionId, default!);
+        
+        var actualProjection = await projectionRepository.GetCurrent(projectionId);
+        
+        // ASSERT
+        
+        actualEntityIds.ShouldBeEmpty();
+        
+        actualProjection.ShouldBeEquivalentTo(expectedProjection);
+    }
     
     private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenReturnDefaultProjection<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
         where TProjection : IProjection<TProjection>
@@ -71,19 +119,19 @@ public class ProjectionsTests : TestsBase<Startup>
     }
     
     
-    private async Task Generic_GivenTransactionCommitted_WhenGettingProject_ThenReturnExpectedProjection<TEntity, TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TEntity : IEntity<TEntity>
+    private async Task Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+        where TEntity : IEntity<TEntity>, IEntityWithVersionNumber<TEntity>
         where TProjection : IProjection<TProjection>, ISnapshotWithShouldReplaceLogic<TProjection>
     {
         // ARRANGE
 
-        const uint NumberOfVersionNumbers = 5;
-        const uint ReplaceAtVersionNumber = 3;
+        const uint numberOfVersionNumbers = 5;
+        const uint replaceAtVersionNumber = 3;
         
-        TProjection.ShouldReplaceLogic.Value = (projection, _) => projection.GetEntityVersionNumber(default) == new VersionNumber(ReplaceAtVersionNumber);
+        TProjection.ShouldReplaceLogic.Value = (projection, _) => projection.GetEntityVersionNumber(default) == new VersionNumber(replaceAtVersionNumber);
         
         var projectionId = Id.NewId();
-        var transaction = TransactionSeeder.Create(projectionId, NumberOfVersionNumbers);
+        var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -103,7 +151,7 @@ public class ProjectionsTests : TestsBase<Startup>
         
         // ARRANGE ASSERTIONS
 
-        NumberOfVersionNumbers.ShouldBeGreaterThan(ReplaceAtVersionNumber);
+        numberOfVersionNumbers.ShouldBeGreaterThan(replaceAtVersionNumber);
         
         transactionInserted.ShouldBeTrue();
         
@@ -114,8 +162,8 @@ public class ProjectionsTests : TestsBase<Startup>
         
         // ASSERT
         
-        currentProjection.GetEntityVersionNumber(default).Value.ShouldBe(NumberOfVersionNumbers);
-        projectionSnapshot.ShouldNotBeNull().GetEntityVersionNumber(default).Value.ShouldBe(ReplaceAtVersionNumber);
+        currentProjection.GetEntityVersionNumber(default).Value.ShouldBe(numberOfVersionNumbers);
+        projectionSnapshot.ShouldNotBeNull().GetEntityVersionNumber(default).Value.ShouldBe(replaceAtVersionNumber);
     }
 
     [Theory]
@@ -131,13 +179,24 @@ public class ProjectionsTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndOneToOneProjectionSnapshots))]
-    public async Task GivenTransactionCommitted_WhenGettingProject_ThenReturnExpectedProjection(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+    public async Task GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection(
+        TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
     {
         await GetType()
-            .GetMethod(nameof(Generic_GivenTransactionCommitted_WhenGettingProject_ThenReturnExpectedProjection), ~BindingFlags.Public)!
+            .GetMethod(nameof(Generic_GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection), ~BindingFlags.Public)!
+            .MakeGenericMethod(snapshotsAdder.SnapshotType)
+            .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
+            .ShouldBeAssignableTo<Task>()!;
+    }
+    
+    [Theory]
+    [MemberData(nameof(AddTransactionsAndOneToOneProjectionSnapshots))]
+    public async Task GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+    {
+        await GetType()
+            .GetMethod(nameof(Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType, snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
             .ShouldBeAssignableTo<Task>()!;
     }
-
 }

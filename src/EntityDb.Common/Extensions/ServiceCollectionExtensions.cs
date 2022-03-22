@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool synchronousMode = false)
-        where TEntity : ISnapshot<TEntity>
+        where TEntity : IEntity<TEntity>, ISnapshot<TEntity>
     {
         serviceCollection.AddSingleton<ITransactionSubscriber>(serviceProvider =>
             EntitySnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,

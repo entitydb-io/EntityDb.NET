@@ -6,6 +6,7 @@ using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace EntityDb.Redis.Extensions;
@@ -13,6 +14,7 @@ namespace EntityDb.Redis.Extensions;
 /// <summary>
 ///     Extensions for service collections.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
 public static class ServiceCollectionExtensions
 {
     internal static void AddJsonElementEnvelopeService(this IServiceCollection serviceCollection)
