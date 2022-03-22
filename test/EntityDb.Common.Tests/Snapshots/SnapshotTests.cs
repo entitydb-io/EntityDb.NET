@@ -1,13 +1,14 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Tests.Implementations.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Shouldly;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Tests.Implementations.Snapshots;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
@@ -19,9 +20,8 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
     }
 
-    [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenEmptySnapshotRepository_WhenGoingThroughFullCycle_ThenOriginalMatchesSnapshot(SnapshotsAdder snapshotsAdder)
+    private async Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotsAdder snapshotsAdder)
+        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
     {
         // ARRANGE
 
@@ -30,12 +30,11 @@ public sealed class SnapshotTests : TestsBase<Startup>
             snapshotsAdder.Add(serviceCollection);
         });
 
-        var expectedSnapshot = new TransactionEntity { VersionNumber = new VersionNumber(300) };
-
         var snapshotId = Id.NewId();
+        var expectedSnapshot = TSnapshot.Construct(snapshotId, new VersionNumber(300));
 
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>();
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>();
         
         await using var snapshotRepository = await snapshotRepositoryFactory
             .CreateRepository(TestSessionOptions.Write);
@@ -54,8 +53,19 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenReadOnlyMode_WhenPuttingSnapshot_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddEntitySnapshots))]
+    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
+    public async Task GivenSnapshotsAdder_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(SnapshotsAdder snapshotsAdder)
+    {
+        await GetType()
+            .GetMethod(nameof(GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched), ~BindingFlags.Public)!
+            .MakeGenericMethod(snapshotsAdder.SnapshotType)
+            .Invoke(this, new object?[] { snapshotsAdder })
+            .ShouldBeAssignableTo<Task>()!;
+    }
+    
+    private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotsAdder snapshotsAdder)
+        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
     {
         // ARRANGE
 
@@ -70,10 +80,10 @@ public sealed class SnapshotTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var snapshot = new TransactionEntity();
+        var snapshot = TSnapshot.Construct(default, new VersionNumber(1));
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.ReadOnly);
         
         // ACT
@@ -86,16 +96,27 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         loggerVerifier.Invoke(Times.Once());
     }
-
+    
     [Theory]
-    [MemberData(nameof(AddSnapshots))]
-    public async Task GivenSnapshotInserted_WhenReadingInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddEntitySnapshots))]
+    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
+    public async Task GivenSnapshotsAdder_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder snapshotsAdder)
+    {
+        await GetType()
+            .GetMethod(nameof(GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged), ~BindingFlags.Public)!
+            .MakeGenericMethod(snapshotsAdder.SnapshotType)
+            .Invoke(this, new object?[] { snapshotsAdder })
+            .ShouldBeAssignableTo<Task>()!;
+    }
+
+    private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotsAdder snapshotsAdder)
+        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
     {
         // ARRANGE
 
         var snapshotId = Id.NewId();
 
-        var expectedSnapshot = new TransactionEntity(new VersionNumber(5000));
+        var expectedSnapshot = TSnapshot.Construct(default, new VersionNumber(5000));
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -103,15 +124,15 @@ public sealed class SnapshotTests : TestsBase<Startup>
         });
         
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.Write);
         
         await using var readOnlySnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.ReadOnly);
         
         await using var readOnlySecondaryPreferredSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
         
         var inserted = await writeSnapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
@@ -130,5 +151,17 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         readOnlySnapshot.ShouldBeEquivalentTo(expectedSnapshot);
         readOnlySecondaryPreferredSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
+    }
+    
+    [Theory]
+    [MemberData(nameof(AddEntitySnapshots))]
+    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
+    public async Task GivenSnapshotsAdder_WhenReadingInsertedSnapshotInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder snapshotsAdder)
+    {
+        await GetType()
+            .GetMethod(nameof(GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot), ~BindingFlags.Public)!
+            .MakeGenericMethod(snapshotsAdder.SnapshotType)
+            .Invoke(this, new object?[] { snapshotsAdder })
+            .ShouldBeAssignableTo<Task>()!;
     }
 }

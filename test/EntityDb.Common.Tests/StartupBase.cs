@@ -31,7 +31,7 @@ public abstract class StartupBase : IStartup
 
         // Transaction Entity
 
-        serviceCollection.AddEntity<TransactionEntity>();
+        serviceCollection.AddEntity<TestEntity>();
 
         // Snapshot Session Options
 

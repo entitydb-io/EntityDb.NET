@@ -7,11 +7,6 @@ namespace EntityDb.Mvc.Agents;
 
 internal record HttpContextAgent(HttpContext HttpContext, IOptionsFactory<HttpContextAgentSignatureOptions> HttpContextAgentSignatureOptionsFactory) : IAgent
 {
-    public bool HasRole(string role)
-    {
-        return HttpContext.User.IsInRole(role);
-    }
-
     public TimeStamp GetTimeStamp()
     {
         return TimeStamp.UtcNow;

@@ -31,11 +31,11 @@ public class EntityTests : TestsBase<Startup>
         Id entityId,
         VersionNumber from,
         VersionNumber to,
-        TransactionEntity? entity = null
+        TestEntity? entity = null
     )
     {
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         if (entity != null)
@@ -57,8 +57,8 @@ public class EntityTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddTransactionsAndSnapshots))]
-    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
+    public async Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder, SnapshotsAdder entitySnapshotsAdder)
     {
         // ARRANGE
 
@@ -72,13 +72,13 @@ public class EntityTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.Add(serviceCollection);
-            snapshotsAdder.Add(serviceCollection);
+            entitySnapshotsAdder.Add(serviceCollection);
         });
 
         var entityId = Id.NewId();
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.Write,
                 TestSessionOptions.Write);
 
@@ -149,7 +149,7 @@ public class EntityTests : TestsBase<Startup>
         });
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
         var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
@@ -185,10 +185,10 @@ public class EntityTests : TestsBase<Startup>
         // ACT
 
         var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+            .GetService<ISnapshotRepositoryFactory<TestEntity>>();
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository("NOT NULL", "NOT NULL");
 
         // ASSERT
@@ -212,10 +212,10 @@ public class EntityTests : TestsBase<Startup>
         // ACT
 
         var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+            .GetService<ISnapshotRepositoryFactory<TestEntity>>();
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository("NOT NULL");
 
         // ASSERT
@@ -239,10 +239,10 @@ public class EntityTests : TestsBase<Startup>
         // ACT
 
         var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TransactionEntity>>();
+            .GetService<ISnapshotRepositoryFactory<TestEntity>>();
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository("NOT NULL", "NOT NULL");
 
         // ASSERT
@@ -257,7 +257,7 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var snapshot = new TransactionEntity(new VersionNumber(1));
+        var snapshot = new TestEntity(default, new VersionNumber(1));
 
         var newCommands = new object[]
         {
@@ -274,7 +274,7 @@ public class EntityTests : TestsBase<Startup>
         // ACT
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository("NOT NULL", "NOT NULL");
 
         var snapshotOrDefault = await entityRepository.GetCurrent(default);
@@ -297,7 +297,7 @@ public class EntityTests : TestsBase<Startup>
         });
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(default!);
 
         // ASSERT

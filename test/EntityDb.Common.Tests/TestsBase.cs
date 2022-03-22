@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Extensions;
+using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
@@ -42,7 +44,7 @@ public class TestsBase<TStartup>
     
     public delegate void AddTransactionsDelegate(IServiceCollection serviceCollection);
 
-    public record TransactionsAdder(string Name, AddTransactionsDelegate AddTransactionsDelegate)
+    public record TransactionsAdder(string Name, Type EntityType, AddTransactionsDelegate AddTransactionsDelegate)
     {
         public void Add(IServiceCollection serviceCollection)
         {
@@ -57,7 +59,7 @@ public class TestsBase<TStartup>
 
     public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
 
-    public record SnapshotsAdder(string Name, AddSnapshotsDelegate AddSnapshotsDelegate)
+    public record SnapshotsAdder(string Name, Type SnapshotType, AddSnapshotsDelegate AddSnapshotsDelegate)
     {
         public void Add(IServiceCollection serviceCollection)
         {
@@ -83,46 +85,85 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionsAdders =
     {
-        new("MongoDb", serviceCollection =>
+        new("MongoDb<TestEntity>", typeof(TestEntity), serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
-                TransactionEntity.MongoCollectionName,
+                TestEntity.MongoCollectionName,
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
                 true
             );
         })
     };
 
-    private static readonly SnapshotsAdder[] AllSnapshotsAdders =
+    private static readonly AddSnapshotsDelegate AddEntitySnapshotsSharedResources = serviceCollection =>
     {
-        new("Redis", serviceCollection =>
+        serviceCollection.AddEntitySnapshotTransactionSubscriber<TestEntity>(TestSessionOptions.Write, true);
+    };
+
+    private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
+    {
+        new("Redis<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
-            serviceCollection.AddRedisSnapshots<TransactionEntity>
+            serviceCollection.AddRedisSnapshots<TestEntity>
             (
-                TransactionEntity.RedisKeyNamespace,
+                TestEntity.RedisKeyNamespace,
                 _ => "127.0.0.1:6379",
                 true
             );
-        }),
-        new("InMemory", serviceCollection =>
+        })),
+        new("InMemory<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
         {
-            serviceCollection.AddInMemorySnapshots<TransactionEntity>
+            serviceCollection.AddInMemorySnapshots<TestEntity>
             (
                 testMode: true
             );
-        })
+        }))
     };
 
-    public static IEnumerable<object[]> AddTransactionsAndSnapshots() =>
+    private static readonly AddSnapshotsDelegate AddOneToOneProjectionSnapshotsSharedResources = serviceCollection =>
+    {
+        serviceCollection.AddProjection<OneToOneProjection, SingleEntityProjectionStrategy>();
+        serviceCollection.AddProjectionSnapshotTransactionSubscriber<OneToOneProjection>(TestSessionOptions.Write, true);
+    };
+
+    private static readonly SnapshotsAdder[] AllOneToOneProjectionSnapshotsAdders =
+    {
+        new("Redis<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+        {
+            serviceCollection.AddRedisSnapshots<OneToOneProjection>
+            (
+                OneToOneProjection.RedisKeyNamespace,
+                _ => "127.0.0.1:6379",
+                true
+            );
+        })),
+        new("InMemory<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+        {
+            serviceCollection.AddInMemorySnapshots<OneToOneProjection>
+            (
+                testMode: true
+            );
+        }))
+    };
+
+    public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots() =>
         from transactionsAdder in AllTransactionsAdders
-        from snapshotsAdder in AllSnapshotsAdders
+        from snapshotsAdder in AllEntitySnapshotsAdders
+        select new object[] { transactionsAdder, snapshotsAdder };
+    
+    public static IEnumerable<object[]> AddTransactionsAndOneToOneProjectionSnapshots() =>
+        from transactionsAdder in AllTransactionsAdders
+        from snapshotsAdder in AllOneToOneProjectionSnapshotsAdders
         select new object[] { transactionsAdder, snapshotsAdder };
 
     public static IEnumerable<object[]> AddTransactions() => AllTransactionsAdders
         .Select(transactionsAdder => new object[] { transactionsAdder });
 
-    public static IEnumerable<object[]> AddSnapshots() => AllSnapshotsAdders
+    public static IEnumerable<object[]> AddEntitySnapshots() => AllEntitySnapshotsAdders
+        .Select(snapshotsAdder => new object[] { snapshotsAdder });
+
+    public static IEnumerable<object[]> AddOneToOneProjectionSnapshots() => AllOneToOneProjectionSnapshotsAdders
         .Select(snapshotsAdder => new object[] { snapshotsAdder });
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
@@ -255,12 +296,12 @@ public class TestsBase<TStartup>
         return transactionRepositoryFactoryMock.Object;
     }
 
-    protected static ISnapshotRepositoryFactory<TransactionEntity> GetMockedSnapshotRepositoryFactory
+    protected static ISnapshotRepositoryFactory<TestEntity> GetMockedSnapshotRepositoryFactory
     (
-        TransactionEntity? snapshot = null
+        TestEntity? snapshot = null
     )
     {
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
             .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
@@ -270,7 +311,7 @@ public class TestsBase<TStartup>
             .Setup(repository => repository.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TransactionEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))

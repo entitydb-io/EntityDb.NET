@@ -3,12 +3,14 @@ using EntityDb.Common.Extensions;
 using EntityDb.InMemory.Sessions;
 using EntityDb.InMemory.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.InMemory.Extensions;
 
 /// <summary>
 ///     Extensions for service collections.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
 public static class ServiceCollectionExtensions
 {
     /// <summary>

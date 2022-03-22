@@ -1,22 +1,24 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubscriber
-    where TSnapshot : ISnapshot<TSnapshot>
+internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscriber
+    where TEntity : IEntity<TEntity>, ISnapshot<TEntity>
 {
-    private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
+    private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
-
+    
     public EntitySnapshotTransactionSubscriber
     (
-        ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
+        ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
         bool synchronousMode
     ) : base(synchronousMode)
@@ -25,40 +27,45 @@ internal class EntitySnapshotTransactionSubscriber<TSnapshot> : TransactionSubsc
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
+    public Task<ISnapshotRepository<TEntity>> CreateSnapshotRepository()
+    {
+        return _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
+    }
+
     protected override async Task NotifyAsync(ITransaction transaction)
     {
-        var snapshotRepository =
-            await _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
+        await using var snapshotRepository = await CreateSnapshotRepository();
 
-        var stepGroups = transaction.Steps
-            .GroupBy(step => step.EntityId);
+        var entityCache = new Dictionary<Id, TEntity>();
 
-        foreach (var stepGroup in stepGroups)
+        foreach (var step in transaction.Steps)
         {
-            var entity = stepGroup.Last().Entity;
-
-            if (entity is not TSnapshot nextSnapshot)
-            {
-                return;
-            }
-            
-            var snapshotId = stepGroup.Key;
-            
-            var previousSnapshot = await snapshotRepository.GetSnapshot(snapshotId);
-
-            if (!nextSnapshot.ShouldReplace(previousSnapshot))
+            if (step.Entity is not TEntity entity)
             {
                 continue;
             }
 
-            await snapshotRepository.PutSnapshot(snapshotId, nextSnapshot);
+            var entityId = entity.GetId();
+
+            entityCache.TryGetValue(entityId, out var previousSnapshot);
+
+            previousSnapshot ??= await snapshotRepository.GetSnapshot(entityId);
+
+            if (!entity.ShouldReplace(previousSnapshot))
+            {
+                continue;
+            }
+
+            await snapshotRepository.PutSnapshot(entityId, entity);
+            
+            entityCache[entityId] = entity;
         }
     }
 
-    public static EntitySnapshotTransactionSubscriber<TSnapshot> Create(IServiceProvider serviceProvider,
+    public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
         string snapshotSessionOptionsName, bool synchronousMode)
     {
-        return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TSnapshot>>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TEntity>>(serviceProvider,
             snapshotSessionOptionsName,
             synchronousMode);
     }

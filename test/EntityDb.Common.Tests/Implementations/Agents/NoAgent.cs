@@ -5,11 +5,6 @@ namespace EntityDb.Common.Tests.Implementations.Agents;
 
 public class NoAgent : IAgent
 {
-    public bool HasRole(string role)
-    {
-        return false;
-    }
-
     public TimeStamp GetTimeStamp()
     {
         return TimeStamp.UtcNow;

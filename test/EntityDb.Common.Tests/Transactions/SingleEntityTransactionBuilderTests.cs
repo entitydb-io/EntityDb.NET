@@ -29,7 +29,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope();
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
         // ASSERT
@@ -48,11 +48,11 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var expectedEntityId = Id.NewId();
 
-        var expectedEntity = TransactionEntity
+        var expectedEntity = TestEntity
             .Construct(expectedEntityId);
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(expectedEntityId);
 
         transactionBuilder.Load(expectedEntity);
@@ -80,7 +80,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope();
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
         // ACT
@@ -113,11 +113,11 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         });
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(default!);
 
         var entity = await entityRepository.GetCurrent(entityId);
@@ -150,7 +150,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         });
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         // ACT
@@ -188,11 +188,11 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         });
 
         var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TransactionEntity>>()
+            .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
         await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TransactionEntity>>()
+            .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(default!);
 
         var entity = await entityRepository.GetCurrent(entityId);
