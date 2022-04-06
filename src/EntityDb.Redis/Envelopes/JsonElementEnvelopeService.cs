@@ -5,12 +5,17 @@ using EntityDb.Redis.Converters;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EntityDb.Redis.Envelopes;
 
 internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions();
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+    
     private readonly ILogger<JsonElementEnvelopeService> _logger;
     private readonly ITypeResolver _typeResolver;
 
