@@ -17,6 +17,8 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
     static JsonElementEnvelopeService()
     {
         JsonSerializerOptions.Converters.Add(new EnvelopeHeadersConverter());
+        JsonSerializerOptions.Converters.Add(new IdConverter());
+        JsonSerializerOptions.Converters.Add(new VersionNumberConverter());
     }
     
     public JsonElementEnvelopeService
