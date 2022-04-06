@@ -9,5 +9,5 @@ internal interface IRedisSession : IDisposableResource
 {
     Task<bool> Insert(RedisKey redisKey, RedisValue redisValue);
     Task<RedisValue> Find(RedisKey redisKey);
-    Task<bool> Delete(IEnumerable<RedisKey> redisKeys);
+    Task<bool> Delete(RedisKey[] redisKeys);
 }

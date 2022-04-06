@@ -21,6 +21,9 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
     private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _connectionString;
     private readonly string _keyNamespace;
+    private readonly SemaphoreSlim _connectionSemaphore = new(1);
+    
+    private IConnectionMultiplexer? _connectionMultiplexer;
 
     public RedisSnapshotRepositoryFactory
     (
@@ -39,13 +42,31 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         _keyNamespace = keyNamespace;
     }
 
+    private async Task<IConnectionMultiplexer> OpenConnectionMultiplexer(CancellationToken cancellationToken)
+    {
+        await _connectionSemaphore.WaitAsync(cancellationToken);
+        
+        if (_connectionMultiplexer != null)
+        {
+            _connectionSemaphore.Release();
+            
+            return _connectionMultiplexer;
+        }
+        
+        var configurationOptions = ConfigurationOptions.Parse(_connectionString);
+        
+        _connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions).WaitAsync(cancellationToken);
+
+        _connectionSemaphore.Release();
+
+        return _connectionMultiplexer;
+    }
+
     private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions, CancellationToken cancellationToken)
     {
-        var configurationOptions = ConfigurationOptions.Parse(_connectionString);
+        var connectionMultiplexer = await OpenConnectionMultiplexer(cancellationToken);
 
-        var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions).WaitAsync(cancellationToken);
-
-        return new RedisSession(connectionMultiplexer, snapshotSessionOptions);
+        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), snapshotSessionOptions);
     }
 
     public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
@@ -73,5 +94,12 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
             connectionString,
             keyNamespace
         );
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        _connectionMultiplexer?.Dispose();
+        
+        return ValueTask.CompletedTask;
     }
 }
