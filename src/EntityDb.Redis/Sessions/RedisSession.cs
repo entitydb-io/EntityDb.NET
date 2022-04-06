@@ -52,7 +52,7 @@ internal sealed record RedisSession
             );
         
         var redisTransaction = Database.CreateTransaction();
-
+        
         var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
 
         await redisTransaction.ExecuteAsync(GetCommandFlags());
