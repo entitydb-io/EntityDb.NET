@@ -62,7 +62,14 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
 
                 var projection = previousProjection;
                 
-                var annotatedCommand = EntityAnnotation<object>.CreateFrom(transaction, appendCommandTransactionStep, appendCommandTransactionStep.Command);
+                var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
+                (
+                    transaction.Id,
+                    transaction.TimeStamp,
+                    appendCommandTransactionStep.EntityId,
+                    appendCommandTransactionStep.EntityVersionNumber,
+                    appendCommandTransactionStep.Command
+                );
 
                 projection = projection.Reduce(annotatedCommand);
 

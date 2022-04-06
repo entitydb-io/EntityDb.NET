@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using System;
 
 namespace EntityDb.Common.Annotations;
 
@@ -14,16 +15,25 @@ internal record EntityAnnotation<TData>
     TData Data
 ) : IEntityAnnotation<TData>
 {
-    public static EntityAnnotation<TData> CreateFrom(ITransaction transaction, ITransactionStep transactionStep,
-        TData data)
+    public static IEntityAnnotation<TData> CreateFromBoxedData
+    (
+        Id transactionId,
+        TimeStamp transactionTimeStamp,
+        Id entityId,
+        VersionNumber entityVersionNumber,
+        object boxedData
+    )
     {
-        return new
+        var dataAnnotationType = typeof(EntityAnnotation<>).MakeGenericType(boxedData.GetType());
+
+        return (IEntityAnnotation<TData>)Activator.CreateInstance
         (
-            transaction.Id,
-            transaction.TimeStamp,
-            transactionStep.EntityId,
-            transactionStep.EntityVersionNumber,
-            data
-        );
+            dataAnnotationType,
+            transactionId,
+            transactionTimeStamp,
+            entityId,
+            entityVersionNumber,
+            boxedData
+        )!;
     }
 }

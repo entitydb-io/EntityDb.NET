@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Threading;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Snapshots;
+using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
@@ -34,21 +36,12 @@ public record OneToOneProjection
 
     public OneToOneProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands)
     {
-        var newProjection = this;
-
-        foreach (var annotatedCommand in annotatedCommands)
+        return annotatedCommands.Aggregate(this, (previousProjection, nextAnnotatedCommand) => nextAnnotatedCommand switch
         {
-            var command = annotatedCommand.Data;
-            
-            if (command is not IReducer<OneToOneProjection> reducer)
-            {
-                throw new NotImplementedException();
-            }
-            
-            newProjection = reducer.Reduce(newProjection);
-        }
-
-        return newProjection;
+            IEntityAnnotation<DoNothing> doNothing => doNothing.Data.Reduce(previousProjection),
+            IEntityAnnotation<Count> count => count.Data.Reduce(previousProjection),
+            _ => throw new NotSupportedException()
+        });
     }
 
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldReplaceLogic { get; } = new();

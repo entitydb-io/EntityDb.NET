@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -104,11 +105,12 @@ internal static class DocumentQueryExtensions
         CancellationToken cancellationToken
     )
         where TDocument : IEntityDocument
+        where TData : notnull
     {
         var documents = await documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
 
         return documents
-            .Select(document => new EntityAnnotation<TData>
+            .Select(document => EntityAnnotation<TData>.CreateFromBoxedData
             (
                 document.TransactionId,
                 document.TransactionTimeStamp,
@@ -116,7 +118,7 @@ internal static class DocumentQueryExtensions
                 document.EntityVersionNumber,
                 envelopeService.Reconstruct<TData>(document.Data)
             ))
-            .ToArray<IEntityAnnotation<TData>>();
+            .ToArray();
     }
 
     public static async Task<TData[]> GetData<TDocument, TData>
