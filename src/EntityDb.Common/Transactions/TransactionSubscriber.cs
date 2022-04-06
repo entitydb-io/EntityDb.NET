@@ -8,15 +8,15 @@ namespace EntityDb.Common.Transactions;
 /// </summary>
 public abstract class TransactionSubscriber : ITransactionSubscriber
 {
-    private readonly bool _synchronousMode;
+    private readonly bool _testMode;
 
     /// <summary>
     ///     Constructs a new instance of <see cref="TransactionSubscriber" />.
     /// </summary>
-    /// <param name="synchronousMode">If <c>true</c> then the task will be synchronously awaited before returning.</param>
-    protected TransactionSubscriber(bool synchronousMode)
+    /// <param name="testMode">If <c>true</c> then the task will be synchronously awaited before returning.</param>
+    protected TransactionSubscriber(bool testMode)
     {
-        _synchronousMode = synchronousMode;
+        _testMode = testMode;
     }
 
     /// <inheritdoc cref="ITransactionSubscriber.Notify(ITransaction)" />
@@ -24,7 +24,7 @@ public abstract class TransactionSubscriber : ITransactionSubscriber
     {
         var task = Task.Run(async () => await NotifyAsync(transaction).ConfigureAwait(false));
 
-        if (_synchronousMode)
+        if (_testMode)
         {
             task.Wait();
         }

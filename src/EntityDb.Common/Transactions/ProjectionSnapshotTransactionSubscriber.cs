@@ -26,8 +26,8 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
         IProjectionStrategy<TProjection> projectionStrategy,
         ISnapshotRepositoryFactory<TProjection> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
-        bool synchronousMode
-    ) : base(synchronousMode)
+        bool testMode
+    ) : base(testMode)
     {
         _projectionStrategy = projectionStrategy;
         _snapshotRepositoryFactory = snapshotRepositoryFactory;
@@ -77,10 +77,10 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
     }
 
     public static ProjectionSnapshotTransactionSubscriber<TProjection> Create(IServiceProvider serviceProvider,
-        string snapshotSessionOptionsName, bool synchronousMode)
+        string snapshotSessionOptionsName, bool testMode)
     {
         return ActivatorUtilities.CreateInstance<ProjectionSnapshotTransactionSubscriber<TProjection>>(serviceProvider,
             snapshotSessionOptionsName,
-            synchronousMode);
+            testMode);
     }
 }

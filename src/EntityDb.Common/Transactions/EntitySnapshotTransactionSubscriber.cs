@@ -20,8 +20,8 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscri
     (
         ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
-        bool synchronousMode
-    ) : base(synchronousMode)
+        bool testMode
+    ) : base(testMode)
     {
         _snapshotRepositoryFactory = snapshotRepositoryFactory;
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
@@ -63,10 +63,10 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscri
     }
 
     public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
-        string snapshotSessionOptionsName, bool synchronousMode)
+        string snapshotSessionOptionsName, bool testMode)
     {
         return ActivatorUtilities.CreateInstance<EntitySnapshotTransactionSubscriber<TEntity>>(serviceProvider,
             snapshotSessionOptionsName,
-            synchronousMode);
+            testMode);
     }
 }
