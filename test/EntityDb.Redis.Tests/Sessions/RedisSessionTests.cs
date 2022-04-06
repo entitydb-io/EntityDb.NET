@@ -20,7 +20,7 @@ public class RedisSessionTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var readOnlyRedisSession = new RedisSession(default!, new SnapshotSessionOptions
+        var readOnlyRedisSession = new RedisSession(default!, default!, new SnapshotSessionOptions
         {
             ReadOnly = true
         });

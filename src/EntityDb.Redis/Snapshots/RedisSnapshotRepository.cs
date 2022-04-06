@@ -32,7 +32,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
 
     private RedisKey GetSnapshotKey(Id snapshotId)
     {
-        return $"{_keyNamespace}#{snapshotId}";
+        return $"{_keyNamespace}#{snapshotId.Value}";
     }
 
     public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
@@ -61,7 +61,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
 
     public async Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
     {
-        var snapshotKeys = snapshotIds.Select(GetSnapshotKey);
+        var snapshotKeys = snapshotIds.Select(GetSnapshotKey).ToArray();
 
         return await _redisSession.Delete(snapshotKeys).WaitAsync(cancellationToken);
     }

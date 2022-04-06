@@ -1,14 +1,23 @@
 ﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Snapshots;
+using EntityDb.Common.Transactions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions;
 
-internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : DisposableResourceBaseRecord, IRedisSession
+internal sealed record RedisSession
+(
+    ILogger<RedisSession> Logger,
+    IDatabase Database,
+    SnapshotSessionOptions SnapshotSessionOptions
+) : DisposableResourceBaseRecord, IRedisSession
 {
     private CommandFlags GetCommandFlags()
     {
@@ -34,29 +43,71 @@ internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer
     {
         AssertNotReadOnly();
 
-        ConnectionMultiplexer.GetDatabase();
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Insert on `{DatabaseIndex}.{RedisKey}`",
+                Database.Database,
+                redisKey.ToString()
+            );
         
-        var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
-
+        var redisTransaction = Database.CreateTransaction();
+        
         var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
 
         await redisTransaction.ExecuteAsync(GetCommandFlags());
 
-        return await insertedTask;
+        var inserted = await insertedTask;
+        
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Insert on `{DatabaseIndex}.{RedisKey}`\n\nInserted: {Inserted}",
+                Database.Database,
+                redisKey.ToString(),
+                inserted
+            );
+
+        return inserted;
     }
 
     public async Task<RedisValue> Find(RedisKey redisKey)
     {
-        var redisDatabase = ConnectionMultiplexer.GetDatabase();
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Query on `{DatabaseIndex}.{RedisKey}`",
+                Database.Database,
+                redisKey.ToString()
+            );
+        
+        var redisValue = await Database.StringGetAsync(redisKey, GetCommandFlags());
+        
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Query on `{DatabaseIndex}.{RedisKey}`\n\nHas Value: {HasValue}",
+                Database.Database,
+                redisKey.ToString(),
+                redisValue.HasValue
+            );
 
-        return await redisDatabase.StringGetAsync(redisKey, GetCommandFlags());
+        return redisValue;
     }
 
-    public async Task<bool> Delete(IEnumerable<RedisKey> redisKeys)
+    public async Task<bool> Delete(RedisKey[] redisKeys)
     {
         AssertNotReadOnly();
 
-        var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Delete on `{DatabaseIndex}` for {NumberOfKeys} Key(s)",
+                Database.Database,
+                redisKeys.Length
+            );
+        
+        var redisTransaction = Database.CreateTransaction();
 
         var deleteSnapshotTasks = redisKeys
             .Select(key => redisTransaction.KeyDeleteAsync(key))
@@ -65,19 +116,28 @@ internal sealed record RedisSession(IConnectionMultiplexer ConnectionMultiplexer
         await redisTransaction.ExecuteAsync(GetCommandFlags());
 
         await Task.WhenAll(deleteSnapshotTasks);
+        
+        var allDeleted = deleteSnapshotTasks.All(task => task.Result);
 
-        return deleteSnapshotTasks.All(task => task.Result);
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Delete on `{DatabaseIndex}` for {NumberOfKeys} Key(s)\n\nAll Deleted: {AllDeleted}",
+                Database.Database,
+                redisKeys.Length,
+                allDeleted
+            );
+
+        return allDeleted;
     }
 
-    public override void Dispose()
+    public static IRedisSession Create
+    (
+        IServiceProvider serviceProvider,
+        IDatabase database,
+        SnapshotSessionOptions snapshotSessionOptions
+    )
     {
-        
-    }
-    
-    public override ValueTask DisposeAsync()
-    {
-        ConnectionMultiplexer.Dispose();
-        
-        return ValueTask.CompletedTask;
+        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, snapshotSessionOptions);
     }
 }
