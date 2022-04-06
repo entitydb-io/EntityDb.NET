@@ -3,6 +3,7 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Snapshots;
 using EntityDb.Common.TypeResolvers;
+using EntityDb.Redis.ConnectionMultiplexers;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,17 +18,16 @@ namespace EntityDb.Redis.Snapshots;
 internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ConnectionMultiplexerFactory _connectionMultiplexerFactory;
     private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
     private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _connectionString;
     private readonly string _keyNamespace;
-    private readonly SemaphoreSlim _connectionSemaphore = new(1);
-    
-    private IConnectionMultiplexer? _connectionMultiplexer;
 
     public RedisSnapshotRepositoryFactory
     (
         IServiceProvider serviceProvider,
+        ConnectionMultiplexerFactory connectionMultiplexerFactory,
         IOptionsFactory<SnapshotSessionOptions> optionsFactory,
         IEnvelopeService<JsonElement> envelopeService,
         ITypeResolver typeResolver,
@@ -36,35 +36,17 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
     )
     {
         _serviceProvider = serviceProvider;
+        _connectionMultiplexerFactory = connectionMultiplexerFactory;
         _optionsFactory = optionsFactory;
         _envelopeService = envelopeService;
         _connectionString = connectionString;
         _keyNamespace = keyNamespace;
     }
 
-    private async Task<IConnectionMultiplexer> OpenConnectionMultiplexer(CancellationToken cancellationToken)
-    {
-        await _connectionSemaphore.WaitAsync(cancellationToken);
-        
-        if (_connectionMultiplexer != null)
-        {
-            _connectionSemaphore.Release();
-            
-            return _connectionMultiplexer;
-        }
-        
-        var configurationOptions = ConfigurationOptions.Parse(_connectionString);
-        
-        _connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(configurationOptions).WaitAsync(cancellationToken);
-
-        _connectionSemaphore.Release();
-
-        return _connectionMultiplexer;
-    }
 
     private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions, CancellationToken cancellationToken)
     {
-        var connectionMultiplexer = await OpenConnectionMultiplexer(cancellationToken);
+        var connectionMultiplexer = await _connectionMultiplexerFactory.CreateConnectionMultiplexer(_connectionString, cancellationToken);
 
         return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), snapshotSessionOptions);
     }
@@ -94,12 +76,5 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
             connectionString,
             keyNamespace
         );
-    }
-
-    public override ValueTask DisposeAsync()
-    {
-        _connectionMultiplexer?.Dispose();
-        
-        return ValueTask.CompletedTask;
     }
 }

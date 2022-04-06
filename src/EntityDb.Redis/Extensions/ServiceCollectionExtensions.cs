@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
+using EntityDb.Redis.ConnectionMultiplexers;
 using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,8 @@ public static class ServiceCollectionExtensions
         Func<IConfiguration, string> getConnectionString, bool testMode = false)
     {
         serviceCollection.AddJsonElementEnvelopeService();
+
+        serviceCollection.AddSingleton<ConnectionMultiplexerFactory>();
         
         serviceCollection.Add
         (
