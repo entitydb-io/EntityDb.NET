@@ -12,39 +12,45 @@ internal sealed class TryCatchSnapshotRepository<TSnapshot> : SnapshotRepository
 
     public TryCatchSnapshotRepository
     (
-        ISnapshotRepository<TSnapshot> snapshotRepository,
-        ILogger<TryCatchSnapshotRepository<TSnapshot>> logger
+        ILogger<TryCatchSnapshotRepository<TSnapshot>> logger,
+        ISnapshotRepository<TSnapshot> snapshotRepository
     )
         : base(snapshotRepository)
     {
         _logger = logger;
     }
 
-    protected override async Task<TSnapshot?> WrapQuery(Task<TSnapshot?> task)
+    protected override async Task<TSnapshot?> WrapQuery(Func<Task<TSnapshot?>> task)
     {
-        try
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
-            return await task;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "The operation cannot be completed");
+            try
+            {
+                return await task.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed");
 
-            return default;
+                return default;
+            }
         }
     }
 
-    protected override async Task<bool> WrapCommand(Task<bool> task)
+    protected override async Task<bool> WrapCommand(Func<Task<bool>> task)
     {
-        try
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
-            return await task;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "The operation cannot be completed");
+            try
+            {
+                return await task.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed");
 
-            return default;
+                return default;
+            }
         }
     }
 

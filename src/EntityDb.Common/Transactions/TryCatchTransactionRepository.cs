@@ -19,31 +19,37 @@ internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapp
         _logger = logger;
     }
 
-    protected override async Task<T[]> WrapQuery<T>(Task<T[]> task)
+    protected override async Task<T[]> WrapQuery<T>(Func<Task<T[]>> task)
     {
-        try
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
-            return await task;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "The operation cannot be completed");
+            try
+            {
+                return await task.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed");
 
-            return Array.Empty<T>();
+                return Array.Empty<T>();
+            }
         }
     }
 
-    protected override async Task<bool> WrapCommand(Task<bool> task)
+    protected override async Task<bool> WrapCommand(Func<Task<bool>> task)
     {
-        try
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
-            return await task;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "The operation cannot be completed");
+            try
+            {
+                return await task.Invoke();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "The operation cannot be completed");
 
-            return default;
+                return default;
+            }
         }
     }
 
