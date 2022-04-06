@@ -175,18 +175,15 @@ public class TestsBase<TStartup>
         serviceCollection.AddSingleton(_configuration);
         serviceCollection.AddSingleton(_test);
 
-        serviceCollection.RemoveAll(typeof(ILogger<>));
-        serviceCollection.RemoveAll(typeof(ILoggerFactory));
-        
-        serviceCollection.AddSingleton(LoggerFactory.Create(builder =>
+        serviceCollection.AddLogging(loggingBuilder =>
         {
-            builder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
-            builder.AddDebug();
-            builder.AddSimpleConsole(options =>
+            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            loggingBuilder.AddDebug();
+            loggingBuilder.AddSimpleConsole(options =>
             {
                 options.IncludeScopes = true;
             });
-        }));
+        });
 
         startup.AddServices(serviceCollection);
 

@@ -13,10 +13,6 @@ public abstract class StartupBase : IStartup
 
     public virtual void AddServices(IServiceCollection serviceCollection)
     {
-        // Logging
-
-        serviceCollection.AddLogging();
-        
         // Resolving
 
         serviceCollection.AddLifoTypeResolver();
