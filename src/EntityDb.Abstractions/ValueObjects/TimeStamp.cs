@@ -24,4 +24,15 @@ public readonly record struct TimeStamp(DateTime Value)
     /// <returns>A <see cref="TimeStamp"/> rounded down to the nearest millisecond.</returns>
     public TimeStamp WithMillisecondPrecision() =>
         new(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
+
+    /// <summary>
+    ///     Converts the value of the current <see cref="TimeStamp"/> object to
+    ///     its equivalent string representation using the formatting
+    ///     conventions of the current culture.
+    /// </summary>
+    /// <returns>
+    ///     A string representation of the value of the current 
+    ///     <see cref="TimeStamp"/> object.
+    /// </returns>
+    public override string? ToString() => Value.ToString();
 }
