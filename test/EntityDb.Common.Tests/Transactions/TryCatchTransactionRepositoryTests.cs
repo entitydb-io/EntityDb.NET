@@ -75,6 +75,10 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
+            .Setup(repository => repository.GetAnnotatedAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotImplementedException());
+
+        transactionRepositoryMock
             .Setup(repository => repository.GetAnnotatedCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 

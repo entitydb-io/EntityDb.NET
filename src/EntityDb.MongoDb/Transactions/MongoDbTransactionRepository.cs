@@ -117,6 +117,13 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetData<TagDocument, ITag>(_mongoSession, _envelopeService, cancellationToken);
     }
 
+    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    {
+        return AgentSignatureDocument
+            .GetQuery(agentSignatureQuery)
+            .GetEntitiesAnnotation<AgentSignatureDocument, object>(_mongoSession, _envelopeService, cancellationToken);
+    }
+
     public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
         return CommandDocument

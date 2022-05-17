@@ -121,6 +121,29 @@ internal static class DocumentQueryExtensions
             .ToArray();
     }
 
+    public static async Task<IEntitiesAnnotation<TData>[]> GetEntitiesAnnotation<TDocument, TData>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
+        CancellationToken cancellationToken
+    )
+        where TDocument : IEntitiesDocument
+        where TData : notnull
+    {
+        var documents = await documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
+
+        return documents
+            .Select(document => EntitiesAnnotation<TData>.CreateFromBoxedData
+            (
+                document.TransactionId,
+                document.TransactionTimeStamp,
+                document.EntityIds,
+                envelopeService.Reconstruct<TData>(document.Data)
+            ))
+            .ToArray();
+    }
+
     public static async Task<TData[]> GetData<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,

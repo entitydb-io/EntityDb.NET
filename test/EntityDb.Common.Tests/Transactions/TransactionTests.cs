@@ -757,6 +757,65 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactions))]
+    public async Task GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature(TransactionsAdder transactionsAdder)
+    {
+        // ARRANGE
+
+        const ulong expectedCount = 5;
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            transactionsAdder.Add(serviceCollection);
+        });
+
+        var transactionTimeStamp = TimeStamp.UtcNow;
+
+        var expectedTransactionId = Id.NewId();
+        var expectedEntityId = Id.NewId();
+        var expectedTransactionTimeStamps = new[]
+        {
+            transactionTimeStamp,
+
+            // A TimeStamp can be more precise than milliseconds.
+            // This allows for database types that cannot be more precise than milliseconds.
+            transactionTimeStamp.WithMillisecondPrecision()
+        };
+
+        var agentSignature = new CounterAgentSignature(123);
+
+        var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
+            new[] { expectedCount }, transactionTimeStamp, agentSignature);
+
+        await using var transactionRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<ITransactionRepositoryFactory>()
+            .CreateRepository(TestSessionOptions.Write);
+
+        var transactionInserted = await transactionRepository.PutTransaction(transaction);
+
+        var agentSignatureQuery = new EntityIdQuery(expectedEntityId);
+
+        // ARRANGE ASSERTIONS
+
+        transactionInserted.ShouldBeTrue();
+
+        // ACT
+
+        var annotatedAgentSignatures = await transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery);
+
+        // ASSERT
+
+        annotatedAgentSignatures.Length.ShouldBe(1);
+
+        annotatedAgentSignatures[0].TransactionId.ShouldBe(expectedTransactionId);
+        annotatedAgentSignatures[0].EntityIds.Length.ShouldBe(1);
+        annotatedAgentSignatures[0].EntityIds[0].ShouldBe(expectedEntityId);
+        annotatedAgentSignatures[0].Data.ShouldBe(agentSignature);
+
+        expectedTransactionTimeStamps.Contains(annotatedAgentSignatures[0].TransactionTimeStamp).ShouldBeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(AddTransactions))]
     public async Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand(TransactionsAdder transactionsAdder)
     {
         // ARRANGE
