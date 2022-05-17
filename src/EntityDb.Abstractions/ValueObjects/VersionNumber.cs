@@ -16,4 +16,15 @@ public readonly record struct VersionNumber(ulong Value)
     /// </summary>
     /// <returns>The next version number.</returns>
     public VersionNumber Next() => new(Value + 1);
+
+    /// <summary>
+    ///     Converts the numeric value of this instance to its equivalent string
+    ///     representation.
+    /// </summary>
+    /// <returns>
+    ///     The string representation of the value of this instance, consisting
+    ///     of a sequence of digits ranging from 0 to 9, without a sign or
+    ///     leading zeroes.
+    /// </returns>
+    public override string? ToString() => Value.ToString();
 }
