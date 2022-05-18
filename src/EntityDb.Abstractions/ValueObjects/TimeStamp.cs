@@ -35,5 +35,5 @@ public readonly record struct TimeStamp(DateTime Value)
     ///     A string representation of the value of the current
     ///     <see cref="TimeStamp"/> object.
     /// </returns>
-    public override string? ToString() => Value.ToString(CultureInfo.InvariantCulture);
+    public override string? ToString() => Value.ToString(CultureInfo.CurrentCulture);
 }
