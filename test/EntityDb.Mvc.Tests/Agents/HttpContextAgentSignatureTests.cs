@@ -32,7 +32,7 @@ public class HttpContextAgentSignatureTests
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default);
+        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
@@ -67,7 +67,7 @@ public class HttpContextAgentSignatureTests
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default);
+        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
@@ -100,7 +100,7 @@ public class HttpContextAgentSignatureTests
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default);
+        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
@@ -135,7 +135,7 @@ public class HttpContextAgentSignatureTests
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default);
+        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
