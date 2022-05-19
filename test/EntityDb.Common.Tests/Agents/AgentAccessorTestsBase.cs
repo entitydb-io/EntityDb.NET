@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Agents;
@@ -18,6 +20,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     protected abstract void ConfigureInactiveAgentAccessor(IServiceCollection serviceCollection);
 
     protected abstract void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection, TAgentAccessorConfiguration agentAccessorConfiguration);
+
+    protected abstract Dictionary<string, string>? GetApplicationInfo(object agentSignature);
 
     protected abstract IEnumerable<TAgentAccessorConfiguration> GetAgentAccessorOptions();
 
@@ -107,6 +111,76 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
             // ASSERT
 
             agentSignature.ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public void GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
+    {
+        foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
+        {
+            // ARRANGE
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                ConfigureActiveAgentAccessor(serviceCollection, agentAccessorConfiguration);
+
+                serviceCollection.RemoveAll(typeof(IAgentSignatureAugmenter));
+            });
+
+            var agentAccessor = serviceScope.ServiceProvider
+                .GetRequiredService<IAgentAccessor>();
+
+            // ACT
+
+            var agentSignature = agentAccessor.GetAgent().GetSignature("").ShouldNotBeNull();
+
+            var applicationInfo = GetApplicationInfo(agentSignature);
+
+            // ASSERT
+
+            applicationInfo.ShouldBeEmpty();
+        }
+    }
+    
+
+    [Fact]
+    public void GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
+    {
+        foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
+        {
+            // ARRANGE
+
+            var expectedApplicationInfo = new Dictionary<string, string>
+            {
+                ["UserId"] = Guid.NewGuid().ToString()
+            };
+
+            var agentSignatureAugmenterMock = new Mock<IAgentSignatureAugmenter>(MockBehavior.Strict);
+
+            agentSignatureAugmenterMock
+                .Setup(x => x.GetApplicationInfo())
+                .Returns(expectedApplicationInfo);
+
+            using var serviceScope = CreateServiceScope(serviceCollection =>
+            {
+                ConfigureActiveAgentAccessor(serviceCollection, agentAccessorConfiguration);
+
+                serviceCollection.AddSingleton(agentSignatureAugmenterMock.Object);
+            });
+
+            var agentAccessor = serviceScope.ServiceProvider
+                .GetRequiredService<IAgentAccessor>();
+
+            // ACT
+
+            var agentSignature = agentAccessor.GetAgent().GetSignature("");
+
+            var actualApplicationInfo = GetApplicationInfo(agentSignature);
+
+            // ASSERT
+
+            actualApplicationInfo.ShouldBe(expectedApplicationInfo);
         }
     }
 }
