@@ -17,6 +17,7 @@ internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, I
     private static readonly Task<object[]> EmptyObjectArrayTask = Task.FromResult(Array.Empty<object>());
     private static readonly Task<ILease[]> EmptyLeaseArrayTask = Task.FromResult(Array.Empty<ILease>());
     private static readonly Task<ITag[]> EmptyTagArrayTask = Task.FromResult(Array.Empty<ITag>());
+    private static readonly Task<IEntitiesAnnotation<object>[]> EmptyEntitiesAnnotationArrayTask = Task.FromResult(Array.Empty<IEntitiesAnnotation<object>>());
     private static readonly Task<IEntityAnnotation<object>[]> EmptyEntityAnnotationArrayTask = Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
     private static readonly Task<bool> TrueBoolTask = Task.FromResult(true);
     
@@ -78,6 +79,11 @@ internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, I
     public Task<ITag[]> GetTags(ITagQuery tagQuery, CancellationToken cancellationToken = default)
     {
         return EmptyTagArrayTask.WaitAsync(cancellationToken);
+    }
+
+    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    {
+        return EmptyEntitiesAnnotationArrayTask.WaitAsync(cancellationToken);
     }
 
     public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)

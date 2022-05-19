@@ -4,33 +4,30 @@ using System;
 
 namespace EntityDb.Common.Annotations;
 
-internal record EntityAnnotation<TData>
+internal record EntitiesAnnotation<TData>
 (
     Id TransactionId,
     TimeStamp TransactionTimeStamp,
-    Id EntityId,
-    VersionNumber EntityVersionNumber,
+    Id[] EntityIds,
     TData Data
-) : IEntityAnnotation<TData>
+) : IEntitiesAnnotation<TData>
 {
-    public static IEntityAnnotation<TData> CreateFromBoxedData
+    public static IEntitiesAnnotation<TData> CreateFromBoxedData
     (
         Id transactionId,
         TimeStamp transactionTimeStamp,
-        Id entityId,
-        VersionNumber entityVersionNumber,
+        Id[] entityIds,
         object boxedData
     )
     {
-        var dataAnnotationType = typeof(EntityAnnotation<>).MakeGenericType(boxedData.GetType());
+        var dataAnnotationType = typeof(EntitiesAnnotation<>).MakeGenericType(boxedData.GetType());
 
-        return (IEntityAnnotation<TData>)Activator.CreateInstance
+        return (IEntitiesAnnotation<TData>)Activator.CreateInstance
         (
             dataAnnotationType,
             transactionId,
             transactionTimeStamp,
-            entityId,
-            entityVersionNumber,
+            entityIds,
             boxedData
         )!;
     }

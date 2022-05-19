@@ -80,6 +80,11 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         return WrapQuery(() => _transactionRepository.GetTags(tagQuery, cancellationToken));
     }
 
+    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken));
+    }
+
     public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _transactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken));

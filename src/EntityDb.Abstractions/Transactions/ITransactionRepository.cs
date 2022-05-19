@@ -111,6 +111,14 @@ public interface ITransactionRepository : IDisposableResource
     Task<ITag[]> GetTags(ITagQuery tagQuery, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Returns the annotated agent signatures which are found by an agent signature query.
+    /// </summary>
+    /// <param name="agentSignatureQuery">The agent signature query.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The annotated agent signatures which are found by <paramref name="agentSignatureQuery" />.</returns>
+    Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Returns the annotated commands which are found by a command query.
     /// </summary>
     /// <param name="commandQuery">The command query.</param>
