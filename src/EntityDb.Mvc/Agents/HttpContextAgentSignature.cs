@@ -52,7 +52,8 @@ public static class HttpContextAgentSignature
     public sealed record Snapshot
     (
         RequestSnapshot Request,
-        ConnectionSnapshot Connection
+        ConnectionSnapshot Connection,
+        Dictionary<string, string>? ApplicationInfo
     );
 
     private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
@@ -92,12 +93,18 @@ public static class HttpContextAgentSignature
         );
     }
 
-    internal static Snapshot GetSnapshot(HttpContext httpContext, HttpContextAgentSignatureOptions httpContextAgentOptions)
+    internal static Snapshot GetSnapshot
+    (
+        HttpContext httpContext,
+        HttpContextAgentSignatureOptions httpContextAgentOptions,
+        Dictionary<string, string>? applicationInfo
+    )
     {
         return new Snapshot
         (
             GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
-            GetConnectionSnapshot(httpContext.Connection)
+            GetConnectionSnapshot(httpContext.Connection),
+            applicationInfo
         );
     }
 }

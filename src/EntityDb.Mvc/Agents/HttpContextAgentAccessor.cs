@@ -10,11 +10,18 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
+    private readonly IAgentSignatureAugmenter? _agentSignatureAugmenter;
 
-    public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor, IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory)
+    public HttpContextAgentAccessor
+    (
+        IHttpContextAccessor httpContextAccessor,
+        IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory,
+        IAgentSignatureAugmenter? agentSignatureAugmenter = null
+    )
     {
         _httpContextAccessor = httpContextAccessor;
         _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
+        _agentSignatureAugmenter = agentSignatureAugmenter;
     }
 
     protected override IAgent CreateAgent()
@@ -26,6 +33,8 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
             throw new NoAgentException();
         }
 
-        return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory);
+        var applicationInfo = _agentSignatureAugmenter?.GetApplicationInfo();
+
+        return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory, applicationInfo);
     }
 }
