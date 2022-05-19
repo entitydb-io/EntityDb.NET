@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
+using EntityDb.Mvc.Agents;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
@@ -57,5 +58,12 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
                 HasIpAddress = false
             }
         };
+    }
+
+    protected override Dictionary<string, string>? GetApplicationInfo(object agentSignature)
+    {
+        return agentSignature is not HttpContextAgentSignature.Snapshot httpContextAgentSignature
+            ? null
+            : httpContextAgentSignature.ApplicationInfo;
     }
 }
