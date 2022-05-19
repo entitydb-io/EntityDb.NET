@@ -10,7 +10,7 @@ internal record HttpContextAgent
 (
     HttpContext HttpContext,
     IOptionsFactory<HttpContextAgentSignatureOptions> HttpContextAgentSignatureOptionsFactory,
-    Dictionary<string, string>? ApplicationInfo
+    Dictionary<string, string> ApplicationInfo
 ) : IAgent
 {
     public TimeStamp GetTimeStamp()

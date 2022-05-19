@@ -115,7 +115,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     }
 
     [Fact]
-    public void GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnNull()
+    public void GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -139,13 +139,13 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ASSERT
 
-            applicationInfo.ShouldBeNull();
+            applicationInfo.ShouldBeEmpty();
         }
     }
     
 
     [Fact]
-    public void GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnApplicationInfo()
+    public void GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -174,7 +174,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agentSignature = agentAccessor.GetAgent().GetSignature("").ShouldNotBeNull();
+            var agentSignature = agentAccessor.GetAgent().GetSignature("");
 
             var actualApplicationInfo = GetApplicationInfo(agentSignature);
 

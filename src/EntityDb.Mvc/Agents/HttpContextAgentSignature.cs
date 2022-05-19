@@ -53,7 +53,7 @@ public static class HttpContextAgentSignature
     (
         RequestSnapshot Request,
         ConnectionSnapshot Connection,
-        Dictionary<string, string>? ApplicationInfo
+        Dictionary<string, string> ApplicationInfo
     );
 
     private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
@@ -97,7 +97,7 @@ public static class HttpContextAgentSignature
     (
         HttpContext httpContext,
         HttpContextAgentSignatureOptions httpContextAgentOptions,
-        Dictionary<string, string>? applicationInfo
+        Dictionary<string, string> applicationInfo
     )
     {
         return new Snapshot
