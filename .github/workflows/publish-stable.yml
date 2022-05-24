@@ -3,7 +3,7 @@ on:
     types:
       - published
 
-name: Publish to Nuget.org
+name: Publish to Stable
 
 jobs:
   extract:
@@ -17,9 +17,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  nuget:
-    name: Publish to Nuget.org
+  stable:
+    name: Publish to Stable
     runs-on: ubuntu-latest
+    environment: stable
     needs: extract
     steps:
       - name: Checkout Repository
@@ -41,5 +42,5 @@ jobs:
         run: dotnet test EntityDb.sln --no-restore -c Debug
       - name: Pack Projects into Nuget Packages
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }}
-      - name: Publish to Nuget.org
-        run: dotnet nuget push */**.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
+      - name: Publish to Stable
+        run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
