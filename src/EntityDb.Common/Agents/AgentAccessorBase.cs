@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Agents;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Agents;
 
@@ -6,10 +8,10 @@ internal abstract class AgentAccessorBase : IAgentAccessor
 {
     private IAgent? _agent;
 
-    protected abstract IAgent CreateAgent();
+    protected abstract Task<IAgent> CreateAgentAsync(CancellationToken cancellationToken);
 
-    public IAgent GetAgent()
+    public async Task<IAgent> GetAgentAsync(CancellationToken cancellationToken = default)
     {
-        return _agent ??= CreateAgent();
+        return _agent ??= await CreateAgentAsync(cancellationToken);
     }
 }

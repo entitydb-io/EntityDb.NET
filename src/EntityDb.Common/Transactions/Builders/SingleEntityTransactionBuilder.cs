@@ -3,6 +3,8 @@ using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Builders;
 
@@ -125,14 +127,15 @@ public class SingleEntityTransactionBuilder<TEntity>
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="transactionId">A new id for the new transaction.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ITransaction" />.</returns>
     /// <remarks>
     ///     Note that this is just a proxy for a <see cref="TransactionBuilder{TEntity}"/>,
     ///     and does NOT filter out steps for entity ids not associated with this
     ///     <see cref="SingleEntityTransactionBuilder{TEntity}"/>.
     /// </remarks>
-    public ITransaction Build(string agentSignatureOptionsName, Id transactionId)
+    public Task<ITransaction> BuildAsync(string agentSignatureOptionsName, Id transactionId, CancellationToken cancellationToken = default)
     {
-        return _transactionBuilder.Build(agentSignatureOptionsName, transactionId);
+        return _transactionBuilder.BuildAsync(agentSignatureOptionsName, transactionId, cancellationToken);
     }
 }

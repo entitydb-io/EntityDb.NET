@@ -4,6 +4,8 @@ using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Mvc.Agents;
 
@@ -27,7 +29,7 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
 
     private static readonly Dictionary<string, string> DefaultApplicationInfo = new();
 
-    protected override IAgent CreateAgent()
+    protected override async Task<IAgent> CreateAgentAsync(CancellationToken cancellationToken)
     {
         var httpContext = _httpContextAccessor.HttpContext;
 
@@ -36,8 +38,12 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
             throw new NoAgentException();
         }
 
-        var applicationInfo = _agentSignatureAugmenter?
-            .GetApplicationInfo() ?? DefaultApplicationInfo;
+        var applicationInfo = DefaultApplicationInfo;
+
+        if (_agentSignatureAugmenter != null)
+        {
+            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfo(cancellationToken);
+        }
 
         return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory, applicationInfo);
     }

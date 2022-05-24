@@ -404,7 +404,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
     }
 
-    private static ITransaction BuildTransaction
+    private static async Task<ITransaction> BuildTransaction
     (
         IServiceScope serviceScope,
         Id transactionId,
@@ -425,7 +425,8 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionBuilder.Add(new CountTag(count));
         }
 
-        var transaction = (transactionBuilder.Build(default!, transactionId) as Transaction)!;
+        var transaction = (await transactionBuilder
+            .BuildAsync(default!, transactionId) as Transaction)!;
             
         if (timeStampOverride.HasValue)
         {
@@ -472,11 +473,11 @@ public sealed class TransactionTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var transaction = serviceScope.ServiceProvider
+        var transaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
-            .Build(default!, default);
+            .BuildAsync(default!, default);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -507,17 +508,17 @@ public sealed class TransactionTests : TestsBase<Startup>
         var transactionId = Id.NewId();
             
             
-        var firstTransaction = serviceScope.ServiceProvider
+        var firstTransaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
-            .Build(default!, transactionId);
+            .BuildAsync(default!, transactionId);
             
-        var secondTransaction = serviceScope.ServiceProvider
+        var secondTransaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Append(CommandSeeder.Create())
-            .Build(default!, transactionId);
+            .BuildAsync(default!, transactionId);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
@@ -546,11 +547,11 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionsAdder.Add(serviceCollection);
         });
 
-        var transaction = (serviceScope.ServiceProvider
+        var transaction = (await serviceScope.ServiceProvider
                 .GetRequiredService<TransactionBuilder<TestEntity>>()
                 .ForSingleEntity(default)
                 .Append(CommandSeeder.Create())
-                .Build(default!, default)
+                .BuildAsync(default!, default)
             as Transaction)!;
 
         transaction = transaction with
@@ -649,17 +650,17 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var entityId = Id.NewId();
 
-        var firstTransaction = serviceScope.ServiceProvider
+        var firstTransaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
             
-        var secondTransaction = serviceScope.ServiceProvider
+        var secondTransaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId)
             .Append(CommandSeeder.Create())
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
             
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -704,12 +705,12 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var tag = TagSeeder.Create();
             
-        var transaction = serviceScope.ServiceProvider
+        var transaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Add(tag)
             .Add(tag)
-            .Build(default!, default);
+            .BuildAsync(default!, default);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
@@ -736,12 +737,12 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var lease = LeaseSeeder.Create();
             
-        var transaction = serviceScope.ServiceProvider
+        var transaction = await serviceScope.ServiceProvider
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default)
             .Add(lease)
             .Add(lease)
-            .Build(default!, default);
+            .BuildAsync(default!, default);
             
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
@@ -783,7 +784,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var agentSignature = new CounterAgentSignature(123);
 
-        var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
+        var transaction = await BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
             new[] { expectedCount }, transactionTimeStamp, agentSignature);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
@@ -840,7 +841,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionTimeStamp.WithMillisecondPrecision()
         };
 
-        var transaction = BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
+        var transaction = await BuildTransaction(serviceScope, expectedTransactionId, expectedEntityId,
             new[] { expectedCount }, transactionTimeStamp);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
@@ -893,7 +894,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var entityRepository = EntityRepository<TestEntity>.Create(serviceScope.ServiceProvider, transactionRepository);
 
-        var transaction = BuildTransaction(serviceScope, Id.NewId(), entityId,
+        var transaction = await BuildTransaction(serviceScope, Id.NewId(), entityId,
             new[] { 0UL });
 
         var transactionInserted = await transactionRepository.PutTransaction(transaction);
@@ -936,9 +937,9 @@ public sealed class TransactionTests : TestsBase<Startup>
             .GetRequiredService<ITransactionRepositoryFactory>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var initialTransaction = transactionBuilder
+        var initialTransaction = await transactionBuilder
             .Add(tag)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -952,9 +953,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var actualInitialTags = await transactionRepository.GetTags(tagQuery);
 
-        var finalTransaction = transactionBuilder
+        var finalTransaction = await transactionBuilder
             .Delete(tag)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -994,9 +995,9 @@ public sealed class TransactionTests : TestsBase<Startup>
             .GetRequiredService<ITransactionRepositoryFactory>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var initialTransaction = transactionBuilder
+        var initialTransaction = await transactionBuilder
             .Add(lease)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
 
@@ -1010,9 +1011,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var actualInitialLeases = await transactionRepository.GetLeases(leaseQuery);
 
-        var finalTransaction = transactionBuilder
+        var finalTransaction = await transactionBuilder
             .Delete(lease)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
@@ -1044,9 +1045,9 @@ public sealed class TransactionTests : TestsBase<Startup>
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
-        var transaction = transactionBuilder
+        var transaction = await transactionBuilder
             .Append(expectedCommand)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var versionOneCommandQuery = new EntityVersionNumberQuery(new VersionNumber(1), new VersionNumber(1));
 
@@ -1093,13 +1094,13 @@ public sealed class TransactionTests : TestsBase<Startup>
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(default);
 
-        var firstTransaction = transactionBuilder
+        var firstTransaction = await transactionBuilder
             .Append(new Count(1))
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
-        var secondTransaction = transactionBuilder
+        var secondTransaction = await transactionBuilder
             .Append(expectedCommand)
-            .Build(default!, Id.NewId());
+            .BuildAsync(default!, Id.NewId());
 
         var versionTwoCommandQuery = new EntityVersionNumberQuery(new VersionNumber(2), new VersionNumber(2));
 
@@ -1183,7 +1184,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 gte = currentTimeStamp;
             }
 
-            var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
                 currentTimeStamp, agentSignature);
 
             transactions.Add(transaction);
@@ -1250,7 +1251,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 transactionId = currentTransactionId;
             }
 
-            var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1316,7 +1317,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 entityId = currentEntityId;
             }
 
-            var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1371,7 +1372,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 leases, tags);
         }
 
-        var transaction = BuildTransaction(serviceScope, Id.NewId(), Id.NewId(), counts.ToArray());
+        var transaction = await BuildTransaction(serviceScope, Id.NewId(), Id.NewId(), counts.ToArray());
 
         var transactions = new List<ITransaction> { transaction };
 
@@ -1418,7 +1419,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, agentSignature, commands,
                 leases, tags);
 
-            var transaction = BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction(serviceScope, currentTransactionId, currentEntityId, new[]{i},
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);

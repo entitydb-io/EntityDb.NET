@@ -73,7 +73,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     }
 
     [Fact]
-    public void GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
+    public async Task GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenTransactionDoesInsertLeases()
     {
         // ARRANGE
 
@@ -85,9 +85,9 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         // ACT
 
-        var transaction = transactionBuilder
+        var transaction = await transactionBuilder
             .Add(new Lease(default!, default!, default!))
-            .Build(default!, default);
+            .BuildAsync(default!, default);
 
         // ASSERT
 
@@ -135,7 +135,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
     }
 
     [Fact]
-    public void GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionNumberAutoIncrements()
+    public async Task GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionNumberAutoIncrements()
     {
         // ARRANGE
 
@@ -160,7 +160,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
             transactionBuilder.Append(new DoNothing());
         }
 
-        var transaction = transactionBuilder.Build(default!, default);
+        var transaction = await transactionBuilder.BuildAsync(default!, default);
 
         // ASSERT
 
@@ -199,10 +199,10 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         // ACT
 
-        var transaction = transactionBuilder
+        var transaction = await transactionBuilder
             .Load(entity)
             .Append(new DoNothing())
-            .Build(default!, default);
+            .BuildAsync(default!, default);
 
         // ASSERT
 

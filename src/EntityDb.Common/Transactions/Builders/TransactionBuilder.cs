@@ -9,12 +9,14 @@ using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions.Steps;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Builders;
 
 /// <summary>
 ///     Provides a way to construct an <see cref="ITransaction" />. Note that no operations are permanent until
-///     you call <see cref="Build(string, Id)" /> and pass the result to a transaction repository.
+///     you call <see cref="BuildAsync(string, Id)" /> and pass the result to a transaction repository.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity in the transaction.</typeparam>
 public sealed class TransactionBuilder<TEntity>
@@ -231,10 +233,11 @@ public sealed class TransactionBuilder<TEntity>
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="transactionId">A new id for the new transaction.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ITransaction" />.</returns>
-    public ITransaction Build(string agentSignatureOptionsName, Id transactionId)
+    public async Task<ITransaction> BuildAsync(string agentSignatureOptionsName, Id transactionId, CancellationToken cancellationToken = default)
     {
-        var agent = _agentAccessor.GetAgent();
+        var agent = await _agentAccessor.GetAgentAsync(cancellationToken);
 
         var transaction = new Transaction
         {

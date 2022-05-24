@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Agents;
 
@@ -11,6 +13,7 @@ public interface IAgentSignatureAugmenter
     /// <summary>
     ///     Returns a dictionary of application-specific information.
     /// </summary>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A dictionary of application-specific information.</returns>
-    Dictionary<string, string> GetApplicationInfo();
+    Task<Dictionary<string, string>> GetApplicationInfo(CancellationToken cancellationToken = default);
 }

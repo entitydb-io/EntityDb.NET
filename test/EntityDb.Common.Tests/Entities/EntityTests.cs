@@ -25,7 +25,7 @@ public class EntityTests : TestsBase<Startup>
     {
     }
 
-    private static ITransaction BuildTransaction
+    private static Task<ITransaction> BuildTransaction
     (
         IServiceScope serviceScope,
         Id entityId,
@@ -53,7 +53,7 @@ public class EntityTests : TestsBase<Startup>
             transactionBuilder.Append(new DoNothing());
         }
 
-        return transactionBuilder.Build(default!, Id.NewId());
+        return transactionBuilder.BuildAsync(default!, Id.NewId());
     }
 
     [Theory]
@@ -82,7 +82,7 @@ public class EntityTests : TestsBase<Startup>
             .CreateRepository(TestSessionOptions.Write,
                 TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
+        var transaction = await BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -152,7 +152,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
+        var transaction = await BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
