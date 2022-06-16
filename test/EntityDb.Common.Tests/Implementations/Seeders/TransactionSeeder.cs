@@ -4,8 +4,7 @@ using System.Linq;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
-using EntityDb.Common.Tests.Implementations.Agents;
+using EntityDb.Common.Agents;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
 using EntityDb.Common.Transactions.Steps;
@@ -41,7 +40,7 @@ public static class TransactionSeeder
         {
             Id = Id.NewId(),
             TimeStamp = TimeStamp.UtcNow,
-            AgentSignature = new NoAgentSignature(),
+            AgentSignature = new UnknownAgentSignature(),
             Steps = transactionSteps.ToImmutableArray()
         };
     }
