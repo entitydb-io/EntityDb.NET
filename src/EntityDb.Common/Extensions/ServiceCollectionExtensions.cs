@@ -68,7 +68,7 @@ public static class ServiceCollectionExtensions
     public static void AddAgentAccessor<TAgentAccessor>(this IServiceCollection serviceCollection)
         where TAgentAccessor : class, IAgentAccessor
     {
-        serviceCollection.AddScoped<IAgentAccessor, TAgentAccessor>();
+        serviceCollection.AddSingleton<IAgentAccessor, TAgentAccessor>();
     }
 
     /// <summary>
