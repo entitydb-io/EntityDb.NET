@@ -1,10 +1,10 @@
 ﻿using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Agents;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using EntityDb.Common.Agents;
 
 namespace EntityDb.Common.Tests;
 
@@ -21,9 +21,9 @@ public abstract class StartupBase : IStartup
 
         serviceCollection.AddDefaultPartialTypeResolver();
 
-        // Agent
+        // Agent Accessor
 
-        serviceCollection.AddAgentAccessor<NoAgentAccessor>();
+        serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
 
         // Transaction Entity
 
