@@ -21,14 +21,30 @@ public class AgentAccessorChain : IAgentAccessor
     private readonly IAgentAccessor[] _agentAccessors;
     
     /// <ignore/>
-    public AgentAccessorChain(ILogger<AgentAccessorChain> logger, IOptions<AgentAccessorChainOptions> options) : this(logger, options.Value)
+    public AgentAccessorChain(ILogger<AgentAccessorChain> logger, IOptions<AgentAccessorChainOptions> options, IServiceProvider outerServiceProvider) : this(logger, options.Value, outerServiceProvider)
     {
     }
     
-    internal AgentAccessorChain(ILogger<AgentAccessorChain> logger, AgentAccessorChainOptions options)
+    internal AgentAccessorChain(ILogger<AgentAccessorChain> logger, AgentAccessorChainOptions options, IServiceProvider outerServiceProvider)
     {
-        var serviceProvider = options.ServiceCollection
-            .BuildServiceProvider();
+        IServiceCollection serviceCollectionCopy = new ServiceCollection();
+
+        foreach (var (outerServiceType, innerServiceLifetime) in options.RequiredOuterServices)
+        {
+            serviceCollectionCopy.Add(new ServiceDescriptor
+            (
+                outerServiceType,
+                _ => outerServiceProvider.GetRequiredService(outerServiceType),
+                innerServiceLifetime
+            ));
+        }
+        
+        foreach (var serviceDescriptor in options.ServiceCollection)
+        {
+            serviceCollectionCopy.Add(serviceDescriptor);
+        }
+
+        var serviceProvider = serviceCollectionCopy.BuildServiceProvider();
         
         _logger = logger;
         _agentAccessors = serviceProvider
