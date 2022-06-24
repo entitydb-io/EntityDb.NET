@@ -21,11 +21,31 @@ public class AgentAccessorChain : IAgentAccessor
     private readonly IAgentAccessor[] _agentAccessors;
     
     /// <ignore/>
-    public AgentAccessorChain(ILogger<AgentAccessorChain> logger, IOptions<AgentAccessorChainOptions> options, IServiceProvider outerServiceProvider) : this(logger, options.Value, outerServiceProvider)
+    public AgentAccessorChain
+    (
+        ILogger<AgentAccessorChain> logger,
+        IOptions<AgentAccessorChainOptions> options,
+        IServiceProvider outerServiceProvider
+    ) : this(logger, options.Value, outerServiceProvider)
     {
     }
     
-    internal AgentAccessorChain(ILogger<AgentAccessorChain> logger, AgentAccessorChainOptions options, IServiceProvider outerServiceProvider)
+    internal AgentAccessorChain
+    (
+        ILogger<AgentAccessorChain> logger,
+        AgentAccessorChainOptions options,
+        IServiceProvider outerServiceProvider
+    )
+    {
+        var serviceProvider = GetServiceProvider(outerServiceProvider, options);
+        
+        _logger = logger;
+        _agentAccessors = serviceProvider
+            .GetServices<IAgentAccessor>()
+            .ToArray();
+    }
+
+    private static IServiceProvider GetServiceProvider(IServiceProvider outerServiceProvider, AgentAccessorChainOptions options)
     {
         IServiceCollection serviceCollectionCopy = new ServiceCollection();
 
@@ -44,12 +64,7 @@ public class AgentAccessorChain : IAgentAccessor
             serviceCollectionCopy.Add(serviceDescriptor);
         }
 
-        var serviceProvider = serviceCollectionCopy.BuildServiceProvider();
-        
-        _logger = logger;
-        _agentAccessors = serviceProvider
-            .GetServices<IAgentAccessor>()
-            .ToArray();
+        return serviceCollectionCopy.BuildServiceProvider();
     }
 
     /// <inheritdoc />
