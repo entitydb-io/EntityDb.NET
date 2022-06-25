@@ -18,10 +18,10 @@ public interface IProjectionStrategy<in TProjection>
     Task<Id[]> GetEntityIds(Id projectionId, TProjection projectionSnapshot);
 
     /// <summary>
-    ///     Map an entity id and/or the entity itself to a set of projection ids.
+    ///     Map an entity id and/or the entity itself to a projection id.
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <param name="entity">The entity.</param>
-    /// <returns>The set of projection ids to query for running the projection.</returns>
-    Task<Id[]> GetProjectionIds(Id entityId, object entity);
+    /// <returns>The projection id to query for running the projection.</returns>
+    Task<Id> GetProjectionId(Id entityId, object entity);
 }
