@@ -1,13 +1,15 @@
 ﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EntityDb.Mvc.Agents;
 
-internal sealed class HttpContextAgentAccessor : AgentAccessorBase
+internal sealed class HttpContextAgentAccessor : IAgentAccessor
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
@@ -27,7 +29,7 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
 
     private static readonly Dictionary<string, string> DefaultApplicationInfo = new();
 
-    protected override IAgent CreateAgent()
+    public async Task<IAgent> GetAgentAsync(string signatureOptionsName)
     {
         var httpContext = _httpContextAccessor.HttpContext;
 
@@ -36,9 +38,22 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
             throw new NoAgentException();
         }
 
-        var applicationInfo = _agentSignatureAugmenter?
-            .GetApplicationInfo() ?? DefaultApplicationInfo;
+        var applicationInfo = DefaultApplicationInfo;
 
-        return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory, applicationInfo);
+        if (_agentSignatureAugmenter != null)
+        {
+            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfoAsync();
+        }
+
+        var signatureOptions = _httpContextAgentOptionsFactory.Create(signatureOptionsName);
+
+        var signature = HttpContextAgentSignature.GetSnapshot
+        (
+            httpContext,
+            signatureOptions,
+            applicationInfo
+        );
+
+        return new Agent(TimeStamp.UtcNow, signature);
     }
 }

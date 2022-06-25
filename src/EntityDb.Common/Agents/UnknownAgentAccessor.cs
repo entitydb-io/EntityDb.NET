@@ -1,4 +1,6 @@
 ﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.ValueObjects;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Agents;
 
@@ -8,8 +10,8 @@ namespace EntityDb.Common.Agents;
 public class UnknownAgentAccessor : IAgentAccessor
 {
     /// <inheritdoc/>
-    public IAgent GetAgent()
+    public Task<IAgent> GetAgentAsync(string signatureOptionsName)
     {
-        return new UnknownAgent();
+        return Task.FromResult<IAgent>(new StandardAgent(new UnknownAgentSignature()));
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Agents;
 
@@ -68,13 +69,13 @@ public class AgentAccessorChain : IAgentAccessor
     }
 
     /// <inheritdoc />
-    public IAgent GetAgent()
+    public async Task<IAgent> GetAgentAsync(string signatureOptionsName)
     {
         foreach (var agentAccessor in _agentAccessors)
         {
             try
             {
-                return agentAccessor.GetAgent();
+                return await agentAccessor.GetAgentAsync(signatureOptionsName);
             }
             catch (Exception exception)
             {
