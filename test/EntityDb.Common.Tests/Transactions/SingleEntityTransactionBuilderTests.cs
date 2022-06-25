@@ -94,7 +94,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         transaction.Steps.Length.ShouldBe(1);
             
-        var leaseTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAddLeasesTransactionStep>()!;
+        var leaseTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAddLeasesTransactionStep>().ShouldNotBeNull();
 
         leaseTransactionStep.Leases.ShouldNotBeEmpty();
     }
@@ -169,7 +169,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         {
             var index = (int)(v.Value - 1);
 
-            var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+            var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
             commandTransactionStep.EntityVersionNumber.ShouldBe(v);
         }
@@ -209,7 +209,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         transaction.Steps.Length.ShouldBe(1);
 
-        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         commandTransactionStep.Command.ShouldBeEquivalentTo(new DoNothing());
     }

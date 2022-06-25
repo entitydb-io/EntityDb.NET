@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Commands;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions.Steps;
@@ -36,6 +37,67 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
         _knownEntities.Add(entityId, entity);
     }
 
+    private void Add(Id entityId, ImmutableArray<ILease> leases)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddLeasesTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases
+        });
+    }
+
+    private void Add(Id entityId, ImmutableArray<ITag> tags)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddTagsTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags
+        });
+    }
+
+    private void Delete(Id entityId, ImmutableArray<ILease> leases)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteLeasesTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases
+        });
+    }
+
+    private void Delete(Id entityId, ImmutableArray<ITag> tags)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteTagsTransactionStep
+        {
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags
+        });
+    }
+
+    public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Id entityId)
+    {
+        return new SingleEntityTransactionBuilder<TEntity>(this, entityId);
+    }
+
     public TEntity GetEntity(Id entityId)
     {
         return _knownEntities[entityId];
@@ -65,19 +127,39 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
         var previousEntity = _knownEntities[entityId];
         var previousEntityVersionNumber = previousEntity.GetVersionNumber();
 
-        var entity = previousEntity.Reduce(command);
-        var entityVersionNumber = entity.GetVersionNumber();
+        var nextEntity = previousEntity.Reduce(command);
+        var nextEntityVersionNumber = nextEntity.GetVersionNumber();
 
         _transactionSteps.Add(new AppendCommandTransactionStep
         {
             EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
+            Entity = nextEntity,
+            EntityVersionNumber = nextEntityVersionNumber,
             Command = command,
             PreviousEntityVersionNumber = previousEntityVersionNumber
         });
         
-        _knownEntities[entityId] = entity;
+        _knownEntities[entityId] = nextEntity;
+
+        if (command is IAddLeasesCommand<TEntity> addLeasesCommand)
+        {
+            Add(entityId, addLeasesCommand.GetLeases(previousEntity, nextEntity).ToImmutableArray());
+        }
+
+        if (command is IAddTagsCommand<TEntity> addTagsCommand)
+        {
+            Add(entityId, addTagsCommand.GetTags(previousEntity, nextEntity).ToImmutableArray());
+        }
+
+        if (command is IDeleteLeasesCommand<TEntity> deleteLeasesCommand)
+        {
+            Delete(entityId, deleteLeasesCommand.GetLeases(previousEntity, nextEntity).ToImmutableArray());
+        }
+
+        if (command is IDeleteTagsCommand<TEntity> deleteTagsCommand)
+        {
+            Delete(entityId, deleteTagsCommand.GetTags(previousEntity, nextEntity).ToImmutableArray());
+        }
 
         return this;
     }
@@ -86,16 +168,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
     {
         ConstructIfNotKnown(entityId);
 
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new AddLeasesTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Leases = leases.ToImmutableArray()
-        });
+        Add(entityId, leases.ToImmutableArray());
 
         return this;
     }
@@ -104,16 +177,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
     {
         ConstructIfNotKnown(entityId);
 
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new AddTagsTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Tags = tags.ToImmutableArray()
-        });
+        Add(entityId, tags.ToImmutableArray());
 
         return this;
     }
@@ -122,16 +186,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
     {
         ConstructIfNotKnown(entityId);
 
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new DeleteLeasesTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Leases = leases.ToImmutableArray()
-        });
+        Delete(entityId, leases.ToImmutableArray());
 
         return this;
     }
@@ -140,16 +195,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
     {
         ConstructIfNotKnown(entityId);
 
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new DeleteTagsTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Tags = tags.ToImmutableArray()
-        });
+        Delete(entityId, tags.ToImmutableArray());
 
         return this;
     }

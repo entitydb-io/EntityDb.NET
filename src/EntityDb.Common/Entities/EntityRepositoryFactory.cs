@@ -32,7 +32,7 @@ internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEnti
         var transactionRepository =
             await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
 
-        if (_snapshotRepositoryFactory == null || snapshotSessionOptionsName == null)
+        if (_snapshotRepositoryFactory is null || snapshotSessionOptionsName is null)
         {
             return EntityRepository<TEntity>.Create(_serviceProvider,
                 transactionRepository);

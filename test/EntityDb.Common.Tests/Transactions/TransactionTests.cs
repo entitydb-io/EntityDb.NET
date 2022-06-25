@@ -426,7 +426,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionBuilder.Add(new CountTag(count));
         }
 
-        var transaction = (transactionBuilder.Build(transactionId) as Transaction)!;
+        var transaction = (transactionBuilder.Build(transactionId) as Transaction).ShouldNotBeNull();
             
         if (timeStampOverride.HasValue)
         {
@@ -436,7 +436,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             };
         }
 
-        if (agentSignatureOverride != null)
+        if (agentSignatureOverride is not null)
         {
             transaction = transaction with
             {
@@ -692,8 +692,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         firstTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
         secondTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
         
-        var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+        var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
+        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         firstCommandTransactionStep.EntityVersionNumber.ShouldBe(secondCommandTransactionStep.EntityVersionNumber);
 
@@ -883,7 +883,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
         annotatedCommands[0].EntityVersionNumber.ShouldBe(new VersionNumber(1));
             
-        var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<Count>()!;
+        var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<Count>().ShouldNotBeNull();
 
         actualCountCommand.Number.ShouldBe(expectedCount);
             
@@ -1082,7 +1082,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         transaction.Steps.Length.ShouldBe(1);
 
-        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         commandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
@@ -1140,7 +1140,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         secondTransaction.Steps.Length.ShouldBe(1);
 
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>()!;
+        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         secondCommandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(2));
 

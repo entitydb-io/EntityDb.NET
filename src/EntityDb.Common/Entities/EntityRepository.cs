@@ -81,7 +81,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
     {
         await TransactionRepository.DisposeAsync();
 
-        if (SnapshotRepository != null)
+        if (SnapshotRepository is not null)
         {
             await SnapshotRepository.DisposeAsync();
         }
@@ -102,7 +102,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
-        if (snapshotRepository == null)
+        if (snapshotRepository is null)
         {
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider,
                 transactionRepository);

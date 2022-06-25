@@ -37,7 +37,7 @@ internal class CreateCollections : CommandBase
 
         var cluster = await mongoDbAtlasClient.GetCluster(clusterName);
 
-        if (cluster == null || cluster.SrvAddress?.StartsWith(protocol) != true)
+        if (cluster is null || cluster.SrvAddress?.StartsWith(protocol) != true)
         {
             throw new InvalidOperationException();
         }

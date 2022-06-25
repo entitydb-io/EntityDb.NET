@@ -61,7 +61,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             .GetMethod(nameof(GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
     
     private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotsAdder snapshotsAdder)
@@ -106,7 +106,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             .GetMethod(nameof(GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
 
     private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotsAdder snapshotsAdder)
@@ -162,6 +162,6 @@ public sealed class SnapshotTests : TestsBase<Startup>
             .GetMethod(nameof(GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
 }

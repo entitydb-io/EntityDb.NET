@@ -59,14 +59,14 @@ internal static class EnvelopeHelper
         {
             var assemblyFullName = type.Assembly.FullName;
 
-            if (assemblyFullName != null)
+            if (assemblyFullName is not null)
             {
                 value.Add(AssemblyFullName, assemblyFullName);
             }
 
             var typeFullName = type.FullName;
 
-            if (typeFullName != null)
+            if (typeFullName is not null)
             {
                 value.Add(TypeFullName, typeFullName);
             }

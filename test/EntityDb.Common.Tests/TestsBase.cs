@@ -23,6 +23,7 @@ using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 using Xunit.Sdk;
+using Shouldly;
 
 namespace EntityDb.Common.Tests;
 
@@ -80,7 +81,7 @@ public class TestsBase<TStartup>
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
         _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
-        _test = (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output) as ITest)!;
+        _test = (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output) as ITest).ShouldNotBeNull();
     }
 
     private static readonly TransactionsAdder[] AllTransactionsAdders =
