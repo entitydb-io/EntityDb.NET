@@ -52,34 +52,31 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
                 continue;
             }
             
-            var projectionIds = await _projectionStrategy.GetProjectionIds(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
+            var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
             
-            foreach (var projectionId in projectionIds)
+            projectionCache.TryGetValue(projectionId, out var previousProjection);
+                
+            previousProjection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
+
+            var projection = previousProjection;
+                
+            var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
+            (
+                transaction.Id,
+                transaction.TimeStamp,
+                appendCommandTransactionStep.EntityId,
+                appendCommandTransactionStep.EntityVersionNumber,
+                appendCommandTransactionStep.Command
+            );
+
+            projection = projection.Reduce(annotatedCommand);
+
+            if (projection.ShouldReplace(previousProjection))
             {
-                projectionCache.TryGetValue(projectionId, out var previousProjection);
-                
-                previousProjection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
-
-                var projection = previousProjection;
-                
-                var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
-                (
-                    transaction.Id,
-                    transaction.TimeStamp,
-                    appendCommandTransactionStep.EntityId,
-                    appendCommandTransactionStep.EntityVersionNumber,
-                    appendCommandTransactionStep.Command
-                );
-
-                projection = projection.Reduce(annotatedCommand);
-
-                if (projection.ShouldReplace(previousProjection))
-                {
-                    await snapshotRepository.PutSnapshot(projectionId, projection);
-                }
-
-                projectionCache[projectionId] = projection;
+                await snapshotRepository.PutSnapshot(projectionId, projection);
             }
+
+            projectionCache[projectionId] = projection;
         }
     }
 
