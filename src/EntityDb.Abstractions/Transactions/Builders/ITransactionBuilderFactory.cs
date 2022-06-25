@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Transactions.Builders;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Transactions.Builders;
@@ -14,14 +15,16 @@ public interface ITransactionBuilderFactory<TEntity>
     ///     Creates a new instance of <see cref="ITransactionBuilder{TEntity}"/>.
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ITransactionBuilder{TEntity}"/>.</returns>
-    Task<ITransactionBuilder<TEntity>> Create(string agentSignatureOptionsName);
+    Task<ITransactionBuilder<TEntity>> Create(string agentSignatureOptionsName, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates a new instance of <see cref="ISingleEntityTransactionBuilder{TEntity}"/>.
     /// </summary>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="entityId">The id of the entity.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ITransactionBuilder{TEntity}"/>.</returns>
-    Task<ISingleEntityTransactionBuilder<TEntity>> CreateForSingleEntity(string agentSignatureOptionsName, Id entityId);
+    Task<ISingleEntityTransactionBuilder<TEntity>> CreateForSingleEntity(string agentSignatureOptionsName, Id entityId, CancellationToken cancellationToken = default);
 }

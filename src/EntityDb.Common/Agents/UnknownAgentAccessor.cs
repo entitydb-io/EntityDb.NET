@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Agents;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Agents;
@@ -20,13 +21,13 @@ public class UnknownAgentAccessor : IAgentAccessor
     }
 
     /// <inheritdoc/>
-    public async Task<IAgent> GetAgentAsync(string signatureOptionsName)
+    public async Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken)
     {
         var applicationInfo = DefaultApplicationInfo;
 
         if (_agentSignatureAugmenter != null)
         {
-            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfoAsync();
+            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfoAsync(cancellationToken);
         }
 
         return new StandardAgent(new UnknownAgentSignature(applicationInfo));

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Agents;
 
@@ -11,6 +12,7 @@ public interface IAgentAccessor
     ///     Returns the agent.
     /// </summary>
     /// <param name="signatureOptionsName">The name of the signature options object.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The agent.</returns>
-    Task<IAgent> GetAgentAsync(string signatureOptionsName);
+    Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken = default);
 }
