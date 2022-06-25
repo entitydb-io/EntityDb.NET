@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using Xunit;
+using EntityDb.Abstractions.Transactions.Builders;
 
 namespace EntityDb.Common.Tests.Entities;
 
@@ -25,7 +26,7 @@ public class EntityTests : TestsBase<Startup>
     {
     }
 
-    private static ITransaction BuildTransaction
+    private static async Task<ITransaction> BuildTransaction
     (
         IServiceScope serviceScope,
         Id entityId,
@@ -34,9 +35,9 @@ public class EntityTests : TestsBase<Startup>
         TestEntity? entity = null
     )
     {
-        var transactionBuilder = serviceScope.ServiceProvider
-            .GetRequiredService<TransactionBuilder<TestEntity>>()
-            .ForSingleEntity(entityId);
+        var transactionBuilder = await serviceScope.ServiceProvider
+            .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
+            .CreateForSingleEntity(default!, entityId);
 
         if (entity != null)
         {
@@ -53,7 +54,7 @@ public class EntityTests : TestsBase<Startup>
             transactionBuilder.Append(new DoNothing());
         }
 
-        return transactionBuilder.Build(default!, Id.NewId());
+        return transactionBuilder.Build(Id.NewId());
     }
 
     [Theory]
@@ -82,7 +83,7 @@ public class EntityTests : TestsBase<Startup>
             .CreateRepository(TestSessionOptions.Write,
                 TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
+        var transaction = await BuildTransaction(serviceScope, entityId, new VersionNumber(1), versionNumberN);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -152,7 +153,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var transaction = BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
+        var transaction = await BuildTransaction(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
