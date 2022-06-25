@@ -174,7 +174,7 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetMethod(nameof(Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenReturnDefaultProjection), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
 
     [Theory]
@@ -186,7 +186,7 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetMethod(nameof(Generic_GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
     
     [Theory]
@@ -197,6 +197,6 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetMethod(nameof(Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType, snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
 }
