@@ -34,32 +34,26 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscri
 
     protected override async Task NotifyAsync(ITransaction transaction)
     {
-        await using var snapshotRepository = await CreateSnapshotRepository();
-
-        var entityCache = new Dictionary<Id, TEntity>();
+        await using var snapshotRepository = new BulkOptimizedSnapshotRepository<TEntity>(await CreateSnapshotRepository());
 
         foreach (var step in transaction.Steps)
         {
-            if (step.Entity is not TEntity entity)
+            if (step.Entity is not TEntity nextSnapshot)
             {
                 continue;
             }
 
-            var entityId = entity.GetId();
+            var entityId = nextSnapshot.GetId();
 
-            entityCache.TryGetValue(entityId, out var previousSnapshot);
+            var previousSnapshot = await snapshotRepository.GetSnapshot(entityId);
 
-            previousSnapshot ??= await snapshotRepository.GetSnapshot(entityId);
-
-            if (!entity.ShouldReplace(previousSnapshot))
+            if (nextSnapshot.ShouldReplace(previousSnapshot))
             {
-                continue;
+                await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
             }
-
-            await snapshotRepository.PutSnapshot(entityId, entity);
-            
-            entityCache[entityId] = entity;
         }
+
+        await snapshotRepository.PutSnapshots();
     }
 
     public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,

@@ -2,14 +2,11 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
@@ -41,25 +38,19 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
 
     protected override async Task NotifyAsync(ITransaction transaction)
     {
-        await using var snapshotRepository = await CreateSnapshotRepository();
+        await using var snapshotRepository = new BulkOptimizedSnapshotRepository<TProjection>(await CreateSnapshotRepository());
 
-        var projectionCache = new Dictionary<Id, TProjection>();
-        
         foreach (var step in transaction.Steps)
         {
             if (step is not IAppendCommandTransactionStep appendCommandTransactionStep)
             {
                 continue;
             }
-            
-            var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
-            
-            projectionCache.TryGetValue(projectionId, out var previousProjection);
-                
-            previousProjection ??= await snapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
 
-            var projection = previousProjection;
-                
+            var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
+
+            var previousSnapshot = await snapshotRepository.GetSnapshot(projectionId);
+
             var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
             (
                 transaction.Id,
@@ -69,15 +60,15 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
                 appendCommandTransactionStep.Command
             );
 
-            projection = projection.Reduce(annotatedCommand);
+            var nextSnapshot = (previousSnapshot ?? TProjection.Construct(projectionId)).Reduce(annotatedCommand);
 
-            if (projection.ShouldReplace(previousProjection))
+            if (nextSnapshot.ShouldReplace(previousSnapshot))
             {
-                await snapshotRepository.PutSnapshot(projectionId, projection);
+                await snapshotRepository.PutSnapshot(projectionId, nextSnapshot);
             }
-
-            projectionCache[projectionId] = projection;
         }
+
+        await snapshotRepository.PutSnapshots();
     }
 
     public static ProjectionSnapshotTransactionSubscriber<TProjection> Create(IServiceProvider serviceProvider,
