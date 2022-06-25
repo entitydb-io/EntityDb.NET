@@ -51,6 +51,10 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscri
             {
                 await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
             }
+            else
+            {
+                snapshotRepository.CacheSnapshot(entityId, nextSnapshot);
+            }
         }
 
         await snapshotRepository.PutSnapshots();

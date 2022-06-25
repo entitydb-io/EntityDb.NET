@@ -48,6 +48,11 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
         return Task.FromResult(false);
     }
 
+    public void CacheSnapshot(Id snapshotId, TSnapshot snapshot)
+    {
+        _getCache[snapshotId] = snapshot;
+    }
+
     public async Task<bool> PutSnapshots(CancellationToken cancellationToken = default)
     {
         foreach (var (snapshotId, snapshot) in _putCache)

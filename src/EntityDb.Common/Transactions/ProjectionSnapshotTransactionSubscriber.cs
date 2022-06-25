@@ -66,6 +66,10 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
             {
                 await snapshotRepository.PutSnapshot(projectionId, nextSnapshot);
             }
+            else
+            {
+                snapshotRepository.CacheSnapshot(projectionId, nextSnapshot);
+            }
         }
 
         await snapshotRepository.PutSnapshots();
