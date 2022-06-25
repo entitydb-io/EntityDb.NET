@@ -18,6 +18,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     {
     }
 
+    protected abstract bool CanBeInactive { get; }
+
     protected abstract void ConfigureInactiveAgentAccessor(IServiceCollection serviceCollection);
 
     protected abstract void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection, TAgentAccessorConfiguration agentAccessorConfiguration);
@@ -29,6 +31,11 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     [Fact]
     public void GivenBackingServiceInactive_WhenGettingAgent_ThenThrow()
     {
+        if (!CanBeInactive)
+        {
+            return;
+        }
+
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(ConfigureInactiveAgentAccessor);
