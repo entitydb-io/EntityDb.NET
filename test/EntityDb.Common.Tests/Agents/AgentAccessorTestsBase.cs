@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Xunit;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace EntityDb.Common.Tests.Agents;
 
@@ -45,7 +46,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
         // ASSERT
 
-        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!));
+        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!, default));
     }
 
     [Fact]
@@ -65,7 +66,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgentAsync(default!);
+            var agent = agentAccessor.GetAgentAsync(default!, default);
 
             // ASSERT
 
@@ -89,7 +90,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, default);
 
             // ASSERT
 
@@ -111,7 +112,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, default);
 
             // ACT
 
@@ -139,7 +140,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, default);
 
             // ACT
 
@@ -169,7 +170,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
             var agentSignatureAugmenterMock = new Mock<IAgentSignatureAugmenter>(MockBehavior.Strict);
 
             agentSignatureAugmenterMock
-                .Setup(x => x.GetApplicationInfoAsync())
+                .Setup(x => x.GetApplicationInfoAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedApplicationInfo);
 
             using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -181,7 +182,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, default);
 
             // ACT
 

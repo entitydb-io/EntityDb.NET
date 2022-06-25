@@ -417,7 +417,7 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         foreach (var count in counts)
         {
@@ -475,7 +475,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var transaction = transactionBuilder
             .Append(CommandSeeder.Create())
@@ -511,11 +511,11 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var firstTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var secondTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
@@ -554,7 +554,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var transaction = (transactionBuilder
                 .Append(CommandSeeder.Create())
@@ -659,11 +659,11 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var firstTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         var secondTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
@@ -718,7 +718,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var transaction = transactionBuilder
             .Add(tag)
@@ -752,7 +752,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var transaction = transactionBuilder
             .Add(lease)
@@ -942,7 +942,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         var tag = new Tag("Foo", "Bar");
 
@@ -1000,7 +1000,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         var lease = new Lease("Foo", "Bar", "Baz");
 
@@ -1058,7 +1058,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var transaction = transactionBuilder
             .Append(expectedCommand)
@@ -1107,7 +1107,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         var firstTransaction = transactionBuilder
             .Append(new Count(1))

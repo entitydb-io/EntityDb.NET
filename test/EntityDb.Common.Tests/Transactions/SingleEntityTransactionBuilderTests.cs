@@ -31,7 +31,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         // ASSERT
 
@@ -54,7 +54,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, expectedEntityId);
+            .CreateForSingleEntity(default!, expectedEntityId, default);
 
         transactionBuilder.Load(expectedEntity);
 
@@ -82,7 +82,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         // ACT
 
@@ -115,7 +115,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         await using var entityRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
@@ -152,7 +152,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         // ACT
 
@@ -190,7 +190,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, default);
+            .CreateForSingleEntity(default!, default, default);
 
         await using var entityRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()

@@ -37,7 +37,7 @@ public class EntityTests : TestsBase<Startup>
     {
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TestEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+            .CreateForSingleEntity(default!, entityId, default);
 
         if (entity != null)
         {
