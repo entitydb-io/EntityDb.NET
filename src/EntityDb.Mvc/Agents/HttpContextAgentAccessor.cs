@@ -31,7 +31,7 @@ internal sealed class HttpContextAgentAccessor : AgentAccessorBase
     {
         var httpContext = _httpContextAccessor.HttpContext;
 
-        if (httpContext == null)
+        if (httpContext is null)
         {
             throw new NoAgentException();
         }

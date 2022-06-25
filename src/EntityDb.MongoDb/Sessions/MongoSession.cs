@@ -108,17 +108,17 @@ internal record MongoSession
             })
             .Project(projection);
 
-        if (sort != null)
+        if (sort is not null)
         {
             find = find.Sort(sort);
         }
 
-        if (skip != null)
+        if (skip is not null)
         {
             find = find.Skip(skip);
         }
 
-        if (limit != null)
+        if (limit is not null)
         {
             find = find.Limit(limit);
         }

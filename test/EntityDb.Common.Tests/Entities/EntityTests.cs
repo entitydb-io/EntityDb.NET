@@ -38,7 +38,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<TransactionBuilder<TestEntity>>()
             .ForSingleEntity(entityId);
 
-        if (entity != null)
+        if (entity is not null)
         {
             transactionBuilder.Load(entity);
         }

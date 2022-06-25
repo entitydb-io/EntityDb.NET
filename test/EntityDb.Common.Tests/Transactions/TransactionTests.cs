@@ -435,7 +435,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             };
         }
 
-        if (agentSignatureOverride != null)
+        if (agentSignatureOverride is not null)
         {
             transaction = transaction with
             {

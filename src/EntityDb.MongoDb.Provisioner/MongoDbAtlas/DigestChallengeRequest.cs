@@ -62,7 +62,7 @@ internal record DigestChallengeRequest(string? Realm, string? Domain, string? No
     {
         digestChallengeRequest = default!;
 
-        if (authorizationHeaderValue.Scheme != "Digest" || authorizationHeaderValue.Parameter == null)
+        if (authorizationHeaderValue.Scheme != "Digest" || authorizationHeaderValue.Parameter is null)
         {
             return false;
         }

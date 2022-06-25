@@ -32,7 +32,7 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
         snapshot = await _snapshotRepository.GetSnapshot(snapshotId, cancellationToken);
 
-        if (snapshot != null)
+        if (snapshot is not null)
         {
             _cache[snapshotId] = snapshot;
         }
