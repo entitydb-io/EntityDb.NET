@@ -9,8 +9,8 @@ namespace EntityDb.Common.Snapshots;
 
 internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly Dictionary<Id, TSnapshot> _getCache = new();
-    private readonly Dictionary<Id, TSnapshot> _putCache = new();
+    private readonly Dictionary<Id, TSnapshot> _cache = new();
+    private readonly Dictionary<Id, TSnapshot> _buffer = new();
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
 
     public BulkOptimizedSnapshotRepository(ISnapshotRepository<TSnapshot> snapshotRepository)
@@ -25,7 +25,7 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
     public async Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
     {
-        if (_getCache.TryGetValue(snapshotId, out var snapshot))
+        if (_cache.TryGetValue(snapshotId, out var snapshot))
         {
             return snapshot;
         }
@@ -34,7 +34,7 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
         if (snapshot != null)
         {
-            _getCache[snapshotId] = snapshot;
+            _cache[snapshotId] = snapshot;
         }
 
         return snapshot;
@@ -42,20 +42,20 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
     public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        _getCache[snapshotId] = snapshot;
-        _putCache[snapshotId] = snapshot;
+        _cache[snapshotId] = snapshot;
+        _buffer[snapshotId] = snapshot;
 
         return Task.FromResult(false);
     }
 
     public void CacheSnapshot(Id snapshotId, TSnapshot snapshot)
     {
-        _getCache[snapshotId] = snapshot;
+        _cache[snapshotId] = snapshot;
     }
 
     public async Task<bool> PutSnapshots(CancellationToken cancellationToken = default)
     {
-        foreach (var (snapshotId, snapshot) in _putCache)
+        foreach (var (snapshotId, snapshot) in _buffer)
         {
             await _snapshotRepository.PutSnapshot(snapshotId, snapshot, cancellationToken);
         }
@@ -65,8 +65,8 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
     public override ValueTask DisposeAsync()
     {
-        _getCache.Clear();
-        _putCache.Clear();
+        _cache.Clear();
+        _buffer.Clear();
 
         return _snapshotRepository.DisposeAsync();
     }
