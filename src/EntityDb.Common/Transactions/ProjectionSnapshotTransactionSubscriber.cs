@@ -52,7 +52,7 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
                 continue;
             }
             
-            var projectionIds = await _projectionStrategy.GetProjectionIds(appendCommandTransactionStep.EntityId);
+            var projectionIds = await _projectionStrategy.GetProjectionIds(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
             
             foreach (var projectionId in projectionIds)
             {
