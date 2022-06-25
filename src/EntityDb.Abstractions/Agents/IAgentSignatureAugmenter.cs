@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Agents;
 
@@ -12,5 +13,5 @@ public interface IAgentSignatureAugmenter
     ///     Returns a dictionary of application-specific information.
     /// </summary>
     /// <returns>A dictionary of application-specific information.</returns>
-    Dictionary<string, string> GetApplicationInfo();
+    Task<Dictionary<string, string>> GetApplicationInfoAsync();
 }
