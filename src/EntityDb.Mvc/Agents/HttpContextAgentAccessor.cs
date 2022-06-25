@@ -54,6 +54,6 @@ internal sealed class HttpContextAgentAccessor : IAgentAccessor
             applicationInfo
         );
 
-        return new Agent(TimeStamp.UtcNow, signature);
+        return new StandardAgent(signature);
     }
 }
