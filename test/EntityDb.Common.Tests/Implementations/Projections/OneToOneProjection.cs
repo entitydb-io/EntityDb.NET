@@ -48,7 +48,7 @@ public record OneToOneProjection
 
     public bool ShouldReplace(OneToOneProjection? previousSnapshot)
     {
-        if (ShouldReplaceLogic.Value != null)
+        if (ShouldReplaceLogic.Value is not null)
         {
             return ShouldReplaceLogic.Value.Invoke(this, previousSnapshot);
         }

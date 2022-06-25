@@ -69,7 +69,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
             .GetMethod(nameof(Generic_GivenSnapshotShouldReplaceAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
     
     private async Task
@@ -118,6 +118,6 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
             .GetMethod(nameof(Generic_GivenSnapshotShouldReplaceAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>()!;
+            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
 }

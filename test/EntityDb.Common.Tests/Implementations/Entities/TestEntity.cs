@@ -54,7 +54,7 @@ public record TestEntity
 
     public bool ShouldReplace(TestEntity? previousSnapshot)
     {
-        if (ShouldReplaceLogic.Value != null)
+        if (ShouldReplaceLogic.Value is not null)
         {
             return ShouldReplaceLogic.Value.Invoke(this, previousSnapshot);
         }

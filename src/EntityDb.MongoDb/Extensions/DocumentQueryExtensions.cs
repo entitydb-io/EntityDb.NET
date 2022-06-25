@@ -59,7 +59,7 @@ internal static class DocumentQueryExtensions
 
         var document = documents.SingleOrDefault();
 
-        return document == null
+        return document is null
             ? default
             : document.EntityVersionNumber;
     }
