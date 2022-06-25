@@ -11,8 +11,8 @@ public class SingleEntityProjectionStrategy : IProjectionStrategy<OneToOneProjec
         return Task.FromResult(new[] { projectionId });
     }
 
-    public Task<Id[]> GetProjectionIds(Id entityId, object entity)
+    public Task<Id> GetProjectionId(Id entityId, object entity)
     {
-        return Task.FromResult(new[] { entityId });
+        return Task.FromResult(entityId);
     }
 }
