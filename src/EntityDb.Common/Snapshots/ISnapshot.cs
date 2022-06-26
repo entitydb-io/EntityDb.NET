@@ -1,14 +1,46 @@
+using EntityDb.Abstractions.ValueObjects;
+
 namespace EntityDb.Common.Snapshots;
 
 /// <summary>
-///     
+///     Indicates that the snapshot is compatible with several EntityDb.Common implementations.
 /// </summary>
-public interface ISnapshot<in TSnapshot>
+/// <typeparam name="TSnapshot">The type of the snapshot.</typeparam>
+public interface ISnapshot<TSnapshot>
 {
     /// <summary>
-    /// 
+    ///     Creates a new instance of a <typeparamref name="TSnapshot" />.
     /// </summary>
-    /// <param name="previousSnapshot"></param>
-    /// <returns></returns>
-    bool ShouldReplace(TSnapshot? previousSnapshot);
+    /// <param name="snapshotId">The id of the snapshot.</param>
+    /// <returns>A new instance of <typeparamref name="TSnapshot" />.</returns>
+    abstract static TSnapshot Construct(Id snapshotId);
+
+    /// <summary>
+    ///     Returns the id of this snapshot.
+    /// </summary>
+    /// <returns>The id of this snapshot.</returns>
+    Id GetId();
+
+    /// <summary>
+    ///     Returns the version number of this snapshot.
+    /// </summary>
+    /// <returns>The version number of this snapshot.</returns>
+    VersionNumber GetVersionNumber();
+
+    /// <summary>
+    ///     Indicates if this snapshot instance version should be recorded (independent of the most recent snapshot).
+    /// </summary>
+    /// <returns><c>true</c> if this snapshot instance should be recorded, or else <c>false</c>.</returns>
+    /// <remarks>
+    ///     You would use this if you intent to fetch a snapshot at multiple version numbers and don't want to hit
+    ///     the transaction database when it can be avoided.
+    /// </remarks>
+    bool ShouldRecord();
+
+    /// <summary>
+    ///     Indicates if this snapshot instance should be recorded as the most recent snapshot.
+    /// </summary>
+    /// <param name="previousMostRecentSnapshot">The previous instance of the most recent snapshot.</param>
+    /// <returns><c>true</c> if this snapshot instance should be recorded as the most recent snapshot, or else <c>false</c>.</returns>
+    bool ShouldRecordAsMostRecent(TSnapshot? previousMostRecentSnapshot);
 }

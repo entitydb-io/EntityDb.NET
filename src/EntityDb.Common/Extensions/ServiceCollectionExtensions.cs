@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool testMode = false)
-        where TEntity : IEntity<TEntity>, ISnapshot<TEntity>
+        where TEntity : IEntity<TEntity>
     {
         serviceCollection.Add<ITransactionSubscriber>
         (
@@ -129,7 +129,7 @@ public static class ServiceCollectionExtensions
     public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
         this IServiceCollection serviceCollection,
         string snapshotSessionOptionsName, bool testMode = false)
-        where TProjection : IProjection<TProjection>, ISnapshot<TProjection>
+        where TProjection : IProjection<TProjection>
     {
         serviceCollection.Add<ITransactionSubscriber>
         (
