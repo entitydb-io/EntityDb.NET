@@ -26,7 +26,8 @@ internal class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryF
         _snapshotRepositoryFactory = snapshotRepositoryFactory;
     }
     
-    public async Task<IProjectionRepository<TProjection>> CreateRepository(string transactionSessionOptionsName, string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
+    public async Task<IProjectionRepository<TProjection>> CreateRepository(string transactionSessionOptionsName,
+        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
     {
         var transactionRepository =
             await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
