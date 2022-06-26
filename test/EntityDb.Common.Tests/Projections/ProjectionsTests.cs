@@ -39,7 +39,7 @@ public class ProjectionsTests : TestsBase<Startup>
 
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
         
         // ACT
         
@@ -76,13 +76,13 @@ public class ProjectionsTests : TestsBase<Startup>
         
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
 
         // ACT
 
         var actualEntityIds = await projectionStrategy.GetEntityIds(projectionId, default!);
         
-        var actualProjection = await projectionRepository.GetCurrent(projectionId);
+        var actualProjection = await projectionRepository.GetCurrent(projectionId, default);
         
         // ASSERT
         
@@ -107,11 +107,11 @@ public class ProjectionsTests : TestsBase<Startup>
 
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
         
         // ACT
 
-        var actualProjection = await projectionRepository.GetCurrent(projectionId);
+        var actualProjection = await projectionRepository.GetCurrent(projectionId, default);
         
         // ASSERT
         
@@ -145,7 +145,8 @@ public class ProjectionsTests : TestsBase<Startup>
         
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
+
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
         
@@ -154,10 +155,12 @@ public class ProjectionsTests : TestsBase<Startup>
         numberOfVersionNumbers.ShouldBeGreaterThan(replaceAtVersionNumber);
         
         transactionInserted.ShouldBeTrue();
-        
+
+        projectionRepository.SnapshotRepository.ShouldNotBeNull();
+
         // ACT
 
-        var currentProjection = await projectionRepository.GetCurrent(projectionId);
+        var currentProjection = await projectionRepository.GetCurrent(projectionId, default);
         var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshot(projectionId);
         
         // ASSERT

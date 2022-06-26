@@ -36,7 +36,9 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
     public async Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
     {
-        var entity = await SnapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
+        var entity = SnapshotRepository is not null
+            ? await SnapshotRepository.GetSnapshot(entityId, cancellationToken) ?? TEntity.Construct(entityId)
+            : TEntity.Construct(entityId);
 
         var versionNumber = entity.GetVersionNumber();
 

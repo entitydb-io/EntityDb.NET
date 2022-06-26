@@ -6,6 +6,7 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Projections;
@@ -15,13 +16,13 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 {
     public IProjectionStrategy<TProjection> ProjectionStrategy { get; }
     public ITransactionRepository TransactionRepository { get; }
-    public ISnapshotRepository<TProjection> SnapshotRepository { get; }
+    public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
     
     public ProjectionRepository
     (
         IProjectionStrategy<TProjection> projectionStrategy,
-        ISnapshotRepository<TProjection> snapshotRepository,
-        ITransactionRepository transactionRepository
+        ITransactionRepository transactionRepository,
+        ISnapshotRepository<TProjection>? snapshotRepository = null
     )
     {
         ProjectionStrategy = projectionStrategy;
@@ -29,9 +30,11 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TProjection> GetCurrent(Id projectionId)
+    public async Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken)
     {
-        var projection = await SnapshotRepository.GetSnapshot(projectionId) ?? TProjection.Construct(projectionId);
+        var projection = SnapshotRepository is not null
+            ? await SnapshotRepository.GetSnapshot(projectionId, cancellationToken) ?? TProjection.Construct(projectionId)
+            : TProjection.Construct(projectionId);
 
         var entityIds = await ProjectionStrategy.GetEntityIds(projectionId, projection);
 
@@ -58,9 +61,15 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
     (
         IServiceProvider serviceProvider,
         ITransactionRepository transactionRepository,
-        ISnapshotRepository<TProjection> snapshotRepository
+        ISnapshotRepository<TProjection>? snapshotRepository = null
     )
     {
+        if (snapshotRepository is null)
+        {
+            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
+                transactionRepository);
+        }
+
         return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
             transactionRepository, snapshotRepository);
     }
