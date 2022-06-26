@@ -26,7 +26,7 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>
-    ISnapshotRepository<TProjection> SnapshotRepository { get; }
+    ISnapshotRepository<TProjection>? SnapshotRepository { get; }
 
     /// <summary>
     ///     Returns the current state of a <typeparamref name="TProjection" />.
