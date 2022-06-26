@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.Abstractions.Projections;
@@ -31,6 +32,7 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     ///     Returns the current state of a <typeparamref name="TProjection" />.
     /// </summary>
     /// <param name="projectionId">The id of the projection.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The current state of a <typeparamref name="TProjection" />.</returns>
-    Task<TProjection> GetCurrent(Id projectionId);
+    Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default);
 }
