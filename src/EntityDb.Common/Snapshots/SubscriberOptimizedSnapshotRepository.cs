@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
+internal class SubscriberOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
     where TSnapshot : ISnapshot<TSnapshot>
 {
     private readonly Dictionary<Pointer, TSnapshot> _getCache = new();
     private readonly Dictionary<Pointer, TSnapshot> _putQueue = new();
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
 
-    public BulkOptimizedSnapshotRepository(ISnapshotRepository<TSnapshot> snapshotRepository)
+    public SubscriberOptimizedSnapshotRepository(ISnapshotRepository<TSnapshot> snapshotRepository)
     {
         _snapshotRepository = snapshotRepository;
     }

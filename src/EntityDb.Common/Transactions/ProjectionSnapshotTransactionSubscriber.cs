@@ -4,19 +4,16 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
-using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class ProjectionSnapshotTransactionSubscriber<TProjection> : TransactionSubscriber
-    where TProjection : IProjection<TProjection>, ISnapshot<TProjection>
+internal class ProjectionSnapshotTransactionSubscriber<TProjection> : SnapshotTransactionSubscriberBase<TProjection>
+    where TProjection : IProjection<TProjection>
 {
     private readonly IProjectionStrategy<TProjection> _projectionStrategy;
-    private readonly ISnapshotRepositoryFactory<TProjection> _snapshotRepositoryFactory;
-    private readonly string _snapshotSessionOptionsName;
 
     public ProjectionSnapshotTransactionSubscriber
     (
@@ -24,55 +21,34 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : Transactio
         ISnapshotRepositoryFactory<TProjection> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
         bool testMode
-    ) : base(testMode)
+    ) : base(snapshotRepositoryFactory, snapshotSessionOptionsName, testMode)
     {
         _projectionStrategy = projectionStrategy;
-        _snapshotRepositoryFactory = snapshotRepositoryFactory;
-        _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
-    public Task<ISnapshotRepository<TProjection>> CreateSnapshotRepository()
+    protected override async Task<(TProjection? previousMostRecentSnapshot, TProjection nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TProjection> snapshotRepository)
     {
-        return _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
-    }
-
-    protected override async Task NotifyAsync(ITransaction transaction)
-    {
-        await using var snapshotRepository = new BulkOptimizedSnapshotRepository<TProjection>(await CreateSnapshotRepository());
-
-        foreach (var step in transaction.Steps)
+        if (transactionStep is not IAppendCommandTransactionStep appendCommandTransactionStep)
         {
-            if (step is not IAppendCommandTransactionStep appendCommandTransactionStep)
-            {
-                continue;
-            }
-
-            var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
-
-            var previousSnapshot = await snapshotRepository.GetSnapshot(projectionId);
-
-            var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
-            (
-                transaction.Id,
-                transaction.TimeStamp,
-                appendCommandTransactionStep.EntityId,
-                appendCommandTransactionStep.EntityVersionNumber,
-                appendCommandTransactionStep.Command
-            );
-
-            var nextSnapshot = (previousSnapshot ?? TProjection.Construct(projectionId)).Reduce(annotatedCommand);
-
-            if (nextSnapshot.ShouldReplace(previousSnapshot))
-            {
-                await snapshotRepository.PutSnapshot(projectionId, nextSnapshot);
-            }
-            else
-            {
-                snapshotRepository.CacheSnapshot(projectionId, nextSnapshot);
-            }
+            return null;
         }
 
-        await snapshotRepository.PutSnapshots();
+        var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
+
+        var previousMostRecentSnapshot = await snapshotRepository.GetSnapshot(projectionId);
+
+        var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
+        (
+            transaction.Id,
+            transaction.TimeStamp,
+            appendCommandTransactionStep.EntityId,
+            appendCommandTransactionStep.EntityVersionNumber,
+            appendCommandTransactionStep.Command
+        );
+
+        var nextSnapshot = (previousMostRecentSnapshot ?? TProjection.Construct(projectionId)).Reduce(annotatedCommand);
+
+        return (previousMostRecentSnapshot, nextSnapshot);
     }
 
     public static ProjectionSnapshotTransactionSubscriber<TProjection> Create(IServiceProvider serviceProvider,

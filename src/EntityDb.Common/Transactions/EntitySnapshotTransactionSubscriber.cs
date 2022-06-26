@@ -1,63 +1,35 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Common.Entities;
-using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
-internal class EntitySnapshotTransactionSubscriber<TEntity> : TransactionSubscriber
-    where TEntity : IEntity<TEntity>, ISnapshot<TEntity>
-{
-    private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
-    private readonly string _snapshotSessionOptionsName;
-    
+internal class EntitySnapshotTransactionSubscriber<TEntity> : SnapshotTransactionSubscriberBase<TEntity>
+    where TEntity : IEntity<TEntity>
+{    
     public EntitySnapshotTransactionSubscriber
     (
         ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
         bool testMode
-    ) : base(testMode)
+    ) : base(snapshotRepositoryFactory, snapshotSessionOptionsName, testMode)
     {
-        _snapshotRepositoryFactory = snapshotRepositoryFactory;
-        _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
-    public Task<ISnapshotRepository<TEntity>> CreateSnapshotRepository()
+    protected override async Task<(TEntity? previousMostRecentSnapshot, TEntity nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TEntity> snapshotRepository)
     {
-        return _snapshotRepositoryFactory.CreateRepository(_snapshotSessionOptionsName);
-    }
-
-    protected override async Task NotifyAsync(ITransaction transaction)
-    {
-        await using var snapshotRepository = new BulkOptimizedSnapshotRepository<TEntity>(await CreateSnapshotRepository());
-
-        foreach (var step in transaction.Steps)
+        if (transactionStep.Entity is not TEntity nextSnapshot)
         {
-            if (step.Entity is not TEntity nextSnapshot)
-            {
-                continue;
-            }
-
-            var entityId = nextSnapshot.GetId();
-
-            var previousSnapshot = await snapshotRepository.GetSnapshot(entityId);
-
-            if (nextSnapshot.ShouldReplace(previousSnapshot))
-            {
-                await snapshotRepository.PutSnapshot(entityId, nextSnapshot);
-            }
-            else
-            {
-                snapshotRepository.CacheSnapshot(entityId, nextSnapshot);
-            }
+            return null;
         }
 
-        await snapshotRepository.PutSnapshots();
+        var previousMostRecentSnapshot = await snapshotRepository.GetSnapshot(transactionStep.EntityId);
+
+        return (previousMostRecentSnapshot, nextSnapshot);
     }
 
     public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,
