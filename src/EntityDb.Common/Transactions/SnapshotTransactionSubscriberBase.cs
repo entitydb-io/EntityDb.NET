@@ -13,7 +13,7 @@ internal abstract class SnapshotTransactionSubscriberBase<TSnapshot> : Transacti
     private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
 
-    public SnapshotTransactionSubscriberBase
+    protected SnapshotTransactionSubscriberBase
     (
         ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory,
         string snapshotSessionOptionsName,
@@ -62,5 +62,6 @@ internal abstract class SnapshotTransactionSubscriberBase<TSnapshot> : Transacti
         await snapshotRepository.PutSnapshots();
     }
 
-    protected abstract Task<(TSnapshot? previousLatestSnapshot, TSnapshot nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TSnapshot> snapshotRepository);
+    protected abstract Task<(TSnapshot? previousLatestSnapshot, TSnapshot nextSnapshot)?> GetSnapshots(
+        ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TSnapshot> snapshotRepository);
 }

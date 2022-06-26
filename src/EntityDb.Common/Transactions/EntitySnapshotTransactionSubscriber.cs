@@ -20,7 +20,8 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : SnapshotTransactio
     {
     }
 
-    protected override async Task<(TEntity? previousLatestSnapshot, TEntity nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TEntity> snapshotRepository)
+    protected override async Task<(TEntity? previousLatestSnapshot, TEntity nextSnapshot)?> GetSnapshots(
+        ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TEntity> snapshotRepository)
     {
         if (transactionStep.Entity is not TEntity nextSnapshot)
         {

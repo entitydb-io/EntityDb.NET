@@ -26,7 +26,8 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : SnapshotTr
         _projectionStrategy = projectionStrategy;
     }
 
-    protected override async Task<(TProjection? previousLatestSnapshot, TProjection nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TProjection> snapshotRepository)
+    protected override async Task<(TProjection? previousLatestSnapshot, TProjection nextSnapshot)?> GetSnapshots(
+        ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TProjection> snapshotRepository)
     {
         if (transactionStep is not IAppendCommandTransactionStep appendCommandTransactionStep)
         {

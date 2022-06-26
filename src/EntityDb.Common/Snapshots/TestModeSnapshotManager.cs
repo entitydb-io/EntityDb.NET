@@ -15,7 +15,9 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
     {
         if (!_dictionary.TryGetValue(snapshotRepository, out var storedSnapshotPointers))
         {
-            _dictionary.Add(snapshotRepository, storedSnapshotPointers = new List<Pointer>());
+            storedSnapshotPointers = new List<Pointer>();
+
+            _dictionary.Add(snapshotRepository, storedSnapshotPointers);
         }
 
         return storedSnapshotPointers;
