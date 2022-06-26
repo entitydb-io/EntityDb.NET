@@ -14,17 +14,17 @@ internal class ReadOnlyInMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
         _inMemorySession = inMemorySession;
     }
     
-    public Task<bool> Insert(Id snapshotId, TSnapshot snapshot)
+    public Task<bool> Insert(Pointer snapshotPointer, TSnapshot snapshot)
     {
         return Task.FromException<bool>(new CannotWriteInReadOnlyModeException());
     }
 
-    public Task<TSnapshot?> Get(Id snapshotId)
+    public Task<TSnapshot?> Get(Pointer snapshotPointer)
     {
-        return _inMemorySession.Get(snapshotId);
+        return _inMemorySession.Get(snapshotPointer);
     }
 
-    public Task<bool> Delete(IEnumerable<Id> snapshotIds)
+    public Task<bool> Delete(IEnumerable<Pointer> snapshotPointers)
     {
         return Task.FromException<bool>(new CannotWriteInReadOnlyModeException());
     }

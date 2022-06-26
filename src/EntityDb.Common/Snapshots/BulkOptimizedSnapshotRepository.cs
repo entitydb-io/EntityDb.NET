@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 namespace EntityDb.Common.Snapshots;
 
 internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
+    where TSnapshot : ISnapshot<TSnapshot>
 {
-    private readonly Dictionary<Id, TSnapshot> _cache = new();
-    private readonly Dictionary<Id, TSnapshot> _buffer = new();
+    private readonly Dictionary<Pointer, TSnapshot> _getCache = new();
+    private readonly Dictionary<Pointer, TSnapshot> _putQueue = new();
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
 
     public BulkOptimizedSnapshotRepository(ISnapshotRepository<TSnapshot> snapshotRepository)
@@ -18,46 +19,46 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
         _snapshotRepository = snapshotRepository;
     }
 
-    public Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
+    public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
     {
-        return _snapshotRepository.DeleteSnapshots(snapshotIds, cancellationToken);
+        return _snapshotRepository.DeleteSnapshots(snapshotPointers, cancellationToken);
     }
 
-    public async Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+    public async Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        if (_cache.TryGetValue(snapshotId, out var snapshot))
+        if (_getCache.TryGetValue(snapshotPointer, out var snapshot))
         {
             return snapshot;
         }
 
-        snapshot = await _snapshotRepository.GetSnapshot(snapshotId, cancellationToken);
+        snapshot = await _snapshotRepository.GetSnapshot(snapshotPointer, cancellationToken);
 
         if (snapshot is not null)
         {
-            _cache[snapshotId] = snapshot;
+            _getCache[snapshotPointer] = snapshot;
         }
 
         return snapshot;
     }
 
-    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        _cache[snapshotId] = snapshot;
-        _buffer[snapshotId] = snapshot;
+        _getCache[snapshotPointer] = snapshot;
+        _putQueue[snapshotPointer] = snapshot;
 
         return Task.FromResult(false);
     }
 
-    public void CacheSnapshot(Id snapshotId, TSnapshot snapshot)
+    public void CacheSnapshot(Pointer snapshotPointer, TSnapshot snapshot)
     {
-        _cache[snapshotId] = snapshot;
+        _getCache[snapshotPointer] = snapshot;
     }
 
     public async Task<bool> PutSnapshots(CancellationToken cancellationToken = default)
     {
-        foreach (var (snapshotId, snapshot) in _buffer)
+        foreach (var (snapshotPointer, snapshot) in _putQueue)
         {
-            await _snapshotRepository.PutSnapshot(snapshotId, snapshot, cancellationToken);
+            await _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken);
         }
 
         return true;
@@ -65,8 +66,8 @@ internal class BulkOptimizedSnapshotRepository<TSnapshot> : DisposableResourceBa
 
     public override ValueTask DisposeAsync()
     {
-        _cache.Clear();
-        _buffer.Clear();
+        _getCache.Clear();
+        _putQueue.Clear();
 
         return _snapshotRepository.DisposeAsync();
     }

@@ -30,24 +30,24 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         _redisSession = redisSession;
     }
 
-    private RedisKey GetSnapshotKey(Id snapshotId)
+    private RedisKey GetSnapshotKey(Pointer snapshotPointer)
     {
-        return $"{_keyNamespace}#{snapshotId.Value}";
+        return $"{_keyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
     }
 
-    public async Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public async Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        var snapshotKey = GetSnapshotKey(snapshotId);
+        var snapshotKey = GetSnapshotKey(snapshotPointer);
 
         var snapshotValue = _envelopeService
-            .DeconstructAndSerialize(snapshot);
+            .DeconstructAndSerialize(snapshot); 
 
         return await _redisSession.Insert(snapshotKey, snapshotValue).WaitAsync(cancellationToken);
     }
 
-    public async Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+    public async Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        var snapshotKey = GetSnapshotKey(snapshotId);
+        var snapshotKey = GetSnapshotKey(snapshotPointer);
         var snapshotValue = await _redisSession.Find(snapshotKey).WaitAsync(cancellationToken);
 
         if (!snapshotValue.HasValue)
@@ -59,9 +59,9 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
             .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue);
     }
 
-    public async Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
     {
-        var snapshotKeys = snapshotIds.Select(GetSnapshotKey).ToArray();
+        var snapshotKeys = snapshotPointers.Select(GetSnapshotKey).ToArray();
 
         return await _redisSession.Delete(snapshotKeys).WaitAsync(cancellationToken);
     }

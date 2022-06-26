@@ -16,18 +16,18 @@ internal class InMemorySnapshotRepository<TSnapshot> : DisposableResourceBaseCla
         _inMemorySession = inMemorySession;
     }
 
-    public Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Insert(snapshotId, snapshot).WaitAsync(cancellationToken);
+        return _inMemorySession.Insert(snapshotPointer, snapshot).WaitAsync(cancellationToken);
     }
 
-    public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+    public Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Get(snapshotId).WaitAsync(cancellationToken);
+        return _inMemorySession.Get(snapshotPointer).WaitAsync(cancellationToken);
     }
 
-    public Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
+    public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Delete(snapshotIds).WaitAsync(cancellationToken);
+        return _inMemorySession.Delete(snapshotPointers).WaitAsync(cancellationToken);
     }
 }

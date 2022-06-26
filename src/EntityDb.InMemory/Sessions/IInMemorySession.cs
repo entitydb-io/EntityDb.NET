@@ -6,9 +6,9 @@ namespace EntityDb.InMemory.Sessions;
 
 internal interface IInMemorySession<TSnapshot>
 {
-    Task<bool> Insert(Id snapshotId, TSnapshot snapshot);
+    Task<bool> Insert(Pointer snapshotPointer, TSnapshot snapshot);
 
-    Task<TSnapshot?> Get(Id snapshotId);
+    Task<TSnapshot?> Get(Pointer snapshotPointer);
 
-    Task<bool> Delete(IEnumerable<Id> snapshotIds);
+    Task<bool> Delete(IEnumerable<Pointer> snapshotPointers);
 }
