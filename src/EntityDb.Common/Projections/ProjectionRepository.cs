@@ -49,7 +49,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
             
             var commandQuery = new GetCurrentEntityQuery(entityId, entityVersionNumber);
 
-            var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery);
+            var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken);
 
             projection = projection.Reduce(annotatedCommands);
         }
