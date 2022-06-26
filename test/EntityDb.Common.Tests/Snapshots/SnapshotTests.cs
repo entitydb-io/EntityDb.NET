@@ -1,15 +1,16 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
@@ -21,7 +22,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     private async Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
+        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
     {
         // ARRANGE
 
@@ -31,7 +32,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
         });
 
         var snapshotId = Id.NewId();
-        var expectedSnapshot = TSnapshot.Construct(snapshotId, new VersionNumber(300));
+        var expectedSnapshot = TSnapshot.Construct(snapshotId).WithVersionNumber(new VersionNumber(300));
 
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>();
@@ -65,7 +66,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
     
     private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
+        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
     {
         // ARRANGE
 
@@ -80,7 +81,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var snapshot = TSnapshot.Construct(default, new VersionNumber(1));
+        var snapshot = TSnapshot.Construct(default).WithVersionNumber(new VersionNumber(300));
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
@@ -110,13 +111,13 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithVersionNumber<TSnapshot>
+        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
     {
         // ARRANGE
 
         var snapshotId = Id.NewId();
 
-        var expectedSnapshot = TSnapshot.Construct(default, new VersionNumber(5000));
+        var expectedSnapshot = TSnapshot.Construct(snapshotId).WithVersionNumber(new VersionNumber(5000));
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {

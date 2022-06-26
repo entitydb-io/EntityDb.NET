@@ -120,15 +120,15 @@ public class ProjectionsTests : TestsBase<Startup>
     
     
     private async Task Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TEntity : IEntity<TEntity>, IEntityWithVersionNumber<TEntity>
-        where TProjection : IProjection<TProjection>, ISnapshotWithShouldReplaceLogic<TProjection>
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestMethods<TEntity>
+        where TProjection : IProjection<TProjection>, ISnapshotWithTestMethods<TProjection>
     {
         // ARRANGE
 
         const uint numberOfVersionNumbers = 5;
         const uint replaceAtVersionNumber = 3;
-        
-        TProjection.ShouldReplaceLogic.Value = (projection, _) => projection.GetEntityVersionNumber(default) == new VersionNumber(replaceAtVersionNumber);
+
+        TProjection.ShouldRecordAsMostRecentLogic.Value = (projection, _) => projection.GetEntityVersionNumber(default) == new VersionNumber(replaceAtVersionNumber);
         
         var projectionId = Id.NewId();
         var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);

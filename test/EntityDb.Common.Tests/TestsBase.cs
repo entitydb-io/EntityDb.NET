@@ -302,7 +302,7 @@ public class TestsBase<TStartup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Abstractions.ValueObjects.Pointer>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshot);
 
         snapshotRepositoryMock

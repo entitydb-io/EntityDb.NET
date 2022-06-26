@@ -2,10 +2,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Projections;
-using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 
@@ -14,8 +12,9 @@ namespace EntityDb.Common.Tests.Implementations.Projections;
 public record OneToOneProjection
 (
     Id Id,
+    VersionNumber VersionNumber = default,
     VersionNumber EntityVersionNumber = default
-) : IProjection<OneToOneProjection>, ISnapshot<OneToOneProjection>, ISnapshotWithVersionNumber<OneToOneProjection>, ISnapshotWithShouldReplaceLogic<OneToOneProjection>
+) : IProjection<OneToOneProjection>, ISnapshotWithTestMethods<OneToOneProjection>
 {
     public const string RedisKeyNamespace = "one-to-one-projection";
     
@@ -23,10 +22,20 @@ public record OneToOneProjection
     {
         return new OneToOneProjection(projectionId);
     }
-    
-    public static OneToOneProjection Construct(Id projectionId, VersionNumber versionNumber)
+
+    public OneToOneProjection WithVersionNumber(VersionNumber versionNumber)
     {
-        return new OneToOneProjection(projectionId, versionNumber);
+        return this with { VersionNumber = versionNumber };
+    }
+
+    public Id GetId()
+    {
+        return Id;
+    }
+
+    public VersionNumber GetVersionNumber()
+    {
+        return VersionNumber;
     }
 
     public VersionNumber GetEntityVersionNumber(Id entityId)
@@ -44,13 +53,25 @@ public record OneToOneProjection
         });
     }
 
-    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldReplaceLogic { get; } = new();
+    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldRecordLogic { get; } = new();
 
-    public bool ShouldReplace(OneToOneProjection? previousSnapshot)
+    public bool ShouldRecord()
     {
-        if (ShouldReplaceLogic.Value is not null)
+        if (ShouldRecordLogic.Value is not null)
         {
-            return ShouldReplaceLogic.Value.Invoke(this, previousSnapshot);
+            return ShouldRecordLogic.Value.Invoke(this);
+        }
+
+        return false;
+    }
+
+    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsMostRecentLogic { get; } = new();
+
+    public bool ShouldRecordAsMostRecent(OneToOneProjection? previousSnapshot)
+    {
+        if (ShouldRecordAsMostRecentLogic.Value is not null)
+        {
+            return ShouldRecordAsMostRecentLogic.Value.Invoke(this, previousSnapshot);
         }
         
         return !Equals(previousSnapshot);

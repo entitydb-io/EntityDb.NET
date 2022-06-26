@@ -30,15 +30,15 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetSnapshot(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Id>(), It.IsAny<TestEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TestEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Pointer[]>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         using var serviceScope = CreateServiceScope(serviceCollection =>

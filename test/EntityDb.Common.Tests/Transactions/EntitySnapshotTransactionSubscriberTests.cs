@@ -3,8 +3,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Common.Transactions;
@@ -21,13 +19,13 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     
     
     private async Task
-        Generic_GivenSnapshotShouldReplaceAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<TEntity>(
+        Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<TEntity>(
             TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TEntity : IEntity<TEntity>, IEntityWithVersionNumber<TEntity>, ISnapshot<TEntity>, ISnapshotWithShouldReplaceLogic<TEntity>
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestMethods<TEntity>
     {
         // ARRANGE
 
-        TEntity.ShouldReplaceLogic.Value = (_, _) => true;
+        TEntity.ShouldRecordAsMostRecentLogic.Value = (_, _) => true;
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -62,24 +60,24 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
     private async Task
-        GivenSnapshotShouldReplaceAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot(
+        GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot(
             TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
     {
         await GetType()
-            .GetMethod(nameof(Generic_GivenSnapshotShouldReplaceAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot), ~BindingFlags.Public)!
+            .GetMethod(nameof(Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
             .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
     }
     
     private async Task
-        Generic_GivenSnapshotShouldReplaceAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<TEntity>(
+        Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<TEntity>(
             TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TEntity : IEntity<TEntity>, IEntityWithVersionNumber<TEntity>, ISnapshot<TEntity>, ISnapshotWithShouldReplaceLogic<TEntity>
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestMethods<TEntity>
     {
         // ARRANGE
 
-        TEntity.ShouldReplaceLogic.Value = (_, _) => false;
+        TEntity.ShouldRecordAsMostRecentLogic.Value = (_, _) => false;
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -111,11 +109,11 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
     private async Task
-        GivenSnapshotShouldReplaceAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot(
+        GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot(
             TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
     {
         await GetType()
-            .GetMethod(nameof(Generic_GivenSnapshotShouldReplaceAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot), ~BindingFlags.Public)!
+            .GetMethod(nameof(Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot), ~BindingFlags.Public)!
             .MakeGenericMethod(transactionsAdder.EntityType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
             .ShouldBeAssignableTo<Task>().ShouldNotBeNull();

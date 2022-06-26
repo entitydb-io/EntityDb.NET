@@ -13,6 +13,10 @@ public record DoNothing : IReducer<TestEntity>, IReducer<OneToOneProjection>
 
     public OneToOneProjection Reduce(OneToOneProjection projection)
     {
-        return projection with { EntityVersionNumber = projection.EntityVersionNumber.Next() };
+        return projection with
+        {
+            VersionNumber = projection.VersionNumber.Next(),
+            EntityVersionNumber = projection.EntityVersionNumber.Next()
+        };
     }
 }
