@@ -26,7 +26,7 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : SnapshotTr
         _projectionStrategy = projectionStrategy;
     }
 
-    protected override async Task<(TProjection? previousMostRecentSnapshot, TProjection nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TProjection> snapshotRepository)
+    protected override async Task<(TProjection? previousLatestSnapshot, TProjection nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TProjection> snapshotRepository)
     {
         if (transactionStep is not IAppendCommandTransactionStep appendCommandTransactionStep)
         {
@@ -35,7 +35,7 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : SnapshotTr
 
         var projectionId = await _projectionStrategy.GetProjectionId(appendCommandTransactionStep.EntityId, appendCommandTransactionStep.Entity);
 
-        var previousMostRecentSnapshot = await snapshotRepository.GetSnapshot(projectionId);
+        var previousLatestSnapshot = await snapshotRepository.GetSnapshot(projectionId);
 
         var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
         (
@@ -46,9 +46,9 @@ internal class ProjectionSnapshotTransactionSubscriber<TProjection> : SnapshotTr
             appendCommandTransactionStep.Command
         );
 
-        var nextSnapshot = (previousMostRecentSnapshot ?? TProjection.Construct(projectionId)).Reduce(annotatedCommand);
+        var nextSnapshot = (previousLatestSnapshot ?? TProjection.Construct(projectionId)).Reduce(annotatedCommand);
 
-        return (previousMostRecentSnapshot, nextSnapshot);
+        return (previousLatestSnapshot, nextSnapshot);
     }
 
     public static ProjectionSnapshotTransactionSubscriber<TProjection> Create(IServiceProvider serviceProvider,

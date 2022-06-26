@@ -62,7 +62,7 @@ public record TestEntity
 
     public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsMostRecentLogic { get; } = new();
 
-    public bool ShouldRecordAsMostRecent(TestEntity? previousMostRecentSnapshot)
+    public bool ShouldRecordAsLatest(TestEntity? previousMostRecentSnapshot)
     {
         if (ShouldRecordAsMostRecentLogic.Value is not null)
         {

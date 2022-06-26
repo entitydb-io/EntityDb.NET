@@ -67,7 +67,7 @@ public record OneToOneProjection
 
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsMostRecentLogic { get; } = new();
 
-    public bool ShouldRecordAsMostRecent(OneToOneProjection? previousSnapshot)
+    public bool ShouldRecordAsLatest(OneToOneProjection? previousSnapshot)
     {
         if (ShouldRecordAsMostRecentLogic.Value is not null)
         {

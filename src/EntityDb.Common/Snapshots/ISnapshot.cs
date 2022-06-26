@@ -28,7 +28,7 @@ public interface ISnapshot<TSnapshot>
     VersionNumber GetVersionNumber();
 
     /// <summary>
-    ///     Indicates if this snapshot instance version should be recorded (independent of the most recent snapshot).
+    ///     Indicates if this snapshot instance version should be recorded (independent of the latest snapshot).
     /// </summary>
     /// <returns><c>true</c> if this snapshot instance should be recorded, or else <c>false</c>.</returns>
     /// <remarks>
@@ -38,9 +38,9 @@ public interface ISnapshot<TSnapshot>
     bool ShouldRecord();
 
     /// <summary>
-    ///     Indicates if this snapshot instance should be recorded as the most recent snapshot.
+    ///     Indicates if this snapshot instance should be recorded as the latest snapshot.
     /// </summary>
-    /// <param name="previousMostRecentSnapshot">The previous instance of the most recent snapshot.</param>
-    /// <returns><c>true</c> if this snapshot instance should be recorded as the most recent snapshot, or else <c>false</c>.</returns>
-    bool ShouldRecordAsMostRecent(TSnapshot? previousMostRecentSnapshot);
+    /// <param name="previousLatestSnapshot">The previous instance of the latest snapshot.</param>
+    /// <returns><c>true</c> if this snapshot instance should be recorded as the latest snapshot, or else <c>false</c>.</returns>
+    bool ShouldRecordAsLatest(TSnapshot? previousLatestSnapshot);
 }

@@ -20,16 +20,16 @@ internal class EntitySnapshotTransactionSubscriber<TEntity> : SnapshotTransactio
     {
     }
 
-    protected override async Task<(TEntity? previousMostRecentSnapshot, TEntity nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TEntity> snapshotRepository)
+    protected override async Task<(TEntity? previousLatestSnapshot, TEntity nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TEntity> snapshotRepository)
     {
         if (transactionStep.Entity is not TEntity nextSnapshot)
         {
             return null;
         }
 
-        var previousMostRecentSnapshot = await snapshotRepository.GetSnapshot(transactionStep.EntityId);
+        var previousLatestSnapshot = await snapshotRepository.GetSnapshot(transactionStep.EntityId);
 
-        return (previousMostRecentSnapshot, nextSnapshot);
+        return (previousLatestSnapshot, nextSnapshot);
     }
 
     public static EntitySnapshotTransactionSubscriber<TEntity> Create(IServiceProvider serviceProvider,

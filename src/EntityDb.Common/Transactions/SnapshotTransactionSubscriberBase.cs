@@ -35,14 +35,14 @@ internal abstract class SnapshotTransactionSubscriberBase<TSnapshot> : Transacti
 
         foreach (var step in transaction.Steps)
         {
-            if (await GetSnapshots(transaction, step, snapshotRepository) is not var (previousMostRecentSnapshot, nextSnapshot))
+            if (await GetSnapshots(transaction, step, snapshotRepository) is not var (previousLatestSnapshot, nextSnapshot))
             {
                 continue;
             }
 
             var snapshotId = nextSnapshot.GetId();
 
-            if (nextSnapshot.ShouldRecordAsMostRecent(previousMostRecentSnapshot))
+            if (nextSnapshot.ShouldRecordAsLatest(previousLatestSnapshot))
             {
                 await snapshotRepository.PutSnapshot(snapshotId, nextSnapshot);
             }
@@ -62,5 +62,5 @@ internal abstract class SnapshotTransactionSubscriberBase<TSnapshot> : Transacti
         await snapshotRepository.PutSnapshots();
     }
 
-    protected abstract Task<(TSnapshot? previousMostRecentSnapshot, TSnapshot nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TSnapshot> snapshotRepository);
+    protected abstract Task<(TSnapshot? previousLatestSnapshot, TSnapshot nextSnapshot)?> GetSnapshots(ITransaction transaction, ITransactionStep transactionStep, ISnapshotRepository<TSnapshot> snapshotRepository);
 }
