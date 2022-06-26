@@ -33,4 +33,13 @@ public readonly record struct Id(Guid Value)
     ///     string.
     /// </returns>
     public override string? ToString() => Value.ToString();
+
+    /// <summary>
+    ///     Implicitly converts an <see cref="Id"/> to a pointer.
+    /// </summary>
+    /// <param name="id">The implicit id argument.</param>
+    public static implicit operator Pointer(Id id)
+    {
+        return new Pointer(id, VersionNumber.MinValue);
+    }
 }
