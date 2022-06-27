@@ -14,8 +14,8 @@ public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
     /// <ignore/>
     [Obsolete("Please use GetSnapshotOrDefault(...) instead. This method will be removed at a later date.")]
-    public Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
-        => GetSnapshotOrDefault(snapshotPointer, cancellationToken);
+    public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+        => GetSnapshotOrDefault(snapshotId, cancellationToken);
 
     /// <summary>
     ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or <c>default(<typeparamref name="TSnapshot"/>)</c>.
