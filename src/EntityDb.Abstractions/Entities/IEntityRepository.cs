@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,11 +27,13 @@ public interface IEntityRepository<TEntity> : IDisposableResource
 
     /// <ignore />
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
         => GetSnapshot(entityId, cancellationToken);
 
     /// <ignore />
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default)
         => GetSnapshot(entityId + lteVersionNumber, cancellationToken);
 

@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
 
     /// <ignore />
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default)
         => GetSnapshot(projectionId, cancellationToken);
 

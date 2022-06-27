@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -43,6 +44,7 @@ public abstract class TransactionSubscriber : BackgroundService, ITransactionSub
 
     /// <ignore/>
     [Obsolete("Please implement ProcessTransaction(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     protected virtual Task NotifyAsync(ITransaction transaction)
         => ProcessTransaction(transaction, default);
 

@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Common.Snapshots;
 
@@ -47,6 +48,7 @@ public interface ISnapshot<TSnapshot>
 
     /// <ignore/>
     [Obsolete("This use ShouldRecordAsLatest() instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     bool ShouldReplace(TSnapshot? previousSnapshot)
         => ShouldRecordAsLatest(previousSnapshot);
 }

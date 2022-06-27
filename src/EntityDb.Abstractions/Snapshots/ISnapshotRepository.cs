@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
     /// <ignore/>
     [Obsolete("Please use GetSnapshotOrDefault(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
         => GetSnapshotOrDefault(snapshotId, cancellationToken);
 
