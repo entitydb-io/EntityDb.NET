@@ -37,5 +37,10 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer"/>.</returns>
     Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default);
 
-    Id? GetProjectionId(object entity);
+    /// <summary>
+    ///     Maps an entity to a projection id, or default if the entity does not map to this projection.
+    /// </summary>
+    /// <param name="entity">The entity object.</param>
+    /// <returns>The projection id for the entity, or default if none.</returns>
+    Id? GetProjectionIdOrDefault(object entity);
 }

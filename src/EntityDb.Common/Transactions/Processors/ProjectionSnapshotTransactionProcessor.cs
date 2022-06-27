@@ -1,12 +1,10 @@
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,7 +43,7 @@ internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : Snap
 
         async Task<(TProjection?, TProjection)?> GetSnapshots(IAppendCommandTransactionStep appendCommandTransactionStep)
         {
-            var projectionId = projectionRepository.GetProjectionId(appendCommandTransactionStep.Entity);
+            var projectionId = projectionRepository.GetProjectionIdOrDefault(appendCommandTransactionStep.Entity);
 
             if (projectionId is null)
             {

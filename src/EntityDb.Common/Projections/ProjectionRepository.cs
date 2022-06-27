@@ -29,7 +29,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
         SnapshotRepository = snapshotRepository;
     }
 
-    public Id? GetProjectionId(object entity)
+    public Id? GetProjectionIdOrDefault(object entity)
     {
         return TProjection.GetProjectionIdOrDefault(entity);
     }
