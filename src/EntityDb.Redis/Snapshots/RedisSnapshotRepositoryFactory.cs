@@ -2,12 +2,10 @@
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Snapshots;
-using EntityDb.Common.TypeResolvers;
 using EntityDb.Redis.ConnectionMultiplexers;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
 using System;
 using System.Text.Json;
 using System.Threading;
@@ -30,7 +28,6 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         ConnectionMultiplexerFactory connectionMultiplexerFactory,
         IOptionsFactory<SnapshotSessionOptions> optionsFactory,
         IEnvelopeService<JsonElement> envelopeService,
-        ITypeResolver typeResolver,
         string connectionString,
         string keyNamespace
     )
@@ -48,7 +45,7 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
     {
         var connectionMultiplexer = await _connectionMultiplexerFactory.CreateConnectionMultiplexer(_connectionString, cancellationToken);
 
-        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), snapshotSessionOptions);
+        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), _keyNamespace, snapshotSessionOptions);
     }
 
     public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
@@ -60,7 +57,6 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         var redisSnapshotRepository = new RedisSnapshotRepository<TSnapshot>
         (
             _envelopeService,
-            _keyNamespace,
             redisSession
         );
         
