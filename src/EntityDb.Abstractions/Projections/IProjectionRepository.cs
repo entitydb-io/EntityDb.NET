@@ -15,11 +15,6 @@ namespace EntityDb.Abstractions.Projections;
 public interface IProjectionRepository<TProjection> : IDisposableResource
 {
     /// <summary>
-    ///     The strategy for mapping between projection id and entity id.
-    /// </summary>
-    IProjectionStrategy<TProjection> ProjectionStrategy { get; }
-
-    /// <summary>
     ///     The backing transaction repository.
     /// </summary>
     ITransactionRepository TransactionRepository { get; }

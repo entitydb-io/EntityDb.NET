@@ -104,17 +104,14 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a projection strategy.
+    ///     Adds projections for <typeparamref name="TProjection"/>.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
-    /// <typeparam name="TProjectionStrategy">The type of the projection strategy.</typeparam>
-    public static void AddProjection<TProjection, TProjectionStrategy>(
+    public static void AddProjection<TProjection>(
         this IServiceCollection serviceCollection)
         where TProjection : IProjection<TProjection>
-        where TProjectionStrategy : class, IProjectionStrategy<TProjection>
     {
-        serviceCollection.AddSingleton<IProjectionStrategy<TProjection>, TProjectionStrategy>();
         serviceCollection
             .AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TProjection>>();
     }
