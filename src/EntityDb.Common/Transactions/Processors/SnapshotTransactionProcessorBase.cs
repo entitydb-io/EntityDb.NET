@@ -35,7 +35,8 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
         return new SnapshotCache();
     }
 
-    protected static async Task ProcessTransactionSteps(ISnapshotRepository<TSnapshot> snapshotRepository, SnapshotCache snapshotCache, ITransaction transaction, Func<IAppendCommandTransactionStep, Task<(TSnapshot?, TSnapshot)?>> getSnapshots, CancellationToken cancellationToken)
+    protected static async Task ProcessTransactionSteps(ISnapshotRepository<TSnapshot> snapshotRepository, SnapshotCache snapshotCache,
+        ITransaction transaction, Func<IAppendCommandTransactionStep, Task<(TSnapshot?, TSnapshot)?>> getSnapshots, CancellationToken cancellationToken)
     {
         var putQueue = new Dictionary<Pointer, TSnapshot>();
 
