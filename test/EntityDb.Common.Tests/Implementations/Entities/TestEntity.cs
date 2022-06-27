@@ -60,13 +60,13 @@ public record TestEntity
         return false;
     }
 
-    public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsMostRecentLogic { get; } = new();
+    public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
 
     public bool ShouldRecordAsLatest(TestEntity? previousMostRecentSnapshot)
     {
-        if (ShouldRecordAsMostRecentLogic.Value is not null)
+        if (ShouldRecordAsLatestLogic.Value is not null)
         {
-            return ShouldRecordAsMostRecentLogic.Value.Invoke(this, previousMostRecentSnapshot);
+            return ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
         }
         
         return !Equals(previousMostRecentSnapshot);

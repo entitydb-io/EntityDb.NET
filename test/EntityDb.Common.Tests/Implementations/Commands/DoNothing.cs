@@ -16,7 +16,6 @@ public record DoNothing : IReducer<TestEntity>, IReducer<OneToOneProjection>
         return projection with
         {
             VersionNumber = projection.VersionNumber.Next(),
-            EntityVersionNumber = projection.EntityVersionNumber.Next()
         };
     }
 }

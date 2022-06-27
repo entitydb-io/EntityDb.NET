@@ -2,9 +2,12 @@ using System;
 using System.Linq;
 using System.Threading;
 using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Projections;
-using EntityDb.Common.Tests.Implementations.Commands;
+using EntityDb.Common.Queries;
+using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
@@ -38,17 +41,14 @@ public record OneToOneProjection
         return VersionNumber;
     }
 
-    public VersionNumber GetEntityVersionNumber(Id entityId)
-    {
-        return EntityVersionNumber;
-    }
-
     public OneToOneProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands)
     {
         return annotatedCommands.Aggregate(this, (previousProjection, nextAnnotatedCommand) => nextAnnotatedCommand switch
         {
-            IEntityAnnotation<DoNothing> doNothing => doNothing.Data.Reduce(previousProjection),
-            IEntityAnnotation<Count> count => count.Data.Reduce(previousProjection),
+            IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(previousProjection) with
+            {
+                EntityVersionNumber = reducer.EntityVersionNumber
+            },
             _ => throw new NotSupportedException()
         });
     }
@@ -65,15 +65,30 @@ public record OneToOneProjection
         return false;
     }
 
-    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsMostRecentLogic { get; } = new();
+    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
 
     public bool ShouldRecordAsLatest(OneToOneProjection? previousSnapshot)
     {
-        if (ShouldRecordAsMostRecentLogic.Value is not null)
+        if (ShouldRecordAsLatestLogic.Value is not null)
         {
-            return ShouldRecordAsMostRecentLogic.Value.Invoke(this, previousSnapshot);
+            return ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
         }
         
         return !Equals(previousSnapshot);
+    }
+
+    public ICommandQuery GetCommandQuery(Pointer projectionPointer)
+    {
+        return new GetEntityCommandsQuery(projectionPointer, EntityVersionNumber);
+    }
+
+    public static Id? GetProjectionIdOrDefault(object entity)
+    {
+        if (entity is TestEntity testEntity)
+        {
+            return testEntity.Id;
+        }
+
+        return null;
     }
 }

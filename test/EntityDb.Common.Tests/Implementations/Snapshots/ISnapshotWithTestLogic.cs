@@ -9,5 +9,5 @@ public interface ISnapshotWithTestMethods<TSnapshot> : ISnapshot<TSnapshot>
 {
     TSnapshot WithVersionNumber(VersionNumber versionNumber);
     static abstract AsyncLocal<Func<TSnapshot, bool>?> ShouldRecordLogic { get; }
-    static abstract AsyncLocal<Func<TSnapshot, TSnapshot?, bool>?> ShouldRecordAsMostRecentLogic { get; }
+    static abstract AsyncLocal<Func<TSnapshot, TSnapshot?, bool>?> ShouldRecordAsLatestLogic { get; }
 }

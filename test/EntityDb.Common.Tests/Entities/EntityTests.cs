@@ -92,7 +92,7 @@ public class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        var entityAtVersionM = await entityRepository.GetAtVersion(entityId, versionNumberM);
+        var entityAtVersionM = await entityRepository.GetSnapshot(entityId + versionNumberM);
 
         // ASSERT
 
@@ -162,7 +162,7 @@ public class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        var currenEntity = await entityRepository.GetCurrent(entityId);
+        var currenEntity = await entityRepository.GetSnapshot(entityId);
 
         // ASSERT
 
@@ -277,7 +277,7 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository("NOT NULL", "NOT NULL");
 
-        var snapshotOrDefault = await entityRepository.GetCurrent(default);
+        var snapshotOrDefault = await entityRepository.GetSnapshot(default);
 
         // ASSERT
 
@@ -302,9 +302,9 @@ public class EntityTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<EntityNotCreatedException>(async () =>
+        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(async () =>
         {
-            await entityRepository.GetCurrent(default);
+            await entityRepository.GetSnapshot(default);
         });
     }
 }

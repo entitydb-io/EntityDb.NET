@@ -849,7 +849,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
-        var commandQuery = new GetCurrentEntityQuery(expectedEntityId, VersionNumber.MinValue);
+        var commandQuery = new GetEntityCommandsQuery(expectedEntityId, default);
 
         // ARRANGE ASSERTIONS
 
@@ -904,7 +904,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ACT
 
-        var actualEntity = await entityRepository.GetCurrent(entityId);
+        var actualEntity = await entityRepository.GetSnapshot(entityId);
 
         // ASSERT
 

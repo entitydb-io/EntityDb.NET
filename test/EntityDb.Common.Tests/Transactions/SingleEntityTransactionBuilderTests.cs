@@ -120,7 +120,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(default!);
 
-        var entity = await entityRepository.GetCurrent(entityId);
+        var entity = await entityRepository.GetSnapshot(entityId);
 
         // ACT
 
@@ -195,7 +195,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TestEntity>>()
             .CreateRepository(default!);
 
-        var entity = await entityRepository.GetCurrent(entityId);
+        var entity = await entityRepository.GetSnapshot(entityId);
 
         // ACT
 

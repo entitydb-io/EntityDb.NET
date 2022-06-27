@@ -30,7 +30,7 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
@@ -53,7 +53,7 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
 
         // ACT
 
-        var snapshot = await tryCatchSnapshotRepository.GetSnapshot(default);
+        var snapshot = await tryCatchSnapshotRepository.GetSnapshotOrDefault(default);
         var inserted = await tryCatchSnapshotRepository.PutSnapshot(default, default!);
         var deleted = await tryCatchSnapshotRepository.DeleteSnapshots(default!);
 

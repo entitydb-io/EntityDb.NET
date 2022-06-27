@@ -44,7 +44,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         var snapshotInserted = await snapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
 
-        var actualSnapshot = await snapshotRepository.GetSnapshot(snapshotId);
+        var actualSnapshot = await snapshotRepository.GetSnapshotOrDefault(snapshotId);
 
         // ASSERT
 
@@ -144,9 +144,9 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         // ACT
 
-        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshot(snapshotId);
+        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshotOrDefault(snapshotId);
 
-        var readOnlySecondaryPreferredSnapshot = await readOnlySecondaryPreferredSnapshotRepository.GetSnapshot(snapshotId);
+        var readOnlySecondaryPreferredSnapshot = await readOnlySecondaryPreferredSnapshotRepository.GetSnapshotOrDefault(snapshotId);
 
         // ASSERT
 
