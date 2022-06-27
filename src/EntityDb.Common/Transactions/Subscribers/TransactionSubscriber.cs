@@ -57,6 +57,7 @@ public abstract class TransactionSubscriber : BackgroundService, ITransactionSub
     protected abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "Not used in tests")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (await _transactionQueue.OutputAvailableAsync(stoppingToken))
