@@ -1,4 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
+using System;
 
 namespace EntityDb.Common.Snapshots;
 
@@ -43,4 +44,9 @@ public interface ISnapshot<TSnapshot>
     /// <param name="previousLatestSnapshot">The previous instance of the latest snapshot.</param>
     /// <returns><c>true</c> if this snapshot instance should be recorded as the latest snapshot, or else <c>false</c>.</returns>
     bool ShouldRecordAsLatest(TSnapshot? previousLatestSnapshot);
+
+    /// <ignore/>
+    [Obsolete("This use ShouldRecordAsLatest() instead. This method will be removed at a later date.")]
+    bool ShouldReplace(TSnapshot? previousSnapshot)
+        => ShouldRecordAsLatest(previousSnapshot);
 }
