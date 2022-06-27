@@ -11,26 +11,17 @@ namespace EntityDb.Common.Transactions.Subscribers;
 internal sealed class TransactionProcessorSubscriber<TTransactionProcessor> : TransactionSubscriber
     where TTransactionProcessor : ITransactionProcessor
 {
-    private readonly ILogger<TransactionProcessorSubscriber<TTransactionProcessor>> _logger;
     private readonly TTransactionProcessor _transactionProcessor;
 
     public TransactionProcessorSubscriber(ILogger<TransactionProcessorSubscriber<TTransactionProcessor>> logger,
-        TTransactionProcessor transactionProcessor, bool testMode) : base(testMode)
+        TTransactionProcessor transactionProcessor, bool testMode) : base(logger, testMode)
     {
-        _logger = logger;
         _transactionProcessor = transactionProcessor;
     }
 
-    protected override async Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken)
+    protected override Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken)
     {
-        try
-        {
-            await _transactionProcessor.ProcessTransaction(transaction, cancellationToken);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Error occurred while processing transaction");
-        }
+        return _transactionProcessor.ProcessTransaction(transaction, cancellationToken);
     }
 
     public static TransactionProcessorSubscriber<TTransactionProcessor> Create(IServiceProvider serviceProvider,

@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,14 +14,17 @@ namespace EntityDb.Common.Transactions.Subscribers;
 public abstract class TransactionSubscriber : BackgroundService, ITransactionSubscriber
 {
     private readonly BufferBlock<ITransaction> _transactionQueue = new();
+    private readonly ILogger<TransactionSubscriber> _logger;
     private readonly bool _testMode;
 
     /// <summary>
     ///     Constructs a new instance of <see cref="TransactionSubscriber" />.
     /// </summary>
+    /// <param name="logger">A logger for exceptions and information.</param>
     /// <param name="testMode">If <c>true</c> then the task will be synchronously awaited before returning.</param>
-    protected TransactionSubscriber(bool testMode)
+    protected TransactionSubscriber(ILogger<TransactionSubscriber> logger, bool testMode)
     {
+        _logger = logger;
         _testMode = testMode;
     }
 
@@ -55,9 +59,16 @@ public abstract class TransactionSubscriber : BackgroundService, ITransactionSub
     {
         while (await _transactionQueue.OutputAvailableAsync(stoppingToken))
         {
-            var transaction = await _transactionQueue.ReceiveAsync(stoppingToken);
+            try
+            {
+                var transaction = await _transactionQueue.ReceiveAsync(stoppingToken);
 
-            await ProcessTransaction(transaction, stoppingToken);
+                await ProcessTransaction(transaction, stoppingToken);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Error occurred while processing transaction");
+            }
         }
     }
 }
