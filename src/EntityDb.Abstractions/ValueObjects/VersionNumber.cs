@@ -15,8 +15,8 @@ public readonly record struct VersionNumber(ulong Value)
     ///     In the context of an <see cref="ITransactionRepository"/>, 
     ///     this value is reserved to indicate there is no previous version number.
     ///     
-    ///     In the context of an <see cref="ISnapshotRepository{TSnapshot}"/>,
-    ///     this value is revervd to point to the most recent snapshot.
+    ///     In the context of an <see cref="Pointer"/>,
+    ///     this value is revervd to point to the latest snapshot.
     /// </summary>
     public static readonly VersionNumber MinValue = new(ulong.MinValue);
     

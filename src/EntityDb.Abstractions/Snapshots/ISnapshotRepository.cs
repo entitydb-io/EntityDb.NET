@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.ValueObjects;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,13 +12,18 @@ namespace EntityDb.Abstractions.Snapshots;
 /// <typeparam name="TSnapshot">The type of snapshot stored in the <see cref="ISnapshotRepository{TSnapshot}" />.</typeparam>
 public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
+    /// <ignore/>
+    [Obsolete("Please use GetSnapshotOrDefault(...) instead. This method will be removed at a later date.")]
+    public Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+        => GetSnapshotOrDefault(snapshotPointer, cancellationToken);
+
     /// <summary>
     ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or <c>default(<typeparamref name="TSnapshot"/>)</c>.
     /// </summary>
     /// <param name="snapshotPointer">A pointer to a specific snapshot.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An exact version of snapshot of a <typeparamref name="TSnapshot" /> or <c>default(<typeparamref name="TSnapshot"/>)</c>.</returns>
-    Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default);
+    Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Inserts a <typeparamref name="TSnapshot" /> snapshot.

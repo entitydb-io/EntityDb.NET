@@ -28,9 +28,9 @@ internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResource
         return _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken);
     }
 
-    public Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    public Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        return _snapshotRepository.GetSnapshot(snapshotPointer, cancellationToken);
+        return _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken);
     }
 
     public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)

@@ -75,7 +75,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
         CancellationToken cancellationToken
     )
     {
-        var commandQuery = new GetLastEntityVersionQuery(entityId);
+        var commandQuery = new GetLastEntityCommandQuery(entityId);
 
         var documentQuery = GetQuery(commandQuery);
 

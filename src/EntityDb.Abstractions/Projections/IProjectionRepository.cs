@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,13 +27,20 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>
-    ISnapshotRepository<TProjection> SnapshotRepository { get; }
+    ISnapshotRepository<TProjection>? SnapshotRepository { get; }
+
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    public Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default)
+        => GetSnapshot(projectionId, cancellationToken);
 
     /// <summary>
-    ///     Returns the current state of a <typeparamref name="TProjection" />.
+    ///     Returns the snapshot of a <typeparamref name="TProjection" /> for a given <see cref="Pointer"/>.
     /// </summary>
-    /// <param name="projectionId">The id of the projection.</param>
+    /// <param name="projectionPointer">A pointer to the projection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The current state of a <typeparamref name="TProjection" />.</returns>
-    Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default);
+    /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer"/>.</returns>
+    Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default);
+
+    Id? GetProjectionId(object entity);
 }

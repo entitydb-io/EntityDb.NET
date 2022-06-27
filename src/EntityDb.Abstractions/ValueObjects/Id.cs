@@ -40,6 +40,17 @@ public readonly record struct Id(Guid Value)
     /// <param name="id">The implicit id argument.</param>
     public static implicit operator Pointer(Id id)
     {
-        return new Pointer(id, VersionNumber.MinValue);
+        return id + VersionNumber.MinValue;
+    }
+
+    /// <summary>
+    ///     Combine an Id and a VersionNumber into a Pointer.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="versionNumber"></param>
+    /// <returns>A pointer for the id and version number.</returns>
+    public static Pointer operator +(Id id, VersionNumber versionNumber)
+    {
+        return new Pointer(id, versionNumber);
     }
 }

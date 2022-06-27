@@ -21,7 +21,7 @@ internal class InMemorySnapshotRepository<TSnapshot> : DisposableResourceBaseCla
         return _inMemorySession.Insert(snapshotPointer, snapshot).WaitAsync(cancellationToken);
     }
 
-    public Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    public Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
         return _inMemorySession.Get(snapshotPointer).WaitAsync(cancellationToken);
     }

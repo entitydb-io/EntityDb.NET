@@ -24,9 +24,9 @@ internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourc
         return WrapCommand(() => _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken));
     }
 
-    public virtual Task<TSnapshot?> GetSnapshot(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    public virtual Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _snapshotRepository.GetSnapshot(snapshotPointer, cancellationToken));
+        return WrapQuery(() => _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken));
     }
 
     public virtual Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
