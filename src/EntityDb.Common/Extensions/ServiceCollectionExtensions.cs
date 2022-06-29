@@ -10,6 +10,7 @@ using EntityDb.Common.Transactions.Subscribers;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EntityDb.Common.Extensions;
@@ -19,6 +20,31 @@ namespace EntityDb.Common.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+    [ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
+    private static void AddSnapshotTransactionProcessor<TTransactionProcessor>(this IServiceCollection serviceCollection, bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
+        where TTransactionProcessor : ITransactionProcessor
+    {
+        serviceCollection.AddSingleton(serviceProvider =>
+        {
+            var transactionProcessor = transactionProcessorFactory.Invoke(serviceProvider);
+
+            return TransactionProcessorSubscriber<TTransactionProcessor>.Create(serviceProvider, transactionProcessor, testMode);
+        });
+
+        serviceCollection.AddSingleton<ITransactionSubscriber>(
+            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+        );
+
+        if (testMode)
+        {
+            return;
+        }
+
+        serviceCollection.AddHostedService(
+            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+        );
+    }
+
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime, Func<IServiceProvider, TService> serviceFactory)
         where TService : class
     {
@@ -96,30 +122,11 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddSingleton
-        (
-            serviceProvider =>
-            {
-                var transactionProcessor = EntitySnapshotTransactionProcessor<TEntity>.Create(
-                    serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-
-                return TransactionProcessorSubscriber<EntitySnapshotTransactionProcessor<TEntity>>.Create(
-                    serviceProvider, transactionProcessor, testMode);
-            }
-        );
-
-        serviceCollection.AddSingleton<ITransactionSubscriber>(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<EntitySnapshotTransactionProcessor<TEntity>>>()
-        );
-
-        if (testMode)
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
         {
-            return;
-        }
-
-        serviceCollection.AddHostedService(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<EntitySnapshotTransactionProcessor<TEntity>>>()
-        );
+            return EntitySnapshotTransactionProcessor<TEntity>.Create(
+                serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
+        });
     }
 
     /// <summary>
@@ -148,29 +155,10 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddSingleton
-        (
-            serviceProvider =>
-            {
-                var transactionProcessor = ProjectionSnapshotTransactionProcessor<TProjection>.Create(
-                    serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-
-                return TransactionProcessorSubscriber<ProjectionSnapshotTransactionProcessor<TProjection>>.Create(
-                    serviceProvider, transactionProcessor, testMode);
-            }
-        );
-
-        serviceCollection.AddSingleton<ITransactionSubscriber>(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<ProjectionSnapshotTransactionProcessor<TProjection>>>()
-        );
-
-        if (testMode)
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
         {
-            return;
-        }
-
-        serviceCollection.AddHostedService(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<ProjectionSnapshotTransactionProcessor<TProjection>>>()
-        );
+            return ProjectionSnapshotTransactionProcessor<TProjection>.Create(
+                    serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
+        });
     }
 }
