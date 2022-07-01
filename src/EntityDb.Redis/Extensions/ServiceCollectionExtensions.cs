@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
         
         serviceCollection.Add
         (
-            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
             serviceProvider =>
             {
                 var configuration = serviceProvider.GetRequiredService<IConfiguration>();

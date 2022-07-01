@@ -4,7 +4,6 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -34,37 +33,24 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
+    public async Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default)
     {
-        var entity = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshot(entityId, cancellationToken) ?? TEntity.Construct(entityId)
-            : TEntity.Construct(entityId);
+        var snapshot = SnapshotRepository is not null
+            ? await SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken) ?? TEntity.Construct(entityPointer.Id)
+            : TEntity.Construct(entityPointer.Id);
 
-        var versionNumber = entity.GetVersionNumber();
-
-        var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
+        var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());
 
         var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
 
-        entity = entity.Reduce(commands);
+        var entity = snapshot.Reduce(commands);
 
-        if (entity.GetVersionNumber() == VersionNumber.MinValue)
+        if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
         {
-            throw new EntityNotCreatedException();
+            throw new SnapshotPointernDoesNotExistException();
         }
 
         return entity;
-    }
-
-    public async Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default)
-    {
-        var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
-
-        var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
-
-        return TEntity
-            .Construct(entityId)
-            .Reduce(commands);
     }
 
     public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)

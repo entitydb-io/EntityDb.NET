@@ -1,32 +1,13 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Common.Snapshots;
 
 namespace EntityDb.Common.Entities;
 
 /// <summary>
-///     Provides basic functionality for the common implementations.
+///     Indicates the entiy is compatible with several EntityDb.Common implementations.
 /// </summary>
-/// <typeparam name="TEntity"></typeparam>
-public interface IEntity<out TEntity>
+/// <typeparam name="TEntity">The type of the entity.</typeparam>
+public interface IEntity<TEntity> : ISnapshot<TEntity>
 {
-    /// <summary>
-    ///     Creates a new instance of a <typeparamref name="TEntity" />.
-    /// </summary>
-    /// <param name="entityId">The id of the entity.</param>
-    /// <returns>A new instance of <typeparamref name="TEntity" />.</returns>
-    abstract static TEntity Construct(Id entityId);
-
-    /// <summary>
-    ///     Returns the id of the entity.
-    /// </summary>
-    /// <returns>The id of this entity.</returns>
-    Id GetId();
-    
-    /// <summary>
-    ///     Returns the version number of the entity.
-    /// </summary>
-    /// <returns>The id of this entity.</returns>
-    VersionNumber GetVersionNumber();
-    
     /// <summary>
     ///     Returns a new <typeparamref name="TEntity" /> that incorporates the commands.
     /// </summary>

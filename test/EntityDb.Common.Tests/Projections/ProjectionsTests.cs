@@ -7,6 +7,7 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
@@ -26,72 +27,7 @@ public class ProjectionsTests : TestsBase<Startup>
     {
     }
     
-    private async Task Generic_Given_When_Then<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TProjection : IProjection<TProjection>
-    {
-        // ARRANGE 
-        
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            transactionsAdder.Add(serviceCollection);
-            snapshotsAdder.Add(serviceCollection);
-        });
-
-        await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
-        
-        // ACT
-        
-        // ASSERT
-    }
-
-    private async Task
-        Generic_GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TProjection : IProjection<TProjection>
-    {
-        // ARRANGE
-
-        var projectionId = Id.NewId();
-        var expectedProjection = TProjection.Construct(projectionId);
-
-        var mockProjectionStrategy = new Mock<IProjectionStrategy<TProjection>>();
-
-        mockProjectionStrategy
-            .Setup(strategy => strategy.GetEntityIds(It.IsAny<Id>(), It.IsAny<TProjection>()))
-            .ReturnsAsync(Array.Empty<Id>());
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            transactionsAdder.Add(serviceCollection);
-            snapshotsAdder.Add(serviceCollection);
-            
-            serviceCollection.RemoveAll(typeof(IProjectionStrategy<>));
-
-            serviceCollection.AddSingleton(mockProjectionStrategy.Object);
-        });
-
-        var projectionStrategy = serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionStrategy<TProjection>>();
-        
-        await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
-
-        // ACT
-
-        var actualEntityIds = await projectionStrategy.GetEntityIds(projectionId, default!);
-        
-        var actualProjection = await projectionRepository.GetCurrent(projectionId, default);
-        
-        // ASSERT
-        
-        actualEntityIds.ShouldBeEmpty();
-        
-        actualProjection.ShouldBeEquivalentTo(expectedProjection);
-    }
-    
-    private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenReturnDefaultProjection<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+    private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow<TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
         where TProjection : IProjection<TProjection>
     {
         // ARRANGE
@@ -109,26 +45,22 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
             .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
         
-        // ACT
+        // ACT & ASSERT
 
-        var actualProjection = await projectionRepository.GetCurrent(projectionId, default);
-        
-        // ASSERT
-        
-        actualProjection.ShouldBeEquivalentTo(expectedProjection);
+        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(() => projectionRepository.GetSnapshot(projectionId, default));
     }
     
     
     private async Task Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-        where TEntity : IEntity<TEntity>, IEntityWithVersionNumber<TEntity>
-        where TProjection : IProjection<TProjection>, ISnapshotWithShouldReplaceLogic<TProjection>
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestMethods<TEntity>
+        where TProjection : IProjection<TProjection>, ISnapshotWithTestMethods<TProjection>
     {
         // ARRANGE
 
         const uint numberOfVersionNumbers = 5;
         const uint replaceAtVersionNumber = 3;
-        
-        TProjection.ShouldReplaceLogic.Value = (projection, _) => projection.GetEntityVersionNumber(default) == new VersionNumber(replaceAtVersionNumber);
+
+        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) => projection.GetVersionNumber() == new VersionNumber(replaceAtVersionNumber);
         
         var projectionId = Id.NewId();
         var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);
@@ -147,7 +79,6 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
             .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
 
-
         var transactionInserted = await entityRepository.PutTransaction(transaction);
         
         // ARRANGE ASSERTIONS
@@ -160,33 +91,21 @@ public class ProjectionsTests : TestsBase<Startup>
 
         // ACT
 
-        var currentProjection = await projectionRepository.GetCurrent(projectionId, default);
-        var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshot(projectionId);
+        var currentProjection = await projectionRepository.GetSnapshot(projectionId, default);
+        var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshotOrDefault(projectionId);
         
         // ASSERT
         
-        currentProjection.GetEntityVersionNumber(default).Value.ShouldBe(numberOfVersionNumbers);
-        projectionSnapshot.ShouldNotBeNull().GetEntityVersionNumber(default).Value.ShouldBe(replaceAtVersionNumber);
+        currentProjection.GetVersionNumber().Value.ShouldBe(numberOfVersionNumbers);
+        projectionSnapshot.ShouldNotBeNull().GetVersionNumber().Value.ShouldBe(replaceAtVersionNumber);
     }
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndOneToOneProjectionSnapshots))]
-    public async Task GivenEmptyTransactionRepository_WhenGettingProjection_ThenReturnDefaultProjection(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
+    public async Task GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow(TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
     {
         await GetType()
-            .GetMethod(nameof(Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenReturnDefaultProjection), ~BindingFlags.Public)!
-            .MakeGenericMethod(snapshotsAdder.SnapshotType)
-            .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
-            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
-    }
-
-    [Theory]
-    [MemberData(nameof(AddTransactionsAndOneToOneProjectionSnapshots))]
-    public async Task GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection(
-        TransactionsAdder transactionsAdder, SnapshotsAdder snapshotsAdder)
-    {
-        await GetType()
-            .GetMethod(nameof(Generic_GivenProjectionStrategyReturnsNoEntityIds_WhenGettingProjection_ThenReturnDefaultProjection), ~BindingFlags.Public)!
+            .GetMethod(nameof(Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow), ~BindingFlags.Public)!
             .MakeGenericMethod(snapshotsAdder.SnapshotType)
             .Invoke(this, new object?[] { transactionsAdder, snapshotsAdder })
             .ShouldBeAssignableTo<Task>().ShouldNotBeNull();

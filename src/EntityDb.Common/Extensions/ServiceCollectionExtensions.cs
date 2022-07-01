@@ -4,12 +4,13 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Transactions;
 using EntityDb.Common.Transactions.Builders;
+using EntityDb.Common.Transactions.Processors;
+using EntityDb.Common.Transactions.Subscribers;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EntityDb.Common.Extensions;
@@ -19,6 +20,31 @@ namespace EntityDb.Common.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+    [ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
+    private static void AddSnapshotTransactionProcessor<TTransactionProcessor>(this IServiceCollection serviceCollection, bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
+        where TTransactionProcessor : ITransactionProcessor
+    {
+        serviceCollection.AddSingleton(serviceProvider =>
+        {
+            var transactionProcessor = transactionProcessorFactory.Invoke(serviceProvider);
+
+            return TransactionProcessorSubscriber<TTransactionProcessor>.Create(serviceProvider, transactionProcessor, testMode);
+        });
+
+        serviceCollection.AddSingleton<ITransactionSubscriber>(
+            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+        );
+
+        if (testMode)
+        {
+            return;
+        }
+
+        serviceCollection.AddHostedService(
+            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+        );
+    }
+
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime, Func<IServiceProvider, TService> serviceFactory)
         where TService : class
     {
@@ -88,33 +114,30 @@ public static class ServiceCollectionExtensions
     ///     Adds a transaction subscriber that records snapshots of entities.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <param name="testMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
-        string snapshotSessionOptionsName, bool testMode = false)
-        where TEntity : IEntity<TEntity>, ISnapshot<TEntity>
+        string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
+        where TEntity : IEntity<TEntity>
     {
-        serviceCollection.Add<ITransactionSubscriber>
-        (
-            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
-            serviceProvider => EntitySnapshotTransactionSubscriber<TEntity>.Create(serviceProvider, snapshotSessionOptionsName,
-                testMode)
-        );
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
+        {
+            return EntitySnapshotTransactionProcessor<TEntity>.Create(
+                serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
+        });
     }
 
     /// <summary>
-    ///     Adds a projection strategy.
+    ///     Adds projections for <typeparamref name="TProjection"/>.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
-    /// <typeparam name="TProjectionStrategy">The type of the projection strategy.</typeparam>
-    public static void AddProjection<TProjection, TProjectionStrategy>(
+    public static void AddProjection<TProjection>(
         this IServiceCollection serviceCollection)
         where TProjection : IProjection<TProjection>
-        where TProjectionStrategy : class, IProjectionStrategy<TProjection>
     {
-        serviceCollection.AddSingleton<IProjectionStrategy<TProjection>, TProjectionStrategy>();
         serviceCollection
             .AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TProjection>>();
     }
@@ -123,19 +146,19 @@ public static class ServiceCollectionExtensions
     ///     Adds a transaction subscriber that records snapshots of projections.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <param name="testMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
     public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
         this IServiceCollection serviceCollection,
-        string snapshotSessionOptionsName, bool testMode = false)
-        where TProjection : IProjection<TProjection>, ISnapshot<TProjection>
+        string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
+        where TProjection : IProjection<TProjection>
     {
-        serviceCollection.Add<ITransactionSubscriber>
-        (
-            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
-            serviceProvider => ProjectionSnapshotTransactionSubscriber<TProjection>.Create(serviceProvider, snapshotSessionOptionsName,
-                testMode)
-        );
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
+        {
+            return ProjectionSnapshotTransactionProcessor<TProjection>.Create(
+                    serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
+        });
     }
 }

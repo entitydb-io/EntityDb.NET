@@ -3,6 +3,7 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,63 +15,53 @@ namespace EntityDb.Common.Projections;
 internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass, IProjectionRepository<TProjection>
     where TProjection : IProjection<TProjection>
 {
-    public IProjectionStrategy<TProjection> ProjectionStrategy { get; }
     public ITransactionRepository TransactionRepository { get; }
+
     public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
-    
+
     public ProjectionRepository
     (
-        IProjectionStrategy<TProjection> projectionStrategy,
         ITransactionRepository transactionRepository,
         ISnapshotRepository<TProjection>? snapshotRepository = null
     )
     {
-        ProjectionStrategy = projectionStrategy;
         TransactionRepository = transactionRepository;
         SnapshotRepository = snapshotRepository;
     }
 
-    public async Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken)
+    public Id? GetProjectionIdOrDefault(object entity)
+    {
+        return TProjection.GetProjectionIdOrDefault(entity);
+    }
+
+    public async Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default)
     {
         var projection = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshot(projectionId, cancellationToken) ?? TProjection.Construct(projectionId)
-            : TProjection.Construct(projectionId);
+            ? await SnapshotRepository.GetSnapshotOrDefault(projectionPointer, cancellationToken) ?? TProjection.Construct(projectionPointer.Id)
+            : TProjection.Construct(projectionPointer.Id);
 
-        var entityIds = await ProjectionStrategy.GetEntityIds(projectionId, projection);
+        var commandQuery = projection.GetCommandQuery(projectionPointer);
 
-        if (entityIds.Length == 0)
-        {
-            return projection;
-        }
+        var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken);
+
+        projection = projection.Reduce(annotatedCommands);
         
-        foreach (var entityId in entityIds)
+        if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
         {
-            var entityVersionNumber = projection.GetEntityVersionNumber(entityId);
-            
-            var commandQuery = new GetCurrentEntityQuery(entityId, entityVersionNumber);
-
-            var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken);
-
-            projection = projection.Reduce(annotatedCommands);
+            throw new SnapshotPointernDoesNotExistException();
         }
 
         return projection;
     }
-    
-    public static ProjectionRepository<TProjection> Create
-    (
-        IServiceProvider serviceProvider,
-        ITransactionRepository transactionRepository,
-        ISnapshotRepository<TProjection>? snapshotRepository = null
-    )
+
+    public static IProjectionRepository<TProjection> Create(IServiceProvider serviceProvider, ITransactionRepository transactionRepository,
+        ISnapshotRepository<TProjection>? snapshotRepository = null)
     {
-        if (snapshotRepository is null)
+        if (snapshotRepository == null)
         {
-            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-                transactionRepository);
+            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider, transactionRepository);
         }
 
-        return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-            transactionRepository, snapshotRepository);
+        return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider, transactionRepository, snapshotRepository);
     }
 }

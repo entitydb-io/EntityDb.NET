@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.Add<IInMemorySession<TSnapshot>>
         (
-            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Scoped,
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
             _ => new InMemorySession<TSnapshot>()
         );
 

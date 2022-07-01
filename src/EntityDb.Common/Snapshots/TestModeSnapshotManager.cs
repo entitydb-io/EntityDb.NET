@@ -9,32 +9,34 @@ namespace EntityDb.Common.Snapshots;
 
 internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
 {
-    private readonly Dictionary<ISnapshotRepository<TSnapshot>, List<Id>> _dictionary = new();
+    private readonly Dictionary<ISnapshotRepository<TSnapshot>, List<Pointer>> _dictionary = new();
 
-    private List<Id> GetStoreSnapshotIds(ISnapshotRepository<TSnapshot> snapshotRepository)
+    private List<Pointer> GetStoreedSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository)
     {
-        if (!_dictionary.TryGetValue(snapshotRepository, out var storedSnapshotIds))
+        if (!_dictionary.TryGetValue(snapshotRepository, out var storedSnapshotPointers))
         {
-            _dictionary.Add(snapshotRepository, storedSnapshotIds = new List<Id>());
+            storedSnapshotPointers = new List<Pointer>();
+
+            _dictionary.Add(snapshotRepository, storedSnapshotPointers);
         }
 
-        return storedSnapshotIds;
+        return storedSnapshotPointers;
     }
     
-    public void AddSnapshotId(ISnapshotRepository<TSnapshot> snapshotRepository, Id snapshotId)
+    public void AddSnapshotPointer(ISnapshotRepository<TSnapshot> snapshotRepository, Pointer snapshotPointer)
     {
-        var storedSnapshotIds = GetStoreSnapshotIds(snapshotRepository);
+        var storedSnapshotPointers = GetStoreedSnapshotPointers(snapshotRepository);
         
-        storedSnapshotIds.Add(snapshotId);
+        storedSnapshotPointers.Add(snapshotPointer);
     }
 
-    public void RemoveSnapshotIds(ISnapshotRepository<TSnapshot> snapshotRepository, IEnumerable<Id> snapshotIds)
+    public void RemoveSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository, IEnumerable<Pointer> snapshotPointers)
     {
-        var storedSnapshotIds = GetStoreSnapshotIds(snapshotRepository);
+        var storedSnapshotPointers = GetStoreedSnapshotPointers(snapshotRepository);
         
-        storedSnapshotIds.RemoveAll(snapshotIds.Contains);
+        storedSnapshotPointers.RemoveAll(snapshotPointers.Contains);
 
-        if (storedSnapshotIds.Count == 0)
+        if (storedSnapshotPointers.Count == 0)
         {
             _dictionary.Remove(snapshotRepository);
         }
@@ -45,9 +47,9 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
     /// </remarks>
     public override async ValueTask DisposeAsync()
     {
-        foreach (var (snapshotRepository, storedSnapshotIds) in _dictionary.ToArray())
+        foreach (var (snapshotRepository, storedSnapshotPointers) in _dictionary.ToArray())
         {
-            await snapshotRepository.DeleteSnapshots(storedSnapshotIds.ToArray());
+            await snapshotRepository.DeleteSnapshots(storedSnapshotPointers.ToArray());
         }
     }
 }

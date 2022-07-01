@@ -99,7 +99,7 @@ public class TestsBase<TStartup>
 
     private static readonly AddSnapshotsDelegate AddEntitySnapshotsSharedResources = serviceCollection =>
     {
-        serviceCollection.AddEntitySnapshotTransactionSubscriber<TestEntity>(TestSessionOptions.Write, true);
+        serviceCollection.AddEntitySnapshotTransactionSubscriber<TestEntity>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
     };
 
     private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
@@ -124,8 +124,8 @@ public class TestsBase<TStartup>
 
     private static readonly AddSnapshotsDelegate AddOneToOneProjectionSnapshotsSharedResources = serviceCollection =>
     {
-        serviceCollection.AddProjection<OneToOneProjection, SingleEntityProjectionStrategy>();
-        serviceCollection.AddProjectionSnapshotTransactionSubscriber<OneToOneProjection>(TestSessionOptions.Write, true);
+        serviceCollection.AddProjection<OneToOneProjection>();
+        serviceCollection.AddProjectionSnapshotTransactionSubscriber<OneToOneProjection>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
     };
 
     private static readonly SnapshotsAdder[] AllOneToOneProjectionSnapshotsAdders =
@@ -302,7 +302,7 @@ public class TestsBase<TStartup>
         var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Abstractions.ValueObjects.Pointer>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshot);
 
         snapshotRepositoryMock
