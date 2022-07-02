@@ -37,7 +37,7 @@ public class ProjectionsTests : TestsBase<Startup>
         });
 
         await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
+            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
             .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
         
         // ACT & ASSERT
@@ -72,7 +72,7 @@ public class ProjectionsTests : TestsBase<Startup>
             .CreateRepository(TestSessionOptions.Write);
         
         await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<OneToOneProjection>>()
+            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
             .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
