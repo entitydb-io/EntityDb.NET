@@ -21,7 +21,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
     }
 
-    private async Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotAdder snapshotAdder)
+    private async Task Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotAdder snapshotAdder)
         where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
@@ -56,17 +56,17 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenSnapshotsAdder_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(SnapshotAdder snapshotAdder)
+    public Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
         (
-            nameof(GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched),
+            nameof(Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );
     }
     
-    private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotAdder snapshotAdder)
+    private async Task Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotAdder snapshotAdder)
         where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
@@ -102,17 +102,17 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenSnapshotsAdder_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotAdder snapshotAdder)
+    public Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
         (
-            nameof(GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged),
+            nameof(Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );
     }
 
-    private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotAdder snapshotAdder)
+    private async Task Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotAdder snapshotAdder)
         where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
@@ -159,11 +159,11 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenSnapshotsAdder_WhenReadingInsertedSnapshotInVariousReadModes_ThenReturnSameSnapshot(SnapshotAdder snapshotAdder)
+    public Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot(SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
         (
-            nameof(GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot),
+            nameof(Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );
