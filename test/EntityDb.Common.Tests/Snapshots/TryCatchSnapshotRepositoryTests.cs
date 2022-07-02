@@ -28,14 +28,14 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
 
         var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
 
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
             .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TestEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
@@ -51,7 +51,7 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TestEntity>
+        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TEntity>
             .Create(serviceScope.ServiceProvider, snapshotRepositoryMock.Object);
 
         // ACT
