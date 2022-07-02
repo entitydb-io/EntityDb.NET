@@ -75,7 +75,6 @@ public class TestsBase<TStartup>
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
     private readonly ITest _test;
 
-
     protected void RunGenericTest(Type[] typeArguments, object?[] invokeParameters)
     {
         var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
@@ -90,6 +89,19 @@ public class TestsBase<TStartup>
     }
 
     protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
+    {
+        var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
+
+        var methodOutput = GetType()
+            .GetMethod(methodName, ~BindingFlags.Public)?
+            .MakeGenericMethod(typeArguments)
+            .Invoke(this, invokeParameters);
+
+        return methodOutput
+            .ShouldBeAssignableTo<Task>()
+            .ShouldNotBeNull();
+    }
+    protected Task RunGenericTestAsync2(Func<Task> foo, Type[] typeArguments, object?[] invokeParameters)
     {
         var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
 
@@ -370,12 +382,12 @@ public class TestsBase<TStartup>
         return transactionRepositoryFactoryMock.Object;
     }
 
-    protected static ISnapshotRepositoryFactory<TestEntity> GetMockedSnapshotRepositoryFactory
+    protected static ISnapshotRepositoryFactory<TEntity> GetMockedSnapshotRepositoryFactory<TEntity>
     (
-        TestEntity? snapshot = null
+        TEntity? snapshot = default
     )
     {
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
             .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Abstractions.ValueObjects.Pointer>(), It.IsAny<CancellationToken>()))
@@ -385,14 +397,15 @@ public class TestsBase<TStartup>
             .Setup(repository => repository.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TestEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(snapshotRepositoryMock.Object);
 
         snapshotRepositoryFactoryMock
-            .Setup(factory => factory.Dispose());
+            .Setup(factory => factory.DisposeAsync())
+            .Returns(ValueTask.CompletedTask);
 
         return snapshotRepositoryFactoryMock.Object;
     }
