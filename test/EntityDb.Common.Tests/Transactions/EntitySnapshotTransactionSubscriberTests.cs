@@ -68,7 +68,6 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot),
             new[] { entitySnapshotAdder.SnapshotType },
             new object?[] { transactionsAdder, entitySnapshotAdder }
         );
@@ -117,7 +116,6 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot),
             new[] { entitySnapshotAdder.SnapshotType },
             new object?[] { transactionsAdder, entitySnapshotAdder }
         );

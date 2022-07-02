@@ -60,7 +60,6 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );
@@ -106,7 +105,6 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );
@@ -163,7 +161,6 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot),
             new[] { snapshotAdder.SnapshotType },
             new object?[] { snapshotAdder }
         );

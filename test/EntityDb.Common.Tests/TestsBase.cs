@@ -75,11 +75,9 @@ public class TestsBase<TStartup>
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
     private readonly ITest _test;
 
-    protected Task RunGenericTestAsync(string methodName, Type[] typeArguments, object?[] invokeParameters)
+    protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
     {
-        var expectedMethodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
-
-        methodName.ShouldBe(expectedMethodName);
+        var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
 
         var testTask = GetType()
             .GetMethod(methodName, ~BindingFlags.Public)?

@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Threading.Tasks;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
@@ -103,7 +102,6 @@ public class ProjectionsTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow),
             new[] { projectionSnapshotAdder.SnapshotType },
             new object?[] { transactionsAdder, entitySnapshotAdder, projectionSnapshotAdder }
         );
@@ -115,7 +113,6 @@ public class ProjectionsTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection),
             new[] { entitySnapshotAdder.SnapshotType, projectionSnapshotAdder.SnapshotType },
             new object?[] { transactionsAdder, entitySnapshotAdder, projectionSnapshotAdder }
         );

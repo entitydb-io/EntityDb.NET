@@ -1451,7 +1451,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1463,7 +1462,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1475,7 +1473,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1487,7 +1484,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1499,7 +1495,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1511,7 +1506,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1523,7 +1517,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1535,7 +1528,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1547,7 +1539,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1559,7 +1550,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEntityInserted_WhenGettingEntity_ThenReturnEntity),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1571,7 +1561,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1583,7 +1572,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1595,7 +1583,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1607,7 +1594,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1619,7 +1605,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1631,7 +1616,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1643,7 +1627,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1655,7 +1638,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
@@ -1667,7 +1649,6 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            nameof(Generic_GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects),
             new[] { entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
