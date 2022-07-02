@@ -101,19 +101,6 @@ public class TestsBase<TStartup>
             .ShouldBeAssignableTo<Task>()
             .ShouldNotBeNull();
     }
-    protected Task RunGenericTestAsync2(Func<Task> foo, Type[] typeArguments, object?[] invokeParameters)
-    {
-        var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
-
-        var methodOutput = GetType()
-            .GetMethod(methodName, ~BindingFlags.Public)?
-            .MakeGenericMethod(typeArguments)
-            .Invoke(this, invokeParameters);
-
-        return methodOutput
-            .ShouldBeAssignableTo<Task>()
-            .ShouldNotBeNull();
-    }
 
     protected TestsBase(IServiceProvider startupServiceProvider)
     {
