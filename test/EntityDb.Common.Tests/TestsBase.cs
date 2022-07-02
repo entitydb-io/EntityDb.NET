@@ -75,16 +75,30 @@ public class TestsBase<TStartup>
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
     private readonly ITest _test;
 
-    protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
+
+    protected void RunGenericTest(Type[] typeArguments, object?[] invokeParameters)
     {
         var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
 
-        var testTask = GetType()
+        var methodOutput = GetType()
             .GetMethod(methodName, ~BindingFlags.Public)?
             .MakeGenericMethod(typeArguments)
             .Invoke(this, invokeParameters);
 
-        return testTask
+        methodOutput
+            .ShouldBeNull();
+    }
+
+    protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
+    {
+        var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
+
+        var methodOutput = GetType()
+            .GetMethod(methodName, ~BindingFlags.Public)?
+            .MakeGenericMethod(typeArguments)
+            .Invoke(this, invokeParameters);
+
+        return methodOutput
             .ShouldBeAssignableTo<Task>()
             .ShouldNotBeNull();
     }
@@ -205,6 +219,10 @@ public class TestsBase<TStartup>
         from transactionAdder in AllTransactionAdders
         from entityAdder in AllEntityAdders()
         select new object[] { transactionAdder, entityAdder };
+
+    public static IEnumerable<object[]> AddEntity() =>
+        from entityAdder in AllEntityAdders()
+        select new object[] { entityAdder };
 
     public static IEnumerable<object[]> AddEntitySnapshots() =>
         from entitySnapshotAdder in AllEntitySnapshotAdders()
