@@ -68,6 +68,10 @@ public class TestsBase<TStartup>
 
     protected Task RunGenericTestAsync(string methodName, Type[] typeArguments, object?[] invokeParameters)
     {
+        var expectedMethodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
+
+        methodName.ShouldBe(expectedMethodName);
+
         var testTask = GetType()
             .GetMethod(methodName, ~BindingFlags.Public)?
             .MakeGenericMethod(typeArguments)
