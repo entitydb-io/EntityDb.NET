@@ -25,6 +25,7 @@ using Shouldly;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
+using System.Diagnostics;
 
 namespace EntityDb.Common.Tests;
 
@@ -55,6 +56,14 @@ public class TestsBase<TStartup>
     }
 
     public record SnapshotAdder(string Name, Type SnapshotType, AddDependenciesDelegate AddDependencies)
+    {
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    public record EntityAdder(string Name, Type EntityType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
@@ -138,18 +147,31 @@ public class TestsBase<TStartup>
         };
     }
 
+    private static EntityAdder GetEntityAdder<TEntity>()
+        where TEntity : IEntity<TEntity>
+    {
+        return new(typeof(TEntity).Name, typeof(TEntity), serviceCollection =>
+        {
+            serviceCollection.AddEntity<TEntity>();
+        });
+    }
+
     private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders<TEntity>()
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         foreach (var snapshotAdder in AllSnapshotAdders<TEntity>())
         {
-            yield return new(snapshotAdder.Name, snapshotAdder.SnapshotType, snapshotAdder.AddDependencies + (serviceCollection =>
-            {
-                serviceCollection.AddEntity<TEntity>();
+            var entityAdder = GetEntityAdder<TEntity>();
 
+            yield return new(snapshotAdder.Name, snapshotAdder.SnapshotType, snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
+            {
                 serviceCollection.AddEntitySnapshotTransactionSubscriber<TEntity>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
             }));
         }
+    }
+    private static IEnumerable<EntityAdder> AllEntityAdders()
+    {
+        yield return GetEntityAdder<TestEntity>();
     }
 
     private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders()
@@ -180,6 +202,11 @@ public class TestsBase<TStartup>
     public static IEnumerable<object[]> AddTransactions() =>
         from transactionAdder in AllTransactionAdders
         select new object[] { transactionAdder };
+
+    public static IEnumerable<object[]> AddTransactionsAndEntity() =>
+        from transactionAdder in AllTransactionAdders
+        from entityAdder in AllEntityAdders()
+        select new object[] { transactionAdder, entityAdder };
 
     public static IEnumerable<object[]> AddEntitySnapshots() =>
         from entitySnapshotAdder in AllEntitySnapshotAdders()
