@@ -465,7 +465,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
             
@@ -501,7 +501,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var transactionId = Id.NewId();
@@ -543,7 +543,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var transaction = (serviceScope.ServiceProvider
@@ -590,7 +590,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
@@ -640,7 +640,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
             
@@ -699,7 +699,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var tag = TagSeeder.Create();
@@ -731,7 +731,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var lease = LeaseSeeder.Create();
@@ -765,7 +765,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var transactionTimeStamp = TimeStamp.UtcNow;
@@ -824,7 +824,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var transactionTimeStamp = TimeStamp.UtcNow;
@@ -882,7 +882,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var entityId = Id.NewId();
@@ -919,7 +919,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var entityId = Id.NewId();
@@ -977,7 +977,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var entityId = Id.NewId();
@@ -1035,7 +1035,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var expectedCommand = new Count(1);
@@ -1084,7 +1084,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var expectedCommand = new Count(2);
@@ -1143,7 +1143,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
         var originTimeStamp = TimeStamp.UnixEpoch;
 
@@ -1218,7 +1218,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
         
         var transactions = new List<ITransaction>();
@@ -1284,7 +1284,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
         
         var transactions = new List<ITransaction>();
@@ -1351,7 +1351,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
         
         var counts = new List<ulong>();
@@ -1393,7 +1393,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            transactionsAdder.Add(serviceCollection);
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
         });
         
         var transactions = new List<ITransaction>();

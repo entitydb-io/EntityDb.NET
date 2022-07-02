@@ -11,19 +11,20 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 using Xunit.Sdk;
 using Shouldly;
+using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Projections;
 
 namespace EntityDb.Common.Tests;
 
@@ -42,31 +43,19 @@ public class TestsBase<TStartup>
             SingletonServiceProvider.Dispose();
         }
     }
-    
-    public delegate void AddTransactionsDelegate(IServiceCollection serviceCollection);
 
-    public record TransactionsAdder(string Name, Type EntityType, AddTransactionsDelegate AddTransactionsDelegate)
+    public delegate void AddDependenciesDelegate(IServiceCollection serviceCollection);
+
+    public record TransactionsAdder(string Name, AddDependenciesDelegate AddDependencies)
     {
-        public void Add(IServiceCollection serviceCollection)
-        {
-            AddTransactionsDelegate.Invoke(serviceCollection);
-        }
-
         public override string ToString()
         {
             return Name;
         }
     }
 
-    public delegate void AddSnapshotsDelegate(IServiceCollection serviceCollection);
-
-    public record SnapshotsAdder(string Name, Type SnapshotType, AddSnapshotsDelegate AddSnapshotsDelegate)
+    public record SnapshotAdder(string Name, Type SnapshotType, AddDependenciesDelegate AddDependencies)
     {
-        public void Add(IServiceCollection serviceCollection)
-        {
-            AddSnapshotsDelegate.Invoke(serviceCollection);
-        }
-
         public override string ToString()
         {
             return Name;
@@ -77,6 +66,18 @@ public class TestsBase<TStartup>
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
     private readonly ITest _test;
 
+    protected Task RunGenericTestAsync(string methodName, Type[] typeArguments, object?[] invokeParameters)
+    {
+        var testTask = GetType()
+            .GetMethod(methodName, ~BindingFlags.Public)?
+            .MakeGenericMethod(typeArguments)
+            .Invoke(this, invokeParameters);
+
+        return testTask
+            .ShouldBeAssignableTo<Task>()
+            .ShouldNotBeNull();
+    }
+
     protected TestsBase(IServiceProvider startupServiceProvider)
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
@@ -84,88 +85,116 @@ public class TestsBase<TStartup>
         _test = (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output) as ITest).ShouldNotBeNull();
     }
 
-    private static readonly TransactionsAdder[] AllTransactionsAdders =
+    private static readonly TransactionsAdder[] AllTransactionAdders =
     {
-        new("MongoDb<TestEntity>", typeof(TestEntity), serviceCollection =>
+        new("MongoDb", serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions
             (
-                TestEntity.MongoCollectionName,
+                "Test",
                 _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
                 true
             );
-        })
+        }),
     };
 
-    private static readonly AddSnapshotsDelegate AddEntitySnapshotsSharedResources = serviceCollection =>
+    private static SnapshotAdder RedisSnapshotAdder<TSnapshot>()
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
-        serviceCollection.AddEntitySnapshotTransactionSubscriber<TestEntity>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
-    };
-
-    private static readonly SnapshotsAdder[] AllEntitySnapshotsAdders =
-    {
-        new("Redis<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
+        return new($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
-            serviceCollection.AddRedisSnapshots<TestEntity>
+            serviceCollection.AddRedisSnapshots<TSnapshot>
             (
-                TestEntity.RedisKeyNamespace,
+                TSnapshot.RedisKeyNamespace,
                 _ => "127.0.0.1:6379",
                 true
             );
-        })),
-        new("InMemory<TestEntity>", typeof(TestEntity), AddEntitySnapshotsSharedResources + (serviceCollection =>
+        });
+    }
+
+    private static SnapshotAdder InMemorySnapshotAdder<TSnapshot>()
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+    {
+        return new($"InMemory<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
-            serviceCollection.AddInMemorySnapshots<TestEntity>
+            serviceCollection.AddInMemorySnapshots<TSnapshot>
             (
                 testMode: true
             );
-        }))
-    };
+        });
+    }
 
-    private static readonly AddSnapshotsDelegate AddOneToOneProjectionSnapshotsSharedResources = serviceCollection =>
+    private static SnapshotAdder[] AllSnapshotAdders<TSnapshot>()
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
-        serviceCollection.AddProjection<OneToOneProjection>();
-        serviceCollection.AddProjectionSnapshotTransactionSubscriber<OneToOneProjection>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
-    };
+        return new[]
+        {
+            RedisSnapshotAdder<TSnapshot>(),
+            InMemorySnapshotAdder<TSnapshot>()
+        };
+    }
 
-    private static readonly SnapshotsAdder[] AllOneToOneProjectionSnapshotsAdders =
+    private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders<TEntity>()
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        new("Redis<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+        foreach (var snapshotAdder in AllSnapshotAdders<TEntity>())
         {
-            serviceCollection.AddRedisSnapshots<OneToOneProjection>
-            (
-                OneToOneProjection.RedisKeyNamespace,
-                _ => "127.0.0.1:6379",
-                true
-            );
-        })),
-        new("InMemory<OneToOneProjection>", typeof(OneToOneProjection), AddOneToOneProjectionSnapshotsSharedResources + (serviceCollection =>
+            yield return new(snapshotAdder.Name, snapshotAdder.SnapshotType, snapshotAdder.AddDependencies + (serviceCollection =>
+            {
+                serviceCollection.AddEntity<TEntity>();
+
+                serviceCollection.AddEntitySnapshotTransactionSubscriber<TEntity>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
+            }));
+        }
+    }
+
+    private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders()
+    {
+        return Enumerable.Empty<SnapshotAdder>()
+            .Concat(AllEntitySnapshotAdders<TestEntity>());
+    }
+
+    private static IEnumerable<SnapshotAdder> AllProjectionAdders<TProjection>()
+        where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+    {
+        foreach (var snapshotAdder in AllSnapshotAdders<TProjection>())
         {
-            serviceCollection.AddInMemorySnapshots<OneToOneProjection>
-            (
-                testMode: true
-            );
-        }))
-    };
+            yield return new(snapshotAdder.Name, snapshotAdder.SnapshotType, snapshotAdder.AddDependencies + (serviceCollection =>
+            {
+                serviceCollection.AddProjection<TProjection>();
+                serviceCollection.AddProjectionSnapshotTransactionSubscriber<TProjection>(TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
+            }));
+        }
+    }
+
+    private static IEnumerable<SnapshotAdder> AllProjectionSnapshotAdders()
+    {
+        return Enumerable.Empty<SnapshotAdder>()
+            .Concat(AllProjectionAdders<OneToOneProjection>());
+    }
+
+    public static IEnumerable<object[]> AddTransactions() =>
+        from transactionAdder in AllTransactionAdders
+        select new object[] { transactionAdder };
+
+    public static IEnumerable<object[]> AddEntitySnapshots() =>
+        from entitySnapshotAdder in AllEntitySnapshotAdders()
+        select new object[] { entitySnapshotAdder };
+
+    public static IEnumerable<object[]> AddProjectionSnapshots() =>
+        from projectionSnapshotAdder in AllProjectionSnapshotAdders()
+        select new object[] { projectionSnapshotAdder };
 
     public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots() =>
-        from transactionsAdder in AllTransactionsAdders
-        from snapshotsAdder in AllEntitySnapshotsAdders
-        select new object[] { transactionsAdder, snapshotsAdder };
-    
-    public static IEnumerable<object[]> AddTransactionsAndOneToOneProjectionSnapshots() =>
-        from transactionsAdder in AllTransactionsAdders
-        from snapshotsAdder in AllOneToOneProjectionSnapshotsAdders
-        select new object[] { transactionsAdder, snapshotsAdder };
+        from transactionAdder in AllTransactionAdders
+        from entitySnapshotAdder in AllEntitySnapshotAdders()
+        select new object[] { transactionAdder, entitySnapshotAdder };
 
-    public static IEnumerable<object[]> AddTransactions() => AllTransactionsAdders
-        .Select(transactionsAdder => new object[] { transactionsAdder });
-
-    public static IEnumerable<object[]> AddEntitySnapshots() => AllEntitySnapshotsAdders
-        .Select(snapshotsAdder => new object[] { snapshotsAdder });
-
-    public static IEnumerable<object[]> AddOneToOneProjectionSnapshots() => AllOneToOneProjectionSnapshotsAdders
-        .Select(snapshotsAdder => new object[] { snapshotsAdder });
+    public static IEnumerable<object[]> AddTransactionsEntitySnapshotsAndProjectionSnapshots() =>
+        from transactionAdder in AllTransactionAdders
+        from entitySnapshotAdder in AllEntitySnapshotAdders()
+        from projectionSnapshotAdder in AllProjectionSnapshotAdders()
+        select new object[] { transactionAdder, entitySnapshotAdder, projectionSnapshotAdder };
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
     {

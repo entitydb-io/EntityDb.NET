@@ -21,14 +21,14 @@ public sealed class SnapshotTests : TestsBase<Startup>
     {
     }
 
-    private async Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
+    private async Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(SnapshotAdder snapshotAdder)
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var snapshotId = Id.NewId();
@@ -55,18 +55,19 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
-    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
-    public async Task GivenSnapshotsAdder_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddProjectionSnapshots))]
+    public Task GivenSnapshotsAdder_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(SnapshotAdder snapshotAdder)
     {
-        await GetType()
-            .GetMethod(nameof(GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched), ~BindingFlags.Public)!
-            .MakeGenericMethod(snapshotsAdder.SnapshotType)
-            .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
+        return RunGenericTestAsync
+        (
+            nameof(GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched),
+            new[] { snapshotAdder.SnapshotType },
+            new object?[] { snapshotAdder }
+        );
     }
     
-    private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
+    private async Task GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TSnapshot>(SnapshotAdder snapshotAdder)
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -74,7 +75,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            snapshotAdder.AddDependencies.Invoke(serviceCollection);
             
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
@@ -100,18 +101,19 @@ public sealed class SnapshotTests : TestsBase<Startup>
     
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
-    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
-    public async Task GivenSnapshotsAdder_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddProjectionSnapshots))]
+    public Task GivenSnapshotsAdder_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SnapshotAdder snapshotAdder)
     {
-        await GetType()
-            .GetMethod(nameof(GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged), ~BindingFlags.Public)!
-            .MakeGenericMethod(snapshotsAdder.SnapshotType)
-            .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
+        return RunGenericTestAsync
+        (
+            nameof(GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged),
+            new[] { snapshotAdder.SnapshotType },
+            new object?[] { snapshotAdder }
+        );
     }
 
-    private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotsAdder snapshotsAdder)
-        where TSnapshot : ISnapshotWithTestMethods<TSnapshot>
+    private async Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(SnapshotAdder snapshotAdder)
+        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -121,7 +123,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            snapshotsAdder.Add(serviceCollection);
+            snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
         
         await using var writeSnapshotRepository = await serviceScope.ServiceProvider
@@ -156,13 +158,14 @@ public sealed class SnapshotTests : TestsBase<Startup>
     
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
-    [MemberData(nameof(AddOneToOneProjectionSnapshots))]
-    public async Task GivenSnapshotsAdder_WhenReadingInsertedSnapshotInVariousReadModes_ThenReturnSameSnapshot(SnapshotsAdder snapshotsAdder)
+    [MemberData(nameof(AddProjectionSnapshots))]
+    public Task GivenSnapshotsAdder_WhenReadingInsertedSnapshotInVariousReadModes_ThenReturnSameSnapshot(SnapshotAdder snapshotAdder)
     {
-        await GetType()
-            .GetMethod(nameof(GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot), ~BindingFlags.Public)!
-            .MakeGenericMethod(snapshotsAdder.SnapshotType)
-            .Invoke(this, new object?[] { snapshotsAdder })
-            .ShouldBeAssignableTo<Task>().ShouldNotBeNull();
+        return RunGenericTestAsync
+        (
+            nameof(GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot),
+            new[] { snapshotAdder.SnapshotType },
+            new object?[] { snapshotAdder }
+        );
     }
 }

@@ -13,10 +13,9 @@ public record TestEntity
     Id Id,
     VersionNumber VersionNumber = default
 )
-: IEntity<TestEntity>, ISnapshotWithTestMethods<TestEntity>
+: IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
-    public const string MongoCollectionName = "Test";
-    public const string RedisKeyNamespace = "test-entity";
+    public static string RedisKeyNamespace => "test-entity";
 
     public static TestEntity Construct(Id entityId)
     {
