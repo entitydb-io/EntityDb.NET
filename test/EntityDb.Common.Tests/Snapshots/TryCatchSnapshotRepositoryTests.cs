@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using EntityDb.Common.Entities;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
@@ -20,8 +21,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
     }
 
-    [Fact]
-    public async Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged()
+    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(EntityAdder entityAdder)
+        where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
@@ -43,6 +44,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            entityAdder.AddDependencies.Invoke(serviceCollection);
+
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
             serviceCollection.AddSingleton(loggerFactory);
@@ -64,5 +67,16 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         deleted.ShouldBeFalse();
 
         loggerVerifier.Invoke(Times.Exactly(3));
+    }
+
+    [Theory]
+    [MemberData(nameof(AddEntity))]
+    public Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged(EntityAdder entityAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entityAdder.EntityType },
+            new object?[] { entityAdder }
+        );
     }
 }
