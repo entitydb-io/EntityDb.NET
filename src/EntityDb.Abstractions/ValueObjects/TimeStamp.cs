@@ -25,7 +25,7 @@ public readonly record struct TimeStamp(DateTime Value)
     /// <returns>A <see cref="TimeStamp" /> rounded down to the nearest millisecond.</returns>
     public TimeStamp WithMillisecondPrecision()
     {
-        return new(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
+        return new TimeStamp(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public readonly record struct TimeStamp(DateTime Value)
     ///     A string representation of the value of the current
     ///     <see cref="TimeStamp" /> object.
     /// </returns>
-    public override string? ToString()
+    public override string ToString()
     {
         return Value.ToString(CultureInfo.CurrentCulture);
     }

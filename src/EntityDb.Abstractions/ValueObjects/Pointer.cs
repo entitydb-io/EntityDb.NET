@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="Id">The id of the object.</param>
 /// <param name="VersionNumber">The version number of the object.</param>
-public record struct Pointer(Id Id, VersionNumber VersionNumber)
+public readonly record struct Pointer(Id Id, VersionNumber VersionNumber)
 {
     /// <summary>
     ///     Checks if the version number found satisfies the pointer.

@@ -49,7 +49,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
         if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
         {
-            throw new SnapshotPointernDoesNotExistException();
+            throw new SnapshotPointerDoesNotExistException();
         }
 
         return projection;

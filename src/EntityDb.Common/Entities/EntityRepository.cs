@@ -48,7 +48,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
         {
-            throw new SnapshotPointernDoesNotExistException();
+            throw new SnapshotPointerDoesNotExistException();
         }
 
         return entity;

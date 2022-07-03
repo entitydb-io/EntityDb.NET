@@ -49,17 +49,12 @@ public record OneToOneProjection
 
     public bool ShouldRecord()
     {
-        if (ShouldRecordLogic.Value is not null) return ShouldRecordLogic.Value.Invoke(this);
-
-        return false;
+        return ShouldRecordLogic.Value is not null && ShouldRecordLogic.Value.Invoke(this);
     }
 
     public bool ShouldRecordAsLatest(OneToOneProjection? previousSnapshot)
     {
-        if (ShouldRecordAsLatestLogic.Value is not null)
-            return ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
-
-        return !Equals(previousSnapshot);
+        return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
     }
 
     public ICommandQuery GetCommandQuery(Pointer projectionPointer)

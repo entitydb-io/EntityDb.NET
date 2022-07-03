@@ -156,8 +156,6 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         var numberOfVersionsToTest = new VersionNumber(10);
 
-        var entityId = Id.NewId();
-
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             entityAdder.AddDependencies.Invoke(serviceCollection);

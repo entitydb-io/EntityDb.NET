@@ -1,9 +1,8 @@
 ﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 
-namespace EntityDb.Common.Transactions.Builders;
+namespace EntityDb.Abstractions.Transactions.Builders;
 
 /// <summary>
 ///     Provides a way to construct an <see cref="ITransaction" />. Note that no operations are permanent until

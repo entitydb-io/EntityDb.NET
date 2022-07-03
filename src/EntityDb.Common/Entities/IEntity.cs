@@ -3,7 +3,7 @@
 namespace EntityDb.Common.Entities;
 
 /// <summary>
-///     Indicates the entiy is compatible with several EntityDb.Common implementations.
+///     Indicates the entity is compatible with several EntityDb.Common implementations.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 public interface IEntity<TEntity> : ISnapshot<TEntity>

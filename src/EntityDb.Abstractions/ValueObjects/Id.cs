@@ -14,7 +14,7 @@ public readonly record struct Id(Guid Value)
     /// <returns>A new, randomly-generated <see cref="Id" />.</returns>
     public static Id NewId()
     {
-        return new(Guid.NewGuid());
+        return new Id(Guid.NewGuid());
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public readonly record struct Id(Guid Value)
     ///     <see cref="M:System.String.ToUpper" /> method on the returned
     ///     string.
     /// </returns>
-    public override string? ToString()
+    public override string ToString()
     {
         return Value.ToString();
     }

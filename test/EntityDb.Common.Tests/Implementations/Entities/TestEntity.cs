@@ -42,17 +42,12 @@ public record TestEntity
 
     public bool ShouldRecord()
     {
-        if (ShouldRecordLogic.Value is not null) return ShouldRecordLogic.Value.Invoke(this);
-
-        return false;
+        return ShouldRecordLogic.Value is not null && ShouldRecordLogic.Value.Invoke(this);
     }
 
     public bool ShouldRecordAsLatest(TestEntity? previousMostRecentSnapshot)
     {
-        if (ShouldRecordAsLatestLogic.Value is not null)
-            return ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
-
-        return !Equals(previousMostRecentSnapshot);
+        return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
     }
 
     public static string RedisKeyNamespace => "test-entity";

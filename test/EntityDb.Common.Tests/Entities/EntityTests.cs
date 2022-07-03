@@ -321,7 +321,7 @@ public class EntityTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(async () =>
+        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(async () =>
         {
             await entityRepository.GetSnapshot(default);
         });

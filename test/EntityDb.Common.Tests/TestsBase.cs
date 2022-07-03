@@ -61,19 +61,6 @@ public class TestsBase<TStartup>
                 as ITest).ShouldNotBeNull();
     }
 
-    protected void RunGenericTest(Type[] typeArguments, object?[] invokeParameters)
-    {
-        var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
-
-        var methodOutput = GetType()
-            .GetMethod(methodName, ~BindingFlags.Public)?
-            .MakeGenericMethod(typeArguments)
-            .Invoke(this, invokeParameters);
-
-        methodOutput
-            .ShouldBeNull();
-    }
-
     protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
     {
         var methodName = $"Generic_{new StackTrace().GetFrame(1)?.GetMethod()?.Name}";
@@ -114,14 +101,11 @@ public class TestsBase<TStartup>
         });
     }
 
-    private static SnapshotAdder[] AllSnapshotAdders<TSnapshot>()
+    private static IEnumerable<SnapshotAdder> AllSnapshotAdders<TSnapshot>()
         where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
     {
-        return new[]
-        {
-            RedisSnapshotAdder<TSnapshot>(),
-            InMemorySnapshotAdder<TSnapshot>()
-        };
+        yield return RedisSnapshotAdder<TSnapshot>();
+        yield return InMemorySnapshotAdder<TSnapshot>();
     }
 
     private static EntityAdder GetEntityAdder<TEntity>()
@@ -134,17 +118,15 @@ public class TestsBase<TStartup>
     private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders<TEntity>()
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        foreach (var snapshotAdder in AllSnapshotAdders<TEntity>())
-        {
-            var entityAdder = GetEntityAdder<TEntity>();
-
-            yield return new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
-                snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
-                {
-                    serviceCollection.AddEntitySnapshotTransactionSubscriber<TEntity>(TestSessionOptions.ReadOnly,
-                        TestSessionOptions.Write, true);
-                }));
-        }
+        return
+            from snapshotAdder in AllSnapshotAdders<TEntity>()
+            let entityAdder = GetEntityAdder<TEntity>()
+            select new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
+            snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
+            {
+                serviceCollection.AddEntitySnapshotTransactionSubscriber<TEntity>(TestSessionOptions.ReadOnly,
+                    TestSessionOptions.Write, true);
+            }));
     }
 
     private static IEnumerable<EntityAdder> AllEntityAdders()
@@ -161,26 +143,21 @@ public class TestsBase<TStartup>
     private static IEnumerable<SnapshotAdder> AllProjectionAdders<TProjection>()
         where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
-        foreach (var snapshotAdder in AllSnapshotAdders<TProjection>())
-            yield return new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
+        return AllSnapshotAdders<TProjection>()
+            .Select(snapshotAdder => new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
                 snapshotAdder.AddDependencies + (serviceCollection =>
                 {
                     serviceCollection.AddProjection<TProjection>();
                     serviceCollection.AddProjectionSnapshotTransactionSubscriber<TProjection>(
                         TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
-                }));
+                }))
+            );
     }
 
     private static IEnumerable<SnapshotAdder> AllProjectionSnapshotAdders()
     {
         return Enumerable.Empty<SnapshotAdder>()
             .Concat(AllProjectionAdders<OneToOneProjection>());
-    }
-
-    public static IEnumerable<object[]> AddTransactions()
-    {
-        return from transactionAdder in AllTransactionAdders
-            select new object[] { transactionAdder };
     }
 
     public static IEnumerable<object[]> AddTransactionsAndEntity()

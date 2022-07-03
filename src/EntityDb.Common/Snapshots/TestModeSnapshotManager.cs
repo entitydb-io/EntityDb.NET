@@ -11,21 +11,23 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
 {
     private readonly Dictionary<ISnapshotRepository<TSnapshot>, List<Pointer>> _dictionary = new();
 
-    private List<Pointer> GetStoreedSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository)
+    private List<Pointer> GetStoredSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository)
     {
-        if (!_dictionary.TryGetValue(snapshotRepository, out var storedSnapshotPointers))
+        if (_dictionary.TryGetValue(snapshotRepository, out var storedSnapshotPointers))
         {
-            storedSnapshotPointers = new List<Pointer>();
-
-            _dictionary.Add(snapshotRepository, storedSnapshotPointers);
+            return storedSnapshotPointers;
         }
+
+        storedSnapshotPointers = new List<Pointer>();
+
+        _dictionary.Add(snapshotRepository, storedSnapshotPointers);
 
         return storedSnapshotPointers;
     }
 
     public void AddSnapshotPointer(ISnapshotRepository<TSnapshot> snapshotRepository, Pointer snapshotPointer)
     {
-        var storedSnapshotPointers = GetStoreedSnapshotPointers(snapshotRepository);
+        var storedSnapshotPointers = GetStoredSnapshotPointers(snapshotRepository);
 
         storedSnapshotPointers.Add(snapshotPointer);
     }
@@ -33,7 +35,7 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
     public void RemoveSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository,
         IEnumerable<Pointer> snapshotPointers)
     {
-        var storedSnapshotPointers = GetStoreedSnapshotPointers(snapshotRepository);
+        var storedSnapshotPointers = GetStoredSnapshotPointers(snapshotRepository);
 
         storedSnapshotPointers.RemoveAll(snapshotPointers.Contains);
 

@@ -13,7 +13,7 @@ public readonly record struct VersionNumber(ulong Value)
     ///     In the context of an <see cref="ITransactionRepository" />,
     ///     this value is reserved to indicate there is no previous version number.
     ///     In the context of an <see cref="Pointer" />,
-    ///     this value is revervd to point to the latest snapshot.
+    ///     this value is reserved to point to the latest snapshot.
     /// </summary>
     public static readonly VersionNumber MinValue = new(ulong.MinValue);
 
@@ -23,7 +23,7 @@ public readonly record struct VersionNumber(ulong Value)
     /// <returns>The next version number.</returns>
     public VersionNumber Next()
     {
-        return new(Value + 1);
+        return new VersionNumber(Value + 1);
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public readonly record struct VersionNumber(ulong Value)
     ///     of a sequence of digits ranging from 0 to 9, without a sign or
     ///     leading zeroes.
     /// </returns>
-    public override string? ToString()
+    public override string ToString()
     {
         return Value.ToString();
     }

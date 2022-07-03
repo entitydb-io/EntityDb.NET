@@ -131,11 +131,8 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
-        {
-            return EntitySnapshotTransactionProcessor<TEntity>.Create(
-                serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-        });
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => EntitySnapshotTransactionProcessor<TEntity>.Create(
+            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 
     /// <summary>
@@ -164,10 +161,7 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
-        {
-            return ProjectionSnapshotTransactionProcessor<TProjection>.Create(
-                serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-        });
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => ProjectionSnapshotTransactionProcessor<TProjection>.Create(
+            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 }

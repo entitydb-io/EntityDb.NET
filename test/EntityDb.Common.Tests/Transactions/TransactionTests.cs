@@ -1226,9 +1226,16 @@ public sealed class TransactionTests : TestsBase<Startup>
             expectedObjects.Add(gteInMinutes <= i && i <= lteInMinutes, currentTransactionId, currentEntityId,
                 agentSignature, commands, leases, tags);
 
-            if (i == lteInMinutes)
-                lte = currentTimeStamp;
-            else if (i == gteInMinutes) gte = currentTimeStamp;
+            switch (i)
+            {
+                case lteInMinutes:
+                    lte = currentTimeStamp;
+                    break;
+                
+                case gteInMinutes:
+                    gte = currentTimeStamp;
+                    break;
+            }
 
             var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,
                 new[] { i },
@@ -1418,7 +1425,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
             counts.Add(i);
 
-            expectedObjects.Add(gte <= i && i <= lte, default, default, default!, new[] { command },
+            expectedObjects.Add(i is >= gte and <= lte, default, default, default!, new[] { command },
                 leases, tags);
         }
 
@@ -1467,7 +1474,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
             var tags = new[] { new CountTag(i) };
 
-            expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, agentSignature, commands,
+            expectedObjects.Add(i is >= gte and <= lte, currentTransactionId, currentEntityId, agentSignature, commands,
                 leases, tags);
 
             var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,

@@ -26,9 +26,6 @@ public class ProjectionsTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var projectionId = Id.NewId();
-        var expectedProjection = TProjection.Construct(projectionId);
-
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.AddDependencies.Invoke(serviceCollection);
@@ -42,8 +39,8 @@ public class ProjectionsTests : TestsBase<Startup>
 
         // ACT & ASSERT
 
-        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(() =>
-            projectionRepository.GetSnapshot(projectionId));
+        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(() =>
+            projectionRepository.GetSnapshot(default));
     }
 
 
