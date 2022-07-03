@@ -24,7 +24,7 @@ internal class
                 .WithTransactionSessionOptions(options);
         }
 
-        var normalOptions = new MongoTransactionSessionOptions()
+        var normalOptions = new MongoTransactionSessionOptions
         {
             ConnectionString = options.ConnectionString,
             Database = options.Database,
