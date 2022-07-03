@@ -105,6 +105,6 @@ A projection is an aggregate, but notably _not_ the aggregate root, and it too e
 In the banking example, one example of a projection could be your entire account balance. It can be anything, though!
 You are not constrained in what data you want to use for your projection.
 
-### Notifications
+### Communications
 
 - Coming Soon!
