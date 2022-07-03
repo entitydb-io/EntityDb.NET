@@ -28,4 +28,10 @@ public class RedisSnapshotSessionOptions<TSnapshot>
     ///     If <c>true</c>, indicates the agent can tolerate replication lag for queries.
     /// </summary>
     public bool SecondaryPreferred { get; set; }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{nameof(RedisSnapshotSessionOptions<TSnapshot>)}<{typeof(TSnapshot).Name}";
+    }
 }

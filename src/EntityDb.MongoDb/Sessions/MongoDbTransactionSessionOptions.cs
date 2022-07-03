@@ -38,4 +38,10 @@ public class MongoDbTransactionSessionOptions
     ///     Determines how long to wait before a query should be automatically killed.
     /// </summary>
     public TimeSpan? ReadTimeout { get; set; }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"{nameof(MongoDbTransactionSessionOptions)}";
+    }
 }
