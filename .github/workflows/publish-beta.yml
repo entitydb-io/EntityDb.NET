@@ -4,6 +4,7 @@ name: Publish to Beta
 
 jobs:
   beta:
+    if: ${{ github.event.pull_request.milestone != null }}
     name: Publish to Beta
     runs-on: ubuntu-latest
     environment: beta
@@ -31,6 +32,6 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./TestResults/**/*.xml
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.run_number }}.${{ github.run_attempt }}-beta'
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone }}-beta-pr${{ github.event.number }}-run${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
         run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
