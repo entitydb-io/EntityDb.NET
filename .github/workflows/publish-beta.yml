@@ -1,0 +1,43 @@
+on:
+  push:
+    branches-ignore:
+      - main
+    tags-ignore:
+      - '**'
+    paths:
+      - '.github/workflows/publish-beta.yml'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'EntityDb.sln'
+      - 'src/**'
+      - 'test/**'
+
+name: Publish to Beta
+
+jobs:
+  beta:
+    name: Publish to Beta
+    runs-on: ubuntu-latest
+    environment: beta
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.2.0
+        with:
+          redis-version: 6.2.5
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.6.0
+        with:
+          mongodb-version: 5.0.3
+          mongodb-replica-set: entitydb
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v1
+      - name: Restore Dependencies
+        run: dotnet restore EntityDb.sln --locked-mode
+      - name: Run Project Tests
+        run: dotnet test EntityDb.sln --no-restore -c Debug
+      - name: Pack Projects into Nuget Packages
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.run_number }}.${{ github.run_attempt }}'
+      - name: Publish to Beta
+        run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
