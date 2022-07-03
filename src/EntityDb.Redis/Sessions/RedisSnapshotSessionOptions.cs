@@ -3,7 +3,7 @@
 /// <summary>
 /// 
 /// </summary>
-public class RedisSnapshotSessionOptions
+public class RedisSnapshotSessionOptions<TSnapshot>
 {
     public string ConnectionString { get; set; } = default!;
 

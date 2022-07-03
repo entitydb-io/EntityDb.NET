@@ -105,24 +105,24 @@ public class TestsBase<TStartup>
         {
             serviceCollection.AddRedisSnapshots<TSnapshot>(true);
 
-            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions>(options =>
+            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions<TSnapshot>>(options =>
             {
                 options.ConnectionString = "127.0.0.1:6379";
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.Write, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;

@@ -19,7 +19,7 @@ public class RedisSessionTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var readOnlyRedisSession = new RedisSession(default!, default!, new RedisSnapshotSessionOptions
+        var readOnlyRedisSession = new RedisSession<object>(default!, default!, new RedisSnapshotSessionOptions<object>
         {
             ReadOnly = true
         });
