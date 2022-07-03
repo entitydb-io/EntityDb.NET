@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using EntityDb.Abstractions.Annotations;
@@ -17,9 +18,9 @@ public record OneToOneProjection
     Id Id,
     VersionNumber VersionNumber = default,
     VersionNumber EntityVersionNumber = default
-) : IProjection<OneToOneProjection>, ISnapshotWithTestMethods<OneToOneProjection>
+) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
-    public const string RedisKeyNamespace = "one-to-one-projection";
+    public static string RedisKeyNamespace => "one-to-one-projection";
     
     public static OneToOneProjection Construct(Id projectionId)
     {

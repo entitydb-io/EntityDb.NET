@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30105.148
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ABACFBCC-B59F-4616-B6CC-99C37AEC8960}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,6 +25,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{92484C44-2754-4C1D-BD46-98D83E4020EE}"
 	ProjectSection(SolutionItems) = preProject
 		test\Directory.Build.props = test\Directory.Build.props
+		test\docker-compose.yml = test\docker-compose.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Common.Tests", "test\EntityDb.Common.Tests\EntityDb.Common.Tests.csproj", "{CF316519-525E-4A67-BF12-1FDDF802B878}"

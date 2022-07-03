@@ -25,10 +25,6 @@ public abstract class StartupBase : IStartup
 
         serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
 
-        // Transaction Entity
-
-        serviceCollection.AddEntity<TestEntity>();
-
         // Snapshot Session Options
 
         serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write, options =>
