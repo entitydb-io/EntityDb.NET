@@ -8,6 +8,27 @@ namespace EntityDb.Common.Tests.Implementations.Queries;
 public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte) : IAgentSignatureQuery, ICommandQuery,
     ILeaseQuery, ITagQuery
 {
+    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
+    {
+        return builder.And
+        (
+            builder.TransactionTimeStampGte(Gte),
+            builder.TransactionTimeStampLte(Lte)
+        );
+    }
+
+    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
+    {
+        return builder.Combine
+        (
+            builder.TransactionTimeStamp(true)
+        );
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
+
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
         return builder.And
@@ -45,27 +66,6 @@ public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte) : IAgentSi
             builder.EntityVersionNumber(true)
         );
     }
-
-    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
-    {
-        return builder.And
-        (
-            builder.TransactionTimeStampGte(Gte),
-            builder.TransactionTimeStampLte(Lte)
-        );
-    }
-
-    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
-    {
-        return builder.Combine
-        (
-            builder.TransactionTimeStamp(true)
-        );
-    }
-
-    public int? Skip => null;
-
-    public int? Take => null;
 
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {

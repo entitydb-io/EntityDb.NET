@@ -10,6 +10,7 @@ internal static class MongoDbTransactionRepositoryFactoryExtensions
         this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory,
         IServiceProvider serviceProvider)
     {
-        return AutoProvisionMongoDbTransactionRepositoryFactory.Create(serviceProvider, mongoDbTransactionRepositoryFactory);
+        return AutoProvisionMongoDbTransactionRepositoryFactory.Create(serviceProvider,
+            mongoDbTransactionRepositoryFactory);
     }
 }

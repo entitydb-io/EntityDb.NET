@@ -7,7 +7,7 @@ namespace EntityDb.MongoDb.Serializers;
 internal class IdSerializer : IBsonSerializer<Id>
 {
     public Type ValueType => typeof(Id);
-    
+
     object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
     {
         return Deserialize(context, args);

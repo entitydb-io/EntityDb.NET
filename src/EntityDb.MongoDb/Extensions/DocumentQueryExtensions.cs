@@ -10,7 +10,6 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -80,7 +79,7 @@ internal static class DocumentQueryExtensions
 
         var documents = await documentQuery.Execute(mongoSession, projection, cancellationToken);
 
-        var ids= mapToIds
+        var ids = mapToIds
             .Invoke(documents)
             .Distinct();
 
@@ -100,7 +99,7 @@ internal static class DocumentQueryExtensions
     public static async Task<IEntityAnnotation<TData>[]> GetEntityAnnotation<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession, 
+        IMongoSession mongoSession,
         IEnvelopeService<BsonDocument> envelopeService,
         CancellationToken cancellationToken
     )
@@ -147,7 +146,7 @@ internal static class DocumentQueryExtensions
     public static async Task<TData[]> GetData<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession, 
+        IMongoSession mongoSession,
         IEnvelopeService<BsonDocument> envelopeService,
         CancellationToken cancellationToken
     )

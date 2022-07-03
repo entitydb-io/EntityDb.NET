@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
+        <PackageReference Include="StackExchange.Redis" Version="2.2.88"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
     </ItemGroup>
 
 </Project>

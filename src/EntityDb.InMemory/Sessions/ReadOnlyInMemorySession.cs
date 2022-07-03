@@ -13,7 +13,7 @@ internal class ReadOnlyInMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
     {
         _inMemorySession = inMemorySession;
     }
-    
+
     public Task<bool> Insert(Pointer snapshotPointer, TSnapshot snapshot)
     {
         return Task.FromException<bool>(new CannotWriteInReadOnlyModeException());

@@ -15,7 +15,7 @@ public interface ISnapshot<TSnapshot>
     /// </summary>
     /// <param name="snapshotId">The id of the snapshot.</param>
     /// <returns>A new instance of <typeparamref name="TSnapshot" />.</returns>
-    abstract static TSnapshot Construct(Id snapshotId);
+    static abstract TSnapshot Construct(Id snapshotId);
 
     /// <summary>
     ///     Returns the id of this snapshot.
@@ -46,9 +46,11 @@ public interface ISnapshot<TSnapshot>
     /// <returns><c>true</c> if this snapshot instance should be recorded as the latest snapshot, or else <c>false</c>.</returns>
     bool ShouldRecordAsLatest(TSnapshot? previousLatestSnapshot);
 
-    /// <ignore/>
+    /// <ignore />
     [Obsolete("This use ShouldRecordAsLatest() instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     bool ShouldReplace(TSnapshot? previousSnapshot)
-        => ShouldRecordAsLatest(previousSnapshot);
+    {
+        return ShouldRecordAsLatest(previousSnapshot);
+    }
 }

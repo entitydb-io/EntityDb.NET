@@ -20,7 +20,8 @@ public interface ITransactionRepository : IDisposableResource
     /// <param name="agentSignatureQuery">The agentSignature query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The transaction ids which are found by <paramref name="agentSignatureQuery" />.</returns>
-    Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default);
+    Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the transaction ids which are found by a command query.
@@ -84,7 +85,8 @@ public interface ITransactionRepository : IDisposableResource
     /// <param name="agentSignatureQuery">The agentSignature query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The agentSignatures which are found by <paramref name="agentSignatureQuery" />.</returns>
-    Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default);
+    Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the commands which are found by a command query.
@@ -116,7 +118,8 @@ public interface ITransactionRepository : IDisposableResource
     /// <param name="agentSignatureQuery">The agent signature query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The annotated agent signatures which are found by <paramref name="agentSignatureQuery" />.</returns>
-    Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default);
+    Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the annotated commands which are found by a command query.
@@ -124,7 +127,8 @@ public interface ITransactionRepository : IDisposableResource
     /// <param name="commandQuery">The command query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The annotated commands which are found by <paramref name="commandQuery" />.</returns>
-    Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default);
+    Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Inserts a single transaction with an atomic commit.

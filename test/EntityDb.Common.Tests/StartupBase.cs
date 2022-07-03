@@ -1,16 +1,14 @@
-﻿using EntityDb.Common.Extensions;
+﻿using System;
+using EntityDb.Common.Agents;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using EntityDb.Common.Agents;
 
 namespace EntityDb.Common.Tests;
 
 public abstract class StartupBase : IStartup
 {
-
     public virtual void AddServices(IServiceCollection serviceCollection)
     {
         // Resolving
@@ -27,10 +25,8 @@ public abstract class StartupBase : IStartup
 
         // Snapshot Session Options
 
-        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write, options =>
-        {
-            options.ReadOnly = false;
-        });
+        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write,
+            options => { options.ReadOnly = false; });
 
         serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
         {

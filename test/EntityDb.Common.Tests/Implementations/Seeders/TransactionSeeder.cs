@@ -17,10 +17,12 @@ public static class TransactionStepSeeder
     public static IEnumerable<ITransactionStep> CreateFromCommands<TEntity>(Id entityId, uint numCommands)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        for (var previousVersionNumber = new VersionNumber(0); previousVersionNumber.Value < numCommands; previousVersionNumber = previousVersionNumber.Next())
+        for (var previousVersionNumber = new VersionNumber(0);
+             previousVersionNumber.Value < numCommands;
+             previousVersionNumber = previousVersionNumber.Next())
         {
             var entityVersionNumber = previousVersionNumber.Next();
-            
+
             yield return new AppendCommandTransactionStep
             {
                 EntityId = entityId,
@@ -41,7 +43,7 @@ public static class TransactionSeeder
         {
             Id = Id.NewId(),
             TimeStamp = TimeStamp.UtcNow,
-            AgentSignature = new UnknownAgentSignature(new()),
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
             Steps = transactionSteps.ToImmutableArray()
         };
     }

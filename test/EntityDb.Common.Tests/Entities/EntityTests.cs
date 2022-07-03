@@ -1,22 +1,22 @@
-﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Common.Exceptions;
-using EntityDb.Common.Tests.Implementations.Commands;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using EntityDb.Abstractions.ValueObjects;
-using Xunit;
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
+using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Shouldly;
+using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 
@@ -38,19 +38,14 @@ public class EntityTests : TestsBase<Startup>
     {
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
-        if (entity is not null)
-        {
-            transactionBuilder.Load(entity);
-        }
+        if (entity is not null) transactionBuilder.Load(entity);
 
         for (var i = from; i.Value <= to.Value; i = i.Next())
         {
-            if (transactionBuilder.IsEntityKnown() && transactionBuilder.GetEntity().VersionNumber.Value >= i.Value)
-            {
-                continue;
-            }
+            if (transactionBuilder.IsEntityKnown() &&
+                transactionBuilder.GetEntity().VersionNumber.Value >= i.Value) continue;
 
             transactionBuilder.Append(new DoNothing());
         }
@@ -59,7 +54,8 @@ public class EntityTests : TestsBase<Startup>
     }
 
 
-    private async Task Generic_GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM<TEntity>(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
+    private async Task Generic_GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM<TEntity>(
+        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -101,7 +97,8 @@ public class EntityTests : TestsBase<Startup>
         entityAtVersionM.VersionNumber.ShouldBe(versionNumberM);
     }
 
-    private async Task Generic_GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns<TEntity>(EntityAdder entityAdder)
+    private async Task Generic_GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns<TEntity>(
+        EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -119,12 +116,8 @@ public class EntityTests : TestsBase<Startup>
             .ReturnsAsync((ITransaction transaction, CancellationToken _) =>
             {
                 foreach (var transactionStep in transaction.Steps)
-                {
                     if (transactionStep is IAppendCommandTransactionStep commandTransactionStep)
-                    {
                         commands.Add(commandTransactionStep.Command);
-                    }
-                }
 
                 return true;
             });
@@ -156,7 +149,8 @@ public class EntityTests : TestsBase<Startup>
             .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var transaction = await BuildTransaction<TEntity>(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
+        var transaction =
+            await BuildTransaction<TEntity>(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -173,10 +167,13 @@ public class EntityTests : TestsBase<Startup>
         currenEntity.VersionNumber.ShouldBe(expectedVersionNumber);
 
         transactionRepositoryMock
-            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()),
+                Times.Once);
     }
 
-    private async Task Generic_GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(EntityAdder entityAdder)
+    private async Task
+        Generic_GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
+            EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -204,7 +201,9 @@ public class EntityTests : TestsBase<Startup>
         entityRepository.SnapshotRepository.ShouldBeNull();
     }
 
-    private async Task Generic_GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(EntityAdder entityAdder)
+    private async Task
+        Generic_GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
+            EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -233,7 +232,9 @@ public class EntityTests : TestsBase<Startup>
         entityRepository.SnapshotRepository.ShouldBeNull();
     }
 
-    private async Task Generic_GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(EntityAdder entityAdder)
+    private async Task
+        Generic_GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<
+            TEntity>(EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -262,7 +263,9 @@ public class EntityTests : TestsBase<Startup>
         entityRepository.SnapshotRepository.ShouldNotBeNull();
     }
 
-    private async Task Generic_GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot<TEntity>(EntityAdder entityAdder)
+    private async Task
+        Generic_GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot<TEntity>(
+            EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -295,10 +298,12 @@ public class EntityTests : TestsBase<Startup>
 
         snapshotOrDefault.ShouldNotBe(default);
         snapshotOrDefault.ShouldNotBe(snapshot);
-        snapshotOrDefault.VersionNumber.ShouldBe(new VersionNumber(snapshot.VersionNumber.Value + Convert.ToUInt64(newCommands.Length)));
+        snapshotOrDefault.VersionNumber.ShouldBe(
+            new VersionNumber(snapshot.VersionNumber.Value + Convert.ToUInt64(newCommands.Length)));
     }
 
-    private async Task Generic_GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow<TEntity>(EntityAdder entityAdder)
+    private async Task Generic_GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow<TEntity>(
+        EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -316,7 +321,7 @@ public class EntityTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(async () =>
+        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(async () =>
         {
             await entityRepository.GetSnapshot(default);
         });
@@ -324,7 +329,8 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
-    public Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
+    public Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder,
+        SnapshotAdder entitySnapshotAdder)
     {
         return RunGenericTestAsync
         (
@@ -346,7 +352,8 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository(EntityAdder entityAdder)
+    public Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -357,7 +364,8 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(EntityAdder entityAdder)
+    public Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -368,7 +376,9 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(EntityAdder entityAdder)
+    public Task
+        GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
+            EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -379,7 +389,8 @@ public class EntityTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot(EntityAdder entityAdder)
+    public Task GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot(
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (

@@ -13,16 +13,16 @@ namespace EntityDb.MongoDb.Envelopes;
 internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
 {
     public const string TypeDiscriminatorPropertyName = "_t";
-    
+
     private readonly ILogger<BsonDocumentEnvelopeService> _logger;
-    private readonly ITypeResolver _typeResolver;
     private readonly bool _removeTypeDiscriminatorProperty;
+    private readonly ITypeResolver _typeResolver;
 
     static BsonDocumentEnvelopeService()
     {
         BsonSerializer.RegisterSerializer(new EnvelopeSerializer());
     }
-    
+
     public BsonDocumentEnvelopeService
     (
         ILogger<BsonDocumentEnvelopeService> logger,
@@ -57,7 +57,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
             throw new SerializeException();
         }
     }
-    
+
     public byte[] Serialize(Envelope<BsonDocument> envelope)
     {
         try

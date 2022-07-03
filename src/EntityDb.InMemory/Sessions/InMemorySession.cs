@@ -9,11 +9,11 @@ namespace EntityDb.InMemory.Sessions;
 internal class InMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
 {
     private readonly ConcurrentDictionary<Pointer, TSnapshot> _dictionary = new();
-    
+
     public async Task<bool> Insert(Pointer snapshotPointer, TSnapshot snapshot)
     {
         await Task.Yield();
-        
+
         return _dictionary.TryGetValue(snapshotPointer, out var previousSnapshot)
             ? _dictionary.TryUpdate(snapshotPointer, snapshot, previousSnapshot)
             : _dictionary.TryAdd(snapshotPointer, snapshot);

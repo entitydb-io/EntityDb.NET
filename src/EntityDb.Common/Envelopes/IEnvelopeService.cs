@@ -7,6 +7,6 @@ internal interface IEnvelopeService<TEnvelopeValue>
     byte[] Serialize(Envelope<TEnvelopeValue> envelope);
 
     Envelope<TEnvelopeValue> Deserialize(byte[] rawData);
-    
+
     TData Reconstruct<TData>(Envelope<TEnvelopeValue> envelope);
 }

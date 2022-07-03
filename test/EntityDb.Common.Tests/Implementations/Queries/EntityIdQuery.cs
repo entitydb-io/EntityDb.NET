@@ -7,6 +7,20 @@ namespace EntityDb.Common.Tests.Implementations.Queries;
 
 public record EntityIdQuery(Id EntityId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery, ITagQuery
 {
+    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
+    {
+        return builder.EntityIdsIn(EntityId);
+    }
+
+    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
+    {
+        return builder.EntityIds(true);
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
+
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
         return builder.EntityIdIn(EntityId);
@@ -34,20 +48,6 @@ public record EntityIdQuery(Id EntityId) : IAgentSignatureQuery, ICommandQuery, 
             builder.EntityVersionNumber(true)
         );
     }
-
-    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
-    {
-        return builder.EntityIdsIn(EntityId);
-    }
-
-    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
-    {
-        return builder.EntityIds(true);
-    }
-
-    public int? Skip => null;
-
-    public int? Take => null;
 
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {

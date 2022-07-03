@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
+internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepository<TSnapshot>
 {
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
     private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager;
@@ -21,7 +22,8 @@ internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResource
         _testModeSnapshotManager = testModeSnapshotManager;
     }
 
-    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+        CancellationToken cancellationToken = default)
     {
         _testModeSnapshotManager.AddSnapshotPointer(this, snapshotPointer);
 

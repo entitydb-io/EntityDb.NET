@@ -9,13 +9,15 @@ namespace EntityDb.Common.Extensions;
 public static class QueryExtensions
 {
     /// <summary>
-    ///     Returns a new, modified <see cref="IAgentSignatureQuery" />. The way in which it is modified depends on the parameters of
+    ///     Returns a new, modified <see cref="IAgentSignatureQuery" />. The way in which it is modified depends on the
+    ///     parameters of
     ///     this extension method.
     /// </summary>
     /// <param name="agentSignatureQuery">The agentSignature query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
     /// <returns>A new, modified <see cref="IAgentSignatureQuery" />.</returns>
-    public static IAgentSignatureQuery Modify(this IAgentSignatureQuery agentSignatureQuery, ModifiedQueryOptions modifiedQueryOptions)
+    public static IAgentSignatureQuery Modify(this IAgentSignatureQuery agentSignatureQuery,
+        ModifiedQueryOptions modifiedQueryOptions)
     {
         return new ModifiedAgentSignatureQuery(agentSignatureQuery, modifiedQueryOptions);
     }

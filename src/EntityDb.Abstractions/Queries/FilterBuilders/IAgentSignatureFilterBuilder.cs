@@ -11,7 +11,8 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures with any entity id which is contained in a set
+    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures with any entity id which is contained
+    ///     in a set
     ///     of entity ids.
     /// </summary>
     /// <param name="entityIds">The set of entity ids.</param>
@@ -22,7 +23,8 @@ public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     TFilter EntityIdsIn(params Id[] entityIds);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures whose type is contained in a set of agentSignature
+    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures whose type is contained in a set of
+    ///     agentSignature
     ///     types.
     /// </summary>
     /// <param name="agentSignatureTypes">The agentSignature types.</param>
@@ -33,7 +35,8 @@ public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     TFilter AgentSignatureTypeIn(params Type[] agentSignatureTypes);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures which do match a agentSignature expression.
+    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures which do match a agentSignature
+    ///     expression.
     /// </summary>
     /// <typeparam name="TAgentSignature">The type of agentSignature in the agentSignature expression.</typeparam>
     /// <param name="agentSignatureExpression">The agentSignature expression.</param>

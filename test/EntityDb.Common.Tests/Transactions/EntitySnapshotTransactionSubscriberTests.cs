@@ -14,20 +14,22 @@ namespace EntityDb.Common.Tests.Transactions;
 
 public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
 {
-    public EntitySnapshotTransactionSubscriberTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public EntitySnapshotTransactionSubscriberTests(IServiceProvider startupServiceProvider) : base(
+        startupServiceProvider)
     {
     }
-    
-    
+
+
     private async Task
-        Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<TEntity>(
+        Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<
+            TEntity>(
             TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
         TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => true;
-        
+
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.AddDependencies.Invoke(serviceCollection);
@@ -37,25 +39,25 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         var entityId = Id.NewId();
 
         const uint numberOfVersionNumbers = 10;
-        
+
         var transaction = TransactionSeeder.Create<TEntity>(entityId, numberOfVersionNumbers);
 
         await using var entityRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write, default);
+            .CreateRepository(TestSessionOptions.Write);
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.ReadOnly, default);
+            .CreateRepository(TestSessionOptions.ReadOnly);
 
         // ACT
 
-        await entityRepository.PutTransaction(transaction, default);
+        await entityRepository.PutTransaction(transaction);
 
         var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
-        
+
         snapshot.ShouldNotBe(default);
         snapshot!.GetVersionNumber().Value.ShouldBe(numberOfVersionNumbers);
     }
@@ -72,14 +74,16 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
             new object?[] { transactionsAdder, entitySnapshotAdder }
         );
     }
-    
-    private async Task Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<TEntity>(TransactionsAdder transactionsAdder, SnapshotAdder snapshotAdder)
+
+    private async Task
+        Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<
+            TEntity>(TransactionsAdder transactionsAdder, SnapshotAdder snapshotAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
         TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => false;
-        
+
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.AddDependencies.Invoke(serviceCollection);
@@ -92,26 +96,27 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
 
         await using var entityRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write, default);
+            .CreateRepository(TestSessionOptions.Write);
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.ReadOnly, default);
+            .CreateRepository(TestSessionOptions.ReadOnly);
 
         // ACT
 
-        await entityRepository.PutTransaction(transaction, default);
+        await entityRepository.PutTransaction(transaction);
 
         var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
-        
+
         snapshot.ShouldBe(default);
     }
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
-    private Task GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot(
+    private Task
+        GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot(
             TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
     {
         return RunGenericTestAsync

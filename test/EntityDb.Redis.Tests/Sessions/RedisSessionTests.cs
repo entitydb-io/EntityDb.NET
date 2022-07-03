@@ -1,10 +1,10 @@
-﻿using EntityDb.Common.Exceptions;
+﻿using System;
+using System.Threading.Tasks;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests;
 using EntityDb.Redis.Sessions;
 using Shouldly;
-using System;
-using System.Threading.Tasks;
-using EntityDb.Common.Snapshots;
 using Xunit;
 
 namespace EntityDb.Redis.Tests.Sessions;
@@ -27,7 +27,8 @@ public class RedisSessionTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Insert(default!, default!));
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() =>
+            readOnlyRedisSession.Insert(default!, default!));
 
         await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Delete(default!));
     }

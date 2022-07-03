@@ -16,15 +16,15 @@ internal class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
     )
     {
         var value = new Dictionary<string, string>();
-        
+
         while (reader.Read() && reader.TokenType == JsonTokenType.PropertyName)
         {
             var propertyName = reader.GetString()!;
 
             reader.Read();
-            
+
             var propertyValue = reader.GetString()!;
-            
+
             value.Add(propertyName, propertyValue);
         }
 
@@ -37,7 +37,7 @@ internal class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
         EnvelopeHeaders envelopeHeaders,
         JsonSerializerOptions options
     )
-    { 
+    {
         writer.WriteStartObject();
 
         foreach (var (propertyName, propertyValue) in envelopeHeaders.Value)
@@ -45,7 +45,7 @@ internal class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
             writer.WritePropertyName(propertyName);
             writer.WriteStringValue(propertyValue);
         }
-        
+
         writer.WriteEndObject();
     }
 }

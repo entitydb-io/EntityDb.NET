@@ -13,6 +13,30 @@ namespace EntityDb.Common.Tests.Implementations.Queries;
 public record CountQuery(ulong Gte, ulong Lte) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
     ITagQuery
 {
+    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
+    {
+        return builder.And
+        (
+            builder.AgentSignatureTypeIn(typeof(CounterAgentSignature)),
+            builder.AgentSignatureMatches((CounterAgentSignature counter) =>
+                Gte <= counter.Number && counter.Number <= Lte)
+        );
+    }
+
+    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
+    {
+        return builder.Combine
+        (
+            builder.EntityIds(true),
+            builder.AgentSignatureType(true),
+            builder.AgentSignatureProperty(true, (CounterAgentSignature counter) => counter.Number)
+        );
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
+
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
         return builder.And
@@ -54,29 +78,6 @@ public record CountQuery(ulong Gte, ulong Lte) : IAgentSignatureQuery, ICommandQ
             builder.LeaseProperty(true, (Lease lease) => lease.Scope)
         );
     }
-
-    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
-    {
-        return builder.And
-        (
-            builder.AgentSignatureTypeIn(typeof(CounterAgentSignature)),
-            builder.AgentSignatureMatches((CounterAgentSignature counter) => Gte <= counter.Number && counter.Number <= Lte)
-        );
-    }
-
-    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
-    {
-        return builder.Combine
-        (
-            builder.EntityIds(true),
-            builder.AgentSignatureType(true),
-            builder.AgentSignatureProperty(true, (CounterAgentSignature counter) => counter.Number)
-        );
-    }
-
-    public int? Skip => null;
-
-    public int? Take => null;
 
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {

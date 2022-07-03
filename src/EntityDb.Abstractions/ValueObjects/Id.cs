@@ -9,21 +9,22 @@ namespace EntityDb.Abstractions.ValueObjects;
 public readonly record struct Id(Guid Value)
 {
     /// <summary>
-    ///     Returns a new, randomly-generated <see cref="Id"/>.
+    ///     Returns a new, randomly-generated <see cref="Id" />.
     /// </summary>
-    /// <returns>A new, randomly-generated <see cref="Id"/>.</returns>
-    public static Id NewId() => new(Guid.NewGuid());
+    /// <returns>A new, randomly-generated <see cref="Id" />.</returns>
+    public static Id NewId()
+    {
+        return new Id(Guid.NewGuid());
+    }
 
     /// <summary>
-    ///    Returns a string representation of the value of this instance in
-    ///    registry format.
+    ///     Returns a string representation of the value of this instance in
+    ///     registry format.
     /// </summary>
     /// <returns>
     ///     The value of this <see cref="Id" />, formatted by using the "D"
-    ///     format specifier as follows:  
-    ///
-    ///     <c>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</c>  
-    ///
+    ///     format specifier as follows:
+    ///     <c>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</c>
     ///     where the value of the Id is represented as a series of lowercase
     ///     hexadecimal digits in groups of 8, 4, 4, 4, and 12 digits and
     ///     separated by hyphens. An example of a return value is
@@ -32,10 +33,13 @@ public readonly record struct Id(Guid Value)
     ///     <see cref="M:System.String.ToUpper" /> method on the returned
     ///     string.
     /// </returns>
-    public override string? ToString() => Value.ToString();
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
 
     /// <summary>
-    ///     Implicitly converts an <see cref="Id"/> to a pointer.
+    ///     Implicitly converts an <see cref="Id" /> to a pointer.
     /// </summary>
     /// <param name="id">The implicit id argument.</param>
     public static implicit operator Pointer(Id id)

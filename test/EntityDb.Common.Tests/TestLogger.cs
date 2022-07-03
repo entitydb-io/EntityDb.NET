@@ -6,9 +6,9 @@ namespace EntityDb.Common.Tests;
 
 public class TestLogger<T> : ILogger<T>
 {
-    private readonly ITest _test;
     private readonly ILogger _logger;
-        
+    private readonly ITest _test;
+
     public TestLogger(ITest test, ILoggerFactory loggerFactory)
     {
         _test = test;
@@ -25,7 +25,8 @@ public class TestLogger<T> : ILogger<T>
         return _logger.IsEnabled(logLevel);
     }
 
-    void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+        Func<TState, Exception?, string> formatter)
     {
         using (_logger.BeginScope($"Test: {_test.DisplayName}"))
         {

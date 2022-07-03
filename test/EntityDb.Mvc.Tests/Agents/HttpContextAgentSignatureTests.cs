@@ -1,8 +1,8 @@
-﻿using EntityDb.Mvc.Agents;
+﻿using System;
+using System.Collections.Generic;
+using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace EntityDb.Mvc.Tests.Agents;
@@ -78,7 +78,8 @@ public class HttpContextAgentSignatureTests
     }
 
     [Fact]
-    public void GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
+    public void
+        GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
     {
         // ARRANGE
 
@@ -111,7 +112,8 @@ public class HttpContextAgentSignatureTests
     }
 
     [Fact]
-    public void GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
+    public void
+        GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
     {
         // ARRANGE
 

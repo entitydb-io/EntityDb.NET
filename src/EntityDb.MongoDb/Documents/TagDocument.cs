@@ -47,7 +47,7 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
                 Data = envelopeService.Deconstruct(insertTag)
             })
             .ToArray();
-        
+
         return new InsertDocumentsCommand<TagDocument>
         (
             CollectionName,

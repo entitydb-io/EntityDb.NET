@@ -9,22 +9,15 @@ using EntityDb.Common.Tests.Implementations.Snapshots;
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
 public record TestEntity
-(
-    Id Id,
-    VersionNumber VersionNumber = default
-)
-: IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
+    (
+        Id Id,
+        VersionNumber VersionNumber = default
+    )
+    : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
-    public static string RedisKeyNamespace => "test-entity";
-
     public static TestEntity Construct(Id entityId)
     {
         return new TestEntity(entityId);
-    }
-    
-    public TestEntity WithVersionNumber(VersionNumber versionNumber)
-    {
-        return this with { VersionNumber = versionNumber };
     }
 
     public Id GetId()
@@ -47,27 +40,24 @@ public record TestEntity
         });
     }
 
-    public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
-
     public bool ShouldRecord()
     {
-        if (ShouldRecordLogic.Value is not null)
-        {
-            return ShouldRecordLogic.Value.Invoke(this);
-        }
-
-        return false;
+        return ShouldRecordLogic.Value is not null && ShouldRecordLogic.Value.Invoke(this);
     }
-
-    public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
 
     public bool ShouldRecordAsLatest(TestEntity? previousMostRecentSnapshot)
     {
-        if (ShouldRecordAsLatestLogic.Value is not null)
-        {
-            return ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
-        }
-        
-        return !Equals(previousMostRecentSnapshot);
+        return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
     }
+
+    public static string RedisKeyNamespace => "test-entity";
+
+    public TestEntity WithVersionNumber(VersionNumber versionNumber)
+    {
+        return this with { VersionNumber = versionNumber };
+    }
+
+    public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
+
+    public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
 }

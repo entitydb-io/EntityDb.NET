@@ -1,11 +1,11 @@
-﻿using EntityDb.Common.Tests.Agents;
+﻿using System;
+using System.Collections.Generic;
+using EntityDb.Common.Tests.Agents;
+using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
-using System.Collections.Generic;
-using EntityDb.Mvc.Agents;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
@@ -28,7 +28,8 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
         serviceCollection.AddSingleton(httpContextAccessorMock.Object);
     }
 
-    protected override void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection, HttpContextSeederOptions httpContextSeederOptions)
+    protected override void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection,
+        HttpContextSeederOptions httpContextSeederOptions)
     {
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>(MockBehavior.Strict);
 
@@ -47,7 +48,7 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[]{ "application/json" }
+                    ["Content-Type"] = new[] { "application/json" }
                 },
                 HasIpAddress = true
             },
@@ -55,7 +56,7 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[]{ "application/json" }
+                    ["Content-Type"] = new[] { "application/json" }
                 },
                 HasIpAddress = false
             }

@@ -12,10 +12,10 @@ namespace EntityDb.Mvc.Agents;
 internal sealed class HttpContextAgentAccessor : IAgentAccessor
 {
     private static readonly Dictionary<string, string> DefaultApplicationInfo = new();
+    private readonly IAgentSignatureAugmenter? _agentSignatureAugmenter;
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
-    private readonly IAgentSignatureAugmenter? _agentSignatureAugmenter;
 
     public HttpContextAgentAccessor
     (

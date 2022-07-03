@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using EntityDb.Common.Agents;
-using EntityDb.Common.Tests;
-using EntityDb.Common.Tests.Agents;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDb.Mvc.Tests.Agents;
+namespace EntityDb.Common.Tests.Agents;
 
 public class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
 {
@@ -29,7 +27,7 @@ public class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
     {
         return new[]
         {
-            new object(),
+            new object()
         };
     }
 

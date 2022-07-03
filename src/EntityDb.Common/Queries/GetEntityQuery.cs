@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record GetEntityCommandsQuery(Pointer EntityPointer, VersionNumber SnapshotVersionNumber) : ICommandQuery
+internal sealed record GetEntityCommandsQuery
+    (Pointer EntityPointer, VersionNumber SnapshotVersionNumber) : ICommandQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
         var filters = new List<TFilter>
         {
-            builder.EntityIdIn(EntityPointer.Id),
-            builder.EntityVersionNumberGte(SnapshotVersionNumber.Next())
+            builder.EntityIdIn(EntityPointer.Id), builder.EntityVersionNumberGte(SnapshotVersionNumber.Next())
         };
 
         if (EntityPointer.VersionNumber != VersionNumber.MinValue)

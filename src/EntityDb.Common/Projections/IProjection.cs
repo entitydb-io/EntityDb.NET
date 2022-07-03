@@ -12,17 +12,17 @@ namespace EntityDb.Common.Projections;
 public interface IProjection<TProjection> : ISnapshot<TProjection>
 {
     /// <summary>
-    ///     Returns a new <typeparamref name="TProjection"/> that incorporates the commands for a particular entity id.
+    ///     Returns a new <typeparamref name="TProjection" /> that incorporates the commands for a particular entity id.
     /// </summary>
     /// <param name="annotatedCommands">The annotated commands.</param>
-    /// <returns>A new <typeparamref name="TProjection"/> that incorporates <paramref name="annotatedCommands"/>.</returns>
+    /// <returns>A new <typeparamref name="TProjection" /> that incorporates <paramref name="annotatedCommands" />.</returns>
     TProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands);
 
     /// <summary>
-    ///     Returns a <see cref="ICommandQuery"/> that is used to load the rest of the state for the given projection pointer.
+    ///     Returns a <see cref="ICommandQuery" /> that is used to load the rest of the state for the given projection pointer.
     /// </summary>
     /// <param name="projectionPointer">A pointer to the projection.</param>
-    /// <returns>A <see cref="ICommandQuery"/> that is used to load the rest of the state for the given projection pointer.</returns>
+    /// <returns>A <see cref="ICommandQuery" /> that is used to load the rest of the state for the given projection pointer.</returns>
     ICommandQuery GetCommandQuery(Pointer projectionPointer);
 
     /// <summary>
@@ -30,5 +30,5 @@ public interface IProjection<TProjection> : ISnapshot<TProjection>
     /// </summary>
     /// <param name="entity">The entity object.</param>
     /// <returns>The projection id for the entity, or default if none.</returns>
-    abstract static Id? GetProjectionIdOrDefault(object entity);
+    static abstract Id? GetProjectionIdOrDefault(object entity);
 }

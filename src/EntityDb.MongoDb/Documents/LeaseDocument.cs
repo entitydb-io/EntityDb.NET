@@ -49,7 +49,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
                 Data = envelopeService.Deconstruct(insertLease)
             })
             .ToArray();
-        
+
         return new InsertDocumentsCommand<LeaseDocument>
         (
             CollectionName,
@@ -79,7 +79,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     {
         var deleteLeasesQuery =
             new DeleteLeasesQuery(deleteLeasesTransactionStep.EntityId, deleteLeasesTransactionStep.Leases);
-        
+
         return new DeleteDocumentsCommand
         (
             CollectionName,

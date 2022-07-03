@@ -14,8 +14,8 @@ internal class EntitySnapshotTransactionProcessor<TEntity> : SnapshotTransaction
     where TEntity : IEntity<TEntity>
 {
     private readonly IEntityRepositoryFactory<TEntity> _entityRepositoryFactory;
-    private readonly string _transactionSessionOptionsName;
     private readonly string _snapshotSessionOptionsName;
+    private readonly string _transactionSessionOptionsName;
 
     public EntitySnapshotTransactionProcessor
     (
@@ -48,20 +48,22 @@ internal class EntitySnapshotTransactionProcessor<TEntity> : SnapshotTransaction
                 return null;
             }
 
-            var previousLatestPointer = appendCommandTransactionStep.EntityId + appendCommandTransactionStep.PreviousEntityVersionNumber;
+            var previousLatestPointer = appendCommandTransactionStep.EntityId +
+                                        appendCommandTransactionStep.PreviousEntityVersionNumber;
 
             TEntity? previousLatestSnapshot = default;
 
             if (previousLatestPointer.VersionNumber != VersionNumber.MinValue)
             {
                 previousLatestSnapshot = snapshotCache.GetSnapshotOrDefault(previousLatestPointer) ??
-                    await entityRepository.GetSnapshot(previousLatestPointer, cancellationToken);
+                                         await entityRepository.GetSnapshot(previousLatestPointer, cancellationToken);
             }
 
             return (previousLatestSnapshot, nextSnapshot);
         }
 
-        await ProcessTransactionSteps(entityRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots, cancellationToken);
+        await ProcessTransactionSteps(entityRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots,
+            cancellationToken);
     }
 
     public static EntitySnapshotTransactionProcessor<TEntity> Create(IServiceProvider serviceProvider,

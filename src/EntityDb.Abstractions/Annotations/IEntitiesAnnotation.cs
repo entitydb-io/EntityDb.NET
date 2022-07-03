@@ -3,7 +3,8 @@
 namespace EntityDb.Abstractions.Annotations;
 
 /// <summary>
-///     Represents data for multiple entities that have already been committed, along with relevant information not contained
+///     Represents data for multiple entities that have already been committed, along with relevant information not
+///     contained
 ///     in the data.
 /// </summary>
 /// <typeparam name="TData">The type of data.</typeparam>

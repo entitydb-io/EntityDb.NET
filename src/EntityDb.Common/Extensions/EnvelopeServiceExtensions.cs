@@ -4,7 +4,8 @@ namespace EntityDb.Common.Extensions;
 
 internal static class EnvelopeServiceExtensions
 {
-    public static byte[] DeconstructAndSerialize<TEnvelope, TData>(this IEnvelopeService<TEnvelope> envelopeService, TData data)
+    public static byte[] DeconstructAndSerialize<TEnvelope, TData>(this IEnvelopeService<TEnvelope> envelopeService,
+        TData data)
     {
         var envelope = envelopeService.Deconstruct(data);
 

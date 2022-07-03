@@ -11,7 +11,7 @@ public interface ITransactionStep
     ///     The id of the entity.
     /// </summary>
     Id EntityId { get; }
-    
+
     /// <summary>
     ///     The state of the entity associated with this step.
     /// </summary>

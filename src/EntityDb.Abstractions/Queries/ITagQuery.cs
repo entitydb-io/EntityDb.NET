@@ -15,7 +15,7 @@ public interface ITagQuery : IQuery
     /// <param name="builder">The tag filter builder.</param>
     /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
     TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder);
-    
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> built from a tag sort builder.
     /// </summary>

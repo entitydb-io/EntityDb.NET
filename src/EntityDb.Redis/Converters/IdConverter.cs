@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Envelopes;
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,7 +22,7 @@ internal class IdConverter : JsonConverter<Id>
         var stringValue = reader.GetString();
 
         var guidValue = Guid.Parse(stringValue!);
-        
+
         return new Id(guidValue);
     }
 
@@ -36,7 +34,7 @@ internal class IdConverter : JsonConverter<Id>
     )
     {
         var stringValue = id.Value.ToString();
-        
+
         writer.WriteStringValue(stringValue);
     }
 }

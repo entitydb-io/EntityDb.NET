@@ -17,14 +17,16 @@ internal sealed class TransactionBuilderFactory<TEntity> : ITransactionBuilderFa
         _agentAccessor = agentAccessor;
     }
 
-    public async Task<ITransactionBuilder<TEntity>> Create(string agentSignatureOptionsName, CancellationToken cancellationToken)
+    public async Task<ITransactionBuilder<TEntity>> Create(string agentSignatureOptionsName,
+        CancellationToken cancellationToken)
     {
         var agent = await _agentAccessor.GetAgentAsync(agentSignatureOptionsName, cancellationToken);
 
         return new TransactionBuilder<TEntity>(agent);
     }
 
-    public async Task<ISingleEntityTransactionBuilder<TEntity>> CreateForSingleEntity(string agentSignatureOptionsName, Id entityId, CancellationToken cancellationToken)
+    public async Task<ISingleEntityTransactionBuilder<TEntity>> CreateForSingleEntity(string agentSignatureOptionsName,
+        Id entityId, CancellationToken cancellationToken)
     {
         var transactionBuilder = await Create(agentSignatureOptionsName, cancellationToken);
 

@@ -1,14 +1,14 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using EntityDb.Abstractions.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
+using Shouldly;
 using Xunit;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace EntityDb.Common.Tests.Agents;
 
@@ -23,7 +23,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
     protected abstract void ConfigureInactiveAgentAccessor(IServiceCollection serviceCollection);
 
-    protected abstract void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection, TAgentAccessorConfiguration agentAccessorConfiguration);
+    protected abstract void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection,
+        TAgentAccessorConfiguration agentAccessorConfiguration);
 
     protected abstract Dictionary<string, string>? GetApplicationInfo(object agentSignature);
 
@@ -32,10 +33,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     [Fact]
     public void GivenBackingServiceInactive_WhenGettingAgent_ThenThrow()
     {
-        if (!CanBeInactive)
-        {
-            return;
-        }
+        if (!CanBeInactive) return;
 
         // ARRANGE
 
@@ -46,7 +44,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
         // ASSERT
 
-        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!, default));
+        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!));
     }
 
     [Fact]
@@ -66,7 +64,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgentAsync(default!, default);
+            var agent = agentAccessor.GetAgentAsync(default!);
 
             // ASSERT
 
@@ -90,7 +88,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!, default);
+                .GetAgentAsync(default!);
 
             // ASSERT
 
@@ -112,7 +110,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!, default);
+                .GetAgentAsync(default!);
 
             // ACT
 
@@ -125,7 +123,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     }
 
     [Fact]
-    public async Task GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
+    public async Task
+        GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -140,7 +139,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!, default);
+                .GetAgentAsync(default!);
 
             // ACT
 
@@ -153,10 +152,11 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
             applicationInfo.ShouldBeEmpty();
         }
     }
-    
+
 
     [Fact]
-    public async Task GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
+    public async Task
+        GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -182,7 +182,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!, default);
+                .GetAgentAsync(default!);
 
             // ACT
 

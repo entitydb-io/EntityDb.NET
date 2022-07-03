@@ -1,4 +1,3 @@
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 
 namespace EntityDb.Abstractions.ValueObjects;
@@ -11,20 +10,21 @@ public readonly record struct VersionNumber(ulong Value)
 {
     /// <summary>
     ///     This constant represents the minimum possible version number.
-    ///     
-    ///     In the context of an <see cref="ITransactionRepository"/>, 
+    ///     In the context of an <see cref="ITransactionRepository" />,
     ///     this value is reserved to indicate there is no previous version number.
-    ///     
-    ///     In the context of an <see cref="Pointer"/>,
-    ///     this value is revervd to point to the latest snapshot.
+    ///     In the context of an <see cref="Pointer" />,
+    ///     this value is reserved to point to the latest snapshot.
     /// </summary>
     public static readonly VersionNumber MinValue = new(ulong.MinValue);
-    
+
     /// <summary>
     ///     Gets the next version number.
     /// </summary>
     /// <returns>The next version number.</returns>
-    public VersionNumber Next() => new(Value + 1);
+    public VersionNumber Next()
+    {
+        return new VersionNumber(Value + 1);
+    }
 
     /// <summary>
     ///     Converts the numeric value of this instance to its equivalent string
@@ -35,5 +35,8 @@ public readonly record struct VersionNumber(ulong Value)
     ///     of a sequence of digits ranging from 0 to 9, without a sign or
     ///     leading zeroes.
     /// </returns>
-    public override string? ToString() => Value.ToString();
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
 }

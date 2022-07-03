@@ -15,11 +15,13 @@ namespace EntityDb.MongoDb.Extensions;
 [ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
 public static class ServiceCollectionExtensions
 {
-    internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection, bool removeTypeDiscriminatorProperty)
+    internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection,
+        bool removeTypeDiscriminatorProperty)
     {
-        serviceCollection.AddSingleton(serviceProvider => BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
+        serviceCollection.AddSingleton(serviceProvider =>
+            BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
     }
-    
+
     /// <summary>
     ///     Adds a production-ready implementation of <see cref="ITransactionRepositoryFactory" /> to a service
     ///     collection.
@@ -33,7 +35,7 @@ public static class ServiceCollectionExtensions
         bool testMode = false)
     {
         serviceCollection.AddBsonDocumentEnvelopeService(true);
-        
+
         serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,

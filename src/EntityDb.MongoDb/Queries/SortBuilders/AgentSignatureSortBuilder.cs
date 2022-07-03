@@ -7,7 +7,8 @@ using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;
 
-internal sealed class AgentSignatureSortBuilder : SortBuilderBase, IAgentSignatureSortBuilder<SortDefinition<BsonDocument>>
+internal sealed class AgentSignatureSortBuilder : SortBuilderBase,
+    IAgentSignatureSortBuilder<SortDefinition<BsonDocument>>
 {
     public SortDefinition<BsonDocument> EntityIds(bool ascending)
     {

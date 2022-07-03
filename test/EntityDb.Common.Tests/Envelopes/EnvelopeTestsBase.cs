@@ -15,7 +15,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     }
 
     protected abstract byte[] GenerateCorruptedBytes();
-    
+
     [Fact]
     public void GivenValidRecord_WhenDeconstructedSerializedAndDeserialized_ThenReconstructReturnsEquivalentRecord()
     {
@@ -37,7 +37,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
         var rawData = envelopeService.Serialize(envelope);
 
         var reconstructedEnvelope = envelopeService.Deserialize(rawData);
-        
+
         var reconstructedBoxedRecord = envelopeService.Reconstruct<IRecord>(reconstructedEnvelope);
 
         var reconstructedRecord = (TestRecord<bool>)reconstructedBoxedRecord;
@@ -46,7 +46,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         reconstructedRecord.ShouldBeEquivalentTo(record);
     }
-    
+
     [Fact]
     public void WhenSerializingCorruptedEnvelope_ThrowSerializeException()
     {
@@ -61,12 +61,9 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ACT
 
-        Should.Throw<SerializeException>(() =>
-        {
-            envelopeService.Serialize(envelope);
-        });
+        Should.Throw<SerializeException>(() => { envelopeService.Serialize(envelope); });
     }
-    
+
     [Fact]
     public void WhenDeserializingCorruptedBytes_ThrowDeserializeException()
     {
@@ -81,10 +78,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() =>
-        {
-            envelopeService.Deserialize(corruptedBytes);
-        });
+        Should.Throw<DeserializeException>(() => { envelopeService.Deserialize(corruptedBytes); });
     }
 
     [Fact]
@@ -101,10 +95,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() =>
-        {
-            envelopeService.Reconstruct<object>(envelope);
-        });
+        Should.Throw<DeserializeException>(() => { envelopeService.Reconstruct<object>(envelope); });
     }
 
     [Fact]
@@ -119,10 +110,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<SerializeException>(() =>
-        {
-            envelopeService.Deconstruct<object?>(null);
-        });
+        Should.Throw<SerializeException>(() => { envelopeService.Deconstruct<object?>(null); });
     }
 
     private interface IRecord

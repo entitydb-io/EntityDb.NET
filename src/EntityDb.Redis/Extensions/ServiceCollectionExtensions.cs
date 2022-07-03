@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddSingleton<IEnvelopeService<JsonElement>, JsonElementEnvelopeService>();
     }
-    
+
     /// <summary>
-    ///     Adds a production-ready implementation of <see cref="ISnapshotRepositoryFactory{TEntity}" /> to a service
+    ///     Adds a production-ready implementation of <see cref="ISnapshotRepositoryFactory{TSnapshot}" /> to a service
     ///     collection.
     /// </summary>
     /// <typeparam name="TSnapshot">The type of the snapshot stored in the repository.</typeparam>
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddJsonElementEnvelopeService();
 
         serviceCollection.AddSingleton<ConnectionMultiplexerFactory>();
-        
+
         serviceCollection.Add
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,

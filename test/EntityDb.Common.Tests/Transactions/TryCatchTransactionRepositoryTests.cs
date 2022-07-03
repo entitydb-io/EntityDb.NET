@@ -1,12 +1,12 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -27,7 +27,8 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
@@ -43,7 +44,8 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetEntityIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetEntityIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
@@ -59,7 +61,8 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
@@ -75,26 +78,32 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetAnnotatedAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAnnotatedAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetAnnotatedCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetAnnotatedCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         transactionRepositoryMock
             .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
-        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object, loggerFactory.CreateLogger<TryCatchTransactionRepository>());
+        var tryCatchTransactionRepository = new TryCatchTransactionRepository(transactionRepositoryMock.Object,
+            loggerFactory.CreateLogger<TryCatchTransactionRepository>());
 
         // ACT
 
-        var transactionIdsFromAgentSignatureQuery = await tryCatchTransactionRepository.GetTransactionIds(default(IAgentSignatureQuery)!);
-        var transactionIdsFromCommandQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ICommandQuery)!);
+        var transactionIdsFromAgentSignatureQuery =
+            await tryCatchTransactionRepository.GetTransactionIds(default(IAgentSignatureQuery)!);
+        var transactionIdsFromCommandQuery =
+            await tryCatchTransactionRepository.GetTransactionIds(default(ICommandQuery)!);
         var transactionIdsFromLeaseQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ILeaseQuery)!);
         var transactionIdsFromTagQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ITagQuery)!);
-        var entityIdsFromAgentSignatureQuery = await tryCatchTransactionRepository.GetEntityIds(default(IAgentSignatureQuery)!);
+        var entityIdsFromAgentSignatureQuery =
+            await tryCatchTransactionRepository.GetEntityIds(default(IAgentSignatureQuery)!);
         var entityIdsFromCommandQuery = await tryCatchTransactionRepository.GetEntityIds(default(ICommandQuery)!);
         var entityIdsFromLeaseQuery = await tryCatchTransactionRepository.GetEntityIds(default(ILeaseQuery)!);
         var entityIdsFromTagQuery = await tryCatchTransactionRepository.GetEntityIds(default(ITagQuery)!);
@@ -121,7 +130,7 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         tags.ShouldBeEmpty();
         annotatedCommands.ShouldBeEmpty();
         inserted.ShouldBeFalse();
-        
+
         loggerVerifier.Invoke(Times.Exactly(14));
     }
 }

@@ -13,14 +13,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
-internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
+internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepositoryFactory<TSnapshot>
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly ConnectionMultiplexerFactory _connectionMultiplexerFactory;
-    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
-    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _connectionString;
+    private readonly IEnvelopeService<JsonElement> _envelopeService;
     private readonly string _keyNamespace;
+    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+    private readonly IServiceProvider _serviceProvider;
 
     public RedisSnapshotRepositoryFactory
     (
@@ -40,15 +41,8 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         _keyNamespace = keyNamespace;
     }
 
-
-    private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions, CancellationToken cancellationToken)
-    {
-        var connectionMultiplexer = await _connectionMultiplexerFactory.CreateConnectionMultiplexer(_connectionString, cancellationToken);
-
-        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), _keyNamespace, snapshotSessionOptions);
-    }
-
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName,
+        CancellationToken cancellationToken = default)
     {
         var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
@@ -59,8 +53,19 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
             _envelopeService,
             redisSession
         );
-        
+
         return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, redisSnapshotRepository);
+    }
+
+
+    private async Task<IRedisSession> CreateSession(SnapshotSessionOptions snapshotSessionOptions,
+        CancellationToken cancellationToken)
+    {
+        var connectionMultiplexer =
+            await _connectionMultiplexerFactory.CreateConnectionMultiplexer(_connectionString, cancellationToken);
+
+        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), _keyNamespace,
+            snapshotSessionOptions);
     }
 
     public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,

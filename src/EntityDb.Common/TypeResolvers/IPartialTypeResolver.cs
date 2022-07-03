@@ -14,6 +14,9 @@ public interface IPartialTypeResolver
     /// </summary>
     /// <param name="envelopeHeaders">Describes the type that needs to be resolved.</param>
     /// <param name="resolvedType">The resolved <see cref="Type" /> or null if the <see cref="Type" /> cannot be resolved.</param>
-    /// <returns><c>true</c> if <paramref name="resolvedType"/> is not null or <c>false</c> if <paramref name="resolvedType"/> is null.</returns>
+    /// <returns>
+    ///     <c>true</c> if <paramref name="resolvedType" /> is not null or <c>false</c> if
+    ///     <paramref name="resolvedType" /> is null.
+    /// </returns>
     bool TryResolveType(EnvelopeHeaders envelopeHeaders, [NotNullWhen(true)] out Type? resolvedType);
 }

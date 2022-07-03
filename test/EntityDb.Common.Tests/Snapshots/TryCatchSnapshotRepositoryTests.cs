@@ -1,17 +1,16 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Entities;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
-using EntityDb.Common.Entities;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
@@ -21,7 +20,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
     }
 
-    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(EntityAdder entityAdder)
+    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(
+        EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -35,7 +35,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock

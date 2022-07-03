@@ -48,10 +48,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
 
     public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
     {
-        return this with
-        {
-            MongoSession = MongoSession.WithTransactionSessionOptions(transactionSessionOptions)
-        };
+        return this with { MongoSession = MongoSession.WithTransactionSessionOptions(transactionSessionOptions) };
     }
 
     public void StartTransaction()

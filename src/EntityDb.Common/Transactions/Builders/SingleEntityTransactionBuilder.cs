@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 
@@ -10,14 +11,14 @@ internal sealed class SingleEntityTransactionBuilder<TEntity> : ISingleEntityTra
     where TEntity : IEntity<TEntity>
 {
     private readonly ITransactionBuilder<TEntity> _transactionBuilder;
-    
-    public Id EntityId { get; }
 
     internal SingleEntityTransactionBuilder(ITransactionBuilder<TEntity> transactionBuilder, Id entityId)
     {
         _transactionBuilder = transactionBuilder;
         EntityId = entityId;
     }
+
+    public Id EntityId { get; }
 
     public TEntity GetEntity()
     {

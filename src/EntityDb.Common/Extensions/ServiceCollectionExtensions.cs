@@ -22,18 +22,22 @@ namespace EntityDb.Common.Extensions;
 public static class ServiceCollectionExtensions
 {
     [ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
-    private static void AddSnapshotTransactionProcessor<TTransactionProcessor>(this IServiceCollection serviceCollection, bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
+    private static void AddSnapshotTransactionProcessor<TTransactionProcessor>(
+        this IServiceCollection serviceCollection, bool testMode,
+        Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
         where TTransactionProcessor : ITransactionProcessor
     {
         serviceCollection.AddSingleton(serviceProvider =>
         {
             var transactionProcessor = transactionProcessorFactory.Invoke(serviceProvider);
 
-            return TransactionProcessorSubscriber<TTransactionProcessor>.Create(serviceProvider, transactionProcessor, testMode);
+            return TransactionProcessorSubscriber<TTransactionProcessor>.Create(serviceProvider, transactionProcessor,
+                testMode);
         });
 
         serviceCollection.AddSingleton<ITransactionSubscriber>(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+            serviceProvider =>
+                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
         );
 
         if (testMode)
@@ -42,11 +46,13 @@ public static class ServiceCollectionExtensions
         }
 
         serviceCollection.AddHostedService(
-            serviceProvider => serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+            serviceProvider =>
+                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
         );
     }
 
-    internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime, Func<IServiceProvider, TService> serviceFactory)
+    internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime,
+        Func<IServiceProvider, TService> serviceFactory)
         where TService : class
     {
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), serviceFactory, serviceLifetime));
@@ -63,7 +69,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds an internal implementation of <see cref="IPartialTypeResolver" /> which resolves the given types based on their
+    ///     Adds an internal implementation of <see cref="IPartialTypeResolver" /> which resolves the given types based on
+    ///     their
     ///     <see cref="MemberInfo.Name" />.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
@@ -99,7 +106,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a transient <see cref="TransactionBuilder{TEntity}"/> and a transient implementation of <see cref="IEntityRepositoryFactory{TEntity}"/> to a service collection.
+    ///     Adds a transient <see cref="TransactionBuilder{TEntity}" /> and a transient implementation of
+    ///     <see cref="IEntityRepositoryFactory{TEntity}" /> to a service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -123,15 +131,12 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
-        {
-            return EntitySnapshotTransactionProcessor<TEntity>.Create(
-                serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-        });
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => EntitySnapshotTransactionProcessor<TEntity>.Create(
+            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 
     /// <summary>
-    ///     Adds projections for <typeparamref name="TProjection"/>.
+    ///     Adds projections for <typeparamref name="TProjection" />.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
@@ -156,10 +161,7 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider =>
-        {
-            return ProjectionSnapshotTransactionProcessor<TProjection>.Create(
-                    serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName);
-        });
+        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => ProjectionSnapshotTransactionProcessor<TProjection>.Create(
+            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 }

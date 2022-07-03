@@ -8,6 +8,23 @@ namespace EntityDb.Common.Tests.Implementations.Queries;
 public record TransactionIdQuery(Id TransactionId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
     ITagQuery
 {
+    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
+    {
+        return builder.TransactionIdIn(TransactionId);
+    }
+
+    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
+    {
+        return builder.Combine
+        (
+            builder.TransactionId(true)
+        );
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
+
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
         return builder.TransactionIdIn(TransactionId);
@@ -37,23 +54,6 @@ public record TransactionIdQuery(Id TransactionId) : IAgentSignatureQuery, IComm
             builder.EntityVersionNumber(true)
         );
     }
-
-    public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
-    {
-        return builder.TransactionIdIn(TransactionId);
-    }
-
-    public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
-    {
-        return builder.Combine
-        (
-            builder.TransactionId(true)
-        );
-    }
-
-    public int? Skip => null;
-
-    public int? Take => null;
 
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {

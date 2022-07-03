@@ -8,7 +8,8 @@ using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
 
-internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase, IAgentSignatureFilterBuilder<FilterDefinition<BsonDocument>>
+internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase,
+    IAgentSignatureFilterBuilder<FilterDefinition<BsonDocument>>
 {
     public FilterDefinition<BsonDocument> EntityIdsIn(params Id[] entityIds)
     {
@@ -20,7 +21,8 @@ internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase, IAgentSig
         return DataTypeIn(agentSignatureTypes);
     }
 
-    public FilterDefinition<BsonDocument> AgentSignatureMatches<TAgentSignature>(Expression<Func<TAgentSignature, bool>> agentSignatureExpression)
+    public FilterDefinition<BsonDocument> AgentSignatureMatches<TAgentSignature>(
+        Expression<Func<TAgentSignature, bool>> agentSignatureExpression)
     {
         return DataValueMatches(agentSignatureExpression);
     }
