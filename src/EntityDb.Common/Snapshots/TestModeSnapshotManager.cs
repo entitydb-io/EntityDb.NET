@@ -30,7 +30,8 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
         storedSnapshotPointers.Add(snapshotPointer);
     }
 
-    public void RemoveSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository, IEnumerable<Pointer> snapshotPointers)
+    public void RemoveSnapshotPointers(ISnapshotRepository<TSnapshot> snapshotRepository,
+        IEnumerable<Pointer> snapshotPointers)
     {
         var storedSnapshotPointers = GetStoreedSnapshotPointers(snapshotRepository);
 

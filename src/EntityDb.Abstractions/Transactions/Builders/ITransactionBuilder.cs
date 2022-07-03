@@ -13,24 +13,27 @@ namespace EntityDb.Common.Transactions.Builders;
 public interface ITransactionBuilder<TEntity>
 {
     /// <summary>
-    ///     Returns a <typeparamref name="TEntity"/> associated with a given entity id, if it is known.
+    ///     Returns a <typeparamref name="TEntity" /> associated with a given entity id, if it is known.
     /// </summary>
     /// <param name="entityId">The id associated with the entity.</param>
-    /// <returns>A <typeparamref name="TEntity"/> associated with <paramref name="entityId"/>, if it is known.</returns>
+    /// <returns>A <typeparamref name="TEntity" /> associated with <paramref name="entityId" />, if it is known.</returns>
     TEntity GetEntity(Id entityId);
 
     /// <summary>
-    ///     Indicates whether or not a <typeparamref name="TEntity"/> associated with a given entity id is in memory.
+    ///     Indicates whether or not a <typeparamref name="TEntity" /> associated with a given entity id is in memory.
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
-    /// <returns><c>true</c> if a <typeparamref name="TEntity"/> associated with <paramref name="entityId"/> is in memory, or else <c>false</c>.</returns>
+    /// <returns>
+    ///     <c>true</c> if a <typeparamref name="TEntity" /> associated with <paramref name="entityId" /> is in memory, or
+    ///     else <c>false</c>.
+    /// </returns>
     bool IsEntityKnown(Id entityId);
 
     /// <summary>
-    ///     Associate a <typeparamref name="TEntity"/> with a given entity id.
+    ///     Associate a <typeparamref name="TEntity" /> with a given entity id.
     /// </summary>
-    /// <param name="entityId">An id associated with a <typeparamref name="TEntity"/>.</param>
-    /// <param name="entity">A <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">An id associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="entity">A <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     /// <remarks>
     ///     Call this method to load an entity that already exists before calling
@@ -41,40 +44,40 @@ public interface ITransactionBuilder<TEntity>
     /// <summary>
     ///     Adds a transaction step that appends a single command associated with a given entity id.
     /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-    /// <param name="command">The new command that modifies the <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="command">The new command that modifies the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Append(Id entityId, object command);
 
     /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ILease"/>s associated with a given entity id.
+    ///     Adds a transaction step that adds a set of <see cref="ILease" />s associated with a given entity id.
     /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-    /// <param name="leases">The leases to be added to the <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="leases">The leases to be added to the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Add(Id entityId, params ILease[] leases);
 
     /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ITag"/>s associated with a given entity id.
+    ///     Adds a transaction step that adds a set of <see cref="ITag" />s associated with a given entity id.
     /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-    /// <param name="tags">The tags to be added to the <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="tags">The tags to be added to the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Add(Id entityId, params ITag[] tags);
 
     /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ILease"/>s associated with a given entity id.
+    ///     Adds a transaction step that deletes a set of <see cref="ILease" />s associated with a given entity id.
     /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-    /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Delete(Id entityId, params ILease[] leases);
 
     /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ITag"/>s associated with a given entity id.
+    ///     Adds a transaction step that deletes a set of <see cref="ITag" />s associated with a given entity id.
     /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity"/>.</param>
-    /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity"/>.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Delete(Id entityId, params ITag[] tags);
 

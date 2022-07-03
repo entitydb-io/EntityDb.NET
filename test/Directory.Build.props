@@ -1,6 +1,6 @@
 <Project>
-    <Import Project="../Directory.Build.props" />
-  
+    <Import Project="../Directory.Build.props"/>
+
     <!--Build-->
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -8,28 +8,28 @@
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <NoWarn>1701;1702;CA1822</NoWarn>
     </PropertyGroup>
-  
+
     <!--Pack-->
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
-  
+
     <ItemGroup>
-        <PackageReference Include="Bogus" Version="34.0.1" />
+        <PackageReference Include="Bogus" Version="34.0.1"/>
         <PackageReference Include="coverlet.collector" Version="3.1.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-        <PackageReference Include="Moq" Version="4.16.1" />
-        <PackageReference Include="Shouldly" Version="4.0.3" />
-        <PackageReference Include="xunit" Version="2.4.1" />
-        <PackageReference Include="Xunit.DependencyInjection" Version="8.3.0" />
-        <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0"/>
+        <PackageReference Include="Moq" Version="4.16.1"/>
+        <PackageReference Include="Shouldly" Version="4.0.3"/>
+        <PackageReference Include="xunit" Version="2.4.1"/>
+        <PackageReference Include="Xunit.DependencyInjection" Version="8.3.0"/>
+        <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.0"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
-  
+
 </Project>

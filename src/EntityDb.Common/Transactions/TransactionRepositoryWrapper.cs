@@ -20,7 +20,8 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         _transactionRepository = transactionRepository;
     }
 
-    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _transactionRepository.GetTransactionIds(agentSignatureQuery, cancellationToken));
     }
@@ -40,7 +41,8 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         return WrapQuery(() => _transactionRepository.GetTransactionIds(tagQuery, cancellationToken));
     }
 
-    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _transactionRepository.GetEntityIds(agentSignatureQuery, cancellationToken));
     }
@@ -60,7 +62,8 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         return WrapQuery(() => _transactionRepository.GetEntityIds(tagQuery, cancellationToken));
     }
 
-    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _transactionRepository.GetAgentSignatures(agentSignatureQuery, cancellationToken));
     }
@@ -80,12 +83,15 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         return WrapQuery(() => _transactionRepository.GetTags(tagQuery, cancellationToken));
     }
 
-    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken));
+        return WrapQuery(() =>
+            _transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken));
     }
 
-    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _transactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken));
     }

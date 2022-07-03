@@ -41,8 +41,6 @@ public class LifoTypeResolverTests : TestsBase<Startup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    private delegate bool TryResolveTypeDelegate(EnvelopeHeaders headers, out Type? resolvedType);
-
     [Fact]
     public void GivenFirstPartialTypeResolverReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
     {
@@ -95,4 +93,6 @@ public class LifoTypeResolverTests : TestsBase<Startup>
 
         actualType.ShouldBe(expectedType);
     }
+
+    private delegate bool TryResolveTypeDelegate(EnvelopeHeaders headers, out Type? resolvedType);
 }

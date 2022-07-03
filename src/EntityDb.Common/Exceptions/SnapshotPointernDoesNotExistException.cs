@@ -8,4 +8,3 @@ namespace EntityDb.Common.Exceptions;
 public sealed class SnapshotPointernDoesNotExistException : Exception
 {
 }
-

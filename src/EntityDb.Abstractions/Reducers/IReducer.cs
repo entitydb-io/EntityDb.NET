@@ -7,7 +7,8 @@ namespace EntityDb.Abstractions.Reducers;
 public interface IReducer<TState>
 {
     /// <summary>
-    ///     Returns a new <typeparamref name="TState"/> that incorporates this object into input <typeparamref name="TState"/>.
+    ///     Returns a new <typeparamref name="TState" /> that incorporates this object into input
+    ///     <typeparamref name="TState" />.
     /// </summary>
     /// <param name="state">The state to be reduced.</param>
     /// <returns></returns>

@@ -19,30 +19,6 @@ internal sealed record RedisSession
     SnapshotSessionOptions SnapshotSessionOptions
 ) : DisposableResourceBaseRecord, IRedisSession
 {
-    private CommandFlags GetCommandFlags()
-    {
-        if (!SnapshotSessionOptions.ReadOnly)
-        {
-            return CommandFlags.DemandMaster;
-        }
-
-        return SnapshotSessionOptions.SecondaryPreferred
-            ? CommandFlags.PreferReplica
-            : CommandFlags.PreferMaster;
-    }
-
-    private void AssertNotReadOnly()
-    {
-        if (SnapshotSessionOptions.ReadOnly)
-        {
-            throw new CannotWriteInReadOnlyModeException();
-        }
-    }
-    private RedisKey GetSnapshotKey(Pointer snapshotPointer)
-    {
-        return $"{KeyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
-    }
-
     public async Task<bool> Insert(Pointer snapshotPointer, RedisValue redisValue)
     {
         AssertNotReadOnly();
@@ -139,6 +115,31 @@ internal sealed record RedisSession
         return allDeleted;
     }
 
+    private CommandFlags GetCommandFlags()
+    {
+        if (!SnapshotSessionOptions.ReadOnly)
+        {
+            return CommandFlags.DemandMaster;
+        }
+
+        return SnapshotSessionOptions.SecondaryPreferred
+            ? CommandFlags.PreferReplica
+            : CommandFlags.PreferMaster;
+    }
+
+    private void AssertNotReadOnly()
+    {
+        if (SnapshotSessionOptions.ReadOnly)
+        {
+            throw new CannotWriteInReadOnlyModeException();
+        }
+    }
+
+    private RedisKey GetSnapshotKey(Pointer snapshotPointer)
+    {
+        return $"{KeyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
+    }
+
     public static IRedisSession Create
     (
         IServiceProvider serviceProvider,
@@ -147,6 +148,7 @@ internal sealed record RedisSession
         SnapshotSessionOptions snapshotSessionOptions
     )
     {
-        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, keyNamespace, snapshotSessionOptions);
+        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, keyNamespace,
+            snapshotSessionOptions);
     }
 }

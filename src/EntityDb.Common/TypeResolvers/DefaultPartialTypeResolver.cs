@@ -9,7 +9,9 @@ internal class DefaultPartialTypeResolver : IPartialTypeResolver
 {
     public bool TryResolveType(EnvelopeHeaders envelopeHeaders, [NotNullWhen(true)] out Type? resolvedType)
     {
-        if (EnvelopeHelper.NotThisPlatform(envelopeHeaders) || !EnvelopeHelper.TryGetAssemblyFullName(envelopeHeaders, out var assemblyFullName) || !EnvelopeHelper.TryGetTypeFullName(envelopeHeaders, out var typeFullName))
+        if (EnvelopeHelper.NotThisPlatform(envelopeHeaders) ||
+            !EnvelopeHelper.TryGetAssemblyFullName(envelopeHeaders, out var assemblyFullName) ||
+            !EnvelopeHelper.TryGetTypeFullName(envelopeHeaders, out var typeFullName))
         {
             resolvedType = null;
             return false;

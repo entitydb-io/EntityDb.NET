@@ -13,9 +13,9 @@ namespace EntityDb.MongoDb.Provisioner.Transactions;
 internal sealed class
     AutoProvisionMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    private readonly ILogger<AutoProvisionMongoDbTransactionRepositoryFactory> _logger;
     private static readonly SemaphoreSlim Lock = new(1);
     private static bool _provisioned;
+    private readonly ILogger<AutoProvisionMongoDbTransactionRepositoryFactory> _logger;
 
     public AutoProvisionMongoDbTransactionRepositoryFactory(
         ILogger<AutoProvisionMongoDbTransactionRepositoryFactory> logger,
@@ -43,7 +43,8 @@ internal sealed class
         _logger.LogInformation("MongoDb Auto-Provisioning Lock Released");
     }
 
-    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
+    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+        CancellationToken cancellationToken)
     {
         var mongoSession = await base.CreateSession(transactionSessionOptions, cancellationToken);
 

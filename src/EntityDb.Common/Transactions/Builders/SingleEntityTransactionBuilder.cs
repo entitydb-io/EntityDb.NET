@@ -11,13 +11,13 @@ internal sealed class SingleEntityTransactionBuilder<TEntity> : ISingleEntityTra
 {
     private readonly ITransactionBuilder<TEntity> _transactionBuilder;
 
-    public Id EntityId { get; }
-
     internal SingleEntityTransactionBuilder(ITransactionBuilder<TEntity> transactionBuilder, Id entityId)
     {
         _transactionBuilder = transactionBuilder;
         EntityId = entityId;
     }
+
+    public Id EntityId { get; }
 
     public TEntity GetEntity()
     {

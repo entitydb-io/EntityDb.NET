@@ -78,9 +78,6 @@ public class BsonDocumentRewriterTests
 
         // ASSERT
 
-        Should.Throw<NotSupportedException>(() =>
-        {
-            bsonDocumentRewriter.Rewrite(originalBsonDocument);
-        });
+        Should.Throw<NotSupportedException>(() => { bsonDocumentRewriter.Rewrite(originalBsonDocument); });
     }
 }

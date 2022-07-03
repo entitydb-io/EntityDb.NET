@@ -34,7 +34,8 @@ internal class TimeStampSerializer : IBsonSerializer<TimeStamp>
 
     public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, TimeStamp timeStamp)
     {
-        var millisecondsSinceUnixEpoch = Convert.ToInt64(Math.Floor((timeStamp.Value - DateTime.UnixEpoch).TotalMilliseconds));
+        var millisecondsSinceUnixEpoch =
+            Convert.ToInt64(Math.Floor((timeStamp.Value - DateTime.UnixEpoch).TotalMilliseconds));
 
         context.Writer.WriteDateTime(millisecondsSinceUnixEpoch);
     }

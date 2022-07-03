@@ -29,14 +29,16 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default)
-        => GetSnapshot(projectionId, cancellationToken);
+    {
+        return GetSnapshot(projectionId, cancellationToken);
+    }
 
     /// <summary>
-    ///     Returns the snapshot of a <typeparamref name="TProjection" /> for a given <see cref="Pointer"/>.
+    ///     Returns the snapshot of a <typeparamref name="TProjection" /> for a given <see cref="Pointer" />.
     /// </summary>
     /// <param name="projectionPointer">A pointer to the projection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer"/>.</returns>
+    /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
     Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default);
 
     /// <summary>

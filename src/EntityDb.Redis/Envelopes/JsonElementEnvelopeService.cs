@@ -76,7 +76,8 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
     {
         try
         {
-            return (Envelope<JsonElement>)JsonSerializer.Deserialize(rawData, typeof(Envelope<JsonElement>), JsonSerializerOptions)!;
+            return (Envelope<JsonElement>)JsonSerializer.Deserialize(rawData, typeof(Envelope<JsonElement>),
+                JsonSerializerOptions)!;
         }
         catch (Exception exception)
         {
@@ -90,7 +91,8 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
     {
         try
         {
-            return (TData)JsonSerializer.Deserialize(envelope.Value.GetRawText(), _typeResolver.ResolveType(envelope.Headers), JsonSerializerOptions)!;
+            return (TData)JsonSerializer.Deserialize(envelope.Value.GetRawText(),
+                _typeResolver.ResolveType(envelope.Headers), JsonSerializerOptions)!;
         }
         catch (Exception exception)
         {

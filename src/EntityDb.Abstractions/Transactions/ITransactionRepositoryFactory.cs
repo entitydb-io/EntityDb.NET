@@ -15,5 +15,6 @@ public interface ITransactionRepositoryFactory : IDisposableResource
     /// <param name="transactionSessionOptionsName">The agent's use case for the repository.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ITransactionRepository" />.</returns>
-    Task<ITransactionRepository> CreateRepository(string transactionSessionOptionsName, CancellationToken cancellationToken = default);
+    Task<ITransactionRepository> CreateRepository(string transactionSessionOptionsName,
+        CancellationToken cancellationToken = default);
 }

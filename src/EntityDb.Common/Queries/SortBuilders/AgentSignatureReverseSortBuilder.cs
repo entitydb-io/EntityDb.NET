@@ -5,7 +5,8 @@ using System.Linq.Expressions;
 namespace EntityDb.Common.Queries.SortBuilders;
 
 internal sealed record AgentSignatureReverseSortBuilder<TSort>
-    (IAgentSignatureSortBuilder<TSort> AgentSignatureSortBuilder) : ReverseSortBuilderBase<TSort>(AgentSignatureSortBuilder),
+    (IAgentSignatureSortBuilder<TSort> AgentSignatureSortBuilder) : ReverseSortBuilderBase<TSort>(
+            AgentSignatureSortBuilder),
         IAgentSignatureSortBuilder<TSort>
 {
     public TSort EntityIds(bool ascending)
@@ -18,7 +19,8 @@ internal sealed record AgentSignatureReverseSortBuilder<TSort>
         return AgentSignatureSortBuilder.AgentSignatureType(!ascending);
     }
 
-    public TSort AgentSignatureProperty<TAgentSignature>(bool ascending, Expression<Func<TAgentSignature, object>> agentSignatureExpression)
+    public TSort AgentSignatureProperty<TAgentSignature>(bool ascending,
+        Expression<Func<TAgentSignature, object>> agentSignatureExpression)
     {
         return AgentSignatureSortBuilder.AgentSignatureProperty(!ascending, agentSignatureExpression);
     }

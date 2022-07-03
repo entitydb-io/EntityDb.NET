@@ -6,7 +6,8 @@ using EntityDb.Common.Extensions;
 namespace EntityDb.Common.Queries.Modified;
 
 internal sealed record ModifiedAgentSignatureQuery
-    (IAgentSignatureQuery AgentSignatureQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(AgentSignatureQuery,
+    (IAgentSignatureQuery AgentSignatureQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(
+        AgentSignatureQuery,
         ModifiedQueryOptions), IAgentSignatureQuery
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)

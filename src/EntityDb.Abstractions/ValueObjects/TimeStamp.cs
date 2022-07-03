@@ -15,25 +15,30 @@ public readonly record struct TimeStamp(DateTime Value)
     public static readonly TimeStamp UnixEpoch = new(DateTime.UnixEpoch);
 
     /// <summary>
-    ///     Gets a <see cref="TimeStamp"/> that represents the current date and time on this computer, expressed in UTC.
+    ///     Gets a <see cref="TimeStamp" /> that represents the current date and time on this computer, expressed in UTC.
     /// </summary>
     public static TimeStamp UtcNow => new(DateTime.UtcNow);
 
     /// <summary>
-    ///     Gets a <see cref="TimeStamp"/> rounded down to the nearest millisecond.
+    ///     Gets a <see cref="TimeStamp" /> rounded down to the nearest millisecond.
     /// </summary>
-    /// <returns>A <see cref="TimeStamp"/> rounded down to the nearest millisecond.</returns>
-    public TimeStamp WithMillisecondPrecision() =>
-        new(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
+    /// <returns>A <see cref="TimeStamp" /> rounded down to the nearest millisecond.</returns>
+    public TimeStamp WithMillisecondPrecision()
+    {
+        return new(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
+    }
 
     /// <summary>
-    ///     Converts the value of the current <see cref="TimeStamp"/> object to
+    ///     Converts the value of the current <see cref="TimeStamp" /> object to
     ///     its equivalent string representation using the formatting
     ///     conventions of the current culture.
     /// </summary>
     /// <returns>
     ///     A string representation of the value of the current
-    ///     <see cref="TimeStamp"/> object.
+    ///     <see cref="TimeStamp" /> object.
     /// </returns>
-    public override string? ToString() => Value.ToString(CultureInfo.CurrentCulture);
+    public override string? ToString()
+    {
+        return Value.ToString(CultureInfo.CurrentCulture);
+    }
 }

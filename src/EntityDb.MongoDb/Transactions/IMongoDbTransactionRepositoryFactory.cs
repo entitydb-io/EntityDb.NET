@@ -8,12 +8,6 @@ namespace EntityDb.MongoDb.Transactions;
 
 internal interface IMongoDbTransactionRepositoryFactory : ITransactionRepositoryFactory
 {
-    TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
-
-    Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken);
-
-    ITransactionRepository CreateRepository(IMongoSession mongoSession);
-
     async Task<ITransactionRepository> ITransactionRepositoryFactory.CreateRepository(
         string transactionSessionOptionsName, CancellationToken cancellationToken)
     {
@@ -23,4 +17,11 @@ internal interface IMongoDbTransactionRepositoryFactory : ITransactionRepository
 
         return CreateRepository(mongoSession);
     }
+
+    TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
+
+    Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+        CancellationToken cancellationToken);
+
+    ITransactionRepository CreateRepository(IMongoSession mongoSession);
 }

@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Processors;
 
-internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : SnapshotTransactionProcessorBase<TProjection>
+internal sealed class
+    ProjectionSnapshotTransactionProcessor<TProjection> : SnapshotTransactionProcessorBase<TProjection>
     where TProjection : IProjection<TProjection>
 {
     private readonly IProjectionRepositoryFactory<TProjection> _projectionRepositoryFactory;
-    private readonly string _transactionSessionOptionsName;
     private readonly string _snapshotSessionOptionsName;
+    private readonly string _transactionSessionOptionsName;
 
     public ProjectionSnapshotTransactionProcessor
     (
@@ -29,6 +30,7 @@ internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : Snap
         _transactionSessionOptionsName = transactionSessionOptionsName;
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
+
     public override async Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken)
     {
         await using var projectionRepository = await _projectionRepositoryFactory.CreateRepository(
@@ -41,7 +43,8 @@ internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : Snap
 
         var snapshotCache = CreateSnapshotCache();
 
-        async Task<(TProjection?, TProjection)?> GetSnapshots(IAppendCommandTransactionStep appendCommandTransactionStep)
+        async Task<(TProjection?, TProjection)?> GetSnapshots(
+            IAppendCommandTransactionStep appendCommandTransactionStep)
         {
             var projectionId = projectionRepository.GetProjectionIdOrDefault(appendCommandTransactionStep.Entity);
 
@@ -57,7 +60,8 @@ internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : Snap
             if (previousLatestPointer.VersionNumber != VersionNumber.MinValue)
             {
                 previousLatestSnapshot = snapshotCache.GetSnapshotOrDefault(previousLatestPointer) ??
-                    await projectionRepository.GetSnapshot(previousLatestPointer, cancellationToken);
+                                         await projectionRepository.GetSnapshot(previousLatestPointer,
+                                             cancellationToken);
             }
 
             var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
@@ -69,12 +73,14 @@ internal sealed class ProjectionSnapshotTransactionProcessor<TProjection> : Snap
                 appendCommandTransactionStep.Command
             );
 
-            var nextSnapshot = (previousLatestSnapshot ?? TProjection.Construct(projectionId.Value)).Reduce(annotatedCommand);
+            var nextSnapshot =
+                (previousLatestSnapshot ?? TProjection.Construct(projectionId.Value)).Reduce(annotatedCommand);
 
             return (previousLatestSnapshot, nextSnapshot);
         }
 
-        await ProcessTransactionSteps(projectionRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots, cancellationToken);
+        await ProcessTransactionSteps(projectionRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots,
+            cancellationToken);
     }
 
     public static ProjectionSnapshotTransactionProcessor<TProjection> Create(IServiceProvider serviceProvider,

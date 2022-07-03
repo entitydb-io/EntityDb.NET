@@ -61,10 +61,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ACT
 
-        Should.Throw<SerializeException>(() =>
-        {
-            envelopeService.Serialize(envelope);
-        });
+        Should.Throw<SerializeException>(() => { envelopeService.Serialize(envelope); });
     }
 
     [Fact]
@@ -81,10 +78,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() =>
-        {
-            envelopeService.Deserialize(corruptedBytes);
-        });
+        Should.Throw<DeserializeException>(() => { envelopeService.Deserialize(corruptedBytes); });
     }
 
     [Fact]
@@ -101,10 +95,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() =>
-        {
-            envelopeService.Reconstruct<object>(envelope);
-        });
+        Should.Throw<DeserializeException>(() => { envelopeService.Reconstruct<object>(envelope); });
     }
 
     [Fact]
@@ -119,10 +110,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<SerializeException>(() =>
-        {
-            envelopeService.Deconstruct<object?>(null);
-        });
+        Should.Throw<SerializeException>(() => { envelopeService.Deconstruct<object?>(null); });
     }
 
     private interface IRecord

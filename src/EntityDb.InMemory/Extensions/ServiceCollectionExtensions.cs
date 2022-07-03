@@ -14,7 +14,7 @@ namespace EntityDb.InMemory.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///     Adds a production-ready implementation of <see cref="ISnapshotRepositoryFactory{TEntity}" /> to a service
+    ///     Adds a production-ready implementation of <see cref="ISnapshotRepositoryFactory{TSnapshot}" /> to a service
     ///     collection.
     /// </summary>
     /// <typeparam name="TSnapshot">The type of the snapshot stored in the repository.</typeparam>

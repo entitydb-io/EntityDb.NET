@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 
-internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
+internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepository<TSnapshot>
 {
     private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
 
@@ -19,12 +20,14 @@ internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourc
         _snapshotRepository = snapshotRepository;
     }
 
-    public virtual Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public virtual Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+        CancellationToken cancellationToken = default)
     {
         return WrapCommand(() => _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken));
     }
 
-    public virtual Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    public virtual Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer,
+        CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken));
     }

@@ -11,6 +11,62 @@ namespace EntityDb.Mvc.Agents;
 /// </summary>
 public static class HttpContextAgentSignature
 {
+    private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(
+        IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
+    {
+        return dictionary
+            .Select(pair => new NameValuesPairSnapshot
+            (
+                pair.Key,
+                redactedKeys.Contains(pair.Key) ? new[] { redactedValue } : pair.Value.ToArray()
+            ))
+            .ToArray();
+    }
+
+    private static RequestSnapshot GetRequestSnapshot(HttpRequest httpRequest,
+        HttpContextAgentSignatureOptions httpContextAgentOptions)
+    {
+        return new RequestSnapshot
+        (
+            httpRequest.Method,
+            httpRequest.Scheme,
+            httpRequest.Host.Value,
+            httpRequest.Path.Value,
+            httpRequest.Protocol,
+            GetNameValuesPairSnapshots(httpRequest.Headers, httpContextAgentOptions.RedactedHeaders,
+                httpContextAgentOptions.RedactedValue),
+            GetNameValuesPairSnapshots(httpRequest.Query, httpContextAgentOptions.RedactedQueryStringParams,
+                httpContextAgentOptions.RedactedValue)
+        );
+    }
+
+    private static ConnectionSnapshot GetConnectionSnapshot(ConnectionInfo connection)
+    {
+        return new ConnectionSnapshot
+        (
+            connection.Id,
+            connection.RemoteIpAddress?.ToString(),
+            connection.RemotePort,
+            connection.LocalIpAddress?.ToString(),
+            connection.LocalPort
+        );
+    }
+
+    internal static Snapshot GetSnapshot
+    (
+        HttpContext httpContext,
+        HttpContextAgentSignatureOptions httpContextAgentOptions,
+        Dictionary<string, string> applicationInfo
+    )
+    {
+        return new Snapshot
+        (
+            GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
+            GetConnectionSnapshot(httpContext.Connection),
+            applicationInfo
+        );
+    }
+
     /// <summary>
     ///     Represents the headers used by agent.
     /// </summary>
@@ -55,56 +111,4 @@ public static class HttpContextAgentSignature
         ConnectionSnapshot Connection,
         Dictionary<string, string> ApplicationInfo
     );
-
-    private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
-    {
-        return dictionary
-            .Select(pair => new NameValuesPairSnapshot
-            (
-                pair.Key,
-                redactedKeys.Contains(pair.Key) ? new[] { redactedValue } : pair.Value.ToArray()
-            ))
-            .ToArray();
-    }
-
-    private static RequestSnapshot GetRequestSnapshot(HttpRequest httpRequest, HttpContextAgentSignatureOptions httpContextAgentOptions)
-    {
-        return new RequestSnapshot
-        (
-            httpRequest.Method,
-            httpRequest.Scheme,
-            httpRequest.Host.Value,
-            httpRequest.Path.Value,
-            httpRequest.Protocol,
-            GetNameValuesPairSnapshots(httpRequest.Headers, httpContextAgentOptions.RedactedHeaders, httpContextAgentOptions.RedactedValue),
-            GetNameValuesPairSnapshots(httpRequest.Query, httpContextAgentOptions.RedactedQueryStringParams, httpContextAgentOptions.RedactedValue)
-        );
-    }
-
-    private static ConnectionSnapshot GetConnectionSnapshot(ConnectionInfo connection)
-    {
-        return new ConnectionSnapshot
-        (
-            connection.Id,
-            connection.RemoteIpAddress?.ToString(),
-            connection.RemotePort,
-            connection.LocalIpAddress?.ToString(),
-            connection.LocalPort
-        );
-    }
-
-    internal static Snapshot GetSnapshot
-    (
-        HttpContext httpContext,
-        HttpContextAgentSignatureOptions httpContextAgentOptions,
-        Dictionary<string, string> applicationInfo
-    )
-    {
-        return new Snapshot
-        (
-            GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
-            GetConnectionSnapshot(httpContext.Connection),
-            applicationInfo
-        );
-    }
 }

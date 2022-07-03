@@ -10,11 +10,14 @@ internal class
 {
     private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 
-    public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
+    public TestModeMongoDbTransactionRepositoryFactory(
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
+        mongoDbTransactionRepositoryFactory)
     {
     }
 
-    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
+    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+        CancellationToken cancellationToken)
     {
         if (_sessions.HasValue)
         {
@@ -22,10 +25,8 @@ internal class
                 .WithTransactionSessionOptions(transactionSessionOptions);
         }
 
-        var normalSession = await base.CreateSession(new TransactionSessionOptions
-        {
-            ReadOnly = false
-        }, cancellationToken);
+        var normalSession =
+            await base.CreateSession(new TransactionSessionOptions { ReadOnly = false }, cancellationToken);
 
         var testModeSession = new TestModeMongoSession(normalSession);
 

@@ -13,18 +13,24 @@ namespace EntityDb.Abstractions.Snapshots;
 /// <typeparam name="TSnapshot">The type of snapshot stored in the <see cref="ISnapshotRepository{TSnapshot}" />.</typeparam>
 public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
-    /// <ignore/>
+    /// <ignore />
     [Obsolete("Please use GetSnapshotOrDefault(...) instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
-        => GetSnapshotOrDefault(snapshotId, cancellationToken);
+    {
+        return GetSnapshotOrDefault(snapshotId, cancellationToken);
+    }
 
     /// <summary>
-    ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or <c>default(<typeparamref name="TSnapshot"/>)</c>.
+    ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or
+    ///     <c>default(<typeparamref name="TSnapshot" />)</c>.
     /// </summary>
     /// <param name="snapshotPointer">A pointer to a specific snapshot.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>An exact version of snapshot of a <typeparamref name="TSnapshot" /> or <c>default(<typeparamref name="TSnapshot"/>)</c>.</returns>
+    /// <returns>
+    ///     An exact version of snapshot of a <typeparamref name="TSnapshot" /> or
+    ///     <c>default(<typeparamref name="TSnapshot" />)</c>.
+    /// </returns>
     Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default);
 
     /// <summary>

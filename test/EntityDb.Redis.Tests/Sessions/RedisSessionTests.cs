@@ -27,7 +27,8 @@ public class RedisSessionTests : TestsBase<Startup>
 
         // ASSERT
 
-        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Insert(default!, default!));
+        await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() =>
+            readOnlyRedisSession.Insert(default!, default!));
 
         await Should.ThrowAsync<CannotWriteInReadOnlyModeException>(() => readOnlyRedisSession.Delete(default!));
     }

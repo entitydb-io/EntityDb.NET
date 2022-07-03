@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
     </ItemGroup>
 
 </Project>

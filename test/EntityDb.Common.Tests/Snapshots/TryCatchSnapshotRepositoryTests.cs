@@ -20,7 +20,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
     }
 
-    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(EntityAdder entityAdder)
+    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(
+        EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -34,7 +35,8 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock

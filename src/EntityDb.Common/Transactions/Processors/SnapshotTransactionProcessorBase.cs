@@ -13,21 +13,6 @@ namespace EntityDb.Common.Transactions.Processors;
 internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransactionProcessor
     where TSnapshot : ISnapshot<TSnapshot>
 {
-    protected class SnapshotCache
-    {
-        private readonly Dictionary<Pointer, TSnapshot> _cache = new();
-
-        public void PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot)
-        {
-            _cache[snapshotPointer] = snapshot;
-        }
-
-        public TSnapshot? GetSnapshotOrDefault(Pointer snapshotPointer)
-        {
-            return _cache.GetValueOrDefault(snapshotPointer);
-        }
-    }
-
     public abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
     protected static SnapshotCache CreateSnapshotCache()
@@ -35,8 +20,10 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
         return new SnapshotCache();
     }
 
-    protected static async Task ProcessTransactionSteps(ISnapshotRepository<TSnapshot> snapshotRepository, SnapshotCache snapshotCache,
-        ITransaction transaction, Func<IAppendCommandTransactionStep, Task<(TSnapshot?, TSnapshot)?>> getSnapshots, CancellationToken cancellationToken)
+    protected static async Task ProcessTransactionSteps(ISnapshotRepository<TSnapshot> snapshotRepository,
+        SnapshotCache snapshotCache,
+        ITransaction transaction, Func<IAppendCommandTransactionStep, Task<(TSnapshot?, TSnapshot)?>> getSnapshots,
+        CancellationToken cancellationToken)
     {
         var putQueue = new Dictionary<Pointer, TSnapshot>();
 
@@ -47,7 +34,8 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
                 continue;
             }
 
-            if (await getSnapshots.Invoke(appendCommandTransactionStep) is not var (previousLatestSnapshot, nextSnapshot))
+            if (await getSnapshots.Invoke(appendCommandTransactionStep) is not var (previousLatestSnapshot, nextSnapshot
+                ))
             {
                 continue;
             }
@@ -74,6 +62,21 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
         foreach (var (snapshotPointer, snapshot) in putQueue)
         {
             await snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken);
+        }
+    }
+
+    protected class SnapshotCache
+    {
+        private readonly Dictionary<Pointer, TSnapshot> _cache = new();
+
+        public void PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot)
+        {
+            _cache[snapshotPointer] = snapshot;
+        }
+
+        public TSnapshot? GetSnapshotOrDefault(Pointer snapshotPointer)
+        {
+            return _cache.GetValueOrDefault(snapshotPointer);
         }
     }
 }

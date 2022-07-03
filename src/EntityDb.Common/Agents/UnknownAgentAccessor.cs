@@ -14,13 +14,13 @@ public class UnknownAgentAccessor : IAgentAccessor
 
     private readonly IAgentSignatureAugmenter? _agentSignatureAugmenter;
 
-    /// <ignore/>
+    /// <ignore />
     public UnknownAgentAccessor(IAgentSignatureAugmenter? agentSignatureAugmenter = null)
     {
         _agentSignatureAugmenter = agentSignatureAugmenter;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken)
     {
         var applicationInfo = DefaultApplicationInfo;

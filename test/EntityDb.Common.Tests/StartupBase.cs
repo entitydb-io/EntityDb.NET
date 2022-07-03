@@ -9,7 +9,6 @@ namespace EntityDb.Common.Tests;
 
 public abstract class StartupBase : IStartup
 {
-
     public virtual void AddServices(IServiceCollection serviceCollection)
     {
         // Resolving
@@ -26,10 +25,8 @@ public abstract class StartupBase : IStartup
 
         // Snapshot Session Options
 
-        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write, options =>
-        {
-            options.ReadOnly = false;
-        });
+        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write,
+            options => { options.ReadOnly = false; });
 
         serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
         {

@@ -16,86 +16,13 @@ namespace EntityDb.Common.Transactions.Builders;
 internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
     where TEntity : IEntity<TEntity>
 {
+    private readonly IAgent _agent;
     private readonly Dictionary<Id, TEntity> _knownEntities = new();
     private readonly List<ITransactionStep> _transactionSteps = new();
-    private readonly IAgent _agent;
 
     public TransactionBuilder(IAgent agent)
     {
         _agent = agent;
-    }
-
-    private void ConstructIfNotKnown(Id entityId)
-    {
-        if (IsEntityKnown(entityId))
-        {
-            return;
-        }
-
-        var entity = TEntity.Construct(entityId);
-
-        _knownEntities.Add(entityId, entity);
-    }
-
-    private void Add(Id entityId, ImmutableArray<ILease> leases)
-    {
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new AddLeasesTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Leases = leases
-        });
-    }
-
-    private void Add(Id entityId, ImmutableArray<ITag> tags)
-    {
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new AddTagsTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Tags = tags
-        });
-    }
-
-    private void Delete(Id entityId, ImmutableArray<ILease> leases)
-    {
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new DeleteLeasesTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Leases = leases
-        });
-    }
-
-    private void Delete(Id entityId, ImmutableArray<ITag> tags)
-    {
-        var entity = _knownEntities[entityId];
-        var entityVersionNumber = entity.GetVersionNumber();
-
-        _transactionSteps.Add(new DeleteTagsTransactionStep
-        {
-            EntityId = entityId,
-            Entity = entity,
-            EntityVersionNumber = entityVersionNumber,
-            Tags = tags
-        });
-    }
-
-    public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Id entityId)
-    {
-        return new SingleEntityTransactionBuilder<TEntity>(this, entityId);
     }
 
     public TEntity GetEntity(Id entityId)
@@ -213,5 +140,66 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
         _transactionSteps.Clear();
 
         return transaction;
+    }
+
+    private void ConstructIfNotKnown(Id entityId)
+    {
+        if (IsEntityKnown(entityId))
+        {
+            return;
+        }
+
+        var entity = TEntity.Construct(entityId);
+
+        _knownEntities.Add(entityId, entity);
+    }
+
+    private void Add(Id entityId, ImmutableArray<ILease> leases)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddLeasesTransactionStep
+        {
+            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Leases = leases
+        });
+    }
+
+    private void Add(Id entityId, ImmutableArray<ITag> tags)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new AddTagsTransactionStep
+        {
+            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Tags = tags
+        });
+    }
+
+    private void Delete(Id entityId, ImmutableArray<ILease> leases)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteLeasesTransactionStep
+        {
+            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Leases = leases
+        });
+    }
+
+    private void Delete(Id entityId, ImmutableArray<ITag> tags)
+    {
+        var entity = _knownEntities[entityId];
+        var entityVersionNumber = entity.GetVersionNumber();
+
+        _transactionSteps.Add(new DeleteTagsTransactionStep
+        {
+            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Tags = tags
+        });
+    }
+
+    public SingleEntityTransactionBuilder<TEntity> ForSingleEntity(Id entityId)
+    {
+        return new SingleEntityTransactionBuilder<TEntity>(this, entityId);
     }
 }

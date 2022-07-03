@@ -6,8 +6,9 @@ using System.Collections.Generic;
 namespace EntityDb.Common.Commands;
 
 /// <summary>
-///     If a transaction needs to delete any instances of <see cref="ILease"/>, and the properties of the leases
-///     are contained in the command and/or entity, a direct call to <see cref="TransactionBuilder{TEntity}.Delete(Id, ILease[])"/>
+///     If a transaction needs to delete any instances of <see cref="ILease" />, and the properties of the leases
+///     are contained in the command and/or entity, a direct call to
+///     <see cref="TransactionBuilder{TEntity}.Delete(Id, ILease[])" />
 ///     can be avoided by implementing this interface!
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity</typeparam>

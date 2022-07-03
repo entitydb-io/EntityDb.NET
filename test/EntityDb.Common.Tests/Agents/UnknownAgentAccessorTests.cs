@@ -29,7 +29,7 @@ public class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
     {
         return new[]
         {
-            new object(),
+            new object()
         };
     }
 

@@ -20,8 +20,8 @@ namespace EntityDb.MongoDb.Transactions;
 
 internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITransactionRepository
 {
-    private readonly IMongoSession _mongoSession;
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
+    private readonly IMongoSession _mongoSession;
 
     public MongoDbTransactionRepository
     (
@@ -33,7 +33,8 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
         _envelopeService = envelopeService;
     }
 
-    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
             .GetQuery(agentSignatureQuery)
@@ -61,7 +62,8 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetTransactionIds(_mongoSession, cancellationToken);
     }
 
-    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
             .GetQuery(agentSignatureQuery)
@@ -89,7 +91,8 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetEntityIds(_mongoSession, cancellationToken);
     }
 
-    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
             .GetQuery(agentSignatureQuery)
@@ -117,67 +120,20 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetData<TagDocument, ITag>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
+    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
             .GetQuery(agentSignatureQuery)
             .GetEntitiesAnnotation<AgentSignatureDocument, object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
+    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
     {
         return CommandDocument
             .GetQuery(commandQuery)
             .GetEntityAnnotation<CommandDocument, object>(_mongoSession, _envelopeService, cancellationToken);
-    }
-
-    private async Task PutAgentSignature(ITransaction transaction, CancellationToken cancellationToken)
-    {
-        await AgentSignatureDocument
-            .GetInsertCommand(_envelopeService, transaction)
-            .Execute(_mongoSession, cancellationToken);
-    }
-
-    private async Task PutCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep, CancellationToken cancellationToken)
-    {
-        VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
-
-        var previousVersionNumber = await CommandDocument
-            .GetLastEntityVersionNumber(_mongoSession, appendCommandTransactionStep.EntityId, cancellationToken);
-
-        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber, appendCommandTransactionStep.PreviousEntityVersionNumber);
-
-        await CommandDocument
-            .GetInsertCommand(_envelopeService, transaction, appendCommandTransactionStep)
-            .Execute(_mongoSession, cancellationToken);
-    }
-
-    private async Task PutLeases(ITransaction transaction, IAddLeasesTransactionStep addLeasesTransactionStep, CancellationToken cancellationToken)
-    {
-        await LeaseDocument
-            .GetInsertCommand(_envelopeService, transaction, addLeasesTransactionStep)
-            .Execute(_mongoSession, cancellationToken);
-    }
-
-    private async Task PutTags(ITransaction transaction, IAddTagsTransactionStep addTagsTransactionStep, CancellationToken cancellationToken)
-    {
-        await TagDocument
-            .GetInsertCommand(_envelopeService, transaction, addTagsTransactionStep)
-            .Execute(_mongoSession, cancellationToken);
-    }
-
-    private async Task DeleteLeases(IDeleteLeasesTransactionStep deleteLeasesTransactionStep, CancellationToken cancellationToken)
-    {
-        await LeaseDocument
-            .GetDeleteCommand(deleteLeasesTransactionStep)
-            .Execute(_mongoSession, cancellationToken);
-    }
-
-    private async Task DeleteTags(IDeleteTagsTransactionStep deleteTagsTransactionStep, CancellationToken cancellationToken)
-    {
-        await TagDocument
-            .GetDeleteCommand(deleteTagsTransactionStep)
-            .Execute(_mongoSession, cancellationToken);
     }
 
     public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
@@ -225,5 +181,60 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
     public override async ValueTask DisposeAsync()
     {
         await _mongoSession.DisposeAsync();
+    }
+
+    private async Task PutAgentSignature(ITransaction transaction, CancellationToken cancellationToken)
+    {
+        await AgentSignatureDocument
+            .GetInsertCommand(_envelopeService, transaction)
+            .Execute(_mongoSession, cancellationToken);
+    }
+
+    private async Task PutCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep,
+        CancellationToken cancellationToken)
+    {
+        VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
+
+        var previousVersionNumber = await CommandDocument
+            .GetLastEntityVersionNumber(_mongoSession, appendCommandTransactionStep.EntityId, cancellationToken);
+
+        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber,
+            appendCommandTransactionStep.PreviousEntityVersionNumber);
+
+        await CommandDocument
+            .GetInsertCommand(_envelopeService, transaction, appendCommandTransactionStep)
+            .Execute(_mongoSession, cancellationToken);
+    }
+
+    private async Task PutLeases(ITransaction transaction, IAddLeasesTransactionStep addLeasesTransactionStep,
+        CancellationToken cancellationToken)
+    {
+        await LeaseDocument
+            .GetInsertCommand(_envelopeService, transaction, addLeasesTransactionStep)
+            .Execute(_mongoSession, cancellationToken);
+    }
+
+    private async Task PutTags(ITransaction transaction, IAddTagsTransactionStep addTagsTransactionStep,
+        CancellationToken cancellationToken)
+    {
+        await TagDocument
+            .GetInsertCommand(_envelopeService, transaction, addTagsTransactionStep)
+            .Execute(_mongoSession, cancellationToken);
+    }
+
+    private async Task DeleteLeases(IDeleteLeasesTransactionStep deleteLeasesTransactionStep,
+        CancellationToken cancellationToken)
+    {
+        await LeaseDocument
+            .GetDeleteCommand(deleteLeasesTransactionStep)
+            .Execute(_mongoSession, cancellationToken);
+    }
+
+    private async Task DeleteTags(IDeleteTagsTransactionStep deleteTagsTransactionStep,
+        CancellationToken cancellationToken)
+    {
+        await TagDocument
+            .GetDeleteCommand(deleteTagsTransactionStep)
+            .Execute(_mongoSession, cancellationToken);
     }
 }

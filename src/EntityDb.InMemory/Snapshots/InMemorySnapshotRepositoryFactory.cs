@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Snapshots;
 
-internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepositoryFactory<TSnapshot>
+internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepositoryFactory<TSnapshot>
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly IInMemorySession<TSnapshot> _inMemorySession;
     private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+    private readonly IServiceProvider _serviceProvider;
 
     public InMemorySnapshotRepositoryFactory
     (
@@ -27,7 +28,8 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
         _optionsFactory = optionsFactory;
     }
 
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName,
+        CancellationToken cancellationToken = default)
     {
         await Task.Yield();
 

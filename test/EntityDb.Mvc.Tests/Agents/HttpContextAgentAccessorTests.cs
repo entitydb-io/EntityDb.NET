@@ -28,7 +28,8 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
         serviceCollection.AddSingleton(httpContextAccessorMock.Object);
     }
 
-    protected override void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection, HttpContextSeederOptions httpContextSeederOptions)
+    protected override void ConfigureActiveAgentAccessor(IServiceCollection serviceCollection,
+        HttpContextSeederOptions httpContextSeederOptions)
     {
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>(MockBehavior.Strict);
 
@@ -47,7 +48,7 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[]{ "application/json" }
+                    ["Content-Type"] = new[] { "application/json" }
                 },
                 HasIpAddress = true
             },
@@ -55,7 +56,7 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[]{ "application/json" }
+                    ["Content-Type"] = new[] { "application/json" }
                 },
                 HasIpAddress = false
             }

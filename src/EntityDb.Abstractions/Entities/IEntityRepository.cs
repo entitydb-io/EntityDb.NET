@@ -29,20 +29,25 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
-        => GetSnapshot(entityId, cancellationToken);
+    {
+        return GetSnapshot(entityId, cancellationToken);
+    }
 
     /// <ignore />
     [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
-    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default)
-        => GetSnapshot(entityId + lteVersionNumber, cancellationToken);
+    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber,
+        CancellationToken cancellationToken = default)
+    {
+        return GetSnapshot(entityId + lteVersionNumber, cancellationToken);
+    }
 
     /// <summary>
-    ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Pointer"/>.
+    ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Pointer" />.
     /// </summary>
     /// <param name="entityPointer">A pointer to the entity.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The snapshot of a <typeparamref name="TEntity" /> for <paramref name="entityPointer"/>.</returns>
+    /// <returns>The snapshot of a <typeparamref name="TEntity" /> for <paramref name="entityPointer" />.</returns>
     Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default);
 
     /// <summary>

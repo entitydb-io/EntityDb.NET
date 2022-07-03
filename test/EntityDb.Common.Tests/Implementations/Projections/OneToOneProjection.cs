@@ -19,16 +19,9 @@ public record OneToOneProjection
     VersionNumber EntityVersionNumber = default
 ) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
-    public static string RedisKeyNamespace => "one-to-one-projection";
-
     public static OneToOneProjection Construct(Id projectionId)
     {
         return new OneToOneProjection(projectionId);
-    }
-
-    public OneToOneProjection WithVersionNumber(VersionNumber versionNumber)
-    {
-        return this with { VersionNumber = versionNumber };
     }
 
     public Id GetId()
@@ -43,36 +36,28 @@ public record OneToOneProjection
 
     public OneToOneProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands)
     {
-        return annotatedCommands.Aggregate(this, (previousProjection, nextAnnotatedCommand) => nextAnnotatedCommand switch
-        {
-            IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(previousProjection) with
+        return annotatedCommands.Aggregate(this, (previousProjection, nextAnnotatedCommand) =>
+            nextAnnotatedCommand switch
             {
-                EntityVersionNumber = reducer.EntityVersionNumber
-            },
-            _ => throw new NotSupportedException()
-        });
+                IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(previousProjection) with
+                {
+                    EntityVersionNumber = reducer.EntityVersionNumber
+                },
+                _ => throw new NotSupportedException()
+            });
     }
-
-    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldRecordLogic { get; } = new();
 
     public bool ShouldRecord()
     {
-        if (ShouldRecordLogic.Value is not null)
-        {
-            return ShouldRecordLogic.Value.Invoke(this);
-        }
+        if (ShouldRecordLogic.Value is not null) return ShouldRecordLogic.Value.Invoke(this);
 
         return false;
     }
 
-    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
-
     public bool ShouldRecordAsLatest(OneToOneProjection? previousSnapshot)
     {
         if (ShouldRecordAsLatestLogic.Value is not null)
-        {
             return ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
-        }
 
         return !Equals(previousSnapshot);
     }
@@ -84,11 +69,20 @@ public record OneToOneProjection
 
     public static Id? GetProjectionIdOrDefault(object entity)
     {
-        if (entity is TestEntity testEntity)
-        {
-            return testEntity.Id;
-        }
+        if (entity is TestEntity testEntity) return testEntity.Id;
 
         return null;
     }
+
+    public static string RedisKeyNamespace => "one-to-one-projection";
+
+    public OneToOneProjection WithVersionNumber(VersionNumber versionNumber)
+    {
+        return this with { VersionNumber = versionNumber };
+    }
+
+    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldRecordLogic { get; } = new();
+
+    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
+        new();
 }

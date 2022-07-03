@@ -9,7 +9,8 @@ namespace EntityDb.Common.Extensions;
 public static class SortBuilderExtensions
 {
     /// <summary>
-    ///     Returns a <see cref="IAgentSignatureSortBuilder{TSort}" /> that orders agentSignatures in the reverse order of another
+    ///     Returns a <see cref="IAgentSignatureSortBuilder{TSort}" /> that orders agentSignatures in the reverse order of
+    ///     another
     ///     <see cref="IAgentSignatureSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
@@ -18,7 +19,8 @@ public static class SortBuilderExtensions
     ///     A <see cref="IAgentSignatureSortBuilder{TSort}" /> that orders agentSignatures in the reverse order of
     ///     <paramref name="agentSignatureSortBuilder" />.
     /// </returns>
-    public static IAgentSignatureSortBuilder<TSort> Reverse<TSort>(this IAgentSignatureSortBuilder<TSort> agentSignatureSortBuilder)
+    public static IAgentSignatureSortBuilder<TSort> Reverse<TSort>(
+        this IAgentSignatureSortBuilder<TSort> agentSignatureSortBuilder)
     {
         return new AgentSignatureReverseSortBuilder<TSort>(agentSignatureSortBuilder);
     }

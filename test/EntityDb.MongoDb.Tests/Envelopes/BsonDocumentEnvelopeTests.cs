@@ -28,7 +28,8 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(bool removeTypeDiscriminatorProperty)
+    public void GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(
+        bool removeTypeDiscriminatorProperty)
     {
         // ARRANGE
 
@@ -48,7 +49,8 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
 
         var bsonDocumentEnvelope = envelopeService.Deconstruct(value);
 
-        var actualContainsTypeDiscriminatorProperty = bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelopeService.TypeDiscriminatorPropertyName);
+        var actualContainsTypeDiscriminatorProperty =
+            bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelopeService.TypeDiscriminatorPropertyName);
 
         // ASSERT
 

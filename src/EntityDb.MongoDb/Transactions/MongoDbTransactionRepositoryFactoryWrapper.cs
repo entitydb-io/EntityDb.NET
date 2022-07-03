@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 
-internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
+internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableResourceBaseClass,
+    IMongoDbTransactionRepositoryFactory
 {
     private readonly IMongoDbTransactionRepositoryFactory _mongoDbTransactionRepositoryFactory;
 
@@ -22,7 +23,8 @@ internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableR
         return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
     }
 
-    public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
+    public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+        CancellationToken cancellationToken)
     {
         return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions, cancellationToken);
     }

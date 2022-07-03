@@ -30,5 +30,6 @@ public interface IAgentSignatureSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <param name="agentSignatureExpression">The agentSignature expression.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders agentSignatures by <paramref name="agentSignatureExpression" />.</returns>
-    TSort AgentSignatureProperty<TAgentSignature>(bool ascending, Expression<Func<TAgentSignature, object>> agentSignatureExpression);
+    TSort AgentSignatureProperty<TAgentSignature>(bool ascending,
+        Expression<Func<TAgentSignature, object>> agentSignatureExpression);
 }

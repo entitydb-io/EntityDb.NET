@@ -14,9 +14,9 @@ namespace EntityDb.Common.Transactions.Subscribers;
 /// </summary>
 public abstract class TransactionSubscriber : BackgroundService, ITransactionSubscriber
 {
-    private readonly BufferBlock<ITransaction> _transactionQueue = new();
     private readonly ILogger<TransactionSubscriber> _logger;
     private readonly bool _testMode;
+    private readonly BufferBlock<ITransaction> _transactionQueue = new();
 
     /// <summary>
     ///     Constructs a new instance of <see cref="TransactionSubscriber" />.
@@ -42,11 +42,13 @@ public abstract class TransactionSubscriber : BackgroundService, ITransactionSub
         }
     }
 
-    /// <ignore/>
+    /// <ignore />
     [Obsolete("Please implement ProcessTransaction(...) instead. This method will be removed at a later date.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     protected virtual Task NotifyAsync(ITransaction transaction)
-        => ProcessTransaction(transaction, default);
+    {
+        return ProcessTransaction(transaction, default);
+    }
 
     /// <summary>
     ///     Processes a transaction.
@@ -56,7 +58,7 @@ public abstract class TransactionSubscriber : BackgroundService, ITransactionSub
     /// <returns>A task.</returns>
     protected abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "Not used in tests")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

@@ -1,13 +1,13 @@
 <Project>
-    <Import Project="../Directory.Build.props" />
-  
+    <Import Project="../Directory.Build.props"/>
+
     <!--Build-->
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-  
+
     <!--Pack-->
     <PropertyGroup>
         <IsPackable>true</IsPackable>
@@ -26,13 +26,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\..\ICON.png" Pack="true" PackagePath="\" />
-        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
-        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\ICON.png" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
-  
+
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-  
+
 </Project>

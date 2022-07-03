@@ -11,15 +11,14 @@ namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas;
 internal record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop,
     string? Stale, uint NonceCount, string ClientNonce, DateTime ExpiresAt)
 {
+    private const int MinClientNonce = 0x100000;
+    private const int MaxClientNonce = 0xFFFFFF;
     private static readonly MD5 Md5 = MD5.Create();
 
     private static readonly Regex DigestChallengeRequestRegex =
         new("(?<key>\\w+)[:=](?<value>[\\s\"]?(([^\",]|(\\\"))+))\"?", RegexOptions.IgnoreCase);
 
     public bool IsUsable => ExpiresAt > DateTime.UtcNow;
-
-    private const int MinClientNonce = 0x100000;
-    private const int MaxClientNonce = 0xFFFFFF;
 
     private static string Hash(string input)
     {

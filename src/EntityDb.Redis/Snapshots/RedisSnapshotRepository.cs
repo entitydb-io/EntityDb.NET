@@ -25,7 +25,8 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         _redisSession = redisSession;
     }
 
-    public async Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public async Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+        CancellationToken cancellationToken = default)
     {
         var snapshotValue = _envelopeService
             .DeconstructAndSerialize(snapshot);
@@ -33,7 +34,8 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         return await _redisSession.Insert(snapshotPointer, snapshotValue).WaitAsync(cancellationToken);
     }
 
-    public async Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    public async Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer,
+        CancellationToken cancellationToken = default)
     {
         var snapshotValue = await _redisSession.Find(snapshotPointer).WaitAsync(cancellationToken);
 

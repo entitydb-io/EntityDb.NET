@@ -20,7 +20,8 @@ public class ProjectionsTests : TestsBase<Startup>
     {
     }
 
-    private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow<TProjection>(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow<TProjection>(
+        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
         where TProjection : IProjection<TProjection>
     {
         // ARRANGE
@@ -37,15 +38,19 @@ public class ProjectionsTests : TestsBase<Startup>
 
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
 
         // ACT & ASSERT
 
-        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(() => projectionRepository.GetSnapshot(projectionId, default));
+        await Should.ThrowAsync<SnapshotPointernDoesNotExistException>(() =>
+            projectionRepository.GetSnapshot(projectionId));
     }
 
 
-    private async Task Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    private async Task
+        Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(
+            TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder,
+            SnapshotAdder projectionSnapshotAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
         where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
@@ -54,7 +59,8 @@ public class ProjectionsTests : TestsBase<Startup>
         const uint numberOfVersionNumbers = 5;
         const uint replaceAtVersionNumber = 3;
 
-        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) => projection.GetVersionNumber() == new VersionNumber(replaceAtVersionNumber);
+        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
+            projection.GetVersionNumber() == new VersionNumber(replaceAtVersionNumber);
 
         var projectionId = Id.NewId();
         var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);
@@ -72,7 +78,7 @@ public class ProjectionsTests : TestsBase<Startup>
 
         await using var projectionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
-            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write, default);
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
 
         var transactionInserted = await entityRepository.PutTransaction(transaction);
 
@@ -86,7 +92,7 @@ public class ProjectionsTests : TestsBase<Startup>
 
         // ACT
 
-        var currentProjection = await projectionRepository.GetSnapshot(projectionId, default);
+        var currentProjection = await projectionRepository.GetSnapshot(projectionId);
         var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshotOrDefault(projectionId);
 
         // ASSERT
@@ -100,7 +106,8 @@ public class ProjectionsTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsEntitySnapshotsAndProjectionSnapshots))]
-    public Task GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    public Task GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow(TransactionsAdder transactionsAdder,
+        SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
     {
         return RunGenericTestAsync
         (
@@ -111,7 +118,8 @@ public class ProjectionsTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsEntitySnapshotsAndProjectionSnapshots))]
-    public Task GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection(TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    public Task GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection(
+        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
     {
         return RunGenericTestAsync
         (

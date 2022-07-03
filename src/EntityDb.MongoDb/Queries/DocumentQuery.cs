@@ -16,7 +16,8 @@ internal record DocumentQuery<TDocument>
     int? Limit
 )
 {
-    public Task<List<TDocument>> Execute(IMongoSession mongoSession, ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
+    public Task<List<TDocument>> Execute(IMongoSession mongoSession,
+        ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
     {
         return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, cancellationToken);
     }

@@ -11,8 +11,8 @@ internal class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryF
     where TProjection : IProjection<TProjection>
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
     private readonly ISnapshotRepositoryFactory<TProjection>? _snapshotRepositoryFactory;
+    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
 
     public ProjectionRepositoryFactory
     (

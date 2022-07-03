@@ -15,9 +15,11 @@ namespace EntityDb.MongoDb.Extensions;
 [ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
 public static class ServiceCollectionExtensions
 {
-    internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection, bool removeTypeDiscriminatorProperty)
+    internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection,
+        bool removeTypeDiscriminatorProperty)
     {
-        serviceCollection.AddSingleton(serviceProvider => BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
+        serviceCollection.AddSingleton(serviceProvider =>
+            BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
     }
 
     /// <summary>

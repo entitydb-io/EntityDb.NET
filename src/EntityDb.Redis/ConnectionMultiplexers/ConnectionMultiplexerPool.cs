@@ -8,10 +8,11 @@ namespace EntityDb.Redis.ConnectionMultiplexers;
 
 internal class ConnectionMultiplexerFactory : DisposableResourceBaseClass
 {
-    private readonly SemaphoreSlim _connectionSemaphore = new(1);
     private readonly ConcurrentDictionary<string, IConnectionMultiplexer> _connectionMultiplexers = new();
+    private readonly SemaphoreSlim _connectionSemaphore = new(1);
 
-    public async Task<IConnectionMultiplexer> CreateConnectionMultiplexer(string connectionString, CancellationToken cancellationToken)
+    public async Task<IConnectionMultiplexer> CreateConnectionMultiplexer(string connectionString,
+        CancellationToken cancellationToken)
     {
         await _connectionSemaphore.WaitAsync(cancellationToken);
 

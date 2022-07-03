@@ -12,12 +12,12 @@ namespace EntityDb.MongoDb.Provisioner.Extensions;
 /// </summary>
 public static class MongoClientExtensions
 {
-    private static readonly IndexKeysDefinitionBuilder<BsonDocument> IndexKeysBuilder = Builders<BsonDocument>.IndexKeys;
+    private static readonly IndexKeysDefinitionBuilder<BsonDocument>
+        IndexKeysBuilder = Builders<BsonDocument>.IndexKeys;
 
     private static readonly CreateIndexOptions UniquenessConstraint = new()
     {
-        Name = "Uniqueness Constraint",
-        Unique = true
+        Name = "Uniqueness Constraint", Unique = true
     };
 
     private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> Collections = new()
@@ -83,7 +83,8 @@ public static class MongoClientExtensions
     ///     You should ONLY use this in your code for integration testing. Real databases should be provisioned using the
     ///     dotnet tool EntityDb.MongoDb.Provisioner.
     /// </remarks>
-    public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName, CancellationToken cancellationToken = default)
+    public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName,
+        CancellationToken cancellationToken = default)
     {
         var mongoDatabase = mongoClient.GetDatabase(entityName);
 
@@ -91,7 +92,8 @@ public static class MongoClientExtensions
         {
             var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
-            var entityCollectionNameCursor = await mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken);
+            var entityCollectionNameCursor =
+                await mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken);
             var entityCollectionNames = await entityCollectionNameCursor.ToListAsync(cancellationToken);
 
             if (entityCollectionNames.Contains(collectionName))

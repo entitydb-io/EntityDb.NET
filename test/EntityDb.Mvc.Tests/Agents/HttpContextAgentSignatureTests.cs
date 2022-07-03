@@ -78,7 +78,8 @@ public class HttpContextAgentSignatureTests
     }
 
     [Fact]
-    public void GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
+    public void
+        GivenNoRedactedQueryStringParams_WhenHttpContextHasQueryStringParam_ThenAgentSignatureHasQueryStringParamValue()
     {
         // ARRANGE
 
@@ -111,7 +112,8 @@ public class HttpContextAgentSignatureTests
     }
 
     [Fact]
-    public void GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
+    public void
+        GivenRedactedQueryStringParam_WhenHttpContextContainsOnlyThatQueryStringParam_ThenAgentSignatureHasRedactedQueryStringParams()
     {
         // ARRANGE
 

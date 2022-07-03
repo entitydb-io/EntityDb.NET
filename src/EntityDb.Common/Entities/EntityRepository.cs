@@ -18,9 +18,6 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 {
     private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
 
-    public ITransactionRepository TransactionRepository { get; }
-    public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
-
     public EntityRepository
     (
         IEnumerable<ITransactionSubscriber> transactionSubscribers,
@@ -33,10 +30,14 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         SnapshotRepository = snapshotRepository;
     }
 
+    public ITransactionRepository TransactionRepository { get; }
+    public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+
     public async Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default)
     {
         var snapshot = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken) ?? TEntity.Construct(entityPointer.Id)
+            ? await SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken) ??
+              TEntity.Construct(entityPointer.Id)
             : TEntity.Construct(entityPointer.Id);
 
         var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());

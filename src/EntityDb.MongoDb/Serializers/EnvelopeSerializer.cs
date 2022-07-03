@@ -34,25 +34,6 @@ internal class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
         return new Envelope<BsonDocument>(headers, value);
     }
 
-    private static EnvelopeHeaders DeserializeHeaders(BsonDeserializationContext context)
-    {
-        var value = new Dictionary<string, string>();
-
-        context.Reader.ReadStartDocument();
-
-        while (context.Reader.ReadBsonType() != BsonType.EndOfDocument)
-        {
-            var headerName = context.Reader.ReadName(Utf8NameDecoder.Instance);
-            var headerValue = context.Reader.ReadString();
-
-            value.Add(headerName, headerValue);
-        }
-
-        context.Reader.ReadEndDocument();
-
-        return new EnvelopeHeaders(value);
-    }
-
     public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value)
     {
         if (value is not Envelope<BsonDocument> envelope)
@@ -74,6 +55,25 @@ internal class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
         BsonDocumentSerializer.Serialize(context, args, envelope.Value);
 
         context.Writer.WriteEndDocument();
+    }
+
+    private static EnvelopeHeaders DeserializeHeaders(BsonDeserializationContext context)
+    {
+        var value = new Dictionary<string, string>();
+
+        context.Reader.ReadStartDocument();
+
+        while (context.Reader.ReadBsonType() != BsonType.EndOfDocument)
+        {
+            var headerName = context.Reader.ReadName(Utf8NameDecoder.Instance);
+            var headerValue = context.Reader.ReadString();
+
+            value.Add(headerName, headerValue);
+        }
+
+        context.Reader.ReadEndDocument();
+
+        return new EnvelopeHeaders(value);
     }
 
     private static void SerializeHeaders(BsonSerializationContext context, EnvelopeHeaders envelopeHeaders)

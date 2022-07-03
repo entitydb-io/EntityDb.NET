@@ -57,7 +57,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         }
     }
 
-    private static ModifiedQueryOptions NewModifiedQueryOptions(bool invertFilter, bool reverseSort, int? replaceSkip, int? replaceTake)
+    private static ModifiedQueryOptions NewModifiedQueryOptions(bool invertFilter, bool reverseSort, int? replaceSkip,
+        int? replaceTake)
     {
         return new ModifiedQueryOptions
         {
@@ -92,7 +93,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
-            .CreateRepository(secondaryPreferred ? TestSessionOptions.ReadOnlySecondaryPreferred : TestSessionOptions.ReadOnly);
+            .CreateRepository(secondaryPreferred
+                ? TestSessionOptions.ReadOnlySecondaryPreferred
+                : TestSessionOptions.ReadOnly);
 
         // ACT
 
@@ -131,7 +134,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -155,7 +159,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -179,7 +184,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -203,7 +209,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
         }
@@ -227,7 +234,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -251,7 +259,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -275,7 +284,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -299,7 +309,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
         }
@@ -323,7 +334,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<object[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<object[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetAgentSignatures(query.Modify(modifiedQueryOptions));
         }
@@ -347,7 +359,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<object[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<object[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetCommands(query.Modify(modifiedQueryOptions));
         }
@@ -371,7 +384,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<ILease[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<ILease[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetLeases(query.Modify(modifiedQueryOptions));
         }
@@ -395,7 +409,8 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<ITag[]> GetActualResults(ITransactionRepository transactionRepository, ModifiedQueryOptions modifiedQueryOptions)
+        Task<ITag[]> GetActualResults(ITransactionRepository transactionRepository,
+            ModifiedQueryOptions modifiedQueryOptions)
         {
             return transactionRepository.GetTags(query.Modify(modifiedQueryOptions));
         }
@@ -417,7 +432,7 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
         foreach (var count in counts)
         {
@@ -429,20 +444,16 @@ public sealed class TransactionTests : TestsBase<Startup>
         var transaction = (transactionBuilder.Build(transactionId) as Transaction).ShouldNotBeNull();
 
         if (timeStampOverride.HasValue)
-        {
             transaction = transaction with
             {
                 TimeStamp = timeStampOverride.Value
             };
-        }
 
         if (agentSignatureOverride is not null)
-        {
             transaction = transaction with
             {
                 AgentSignature = agentSignatureOverride
             };
-        }
 
         return transaction;
     }
@@ -456,7 +467,9 @@ public sealed class TransactionTests : TestsBase<Startup>
             .ToArray();
     }
 
-    private async Task Generic_GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -475,7 +488,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
             .Append(CommandSeeder.Create())
@@ -496,7 +509,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -511,11 +525,11 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var firstTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var secondTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
@@ -539,7 +553,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         secondTransactionInserted.ShouldBeFalse();
     }
 
-    private async Task Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -554,7 +569,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var transaction = (transactionBuilder
                 .Append(CommandSeeder.Create())
@@ -585,7 +600,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         transactionInserted.ShouldBeFalse();
     }
 
-    private async Task Generic_GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -636,7 +653,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -657,11 +676,11 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var firstTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
         var secondTransactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
@@ -690,8 +709,10 @@ public sealed class TransactionTests : TestsBase<Startup>
         firstTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
         secondTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
 
-        var firstCommandTransactionStep = firstTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
+        var firstCommandTransactionStep = firstTransaction.Steps[0]
+            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
+        var secondCommandTransactionStep = secondTransaction.Steps[0]
+            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         firstCommandTransactionStep.EntityVersionNumber.ShouldBe(secondCommandTransactionStep.EntityVersionNumber);
 
@@ -701,7 +722,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -716,7 +738,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
             .Add(tag)
@@ -735,7 +757,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         transactionInserted.ShouldBeTrue();
     }
 
-    private async Task Generic_GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -750,7 +773,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
             .Add(lease)
@@ -769,7 +792,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         transactionInserted.ShouldBeFalse();
     }
 
-    private async Task Generic_GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -828,7 +853,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         expectedTransactionTimeStamps.Contains(annotatedAgentSignatures[0].TransactionTimeStamp).ShouldBeTrue();
     }
 
-    private async Task Generic_GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -888,7 +914,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         expectedTransactionTimeStamps.Contains(annotatedCommands[0].TransactionTimeStamp).ShouldBeTrue();
     }
 
-    private async Task Generic_GivenEntityInserted_WhenGettingEntity_ThenReturnEntity<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenEntityInserted_WhenGettingEntity_ThenReturnEntity<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -926,7 +953,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         actualEntity.ShouldBeEquivalentTo(expectedEntity);
     }
 
-    private async Task Generic_GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -941,7 +969,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
         var tag = new Tag("Foo", "Bar");
 
@@ -984,7 +1012,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         actualFinalTags.ShouldBeEmpty();
     }
 
-    private async Task Generic_GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -999,7 +1028,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId, default);
+            .CreateForSingleEntity(default!, entityId);
 
         var lease = new Lease("Foo", "Bar", "Baz");
 
@@ -1042,7 +1071,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         actualFinalLeases.ShouldBeEmpty();
     }
 
-    private async Task Generic_GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -1057,7 +1088,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
             .Append(expectedCommand)
@@ -1081,7 +1112,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         transaction.Steps.Length.ShouldBe(1);
 
-        var commandTransactionStep = transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
+        var commandTransactionStep =
+            transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         commandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
@@ -1090,7 +1122,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         newCommands[0].ShouldBeEquivalentTo(expectedCommand);
     }
 
-    private async Task Generic_GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand<
+            TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
@@ -1105,7 +1139,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default, default);
+            .CreateForSingleEntity(default!, default);
 
         var firstTransaction = transactionBuilder
             .Append(new Count(1))
@@ -1138,7 +1172,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         secondTransaction.Steps.Length.ShouldBe(1);
 
-        var secondCommandTransactionStep = secondTransaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
+        var secondCommandTransactionStep = secondTransaction.Steps[0]
+            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
 
         secondCommandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(2));
 
@@ -1147,7 +1182,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         newCommands[0].ShouldBeEquivalentTo(expectedCommand);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         const ulong timeSpanInMinutes = 60UL;
@@ -1190,15 +1227,11 @@ public sealed class TransactionTests : TestsBase<Startup>
                 agentSignature, commands, leases, tags);
 
             if (i == lteInMinutes)
-            {
                 lte = currentTimeStamp;
-            }
-            else if (i == gteInMinutes)
-            {
-                gte = currentTimeStamp;
-            }
+            else if (i == gteInMinutes) gte = currentTimeStamp;
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,
+                new[] { i },
                 currentTimeStamp, agentSignature);
 
             transactions.Add(transaction);
@@ -1224,7 +1257,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         const ulong numberOfTransactionIds = 10UL;
@@ -1257,15 +1292,14 @@ public sealed class TransactionTests : TestsBase<Startup>
 
             var tags = new[] { new CountTag(i) };
 
-            expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, agentSignature, commands,
+            expectedObjects.Add(i == whichTransactionId, currentTransactionId, currentEntityId, agentSignature,
+                commands,
                 leases, tags);
 
-            if (i == whichTransactionId)
-            {
-                transactionId = currentTransactionId;
-            }
+            if (i == whichTransactionId) transactionId = currentTransactionId;
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,
+                new[] { i },
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1290,7 +1324,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         const ulong numberOfEntityIds = 10UL;
@@ -1326,12 +1362,10 @@ public sealed class TransactionTests : TestsBase<Startup>
             expectedObjects.Add(i == whichEntityId, currentTransactionId, currentEntityId, agentSignature, commands,
                 leases, tags);
 
-            if (i == whichEntityId)
-            {
-                entityId = currentEntityId;
-            }
+            if (i == whichEntityId) entityId = currentEntityId;
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,
+                new[] { i },
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1356,7 +1390,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task
+        Generic_GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects<TEntity>(
+            TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         const ulong numberOfVersionNumbers = 20;
@@ -1398,7 +1434,8 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects<TEntity>(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects<TEntity>(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
         const ulong countTo = 20UL;
@@ -1433,7 +1470,8 @@ public sealed class TransactionTests : TestsBase<Startup>
             expectedObjects.Add(gte <= i && i <= lte, currentTransactionId, currentEntityId, agentSignature, commands,
                 leases, tags);
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId,
+                new[] { i },
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1457,12 +1495,10 @@ public sealed class TransactionTests : TestsBase<Startup>
     }
 
 
-
-
-
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenReadOnlyMode_WhenPuttingTransaction_ThenCannotWriteInReadOnlyModeExceptionIsLogged(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1473,7 +1509,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenNonUniqueTransactionIds_WhenPuttingTransactions_ThenSecondPutReturnsFalse(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1484,7 +1521,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenReturnFalse(TransactionsAdder transactionsAdder,
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1495,7 +1533,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenVersionNumberZero_WhenInsertingCommands_ThenVersionZeroReservedExceptionIsLogged(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1506,7 +1545,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenNonUniqueVersionNumbers_WhenInsertingCommands_ThenOptimisticConcurrencyExceptionIsLogged(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1517,7 +1557,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue(TransactionsAdder transactionsAdder,
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1528,7 +1569,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse(TransactionsAdder transactionsAdder,
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1539,7 +1581,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenCommandInserted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1550,7 +1593,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1561,7 +1605,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenEntityInserted_WhenGettingEntity_ThenReturnEntity(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenEntityInserted_WhenGettingEntity_ThenReturnEntity(TransactionsAdder transactionsAdder,
+        EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1572,7 +1617,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenEntityInsertedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1583,7 +1629,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenEntityInsertedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1594,7 +1641,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedCommand(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1605,7 +1653,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedCommand(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1616,7 +1665,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionTimeStamp_ThenReturnExpectedObjects(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1627,7 +1677,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAlreadyInserted_WhenQueryingByTransactionId_ThenReturnExpectedObjects(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1638,7 +1689,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAlreadyInserted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1649,7 +1701,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAlreadyInserted_WhenQueryingByEntityVersionNumber_ThenReturnExpectedObjects(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1660,7 +1713,8 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddTransactionsAndEntity))]
-    public Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+    public Task GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects(
+        TransactionsAdder transactionsAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
         (
@@ -1671,17 +1725,17 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     private class ExpectedObjects
     {
+        public readonly List<object> FalseAgentSignatures = new();
         public readonly List<object> FalseCommands = new();
         public readonly List<Id> FalseEntityIds = new();
         public readonly List<ILease> FalseLeases = new();
-        public readonly List<object> FalseAgentSignatures = new();
         public readonly List<ITag> FalseTags = new();
         public readonly List<Id> FalseTransactionIds = new();
+        public readonly List<object> TrueAgentSignatures = new();
 
         public readonly List<object> TrueCommands = new();
         public readonly List<Id> TrueEntityIds = new();
         public readonly List<ILease> TrueLeases = new();
-        public readonly List<object> TrueAgentSignatures = new();
         public readonly List<ITag> TrueTags = new();
         public readonly List<Id> TrueTransactionIds = new();
 

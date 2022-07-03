@@ -110,8 +110,7 @@ internal class MongoDbAtlasClient : IDisposable
     {
         var getRoleResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}")
+            Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}")
         });
 
         return getRoleResponse.StatusCode switch
@@ -152,9 +151,7 @@ internal class MongoDbAtlasClient : IDisposable
 
         var createUserResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Post,
-            RequestUri = GetUri($"groups/{_groupId}/databaseUsers"),
-            Content = content
+            Method = HttpMethod.Post, RequestUri = GetUri($"groups/{_groupId}/databaseUsers"), Content = content
         });
 
         if (createUserResponse.IsSuccessStatusCode)
@@ -169,8 +166,7 @@ internal class MongoDbAtlasClient : IDisposable
     {
         var getClusterResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
+            Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
         });
 
         if (!getClusterResponse.IsSuccessStatusCode)
@@ -181,7 +177,6 @@ internal class MongoDbAtlasClient : IDisposable
         var responseStream = await getClusterResponse.Content.ReadAsStreamAsync();
 
         return await JsonSerializer.DeserializeAsync<Cluster>(responseStream);
-
     }
 
     public static async Task<MongoDbAtlasClient> Create(string groupName, string publicKey, string privateKey)
@@ -204,6 +199,5 @@ internal class MongoDbAtlasClient : IDisposable
             .Single(group => group.Name == groupName);
 
         return new MongoDbAtlasClient(group.Id, publicKey, privateKey);
-
     }
 }
