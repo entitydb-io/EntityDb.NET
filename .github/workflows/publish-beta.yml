@@ -32,7 +32,12 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test EntityDb.sln --no-restore -c Debug
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Publish Coverage Results
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ./TestResults/**/*.xml
       - name: Pack Projects into Nuget Packages
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
