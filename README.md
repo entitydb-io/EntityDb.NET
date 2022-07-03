@@ -25,25 +25,28 @@ information on the statement. (If I'm wrong, you should consider getting a new b
 
 ## How does EntityDb.NET implement Event Sourcing?
 
-There are five core objects at the heart of this implementation
+There are several core objects at the heart of this implementation. Encalsulating these objects are various repositories.
 
-1. Transactions
-2. Agent
-3. Commands
-4. Tags
-5. Leases
+1. Transaction Repository
+   - Agents
+   - Commands
+   - Tags
+   - Leases
+2. Snapshot Repository
+   - Snapshots
+2. Entity Repository
+   - Transaction Repository
+   - Optional: Snapshot Repository
+3. Projection Repository
+   - Transaction Repository
+   - Optional: Snapshot Repository
 
 ### Transactions
 
-A transaction represents an atomic operation on multiple entities. A transaction is ideally* committed atomically or not
+A transaction represents an atomic operation on multiple entities. A transaction is committed atomically or not
 at all. If some step in the transaction fails, the entire transaction should fail.
 
-*In the MongoDb implementation, the transaction _is_ committed atomically. However, it is possible in the future that
-there will be implementations that are not capable of doing this if you want to use tags and/or leases. An example would
-be EventStore, which provides no ability to enforce uniqueness constraints in its transaction. Such implementations will
-need a complimentary transaction in order to make use of tags and leases.
-
-### Agent
+### Agents
 
 An agent is an actor that can execute transactions. For example, if a transaction is initiated via an HTTP API, you
 might use the `HttpContextAgent` - it's signature includes headers and connection information, and it uses the
@@ -73,3 +76,35 @@ and the `Value` is whatever username the member wants to use. If an attempt to c
 violate the uniqueness constraint, it will be rejected. (This is obnoxious behavior for the user, though, so the bank
 should check before attempting to commit to see if the username is available and give immediate feedback to choose a
 different username).
+
+### Snapshots
+
+A snapshot is a stateful object at a given point in time. They always have an identifier and a version number.
+Together, the identifier and version number called a pointer. You can request different versions of a given snapshot
+by using different pointers!
+
+In the context of snapshots, the reserved version number is reserved for pointing to the latest snapshot.
+So if you want the latest version, you use a pointer with the exact id and the reserved version number.
+If you want a specific version, you can create pointer with the exact id and version number you want.
+
+The balance on your bank account is a snapshot. You can build that snapshot by summing all of the deposits and
+withdrawls on your account. If you look at the bank statements, you will most likely see the snapshot of each bank
+account for that statement, along with all of the deposits, withdrawls, and interest.
+
+### Entities
+
+An entity is conceptually an aggregate root inside of a bounded context, and it extends the concept of a snapshot.
+In the banking example, there are multiple entities. You have a membership at the bank. That's an entity. You probably
+have a checking account. That's an entity. And you might even have a savings account. That is also an entity!
+
+Which bounded contexts these entiies live in is up to the business.
+
+### Projections
+
+A projection is an aggregate, but notably _not_ the aggregate root, and it too extends the concept of a snapshot.
+In the banking example, one example of a projection could be your entire account balance. It can be anything, though!
+You are not constrained in what data you want to use for your projection.
+
+### Notifications
+
+- Coming Soon!
