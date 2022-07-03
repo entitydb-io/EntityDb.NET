@@ -18,7 +18,7 @@ public record Count(ulong Number) : IReducer<TestEntity>, IReducer<OneToOneProje
     {
         return projection with
         {
-            EntityVersionNumber = projection.EntityVersionNumber.Next()
+            VersionNumber = projection.VersionNumber.Next(),
         };
     }
 }

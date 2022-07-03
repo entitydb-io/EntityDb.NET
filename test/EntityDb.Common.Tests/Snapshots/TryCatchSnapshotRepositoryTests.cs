@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using EntityDb.Common.Entities;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
@@ -20,40 +21,42 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
     {
     }
 
-    [Fact]
-    public async Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged()
+    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(EntityAdder entityAdder)
+        where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
         var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
 
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TestEntity>>(MockBehavior.Strict);
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TEntity>>(MockBehavior.Strict);
 
         snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshot(It.IsAny<Id>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.PutSnapshot(It.IsAny<Id>(), It.IsAny<TestEntity>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         snapshotRepositoryMock
-            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Id[]>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Pointer[]>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
+            entityAdder.AddDependencies.Invoke(serviceCollection);
+
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TestEntity>
+        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TEntity>
             .Create(serviceScope.ServiceProvider, snapshotRepositoryMock.Object);
 
         // ACT
 
-        var snapshot = await tryCatchSnapshotRepository.GetSnapshot(default);
+        var snapshot = await tryCatchSnapshotRepository.GetSnapshotOrDefault(default);
         var inserted = await tryCatchSnapshotRepository.PutSnapshot(default, default!);
         var deleted = await tryCatchSnapshotRepository.DeleteSnapshots(default!);
 
@@ -64,5 +67,16 @@ public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
         deleted.ShouldBeFalse();
 
         loggerVerifier.Invoke(Times.Exactly(3));
+    }
+
+    [Theory]
+    [MemberData(nameof(AddEntity))]
+    public Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged(EntityAdder entityAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entityAdder.EntityType },
+            new object?[] { entityAdder }
+        );
     }
 }

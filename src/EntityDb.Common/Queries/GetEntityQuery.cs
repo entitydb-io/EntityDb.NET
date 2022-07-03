@@ -2,20 +2,26 @@
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.ValueObjects;
+using System.Collections.Generic;
 
 namespace EntityDb.Common.Queries;
 
-internal abstract record GetEntityQuery(Id EntityId) : ICommandQuery
+internal sealed record GetEntityCommandsQuery(Pointer EntityPointer, VersionNumber SnapshotVersionNumber) : ICommandQuery
 {
-    protected abstract TFilter GetSubFilter<TFilter>(ICommandFilterBuilder<TFilter> builder);
-
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
-        return builder.And
-        (
-            builder.EntityIdIn(EntityId),
-            GetSubFilter(builder)
-        );
+        var filters = new List<TFilter>
+        {
+            builder.EntityIdIn(EntityPointer.Id),
+            builder.EntityVersionNumberGte(SnapshotVersionNumber.Next())
+        };
+
+        if (EntityPointer.VersionNumber != VersionNumber.MinValue)
+        {
+            filters.Add(builder.EntityVersionNumberLte(EntityPointer.VersionNumber));
+        }
+
+        return builder.And(filters.ToArray());
     }
 
     public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)

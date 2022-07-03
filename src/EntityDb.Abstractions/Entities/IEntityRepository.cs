@@ -2,6 +2,8 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,22 +25,25 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// </summary>
     ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
-    /// <summary>
-    ///     Returns the current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.
-    /// </summary>
-    /// <param name="entityId">The id of the entity.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.</returns>
-    Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default);
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    public Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
+        => GetSnapshot(entityId, cancellationToken);
+
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default)
+        => GetSnapshot(entityId + lteVersionNumber, cancellationToken);
 
     /// <summary>
-    ///     Returns a previous state of <typeparamref name="TEntity" />.
+    ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Pointer"/>.
     /// </summary>
-    /// <param name="entityId">The id of the entity.</param>
-    /// <param name="lteVersionNumber">The version of the entity to fetch.</param>
+    /// <param name="entityPointer">A pointer to the entity.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>A previous state of <typeparamref name="TEntity" />.</returns>
-    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber, CancellationToken cancellationToken = default);
+    /// <returns>The snapshot of a <typeparamref name="TEntity" /> for <paramref name="entityPointer"/>.</returns>
+    Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Inserts a single transaction with an atomic commit.

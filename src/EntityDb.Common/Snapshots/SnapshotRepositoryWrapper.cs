@@ -19,19 +19,19 @@ internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourc
         _snapshotRepository = snapshotRepository;
     }
 
-    public virtual Task<bool> PutSnapshot(Id snapshotId, TSnapshot snapshot, CancellationToken cancellationToken = default)
+    public virtual Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        return WrapCommand(() => _snapshotRepository.PutSnapshot(snapshotId, snapshot, cancellationToken));
+        return WrapCommand(() => _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken));
     }
 
-    public virtual Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+    public virtual Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _snapshotRepository.GetSnapshot(snapshotId, cancellationToken));
+        return WrapQuery(() => _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken));
     }
 
-    public virtual Task<bool> DeleteSnapshots(Id[] snapshotIds, CancellationToken cancellationToken = default)
+    public virtual Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
     {
-        return WrapCommand(() => _snapshotRepository.DeleteSnapshots(snapshotIds, cancellationToken));
+        return WrapCommand(() => _snapshotRepository.DeleteSnapshots(snapshotPointers, cancellationToken));
     }
 
     public override async ValueTask DisposeAsync()

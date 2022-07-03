@@ -8,28 +8,28 @@ namespace EntityDb.InMemory.Sessions;
 
 internal class InMemorySession<TSnapshot> : IInMemorySession<TSnapshot>
 {
-    private readonly ConcurrentDictionary<Id, TSnapshot> _dictionary = new();
+    private readonly ConcurrentDictionary<Pointer, TSnapshot> _dictionary = new();
     
-    public async Task<bool> Insert(Id snapshotId, TSnapshot snapshot)
+    public async Task<bool> Insert(Pointer snapshotPointer, TSnapshot snapshot)
     {
         await Task.Yield();
         
-        return _dictionary.TryGetValue(snapshotId, out var previousSnapshot)
-            ? _dictionary.TryUpdate(snapshotId, snapshot, previousSnapshot)
-            : _dictionary.TryAdd(snapshotId, snapshot);
+        return _dictionary.TryGetValue(snapshotPointer, out var previousSnapshot)
+            ? _dictionary.TryUpdate(snapshotPointer, snapshot, previousSnapshot)
+            : _dictionary.TryAdd(snapshotPointer, snapshot);
     }
 
-    public async Task<TSnapshot?> Get(Id snapshotId)
+    public async Task<TSnapshot?> Get(Pointer snapshotPointer)
     {
         await Task.Yield();
 
-        return _dictionary.GetValueOrDefault(snapshotId);
+        return _dictionary.GetValueOrDefault(snapshotPointer);
     }
 
-    public async Task<bool> Delete(IEnumerable<Id> snapshotIds)
+    public async Task<bool> Delete(IEnumerable<Pointer> snapshotPointers)
     {
         await Task.Yield();
 
-        return snapshotIds.All(snapshotId => _dictionary.TryRemove(snapshotId, out _));
+        return snapshotPointers.All(snapshotPointer => _dictionary.TryRemove(snapshotPointer, out _));
     }
 }

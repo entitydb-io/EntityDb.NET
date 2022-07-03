@@ -1,3 +1,6 @@
+using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
+
 namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
@@ -7,7 +10,13 @@ namespace EntityDb.Abstractions.ValueObjects;
 public readonly record struct VersionNumber(ulong Value)
 {
     /// <summary>
-    ///     This constant represents the minimum version number, which is typically reserved for the initial state of an object.
+    ///     This constant represents the minimum possible version number.
+    ///     
+    ///     In the context of an <see cref="ITransactionRepository"/>, 
+    ///     this value is reserved to indicate there is no previous version number.
+    ///     
+    ///     In the context of an <see cref="Pointer"/>,
+    ///     this value is revervd to point to the latest snapshot.
     /// </summary>
     public static readonly VersionNumber MinValue = new(ulong.MinValue);
     
