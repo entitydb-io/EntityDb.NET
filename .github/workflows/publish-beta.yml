@@ -1,12 +1,4 @@
-on:
-  pull_request:
-    paths:
-      - '.github/workflows/publish-beta.yml'
-      - 'global.json'
-      - 'Directory.Build.props'
-      - 'EntityDb.sln'
-      - 'src/**'
-      - 'test/**'
+on: pull_request
 
 name: Publish to Beta
 
