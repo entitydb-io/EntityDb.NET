@@ -4,7 +4,6 @@ using EntityDb.Common.Envelopes;
 using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Serializers;
 using EntityDb.MongoDb.Sessions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -17,10 +16,8 @@ namespace EntityDb.MongoDb.Transactions;
 
 internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
 {
-    private readonly string _connectionString;
-    private readonly string _databaseName;
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
-    private readonly IOptionsFactory<TransactionSessionOptions> _optionsFactory;
+    private readonly IOptionsFactory<MongoTransactionSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
     static MongoDbTransactionRepositoryFactory()
@@ -33,41 +30,39 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     public MongoDbTransactionRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        IOptionsFactory<TransactionSessionOptions> optionsFactory,
-        IEnvelopeService<BsonDocument> envelopeService,
-        string connectionString,
-        string databaseName
+        IOptionsFactory<MongoTransactionSessionOptions> optionsFactory,
+        IEnvelopeService<BsonDocument> envelopeService
     )
     {
         _serviceProvider = serviceProvider;
         _optionsFactory = optionsFactory;
         _envelopeService = envelopeService;
-        _connectionString = connectionString;
-        _databaseName = databaseName;
     }
 
-    public TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
+    public MongoTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
     {
         return _optionsFactory.Create(transactionSessionOptionsName);
     }
 
-    public async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+    public async Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
-        var mongoClient = new MongoClient(_connectionString);
+        var mongoClient = new MongoClient(options.ConnectionString);
 
-        var mongoDatabase = mongoClient.GetDatabase(_databaseName);
+        var mongoDatabase = mongoClient.GetDatabase(options.Database);
 
         var clientSessionHandle =
             await mongoClient.StartSessionAsync(new ClientSessionOptions { CausalConsistency = true },
                 cancellationToken);
+
+
 
         return MongoSession.Create
         (
             _serviceProvider,
             mongoDatabase,
             clientSessionHandle,
-            transactionSessionOptions
+            options
         );
     }
 
@@ -83,16 +78,5 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         );
 
         return TryCatchTransactionRepository.Create(_serviceProvider, mongoDbTransactionRepository);
-    }
-
-    public static MongoDbTransactionRepositoryFactory Create(IServiceProvider serviceProvider,
-        string connectionString, string databaseName)
-    {
-        return ActivatorUtilities.CreateInstance<MongoDbTransactionRepositoryFactory>
-        (
-            serviceProvider,
-            connectionString,
-            databaseName
-        );
     }
 }

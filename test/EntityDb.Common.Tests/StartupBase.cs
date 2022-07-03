@@ -1,8 +1,6 @@
 ﻿using System;
 using EntityDb.Common.Agents;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Tests;
@@ -22,44 +20,5 @@ public abstract class StartupBase : IStartup
         // Agent Accessor
 
         serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
-
-        // Snapshot Session Options
-
-        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write,
-            options => { options.ReadOnly = false; });
-
-        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
-        {
-            options.ReadOnly = true;
-            options.SecondaryPreferred = false;
-        });
-
-        serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-        {
-            options.ReadOnly = true;
-            options.SecondaryPreferred = true;
-        });
-
-        // Transaction Session Options
-
-        serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.Write, options =>
-        {
-            options.ReadOnly = false;
-            options.WriteTimeout = TimeSpan.FromSeconds(1);
-        });
-
-        serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
-        {
-            options.ReadOnly = true;
-            options.SecondaryPreferred = false;
-            options.ReadTimeout = TimeSpan.FromSeconds(1);
-        });
-
-        serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-        {
-            options.ReadOnly = true;
-            options.SecondaryPreferred = true;
-            options.ReadTimeout = TimeSpan.FromSeconds(1);
-        });
     }
 }

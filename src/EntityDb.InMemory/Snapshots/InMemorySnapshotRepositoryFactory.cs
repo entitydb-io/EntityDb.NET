@@ -13,14 +13,14 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
     ISnapshotRepositoryFactory<TSnapshot>
 {
     private readonly IInMemorySession<TSnapshot> _inMemorySession;
-    private readonly IOptionsFactory<SnapshotSessionOptions> _optionsFactory;
+    private readonly IOptionsFactory<InMemorySnapshotSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
     public InMemorySnapshotRepositoryFactory
     (
         IServiceProvider serviceProvider,
         IInMemorySession<TSnapshot> inMemorySession,
-        IOptionsFactory<SnapshotSessionOptions> optionsFactory
+        IOptionsFactory<InMemorySnapshotSessionOptions> optionsFactory
     )
     {
         _serviceProvider = serviceProvider;
@@ -33,9 +33,9 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
     {
         await Task.Yield();
 
-        var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
+        var options = _optionsFactory.Create(snapshotSessionOptionsName);
 
-        var inMemorySession = snapshotSessionOptions.ReadOnly
+        var inMemorySession = options.ReadOnly
             ? new ReadOnlyInMemorySession<TSnapshot>(_inMemorySession)
             : _inMemorySession;
 

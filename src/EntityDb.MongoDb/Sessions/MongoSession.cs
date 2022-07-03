@@ -1,6 +1,5 @@
 ﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -18,7 +17,7 @@ internal record MongoSession
     ILogger<MongoSession> Logger,
     IMongoDatabase MongoDatabase,
     IClientSessionHandle ClientSessionHandle,
-    TransactionSessionOptions TransactionSessionOptions
+    MongoTransactionSessionOptions Options
 ) : DisposableResourceBaseRecord, IMongoSession
 {
     private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
@@ -75,7 +74,7 @@ internal record MongoSession
             .GetCollection<BsonDocument>(collectionName)
             .WithReadPreference(GetReadPreference())
             .WithReadConcern(GetReadConcern())
-            .Find(ClientSessionHandle, filter, new FindOptions { MaxTime = TransactionSessionOptions.ReadTimeout })
+            .Find(ClientSessionHandle, filter, new FindOptions { MaxTime = Options.ReadTimeout })
             .Project(projection);
 
         if (sort is not null)
@@ -162,9 +161,9 @@ internal record MongoSession
             );
     }
 
-    public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
+    public IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options)
     {
-        return this with { TransactionSessionOptions = transactionSessionOptions };
+        return this with { Options = options };
     }
 
     public void StartTransaction()
@@ -174,7 +173,7 @@ internal record MongoSession
         ClientSessionHandle.StartTransaction(new TransactionOptions
         (
             writeConcern: WriteConcern,
-            maxCommitTime: TransactionSessionOptions.WriteTimeout
+            maxCommitTime: Options.WriteTimeout
         ));
     }
 
@@ -203,12 +202,12 @@ internal record MongoSession
 
     private ReadPreference GetReadPreference()
     {
-        if (!TransactionSessionOptions.ReadOnly)
+        if (!Options.ReadOnly)
         {
             return ReadPreference.Primary;
         }
 
-        return TransactionSessionOptions.SecondaryPreferred
+        return Options.SecondaryPreferred
             ? ReadPreference.SecondaryPreferred
             : ReadPreference.PrimaryPreferred;
     }
@@ -223,7 +222,7 @@ internal record MongoSession
 
     private void AssertNotReadOnly()
     {
-        if (TransactionSessionOptions.ReadOnly)
+        if (Options.ReadOnly)
         {
             throw new CannotWriteInReadOnlyModeException();
         }
@@ -234,10 +233,10 @@ internal record MongoSession
         IServiceProvider serviceProvider,
         IMongoDatabase mongoDatabase,
         IClientSessionHandle clientSessionHandle,
-        TransactionSessionOptions transactionSessionOptions
+        MongoTransactionSessionOptions options
     )
     {
         return ActivatorUtilities.CreateInstance<MongoSession>(serviceProvider, mongoDatabase, clientSessionHandle,
-            transactionSessionOptions);
+            options);
     }
 }

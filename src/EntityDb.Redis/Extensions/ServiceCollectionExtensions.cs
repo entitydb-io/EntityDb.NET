@@ -6,7 +6,6 @@ using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
@@ -29,29 +28,24 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <typeparam name="TSnapshot">The type of the snapshot stored in the repository.</typeparam>
     /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="keyNamespace">The namespace used to build a Redis key.</param>
-    /// <param name="getConnectionString">A function that retrieves the Redis connection string.</param>
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
-    public static void AddRedisSnapshots<TSnapshot>(this IServiceCollection serviceCollection, string keyNamespace,
-        Func<IConfiguration, string> getConnectionString, bool testMode = false)
+    public static void AddRedisSnapshots<TSnapshot>(this IServiceCollection serviceCollection, bool testMode = false)
     {
         serviceCollection.AddJsonElementEnvelopeService();
 
         serviceCollection.AddSingleton<ConnectionMultiplexerFactory>();
 
+        serviceCollection.Add<RedisSnapshotRepositoryFactory<TSnapshot>>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
+        );
+
         serviceCollection.Add
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
-            serviceProvider =>
-            {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-                var connectionString = getConnectionString.Invoke(configuration);
-
-                return RedisSnapshotRepositoryFactory<TSnapshot>
-                    .Create(serviceProvider, connectionString, keyNamespace)
-                    .UseTestMode(testMode);
-            }
+            serviceProvider => serviceProvider
+                .GetRequiredService<RedisSnapshotRepositoryFactory<TSnapshot>>()
+                .UseTestMode(testMode)
         );
     }
 }

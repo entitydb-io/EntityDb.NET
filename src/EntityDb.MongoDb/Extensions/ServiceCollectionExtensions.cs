@@ -4,7 +4,6 @@ using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.MongoDb.Extensions;
@@ -27,28 +26,23 @@ public static class ServiceCollectionExtensions
     ///     collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="databaseName">The name of the MongoDB database.</param>
-    /// <param name="getConnectionString">A function that retrieves the MongoDB connection string.</param>
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
     public static void AddMongoDbTransactions(this IServiceCollection serviceCollection,
-        string databaseName, Func<IConfiguration, string> getConnectionString,
         bool testMode = false)
     {
         serviceCollection.AddBsonDocumentEnvelopeService(true);
 
+        serviceCollection.Add<MongoDbTransactionRepositoryFactory>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
+        );
+
         serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
-            serviceProvider =>
-            {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-                var connectionString = getConnectionString.Invoke(configuration);
-
-                return MongoDbTransactionRepositoryFactory
-                    .Create(serviceProvider, connectionString, databaseName)
-                    .UseTestMode(testMode);
-            }
+            serviceProvider => serviceProvider
+                .GetRequiredService<MongoDbTransactionRepositoryFactory>()
+                .UseTestMode(testMode)
         );
     }
 }

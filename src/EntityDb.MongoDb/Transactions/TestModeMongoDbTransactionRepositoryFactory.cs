@@ -1,5 +1,4 @@
-﻿using EntityDb.Common.Transactions;
-using EntityDb.MongoDb.Sessions;
+﻿using EntityDb.MongoDb.Sessions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,17 +15,22 @@ internal class
     {
     }
 
-    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+    public override async Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
         if (_sessions.HasValue)
         {
             return _sessions.Value.TestMode
-                .WithTransactionSessionOptions(transactionSessionOptions);
+                .WithTransactionSessionOptions(options);
         }
 
-        var normalSession =
-            await base.CreateSession(new TransactionSessionOptions { ReadOnly = false }, cancellationToken);
+        var normalOptions = new MongoTransactionSessionOptions()
+        {
+            ConnectionString = options.ConnectionString,
+            Database = options.Database,
+        };
+
+        var normalSession = await base.CreateSession(normalOptions, cancellationToken);
 
         var testModeSession = new TestModeMongoSession(normalSession);
 
@@ -35,7 +39,7 @@ internal class
         _sessions = (normalSession, testModeSession);
 
         return _sessions.Value.TestMode
-            .WithTransactionSessionOptions(transactionSessionOptions);
+            .WithTransactionSessionOptions(options);
     }
 
     public override async ValueTask DisposeAsync()

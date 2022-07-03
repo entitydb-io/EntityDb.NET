@@ -1,5 +1,4 @@
 ﻿using EntityDb.Common.Disposables;
-using EntityDb.Common.Transactions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
@@ -46,9 +45,9 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         return MongoSession.Delete(collectionName, filterDefinition, cancellationToken);
     }
 
-    public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
+    public IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options)
     {
-        return this with { MongoSession = MongoSession.WithTransactionSessionOptions(transactionSessionOptions) };
+        return this with { MongoSession = MongoSession.WithTransactionSessionOptions(options) };
     }
 
     public void StartTransaction()

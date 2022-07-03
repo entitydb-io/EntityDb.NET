@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -15,8 +14,7 @@ internal sealed record RedisSession
 (
     ILogger<RedisSession> Logger,
     IDatabase Database,
-    string KeyNamespace,
-    SnapshotSessionOptions SnapshotSessionOptions
+    RedisSnapshotSessionOptions Options
 ) : DisposableResourceBaseRecord, IRedisSession
 {
     public async Task<bool> Insert(Pointer snapshotPointer, RedisValue redisValue)
@@ -117,19 +115,19 @@ internal sealed record RedisSession
 
     private CommandFlags GetCommandFlags()
     {
-        if (!SnapshotSessionOptions.ReadOnly)
+        if (!Options.ReadOnly)
         {
             return CommandFlags.DemandMaster;
         }
 
-        return SnapshotSessionOptions.SecondaryPreferred
+        return Options.SecondaryPreferred
             ? CommandFlags.PreferReplica
             : CommandFlags.PreferMaster;
     }
 
     private void AssertNotReadOnly()
     {
-        if (SnapshotSessionOptions.ReadOnly)
+        if (Options.ReadOnly)
         {
             throw new CannotWriteInReadOnlyModeException();
         }
@@ -137,18 +135,16 @@ internal sealed record RedisSession
 
     private RedisKey GetSnapshotKey(Pointer snapshotPointer)
     {
-        return $"{KeyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
+        return $"{Options.KeyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
     }
 
     public static IRedisSession Create
     (
         IServiceProvider serviceProvider,
         IDatabase database,
-        string keyNamespace,
-        SnapshotSessionOptions snapshotSessionOptions
+        RedisSnapshotSessionOptions options
     )
     {
-        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, keyNamespace,
-            snapshotSessionOptions);
+        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, options);
     }
 }

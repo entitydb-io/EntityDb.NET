@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using EntityDb.Common.Transactions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
@@ -33,5 +32,5 @@ internal interface IMongoSession : IDisposableResource
     Task CommitTransaction(CancellationToken cancellationToken);
     Task AbortTransaction();
 
-    IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions);
+    IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options);
 }
