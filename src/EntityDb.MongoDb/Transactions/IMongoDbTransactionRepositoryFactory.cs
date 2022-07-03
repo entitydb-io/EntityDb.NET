@@ -17,9 +17,9 @@ internal interface IMongoDbTransactionRepositoryFactory : ITransactionRepository
         return CreateRepository(mongoSession);
     }
 
-    MongoTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
+    MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
 
-    Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
+    Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken);
 
     ITransactionRepository CreateRepository(IMongoSession mongoSession);

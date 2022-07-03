@@ -32,5 +32,5 @@ internal interface IMongoSession : IDisposableResource
     Task CommitTransaction(CancellationToken cancellationToken);
     Task AbortTransaction();
 
-    IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options);
+    IMongoSession WithTransactionSessionOptions(MongoDbTransactionSessionOptions options);
 }

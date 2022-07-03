@@ -44,26 +44,26 @@ public class TestsBase<TStartup>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions(true);
 
-            serviceCollection.ConfigureAll<MongoTransactionSessionOptions>(options =>
+            serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
             {
                 options.ConnectionString = "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb";
-                options.Database = "Test";
+                options.DatabaseName = "Test";
                 options.ReadTimeout = TimeSpan.FromSeconds(1);
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
-            serviceCollection.Configure<MongoTransactionSessionOptions>(TestSessionOptions.Write, options =>
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
 
-            serviceCollection.Configure<MongoTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<MongoTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;

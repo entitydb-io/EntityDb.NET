@@ -15,7 +15,7 @@ internal class
     {
     }
 
-    public override async Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
+    public override async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
         if (_sessions.HasValue)
@@ -24,10 +24,10 @@ internal class
                 .WithTransactionSessionOptions(options);
         }
 
-        var normalOptions = new MongoTransactionSessionOptions
+        var normalOptions = new MongoDbTransactionSessionOptions
         {
             ConnectionString = options.ConnectionString,
-            Database = options.Database,
+            DatabaseName = options.DatabaseName,
         };
 
         var normalSession = await base.CreateSession(normalOptions, cancellationToken);

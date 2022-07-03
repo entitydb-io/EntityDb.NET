@@ -17,7 +17,7 @@ namespace EntityDb.MongoDb.Transactions;
 internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
 {
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
-    private readonly IOptionsFactory<MongoTransactionSessionOptions> _optionsFactory;
+    private readonly IOptionsFactory<MongoDbTransactionSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
     static MongoDbTransactionRepositoryFactory()
@@ -30,7 +30,7 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     public MongoDbTransactionRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        IOptionsFactory<MongoTransactionSessionOptions> optionsFactory,
+        IOptionsFactory<MongoDbTransactionSessionOptions> optionsFactory,
         IEnvelopeService<BsonDocument> envelopeService
     )
     {
@@ -39,17 +39,17 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         _envelopeService = envelopeService;
     }
 
-    public MongoTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
+    public MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
     {
         return _optionsFactory.Create(transactionSessionOptionsName);
     }
 
-    public async Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
+    public async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
         var mongoClient = new MongoClient(options.ConnectionString);
 
-        var mongoDatabase = mongoClient.GetDatabase(options.Database);
+        var mongoDatabase = mongoClient.GetDatabase(options.DatabaseName);
 
         var clientSessionHandle =
             await mongoClient.StartSessionAsync(new ClientSessionOptions { CausalConsistency = true },

@@ -17,12 +17,12 @@ internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableR
         _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
     }
 
-    public virtual MongoTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
+    public virtual MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
     {
         return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
     }
 
-    public virtual Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
+    public virtual Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
         return _mongoDbTransactionRepositoryFactory.CreateSession(options, cancellationToken);

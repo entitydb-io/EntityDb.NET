@@ -5,11 +5,11 @@ namespace EntityDb.MongoDb.Sessions;
 /// <summary>
 /// 
 /// </summary>
-public class MongoTransactionSessionOptions
+public class MongoDbTransactionSessionOptions
 {
     public string ConnectionString { get; set; } = default!;
 
-    public string Database { get; set; } = default!;
+    public string DatabaseName { get; set; } = default!;
 
     /// <summary>
     ///     If <c>true</c>, indicates the agent only intends to execute queries.

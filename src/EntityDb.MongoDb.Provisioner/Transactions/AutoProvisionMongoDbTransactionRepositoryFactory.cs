@@ -42,7 +42,7 @@ internal sealed class
         _logger.LogInformation("MongoDb Auto-Provisioning Lock Released");
     }
 
-    public override async Task<IMongoSession> CreateSession(MongoTransactionSessionOptions options,
+    public override async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
         var mongoSession = await base.CreateSession(options, cancellationToken);

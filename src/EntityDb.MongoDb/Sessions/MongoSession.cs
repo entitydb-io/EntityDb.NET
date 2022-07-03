@@ -17,7 +17,7 @@ internal record MongoSession
     ILogger<MongoSession> Logger,
     IMongoDatabase MongoDatabase,
     IClientSessionHandle ClientSessionHandle,
-    MongoTransactionSessionOptions Options
+    MongoDbTransactionSessionOptions Options
 ) : DisposableResourceBaseRecord, IMongoSession
 {
     private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
@@ -161,7 +161,7 @@ internal record MongoSession
             );
     }
 
-    public IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options)
+    public IMongoSession WithTransactionSessionOptions(MongoDbTransactionSessionOptions options)
     {
         return this with { Options = options };
     }
@@ -233,7 +233,7 @@ internal record MongoSession
         IServiceProvider serviceProvider,
         IMongoDatabase mongoDatabase,
         IClientSessionHandle clientSessionHandle,
-        MongoTransactionSessionOptions options
+        MongoDbTransactionSessionOptions options
     )
     {
         return ActivatorUtilities.CreateInstance<MongoSession>(serviceProvider, mongoDatabase, clientSessionHandle,

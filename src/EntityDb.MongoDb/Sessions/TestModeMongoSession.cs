@@ -45,7 +45,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         return MongoSession.Delete(collectionName, filterDefinition, cancellationToken);
     }
 
-    public IMongoSession WithTransactionSessionOptions(MongoTransactionSessionOptions options)
+    public IMongoSession WithTransactionSessionOptions(MongoDbTransactionSessionOptions options)
     {
         return this with { MongoSession = MongoSession.WithTransactionSessionOptions(options) };
     }
