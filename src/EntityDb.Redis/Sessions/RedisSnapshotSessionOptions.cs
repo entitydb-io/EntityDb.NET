@@ -1,12 +1,22 @@
-﻿namespace EntityDb.Redis.Sessions;
+﻿using EntityDb.Abstractions.Snapshots;
+using StackExchange.Redis;
+
+namespace EntityDb.Redis.Sessions;
 
 /// <summary>
-/// 
+///     Configuration options for the Redis implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
 public class RedisSnapshotSessionOptions<TSnapshot>
 {
+    /// <summary>
+    ///     A connection string that is compatible with <see cref="ConfigurationOptions.Parse(string)"/>
+    /// </summary>
     public string ConnectionString { get; set; } = default!;
 
+    /// <summary>
+    ///     Choose a key namspace for snapshots. Snapshots are stored with keys in the following format:
+    ///     <c>{KeyNamespace}#{SnapshotId}@{SnapshotVersionNumber}</c>
+    /// </summary>
     public string KeyNamespace { get; set; } = default!;
 
     /// <summary>

@@ -1,14 +1,22 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Transactions;
+using MongoDB.Driver;
+using System;
 
 namespace EntityDb.MongoDb.Sessions;
 
 /// <summary>
-/// 
+///     Configuration options for the MongoDb implementation of <see cref="ITransactionRepository"/>.
 /// </summary>
 public class MongoDbTransactionSessionOptions
 {
+    /// <summary>
+    ///     A connection string that is compatible with <see cref="MongoClient(string)"/>
+    /// </summary>
     public string ConnectionString { get; set; } = default!;
 
+    /// <summary>
+    ///     The name of the database that contains the collections (AgentSignatures, Commands, Tags, Leases)
+    /// </summary>
     public string DatabaseName { get; set; } = default!;
 
     /// <summary>
