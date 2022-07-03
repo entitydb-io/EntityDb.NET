@@ -107,4 +107,4 @@ You are not constrained in what data you want to use for your projection.
 
 ### Communications
 
-- Coming Soon!
+- Coming Soon!<sup>TM</sup>
