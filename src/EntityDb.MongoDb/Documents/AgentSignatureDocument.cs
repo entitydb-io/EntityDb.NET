@@ -20,7 +20,7 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
     private static readonly AgentSignatureSortBuilder SortBuilder = new();
 
     public Id[] EntityIds { get; init; } = default!;
-    
+
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
         IEnvelopeService<BsonDocument> envelopeService,
@@ -37,7 +37,7 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
                 Data = envelopeService.Deconstruct(transaction.AgentSignature)
             }
         };
-        
+
         return new InsertDocumentsCommand<AgentSignatureDocument>
         (
             CollectionName,

@@ -14,7 +14,7 @@ internal interface IMongoSession : IDisposableResource
 
     Task Insert<TDocument>(string collectionName,
         TDocument[] bsonDocuments, CancellationToken cancellationToken);
-    
+
     Task<List<TDocument>> Find<TDocument>
     (
         string collectionName,
@@ -25,7 +25,7 @@ internal interface IMongoSession : IDisposableResource
         int? limit,
         CancellationToken cancellationToken
     );
-        
+
     Task Delete<TDocument>(string collectionName,
         FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken);
 

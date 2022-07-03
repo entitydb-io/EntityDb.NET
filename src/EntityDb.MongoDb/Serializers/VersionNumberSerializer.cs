@@ -7,7 +7,7 @@ namespace EntityDb.MongoDb.Serializers;
 internal class VersionNumberSerializer : IBsonSerializer<VersionNumber>
 {
     public Type ValueType => typeof(VersionNumber);
-    
+
     object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
     {
         return Deserialize(context, args);
@@ -18,7 +18,7 @@ internal class VersionNumberSerializer : IBsonSerializer<VersionNumber>
         var longValue = context.Reader.ReadInt64();
 
         var ulongValue = Convert.ToUInt64(longValue);
-        
+
         return new VersionNumber(ulongValue);
     }
 
@@ -35,7 +35,7 @@ internal class VersionNumberSerializer : IBsonSerializer<VersionNumber>
     public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, VersionNumber versionNumber)
     {
         var longValue = Convert.ToInt64(versionNumber.Value);
-        
+
         context.Writer.WriteInt64(longValue);
     }
 }

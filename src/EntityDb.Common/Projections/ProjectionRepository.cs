@@ -4,7 +4,6 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
@@ -45,7 +44,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
         var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken);
 
         projection = projection.Reduce(annotatedCommands);
-        
+
         if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
         {
             throw new SnapshotPointernDoesNotExistException();

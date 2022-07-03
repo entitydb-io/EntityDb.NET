@@ -28,21 +28,21 @@ internal sealed class
     private async Task AcquireLock(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Wait for MongoDb Auto-Provisioning Lock");
-        
+
         await Lock.WaitAsync(cancellationToken);
-        
+
         _logger.LogInformation("MongoDb Auto-Provisioning Lock Acquired");
     }
 
     private void ReleaseLock()
     {
         _logger.LogInformation("Release MongoDb Auto-Provisioning Lock");
-        
+
         Lock.Release();
-        
+
         _logger.LogInformation("MongoDb Auto-Provisioning Lock Released");
     }
-    
+
     public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions, CancellationToken cancellationToken)
     {
         var mongoSession = await base.CreateSession(transactionSessionOptions, cancellationToken);
@@ -52,17 +52,17 @@ internal sealed class
         if (_provisioned)
         {
             ReleaseLock();
-            
+
             return mongoSession;
         }
-        
+
         await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
             .DatabaseName, cancellationToken);
-        
+
         _provisioned = true;
-        
+
         _logger.LogInformation("MongoDb has been auto-provisioned");
-        
+
         ReleaseLock();
 
         return mongoSession;

@@ -1,11 +1,11 @@
-﻿using EntityDb.Common.Tests.Agents;
+﻿using System;
+using System.Collections.Generic;
+using EntityDb.Common.Tests.Agents;
+using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
-using System.Collections.Generic;
-using EntityDb.Mvc.Agents;
 
 namespace EntityDb.Mvc.Tests.Agents;
 

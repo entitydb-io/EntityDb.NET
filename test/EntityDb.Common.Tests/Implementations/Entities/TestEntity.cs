@@ -21,7 +21,7 @@ public record TestEntity
     {
         return new TestEntity(entityId);
     }
-    
+
     public TestEntity WithVersionNumber(VersionNumber versionNumber)
     {
         return this with { VersionNumber = versionNumber };
@@ -67,7 +67,7 @@ public record TestEntity
         {
             return ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
         }
-        
+
         return !Equals(previousMostRecentSnapshot);
     }
 }

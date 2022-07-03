@@ -26,7 +26,7 @@ internal class
         {
             ReadOnly = false
         }, cancellationToken);
-        
+
         var testModeSession = new TestModeMongoSession(normalSession);
 
         normalSession.StartTransaction();

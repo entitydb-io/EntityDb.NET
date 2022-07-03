@@ -56,7 +56,7 @@ internal record MongoSession
         AssertNotReadOnly();
 
         var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
-        
+
         Logger
             .LogInformation
             (
@@ -66,7 +66,7 @@ internal record MongoSession
                 serverSessionId,
                 bsonDocuments.Length
             );
-        
+
         await MongoDatabase
             .GetCollection<TDocument>(collectionName)
             .InsertManyAsync
@@ -75,7 +75,7 @@ internal record MongoSession
                 bsonDocuments,
                 cancellationToken: cancellationToken
             );
-        
+
         Logger
             .LogInformation
             (
@@ -125,7 +125,7 @@ internal record MongoSession
 
         var query = find.ToString();
         var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
-        
+
         Logger
             .LogInformation
             (
@@ -137,7 +137,7 @@ internal record MongoSession
             );
 
         var documents = await find.ToListAsync(cancellationToken);
-        
+
         Logger
             .LogInformation
             (
@@ -169,7 +169,7 @@ internal record MongoSession
                 serverSessionId,
                 command
             );
-        
+
         var deleteResult = await MongoDatabase
             .GetCollection<TDocument>(collectionName)
             .DeleteManyAsync

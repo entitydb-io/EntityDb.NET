@@ -56,15 +56,15 @@ internal sealed record RedisSession
                 Database.Database,
                 redisKey.ToString()
             );
-        
+
         var redisTransaction = Database.CreateTransaction();
-        
+
         var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
 
         await redisTransaction.ExecuteAsync(GetCommandFlags());
 
         var inserted = await insertedTask;
-        
+
         Logger
             .LogInformation
             (
@@ -88,9 +88,9 @@ internal sealed record RedisSession
                 Database.Database,
                 redisKey.ToString()
             );
-        
+
         var redisValue = await Database.StringGetAsync(redisKey, GetCommandFlags());
-        
+
         Logger
             .LogInformation
             (
@@ -114,7 +114,7 @@ internal sealed record RedisSession
                 Database.Database,
                 snapshotPointers.Length
             );
-        
+
         var redisTransaction = Database.CreateTransaction();
 
         var deleteSnapshotTasks = snapshotPointers
@@ -124,7 +124,7 @@ internal sealed record RedisSession
         await redisTransaction.ExecuteAsync(GetCommandFlags());
 
         await Task.WhenAll(deleteSnapshotTasks);
-        
+
         var allDeleted = deleteSnapshotTasks.All(task => task.Result);
 
         Logger

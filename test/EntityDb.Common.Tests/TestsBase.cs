@@ -1,31 +1,31 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Tests.Implementations.Entities;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Projections;
+using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
+using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.InMemory.Extensions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.Redis.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 using Xunit.Sdk;
-using Shouldly;
-using EntityDb.Common.Tests.Implementations.Snapshots;
-using EntityDb.Common.Entities;
-using EntityDb.Common.Projections;
-using System.Diagnostics;
 
 namespace EntityDb.Common.Tests;
 
@@ -264,9 +264,9 @@ public class TestsBase<TStartup>
         startup.AddServices(serviceCollection);
 
         configureServices?.Invoke(serviceCollection);
-        
+
         serviceCollection.AddSingleton(typeof(ILogger<>), typeof(TestLogger<>));
-        
+
         var singletonServiceProvider = serviceCollection.BuildServiceProvider();
 
         var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -280,13 +280,13 @@ public class TestsBase<TStartup>
         var disposableMock = new Mock<IDisposable>(MockBehavior.Strict);
 
         disposableMock.Setup(disposable => disposable.Dispose());
-        
+
         var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
 
         loggerMock
             .Setup(logger => logger.BeginScope(It.IsAny<It.IsAnyType>()))
             .Returns(disposableMock.Object);
-        
+
         loggerMock
             .Setup(logger => logger.Log
             (
@@ -296,7 +296,7 @@ public class TestsBase<TStartup>
                 It.IsAny<TException>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ));
-        
+
         loggerMock
             .Setup(logger => logger.Log
             (

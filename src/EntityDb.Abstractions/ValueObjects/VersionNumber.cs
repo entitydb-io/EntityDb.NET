@@ -1,4 +1,3 @@
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 
 namespace EntityDb.Abstractions.ValueObjects;
@@ -19,7 +18,7 @@ public readonly record struct VersionNumber(ulong Value)
     ///     this value is revervd to point to the latest snapshot.
     /// </summary>
     public static readonly VersionNumber MinValue = new(ulong.MinValue);
-    
+
     /// <summary>
     ///     Gets the next version number.
     /// </summary>

@@ -19,7 +19,7 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     ///     The backing transaction repository.
     /// </summary>
     ITransactionRepository TransactionRepository { get; }
-    
+
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>

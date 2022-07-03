@@ -39,12 +39,14 @@ internal class CreateRole : CommandBase
 
         var agentSignatureResource = new MongoDbAtlasResource
         {
-            Db = entityName, Collection = AgentSignatureDocument.CollectionName
+            Db = entityName,
+            Collection = AgentSignatureDocument.CollectionName
         };
 
         var commandResource = new MongoDbAtlasResource
         {
-            Db = entityName, Collection = CommandDocument.CollectionName
+            Db = entityName,
+            Collection = CommandDocument.CollectionName
         };
 
         var leaseResource = new MongoDbAtlasResource { Db = entityName, Collection = LeaseDocument.CollectionName };

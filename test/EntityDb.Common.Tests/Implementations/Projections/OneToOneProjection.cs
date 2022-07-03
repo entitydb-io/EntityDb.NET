@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using EntityDb.Abstractions.Annotations;
@@ -21,7 +20,7 @@ public record OneToOneProjection
 ) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
     public static string RedisKeyNamespace => "one-to-one-projection";
-    
+
     public static OneToOneProjection Construct(Id projectionId)
     {
         return new OneToOneProjection(projectionId);
@@ -74,7 +73,7 @@ public record OneToOneProjection
         {
             return ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
         }
-        
+
         return !Equals(previousSnapshot);
     }
 

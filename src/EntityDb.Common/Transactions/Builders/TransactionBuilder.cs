@@ -33,7 +33,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
         }
 
         var entity = TEntity.Construct(entityId);
-        
+
         _knownEntities.Add(entityId, entity);
     }
 
@@ -138,7 +138,7 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
             Command = command,
             PreviousEntityVersionNumber = previousEntityVersionNumber
         });
-        
+
         _knownEntities[entityId] = nextEntity;
 
         if (command is IAddLeasesCommand<TEntity> addLeasesCommand)

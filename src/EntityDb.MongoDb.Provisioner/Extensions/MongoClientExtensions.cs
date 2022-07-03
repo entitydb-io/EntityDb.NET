@@ -16,7 +16,8 @@ public static class MongoClientExtensions
 
     private static readonly CreateIndexOptions UniquenessConstraint = new()
     {
-        Name = "Uniqueness Constraint", Unique = true
+        Name = "Uniqueness Constraint",
+        Unique = true
     };
 
     private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> Collections = new()

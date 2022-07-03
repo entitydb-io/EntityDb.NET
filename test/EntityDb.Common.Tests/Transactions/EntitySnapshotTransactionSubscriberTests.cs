@@ -17,8 +17,8 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     public EntitySnapshotTransactionSubscriberTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
     }
-    
-    
+
+
     private async Task
         Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<TEntity>(
             TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
@@ -27,7 +27,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         // ARRANGE
 
         TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => true;
-        
+
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.AddDependencies.Invoke(serviceCollection);
@@ -37,7 +37,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         var entityId = Id.NewId();
 
         const uint numberOfVersionNumbers = 10;
-        
+
         var transaction = TransactionSeeder.Create<TEntity>(entityId, numberOfVersionNumbers);
 
         await using var entityRepository = await serviceScope.ServiceProvider
@@ -55,7 +55,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
-        
+
         snapshot.ShouldNotBe(default);
         snapshot!.GetVersionNumber().Value.ShouldBe(numberOfVersionNumbers);
     }
@@ -72,14 +72,14 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
             new object?[] { transactionsAdder, entitySnapshotAdder }
         );
     }
-    
+
     private async Task Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<TEntity>(TransactionsAdder transactionsAdder, SnapshotAdder snapshotAdder)
         where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
         TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => false;
-        
+
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             transactionsAdder.AddDependencies.Invoke(serviceCollection);
@@ -105,7 +105,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
-        
+
         snapshot.ShouldBe(default);
     }
 

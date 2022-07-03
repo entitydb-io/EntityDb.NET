@@ -15,7 +15,7 @@ public interface ILeaseQuery : IQuery
     /// <param name="builder">The lease filter builder.</param>
     /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
     TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder);
-    
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> built from a lease sort builder.
     /// </summary>

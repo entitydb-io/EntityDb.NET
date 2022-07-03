@@ -21,7 +21,7 @@ public class AgentAccessorChain : IAgentAccessor
 {
     private readonly ILogger<AgentAccessorChain> _logger;
     private readonly IAgentAccessor[] _agentAccessors;
-    
+
     /// <ignore/>
     public AgentAccessorChain
     (
@@ -31,7 +31,7 @@ public class AgentAccessorChain : IAgentAccessor
     ) : this(logger, options.Value, outerServiceProvider)
     {
     }
-    
+
     internal AgentAccessorChain
     (
         ILogger<AgentAccessorChain> logger,
@@ -40,7 +40,7 @@ public class AgentAccessorChain : IAgentAccessor
     )
     {
         var serviceProvider = GetServiceProvider(outerServiceProvider, options);
-        
+
         _logger = logger;
         _agentAccessors = serviceProvider
             .GetServices<IAgentAccessor>()
@@ -60,7 +60,7 @@ public class AgentAccessorChain : IAgentAccessor
                 innerServiceLifetime
             ));
         }
-        
+
         foreach (var serviceDescriptor in options.ServiceCollection)
         {
             serviceCollectionCopy.Add(serviceDescriptor);

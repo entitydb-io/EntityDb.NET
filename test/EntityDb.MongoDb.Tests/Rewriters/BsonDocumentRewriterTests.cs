@@ -1,10 +1,10 @@
-﻿using EntityDb.MongoDb.Rewriters;
+﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using EntityDb.MongoDb.Rewriters;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using Shouldly;
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Xunit;
 
 namespace EntityDb.MongoDb.Tests.Rewriters;

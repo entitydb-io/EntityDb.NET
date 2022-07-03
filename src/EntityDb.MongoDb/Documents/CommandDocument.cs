@@ -26,7 +26,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
 
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
-    
+
     public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
     (
         IEnvelopeService<BsonDocument> envelopeService,
@@ -45,7 +45,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
                 Data = envelopeService.Deconstruct(appendCommandTransactionStep.Command)
             }
         };
-        
+
         return new InsertDocumentsCommand<CommandDocument>
         (
             CollectionName,

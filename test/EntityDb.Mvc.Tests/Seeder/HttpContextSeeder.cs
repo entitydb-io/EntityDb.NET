@@ -1,9 +1,9 @@
-﻿using Bogus;
+﻿using System.Linq;
+using Bogus;
+using EntityDb.Abstractions.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System.Linq;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Mvc.Tests.Seeder;
 

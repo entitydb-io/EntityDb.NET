@@ -8,7 +8,7 @@ public class TestLogger<T> : ILogger<T>
 {
     private readonly ITest _test;
     private readonly ILogger _logger;
-        
+
     public TestLogger(ITest test, ILoggerFactory loggerFactory)
     {
         _test = test;

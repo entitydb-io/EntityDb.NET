@@ -10,7 +10,7 @@ internal sealed class SingleEntityTransactionBuilder<TEntity> : ISingleEntityTra
     where TEntity : IEntity<TEntity>
 {
     private readonly ITransactionBuilder<TEntity> _transactionBuilder;
-    
+
     public Id EntityId { get; }
 
     internal SingleEntityTransactionBuilder(ITransactionBuilder<TEntity> transactionBuilder, Id entityId)

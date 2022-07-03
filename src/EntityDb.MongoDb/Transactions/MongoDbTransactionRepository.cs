@@ -137,7 +137,7 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             .GetInsertCommand(_envelopeService, transaction)
             .Execute(_mongoSession, cancellationToken);
     }
-    
+
     private async Task PutCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep, CancellationToken cancellationToken)
     {
         VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
@@ -191,7 +191,7 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
             foreach (var transactionStep in transaction.Steps)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 await (transactionStep switch
                 {
                     IAppendCommandTransactionStep appendCommandTransactionStep
@@ -207,7 +207,7 @@ internal class MongoDbTransactionRepository : DisposableResourceBaseClass, ITran
                     _ => throw new NotSupportedException()
                 });
             }
-            
+
             cancellationToken.ThrowIfCancellationRequested();
 
             await _mongoSession.CommitTransaction(cancellationToken);

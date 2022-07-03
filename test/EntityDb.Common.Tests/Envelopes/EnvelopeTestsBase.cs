@@ -15,7 +15,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     }
 
     protected abstract byte[] GenerateCorruptedBytes();
-    
+
     [Fact]
     public void GivenValidRecord_WhenDeconstructedSerializedAndDeserialized_ThenReconstructReturnsEquivalentRecord()
     {
@@ -37,7 +37,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
         var rawData = envelopeService.Serialize(envelope);
 
         var reconstructedEnvelope = envelopeService.Deserialize(rawData);
-        
+
         var reconstructedBoxedRecord = envelopeService.Reconstruct<IRecord>(reconstructedEnvelope);
 
         var reconstructedRecord = (TestRecord<bool>)reconstructedBoxedRecord;
@@ -46,7 +46,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         reconstructedRecord.ShouldBeEquivalentTo(record);
     }
-    
+
     [Fact]
     public void WhenSerializingCorruptedEnvelope_ThrowSerializeException()
     {
@@ -66,7 +66,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
             envelopeService.Serialize(envelope);
         });
     }
-    
+
     [Fact]
     public void WhenDeserializingCorruptedBytes_ThrowDeserializeException()
     {

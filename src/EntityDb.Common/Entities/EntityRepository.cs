@@ -17,7 +17,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
     where TEntity : IEntity<TEntity>
 {
     private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
-    
+
     public ITransactionRepository TransactionRepository { get; }
     public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 

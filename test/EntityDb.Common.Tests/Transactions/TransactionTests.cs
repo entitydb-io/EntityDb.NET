@@ -1,8 +1,15 @@
-﻿using EntityDb.Abstractions.Leases;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
+using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -12,26 +19,18 @@ using EntityDb.Common.Queries.Modified;
 using EntityDb.Common.Tags;
 using EntityDb.Common.Tests.Implementations.Agents;
 using EntityDb.Common.Tests.Implementations.Commands;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Queries;
 using EntityDb.Common.Tests.Implementations.Seeders;
+using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Common.Tests.Implementations.Tags;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.ValueObjects;
-using Microsoft.Extensions.Logging;
 using Xunit;
-using EntityDb.Abstractions.Transactions.Builders;
-using EntityDb.Common.Tests.Implementations.Snapshots;
 
 namespace EntityDb.Common.Tests.Transactions;
 
@@ -428,7 +427,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         }
 
         var transaction = (transactionBuilder.Build(transactionId) as Transaction).ShouldNotBeNull();
-            
+
         if (timeStampOverride.HasValue)
         {
             transaction = transaction with
@@ -521,7 +520,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
             .Build(transactionId);
-            
+
         var secondTransaction = secondTransactionBuilder
             .Append(CommandSeeder.Create())
             .Build(transactionId);
@@ -667,11 +666,11 @@ public sealed class TransactionTests : TestsBase<Startup>
         var firstTransaction = firstTransactionBuilder
             .Append(CommandSeeder.Create())
             .Build(Id.NewId());
-            
+
         var secondTransaction = secondTransactionBuilder
             .Append(CommandSeeder.Create())
             .Build(Id.NewId());
-        
+
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
             .CreateRepository(TestSessionOptions.Write);
@@ -757,7 +756,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             .Add(lease)
             .Add(lease)
             .Build(default);
-        
+
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
 
@@ -1266,7 +1265,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 transactionId = currentTransactionId;
             }
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);
@@ -1332,7 +1331,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 entityId = currentEntityId;
             }
 
-            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[]{i},
+            var transaction = await BuildTransaction<TEntity>(serviceScope, currentTransactionId, currentEntityId, new[] { i },
                 agentSignatureOverride: agentSignature);
 
             transactions.Add(transaction);

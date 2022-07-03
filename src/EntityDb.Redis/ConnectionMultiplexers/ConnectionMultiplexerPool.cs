@@ -14,14 +14,14 @@ internal class ConnectionMultiplexerFactory : DisposableResourceBaseClass
     public async Task<IConnectionMultiplexer> CreateConnectionMultiplexer(string connectionString, CancellationToken cancellationToken)
     {
         await _connectionSemaphore.WaitAsync(cancellationToken);
-        
+
         var connectionMultiplexer = _connectionMultiplexers.GetOrAdd(connectionString, _ =>
         {
             var configurationOptions = ConfigurationOptions.Parse(connectionString);
 
             return ConnectionMultiplexer.Connect(configurationOptions);
         });
-        
+
         _connectionSemaphore.Release();
 
         return connectionMultiplexer;

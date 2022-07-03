@@ -1,13 +1,13 @@
-﻿using EntityDb.Common.Exceptions;
-using EntityDb.Common.TypeResolvers;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using EntityDb.Common.Envelopes;
+using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;
@@ -17,7 +17,7 @@ public class LifoTypeResolverTests : TestsBase<Startup>
     public LifoTypeResolverTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
     }
-    
+
     [Fact]
     public void GivenPartialTypeResolverThrows_WhenResolvingType_ThenExceptionIsLogged()
     {
@@ -78,7 +78,7 @@ public class LifoTypeResolverTests : TestsBase<Startup>
         {
             serviceCollection.RemoveAll(typeof(IPartialTypeResolver));
             serviceCollection.RemoveAll(typeof(ITypeResolver));
-            
+
             serviceCollection.AddLifoTypeResolver();
 
             serviceCollection.AddSingleton(secondPartialTypeResolver.Object);
@@ -86,7 +86,7 @@ public class LifoTypeResolverTests : TestsBase<Startup>
         });
 
         var typeResolver = serviceScope.ServiceProvider.GetRequiredService<ITypeResolver>();
-        
+
         // ACT
 
         var actualType = typeResolver.ResolveType(default);

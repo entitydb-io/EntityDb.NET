@@ -1,14 +1,14 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using EntityDb.Abstractions.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
+using Shouldly;
 using Xunit;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace EntityDb.Common.Tests.Agents;
 
@@ -153,7 +153,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
             applicationInfo.ShouldBeEmpty();
         }
     }
-    
+
 
     [Fact]
     public async Task GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()

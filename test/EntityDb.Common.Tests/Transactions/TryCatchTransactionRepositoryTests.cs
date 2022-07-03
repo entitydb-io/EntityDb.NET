@@ -1,12 +1,12 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
@@ -121,7 +121,7 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         tags.ShouldBeEmpty();
         annotatedCommands.ShouldBeEmpty();
         inserted.ShouldBeFalse();
-        
+
         loggerVerifier.Invoke(Times.Exactly(14));
     }
 }

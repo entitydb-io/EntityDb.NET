@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddSingleton(serviceProvider => BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
     }
-    
+
     /// <summary>
     ///     Adds a production-ready implementation of <see cref="ITransactionRepositoryFactory" /> to a service
     ///     collection.
@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
         bool testMode = false)
     {
         serviceCollection.AddBsonDocumentEnvelopeService(true);
-        
+
         serviceCollection.Add<ITransactionRepositoryFactory>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,

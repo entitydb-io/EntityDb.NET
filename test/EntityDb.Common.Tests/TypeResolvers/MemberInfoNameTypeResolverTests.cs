@@ -1,8 +1,8 @@
-﻿using EntityDb.Common.Envelopes;
+﻿using System;
+using System.Collections.Generic;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.TypeResolvers;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;

@@ -30,7 +30,7 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
     public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName, CancellationToken cancellationToken = default)
     {
         await Task.Yield();
-        
+
         var snapshotSessionOptions = _optionsFactory.Create(snapshotSessionOptionsName);
 
         var inMemorySession = snapshotSessionOptions.ReadOnly
@@ -38,7 +38,7 @@ internal class InMemorySnapshotRepositoryFactory<TSnapshot> : DisposableResource
             : _inMemorySession;
 
         var inMemorySnapshotRepository = new InMemorySnapshotRepository<TSnapshot>(inMemorySession);
-        
+
         cancellationToken.ThrowIfCancellationRequested();
 
         return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, inMemorySnapshotRepository);

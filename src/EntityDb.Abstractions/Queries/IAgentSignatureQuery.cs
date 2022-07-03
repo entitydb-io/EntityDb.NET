@@ -15,7 +15,7 @@ public interface IAgentSignatureQuery : IQuery
     /// <param name="builder">The agentSignature filter builder.</param>
     /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
     TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder);
-    
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> built from a agentSignature sort builder.
     /// </summary>

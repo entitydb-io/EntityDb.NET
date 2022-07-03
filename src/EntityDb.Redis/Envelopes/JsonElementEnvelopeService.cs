@@ -15,7 +15,7 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-    
+
     private readonly ILogger<JsonElementEnvelopeService> _logger;
     private readonly ITypeResolver _typeResolver;
 
@@ -25,7 +25,7 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
         JsonSerializerOptions.Converters.Add(new IdConverter());
         JsonSerializerOptions.Converters.Add(new VersionNumberConverter());
     }
-    
+
     public JsonElementEnvelopeService
     (
         ILogger<JsonElementEnvelopeService> logger,
@@ -35,13 +35,13 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
         _logger = logger;
         _typeResolver = typeResolver;
     }
-    
+
     public Envelope<JsonElement> Deconstruct<TData>(TData data)
     {
         try
         {
             var dataType = data!.GetType();
-            
+
             var json = JsonSerializer.Serialize(data, dataType, JsonSerializerOptions);
 
             var jsonElement = JsonSerializer.Deserialize<JsonElement>(json, JsonSerializerOptions);
@@ -85,7 +85,7 @@ internal sealed class JsonElementEnvelopeService : IEnvelopeService<JsonElement>
             throw new DeserializeException();
         }
     }
-    
+
     public TData Reconstruct<TData>(Envelope<JsonElement> envelope)
     {
         try

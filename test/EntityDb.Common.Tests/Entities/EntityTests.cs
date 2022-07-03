@@ -1,22 +1,22 @@
-﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Common.Exceptions;
-using EntityDb.Common.Tests.Implementations.Commands;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using EntityDb.Abstractions.ValueObjects;
-using Xunit;
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
+using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Shouldly;
+using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 

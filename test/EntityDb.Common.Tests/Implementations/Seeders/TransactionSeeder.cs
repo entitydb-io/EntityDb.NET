@@ -20,7 +20,7 @@ public static class TransactionStepSeeder
         for (var previousVersionNumber = new VersionNumber(0); previousVersionNumber.Value < numCommands; previousVersionNumber = previousVersionNumber.Next())
         {
             var entityVersionNumber = previousVersionNumber.Next();
-            
+
             yield return new AppendCommandTransactionStep
             {
                 EntityId = entityId,

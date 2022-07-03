@@ -29,7 +29,7 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         BsonSerializer.RegisterSerializer(new TimeStampSerializer());
         BsonSerializer.RegisterSerializer(new VersionNumberSerializer());
     }
-    
+
     public MongoDbTransactionRepositoryFactory
     (
         IServiceProvider serviceProvider,

@@ -20,7 +20,7 @@ internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, I
     private static readonly Task<IEntitiesAnnotation<object>[]> EmptyEntitiesAnnotationArrayTask = Task.FromResult(Array.Empty<IEntitiesAnnotation<object>>());
     private static readonly Task<IEntityAnnotation<object>[]> EmptyEntityAnnotationArrayTask = Task.FromResult(Array.Empty<IEntityAnnotation<object>>());
     private static readonly Task<bool> TrueBoolTask = Task.FromResult(true);
-    
+
     public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery, CancellationToken cancellationToken = default)
     {
         return EmptyIdArrayTask.WaitAsync(cancellationToken);

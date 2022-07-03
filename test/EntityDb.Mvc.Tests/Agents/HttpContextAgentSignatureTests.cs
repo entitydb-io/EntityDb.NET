@@ -1,8 +1,8 @@
-﻿using EntityDb.Mvc.Agents;
+﻿using System;
+using System.Collections.Generic;
+using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace EntityDb.Mvc.Tests.Agents;

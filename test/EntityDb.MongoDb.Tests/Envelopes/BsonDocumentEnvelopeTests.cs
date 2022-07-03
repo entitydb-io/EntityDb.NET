@@ -1,10 +1,10 @@
-﻿using EntityDb.MongoDb.Envelopes;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Text;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Tests.Envelopes;
+using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MongoDB.Bson;
 using Shouldly;
@@ -37,17 +37,17 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(IEnvelopeService<BsonDocument>));
-            
+
             serviceCollection.AddBsonDocumentEnvelopeService(removeTypeDiscriminatorProperty);
         });
-        
+
         var envelopeService = serviceScope.ServiceProvider
             .GetRequiredService<IEnvelopeService<BsonDocument>>();
 
         var value = new TestRecord<bool>(true);
 
         var bsonDocumentEnvelope = envelopeService.Deconstruct(value);
-            
+
         var actualContainsTypeDiscriminatorProperty = bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelopeService.TypeDiscriminatorPropertyName);
 
         // ASSERT

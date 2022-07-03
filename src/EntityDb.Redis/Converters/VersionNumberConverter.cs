@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Envelopes;
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -34,7 +32,7 @@ internal class VersionNumberConverter : JsonConverter<VersionNumber>
     )
     {
         var ulongValue = versionNumber.Value;
-        
+
         writer.WriteNumberValue(ulongValue);
     }
 }

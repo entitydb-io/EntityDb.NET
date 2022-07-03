@@ -1,17 +1,16 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Entities;
-using Moq;
-using Shouldly;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Shouldly;
 using Xunit;
-using EntityDb.Common.Entities;
 
 namespace EntityDb.Common.Tests.Snapshots;
 

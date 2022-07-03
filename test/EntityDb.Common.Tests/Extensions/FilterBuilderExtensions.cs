@@ -1,8 +1,8 @@
-﻿using EntityDb.Abstractions.Queries.FilterBuilders;
+﻿using System.Linq;
+using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Common.Extensions;
 using Moq;
 using Shouldly;
-using System.Linq;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Extensions;

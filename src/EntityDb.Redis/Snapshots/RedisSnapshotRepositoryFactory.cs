@@ -59,7 +59,7 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
             _envelopeService,
             redisSession
         );
-        
+
         return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, redisSnapshotRepository);
     }
 
