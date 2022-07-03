@@ -41,7 +41,7 @@ public static class TransactionSeeder
         {
             Id = Id.NewId(),
             TimeStamp = TimeStamp.UtcNow,
-            AgentSignature = new UnknownAgentSignature(),
+            AgentSignature = new UnknownAgentSignature(new()),
             Steps = transactionSteps.ToImmutableArray()
         };
     }

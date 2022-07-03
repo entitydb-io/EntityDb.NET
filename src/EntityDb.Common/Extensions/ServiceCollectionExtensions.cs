@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Transactions.Builders;
@@ -105,7 +106,7 @@ public static class ServiceCollectionExtensions
     public static void AddEntity<TEntity>(this IServiceCollection serviceCollection)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddTransient<TransactionBuilder<TEntity>>();
+        serviceCollection.AddTransient<ITransactionBuilderFactory<TEntity>, TransactionBuilderFactory<TEntity>>();
 
         serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
     }

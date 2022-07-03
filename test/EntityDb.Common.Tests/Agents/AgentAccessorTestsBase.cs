@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using Xunit;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace EntityDb.Common.Tests.Agents;
 
@@ -16,6 +18,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     protected AgentAccessorTestsBase(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
     }
+
+    protected abstract bool CanBeInactive { get; }
 
     protected abstract void ConfigureInactiveAgentAccessor(IServiceCollection serviceCollection);
 
@@ -28,6 +32,11 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     [Fact]
     public void GivenBackingServiceInactive_WhenGettingAgent_ThenThrow()
     {
+        if (!CanBeInactive)
+        {
+            return;
+        }
+
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(ConfigureInactiveAgentAccessor);
@@ -37,7 +46,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
         // ASSERT
 
-        Should.Throw<NoAgentException>(() => agentAccessor.GetAgent());
+        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!, default));
     }
 
     [Fact]
@@ -57,7 +66,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgent();
+            var agent = agentAccessor.GetAgentAsync(default!, default);
 
             // ASSERT
 
@@ -66,7 +75,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     }
 
     [Fact]
-    public void GivenBackingServiceActive_ThenCanGetTimestamp()
+    public async Task GivenBackingServiceActive_ThenCanGetTimestamp()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -79,18 +88,18 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = serviceScope.ServiceProvider
+            var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgent();
+                .GetAgentAsync(default!, default);
 
             // ASSERT
 
-            Should.NotThrow(() => agent.GetTimeStamp());
+            Should.NotThrow(() => agent.TimeStamp);
         }
     }
 
     [Fact]
-    public void GivenBackingServiceActive_WhenGettingAgentSignature_ThenReturnAgentSignature()
+    public async Task GivenBackingServiceActive_WhenGettingAgentSignature_ThenReturnAgentSignature()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -101,12 +110,13 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
                 ConfigureActiveAgentAccessor(serviceCollection, agentAccessorConfiguration);
             });
 
-            var agentAccessor = serviceScope.ServiceProvider
-                .GetRequiredService<IAgentAccessor>();
+            var agent = await serviceScope.ServiceProvider
+                .GetRequiredService<IAgentAccessor>()
+                .GetAgentAsync(default!, default);
 
             // ACT
 
-            var agentSignature = agentAccessor.GetAgent().GetSignature("");
+            var agentSignature = agent.Signature;
 
             // ASSERT
 
@@ -115,7 +125,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     }
 
     [Fact]
-    public void GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
+    public async Task GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -128,12 +138,13 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
                 serviceCollection.RemoveAll(typeof(IAgentSignatureAugmenter));
             });
 
-            var agentAccessor = serviceScope.ServiceProvider
-                .GetRequiredService<IAgentAccessor>();
+            var agent = await serviceScope.ServiceProvider
+                .GetRequiredService<IAgentAccessor>()
+                .GetAgentAsync(default!, default);
 
             // ACT
 
-            var agentSignature = agentAccessor.GetAgent().GetSignature("").ShouldNotBeNull();
+            var agentSignature = agent.Signature;
 
             var applicationInfo = GetApplicationInfo(agentSignature);
 
@@ -145,7 +156,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     
 
     [Fact]
-    public void GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
+    public async Task GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
@@ -159,8 +170,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
             var agentSignatureAugmenterMock = new Mock<IAgentSignatureAugmenter>(MockBehavior.Strict);
 
             agentSignatureAugmenterMock
-                .Setup(x => x.GetApplicationInfo())
-                .Returns(expectedApplicationInfo);
+                .Setup(x => x.GetApplicationInfoAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedApplicationInfo);
 
             using var serviceScope = CreateServiceScope(serviceCollection =>
             {
@@ -169,12 +180,13 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
                 serviceCollection.AddSingleton(agentSignatureAugmenterMock.Object);
             });
 
-            var agentAccessor = serviceScope.ServiceProvider
-                .GetRequiredService<IAgentAccessor>();
+            var agent = await serviceScope.ServiceProvider
+                .GetRequiredService<IAgentAccessor>()
+                .GetAgentAsync(default!, default);
 
             // ACT
 
-            var agentSignature = agentAccessor.GetAgent().GetSignature("");
+            var agentSignature = agent.Signature;
 
             var actualApplicationInfo = GetApplicationInfo(agentSignature);
 

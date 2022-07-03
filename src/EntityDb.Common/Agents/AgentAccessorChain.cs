@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EntityDb.Common.Agents;
 
@@ -68,18 +70,20 @@ public class AgentAccessorChain : IAgentAccessor
     }
 
     /// <inheritdoc />
-    public IAgent GetAgent()
+    public async Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken)
     {
         foreach (var agentAccessor in _agentAccessors)
         {
             try
             {
-                return agentAccessor.GetAgent();
+                return await agentAccessor.GetAgentAsync(signatureOptionsName, cancellationToken);
             }
             catch (Exception exception)
             {
                 _logger.LogDebug(exception, "Agent accessor threw an exception. Moving on to next agent accessor");
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         throw new NoAgentException();

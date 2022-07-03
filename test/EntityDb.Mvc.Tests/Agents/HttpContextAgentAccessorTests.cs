@@ -15,6 +15,8 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
     {
     }
 
+    protected override bool CanBeInactive => true;
+
     protected override void ConfigureInactiveAgentAccessor(IServiceCollection serviceCollection)
     {
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>(MockBehavior.Strict);
