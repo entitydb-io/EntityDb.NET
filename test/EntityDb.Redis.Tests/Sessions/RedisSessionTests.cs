@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Snapshots;
 using EntityDb.Common.Tests;
 using EntityDb.Redis.Sessions;
 using Shouldly;
@@ -20,7 +19,7 @@ public class RedisSessionTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var readOnlyRedisSession = new RedisSession(default!, default!, default!, new SnapshotSessionOptions
+        var readOnlyRedisSession = new RedisSession<object>(default!, default!, new RedisSnapshotSessionOptions<object>
         {
             ReadOnly = true
         });

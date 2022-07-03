@@ -58,6 +58,12 @@ public static class ServiceCollectionExtensions
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), serviceFactory, serviceLifetime));
     }
 
+    internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
+        where TService : class
+    {
+        serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TService), serviceLifetime));
+    }
+
     /// <summary>
     ///     Adds an internal implementation of <see cref="IPartialTypeResolver" /> which resolves types by using assembly
     ///     information.

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests;
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using Shouldly;
 using Xunit;
@@ -20,7 +19,7 @@ public class MongoSessionTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var mongoSession = new MongoSession(default!, default!, default!, new TransactionSessionOptions
+        var mongoSession = new MongoSession(default!, default!, default!, new MongoDbTransactionSessionOptions
         {
             ReadOnly = true
         });

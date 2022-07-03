@@ -15,8 +15,11 @@ using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.InMemory.Extensions;
+using EntityDb.InMemory.Sessions;
 using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.MongoDb.Sessions;
 using EntityDb.Redis.Extensions;
+using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,12 +42,32 @@ public class TestsBase<TStartup>
     {
         new("MongoDb", serviceCollection =>
         {
-            serviceCollection.AddAutoProvisionMongoDbTransactions
-            (
-                "Test",
-                _ => "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb",
-                true
-            );
+            serviceCollection.AddAutoProvisionMongoDbTransactions(true);
+
+            serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
+            {
+                options.ConnectionString = "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb";
+                options.DatabaseName = "Test";
+                options.ReadTimeout = TimeSpan.FromSeconds(1);
+                options.WriteTimeout = TimeSpan.FromSeconds(1);
+            });
+
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
+            });
         })
     };
 
@@ -80,12 +103,30 @@ public class TestsBase<TStartup>
     {
         return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
-            serviceCollection.AddRedisSnapshots<TSnapshot>
-            (
-                TSnapshot.RedisKeyNamespace,
-                _ => "127.0.0.1:6379",
-                true
-            );
+            serviceCollection.AddRedisSnapshots<TSnapshot>(true);
+
+            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions<TSnapshot>>(options =>
+            {
+                options.ConnectionString = "127.0.0.1:6379";
+                options.KeyNamespace = TSnapshot.RedisKeyNamespace;
+            });
+
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
+            });
         });
     }
 
@@ -94,10 +135,22 @@ public class TestsBase<TStartup>
     {
         return new SnapshotAdder($"InMemory<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
-            serviceCollection.AddInMemorySnapshots<TSnapshot>
-            (
-                true
-            );
+            serviceCollection.AddInMemorySnapshots<TSnapshot>(true);
+
+            serviceCollection.Configure<InMemorySnapshotSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<InMemorySnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+            });
+
+            serviceCollection.Configure<InMemorySnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+            });
         });
     }
 

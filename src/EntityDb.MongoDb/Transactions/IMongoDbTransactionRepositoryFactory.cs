@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Sessions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,16 +10,16 @@ internal interface IMongoDbTransactionRepositoryFactory : ITransactionRepository
     async Task<ITransactionRepository> ITransactionRepositoryFactory.CreateRepository(
         string transactionSessionOptionsName, CancellationToken cancellationToken)
     {
-        var transactionSessionOptions = GetTransactionSessionOptions(transactionSessionOptionsName);
+        var options = GetTransactionSessionOptions(transactionSessionOptionsName);
 
-        var mongoSession = await CreateSession(transactionSessionOptions, cancellationToken);
+        var mongoSession = await CreateSession(options, cancellationToken);
 
         return CreateRepository(mongoSession);
     }
 
-    TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
+    MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName);
 
-    Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+    Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken);
 
     ITransactionRepository CreateRepository(IMongoSession mongoSession);

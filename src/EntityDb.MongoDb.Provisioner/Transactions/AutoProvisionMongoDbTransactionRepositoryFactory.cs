@@ -1,4 +1,3 @@
-using EntityDb.Common.Transactions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
@@ -43,10 +42,10 @@ internal sealed class
         _logger.LogInformation("MongoDb Auto-Provisioning Lock Released");
     }
 
-    public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions,
+    public override async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
         CancellationToken cancellationToken)
     {
-        var mongoSession = await base.CreateSession(transactionSessionOptions, cancellationToken);
+        var mongoSession = await base.CreateSession(options, cancellationToken);
 
         await AcquireLock(cancellationToken);
 
