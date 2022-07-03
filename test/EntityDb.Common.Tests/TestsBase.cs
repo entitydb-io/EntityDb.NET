@@ -163,41 +163,41 @@ public class TestsBase<TStartup>
     public static IEnumerable<object[]> AddTransactionsAndEntity()
     {
         return from transactionAdder in AllTransactionAdders
-            from entityAdder in AllEntityAdders()
-            select new object[] { transactionAdder, entityAdder };
+               from entityAdder in AllEntityAdders()
+               select new object[] { transactionAdder, entityAdder };
     }
 
     public static IEnumerable<object[]> AddEntity()
     {
         return from entityAdder in AllEntityAdders()
-            select new object[] { entityAdder };
+               select new object[] { entityAdder };
     }
 
     public static IEnumerable<object[]> AddEntitySnapshots()
     {
         return from entitySnapshotAdder in AllEntitySnapshotAdders()
-            select new object[] { entitySnapshotAdder };
+               select new object[] { entitySnapshotAdder };
     }
 
     public static IEnumerable<object[]> AddProjectionSnapshots()
     {
         return from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-            select new object[] { projectionSnapshotAdder };
+               select new object[] { projectionSnapshotAdder };
     }
 
     public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots()
     {
         return from transactionAdder in AllTransactionAdders
-            from entitySnapshotAdder in AllEntitySnapshotAdders()
-            select new object[] { transactionAdder, entitySnapshotAdder };
+               from entitySnapshotAdder in AllEntitySnapshotAdders()
+               select new object[] { transactionAdder, entitySnapshotAdder };
     }
 
     public static IEnumerable<object[]> AddTransactionsEntitySnapshotsAndProjectionSnapshots()
     {
         return from transactionAdder in AllTransactionAdders
-            from entitySnapshotAdder in AllEntitySnapshotAdders()
-            from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-            select new object[] { transactionAdder, entitySnapshotAdder, projectionSnapshotAdder };
+               from entitySnapshotAdder in AllEntitySnapshotAdders()
+               from projectionSnapshotAdder in AllProjectionSnapshotAdders()
+               select new object[] { transactionAdder, entitySnapshotAdder, projectionSnapshotAdder };
     }
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)

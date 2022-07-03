@@ -1231,7 +1231,7 @@ public sealed class TransactionTests : TestsBase<Startup>
                 case lteInMinutes:
                     lte = currentTimeStamp;
                     break;
-                
+
                 case gteInMinutes:
                     gte = currentTimeStamp;
                     break;

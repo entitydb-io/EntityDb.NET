@@ -162,7 +162,10 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
 
         _transactionSteps.Add(new AddLeasesTransactionStep
         {
-            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Leases = leases
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases
         });
     }
 
@@ -173,7 +176,10 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
 
         _transactionSteps.Add(new AddTagsTransactionStep
         {
-            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Tags = tags
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags
         });
     }
 
@@ -184,7 +190,10 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
 
         _transactionSteps.Add(new DeleteLeasesTransactionStep
         {
-            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Leases = leases
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Leases = leases
         });
     }
 
@@ -195,7 +204,10 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
 
         _transactionSteps.Add(new DeleteTagsTransactionStep
         {
-            EntityId = entityId, Entity = entity, EntityVersionNumber = entityVersionNumber, Tags = tags
+            EntityId = entityId,
+            Entity = entity,
+            EntityVersionNumber = entityVersionNumber,
+            Tags = tags
         });
     }
 }
