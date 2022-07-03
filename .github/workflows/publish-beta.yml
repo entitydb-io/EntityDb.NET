@@ -1,9 +1,7 @@
 on:
-  push:
+  pull_request:
     branches-ignore:
       - main
-    tags-ignore:
-      - '**'
     paths:
       - '.github/workflows/publish-beta.yml'
       - 'global.json'
