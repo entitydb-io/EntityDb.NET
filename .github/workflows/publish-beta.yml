@@ -3,6 +3,14 @@ on: pull_request
 name: Publish to Beta
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output
+        run: |
+          echo ${{ github.event }}
+
   beta:
     if: ${{ github.event.pull_request.milestone != null }}
     name: Publish to Beta
