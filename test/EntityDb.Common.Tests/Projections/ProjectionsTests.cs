@@ -93,7 +93,10 @@ public class ProjectionsTests : TestsBase<Startup>
         // ASSERT
         
         currentProjection.GetVersionNumber().Value.ShouldBe(numberOfVersionNumbers);
-        projectionSnapshot.ShouldNotBeNull().GetVersionNumber().Value.ShouldBe(replaceAtVersionNumber);
+
+        projectionSnapshot.ShouldNotBe(default);
+
+        projectionSnapshot!.GetVersionNumber().Value.ShouldBe(replaceAtVersionNumber);
     }
 
     [Theory]
