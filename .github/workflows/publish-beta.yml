@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Output
         run: |
-          echo ${{ github.event }}
+          echo ${{ github.event.pull_request }}
 
   beta:
     if: ${{ github.event.pull_request.milestone != null }}
