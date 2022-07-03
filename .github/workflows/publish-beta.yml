@@ -3,16 +3,33 @@ on: pull_request
 name: Publish to Beta
 
 jobs:
-  test:
-    name: Test
+  milestone:
+    name: Try Parsing Milestone
     runs-on: ubuntu-latest
+    outputs:
+      is_semantic_version: ${{ steps.parse.outputs.is_semantic_version }}
     steps:
-      - name: Output
+      - id: parse
+        env:
+          GITHUB_MILESTONE: ${{ github.event.pull_request.milestone.title }}
         run: |
-          echo ${{ github.event.pull_request }}
+          # This pattern comes from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+          # However, Bash uses POSIX regular expressions, and there are some unsupported features.
+          # POSIX does not support non-capturing groups: (?:...)
+          # - To make it compatible, the non-capture modifiers have been removed
+          # POSIX does not support the digit metacharacter: \d
+          # - To make it compatible, the digit metacharacters have been replaced with [0-9]
 
+          semantic_version_pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
+
+          if [[ ${GITHUB_MILESTONE} =~ $semantic_version_pattern ]]; then
+            echo ::set-output name=is_semantic_version::'true'
+          else
+            echo ::set-output name=is_semantic_version::'false'
+          fi
   beta:
-    if: ${{ github.event.pull_request.milestone != null }}
+    needs: milestone
+    if: ${{ needs.milestone.outputs.is_semantic_version == 'true' }}
     name: Publish to Beta
     runs-on: ubuntu-latest
     environment: beta
@@ -40,6 +57,6 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./TestResults/**/*.xml
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone }}-beta-pr${{ github.event.number }}-run${{ github.run_number }}.${{ github.run_attempt }}'
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone.title }}-beta-pr${{ github.event.number }}-run${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
         run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
