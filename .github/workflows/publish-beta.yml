@@ -68,8 +68,15 @@ jobs:
           reporttypes: 'HtmlInline'
           license: ${{ secrets.REPORTGENERATOR_LICENSE }}
           toolpath: 'reportgeneratortool'
-      - name: Upload Coverage Report as Artifact
+      - name: Coverage Report Artifact
         uses: actions/upload-artifact@v2.2.3
         with:
           name: CoverageReport
           path: CoverageReport
+      - name: Packages & Symbols Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: Packages & Symbols
+          path: |
+            ./*/**.nupkg
+            ./*/**.snupkg
