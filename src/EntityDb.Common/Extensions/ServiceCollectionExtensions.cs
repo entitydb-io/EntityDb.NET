@@ -6,13 +6,15 @@ using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Transactions.Builders;
-using EntityDb.Common.Transactions.Processors;
 using EntityDb.Common.Transactions.Subscribers;
+using EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
+using EntityDb.Common.Transactions.Subscribers.Processors;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Threading.Tasks.Dataflow;
 
 namespace EntityDb.Common.Extensions;
 
@@ -21,34 +23,24 @@ namespace EntityDb.Common.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    [ExcludeFromCodeCoverage(Justification = "Don't need coverage for non-test mode.")]
-    private static void AddSnapshotTransactionProcessor<TTransactionProcessor>(
-        this IServiceCollection serviceCollection, bool testMode,
-        Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
+    private static void AddTestModeTransactionProcessorQueue<TTransactionProcessor>(this IServiceCollection serviceCollection)
         where TTransactionProcessor : ITransactionProcessor
     {
-        serviceCollection.AddSingleton(serviceProvider =>
-        {
-            var transactionProcessor = transactionProcessorFactory.Invoke(serviceProvider);
+        serviceCollection.AddSingleton<ITransactionProcessorQueue<TTransactionProcessor>, TestModeTransactionQueue<TTransactionProcessor>>();
+    }
 
-            return TransactionProcessorSubscriber<TTransactionProcessor>.Create(serviceProvider, transactionProcessor,
-                testMode);
-        });
+    [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
+    private static void AddBufferBlockTransactionProcessorQueue<TTransactionProcessor>(this IServiceCollection serviceCollection)
+        where TTransactionProcessor : ITransactionProcessor
+    {
+        serviceCollection.AddSingleton<BufferBlockTransactionQueue<TTransactionProcessor>>();
 
-        serviceCollection.AddSingleton<ITransactionSubscriber>(
-            serviceProvider =>
-                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
-        );
+        serviceCollection.AddSingleton<ITransactionProcessorQueue<TTransactionProcessor>>(serviceProvider => serviceProvider.GetRequiredService<BufferBlockTransactionQueue<TTransactionProcessor>>());
 
-        if (testMode)
-        {
-            return;
-        }
+        serviceCollection.AddHostedService(serviceProvider =>
+          serviceProvider.GetRequiredService<BufferBlockTransactionQueue<TTransactionProcessor>>());
 
-        serviceCollection.AddHostedService(
-            serviceProvider =>
-                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
-        );
+        serviceCollection.AddSingleton<ITransactionSubscriber, TransactionProcessorSubscriber<TTransactionProcessor>>();
     }
 
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime,
@@ -62,6 +54,39 @@ public static class ServiceCollectionExtensions
         where TService : class
     {
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TService), serviceLifetime));
+    }
+
+    /// <summary>
+    ///     Registers the transaction processor provided, along with a transaction processor subscriber,
+    ///     and a transaction processor queue. For test mode, the queue is not actually a queue and will
+    ///     immediately process the transaction. For non-test mode, the queue uses a <see cref="BufferBlock{ITransaction}"/>.
+    /// </summary>
+    /// <typeparam name="TTransactionProcessor">The type of the transaction processor.</typeparam>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="testMode">Wether or not to run in test mode.</param>
+    /// <param name="transactionProcessorFactory">A factory for creating the transaction processor.</param>
+    [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
+    public static void AddTransactionProcessorSubscriber<TTransactionProcessor>(this IServiceCollection serviceCollection,
+        bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
+        where TTransactionProcessor : class, ITransactionProcessor
+    {
+        serviceCollection.AddSingleton(transactionProcessorFactory.Invoke);
+
+        serviceCollection.AddSingleton<TransactionProcessorSubscriber<TTransactionProcessor>>();
+
+        serviceCollection.AddSingleton<ITransactionSubscriber>(
+            serviceProvider =>
+                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
+        );
+
+        if (testMode)
+        {
+            serviceCollection.AddTestModeTransactionProcessorQueue<TTransactionProcessor>();
+        }
+        else
+        {
+            serviceCollection.AddBufferBlockTransactionProcessorQueue<TTransactionProcessor>();
+        }
     }
 
     /// <summary>
@@ -137,7 +162,7 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => EntitySnapshotTransactionProcessor<TEntity>.Create(
+        serviceCollection.AddTransactionProcessorSubscriber(testMode, serviceProvider => EntitySnapshotTransactionProcessor<TEntity>.Create(
             serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 
@@ -167,7 +192,7 @@ public static class ServiceCollectionExtensions
         string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddSnapshotTransactionProcessor(testMode, serviceProvider => ProjectionSnapshotTransactionProcessor<TProjection>.Create(
+        serviceCollection.AddTransactionProcessorSubscriber(testMode, serviceProvider => ProjectionSnapshotTransactionProcessor<TProjection>.Create(
             serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 }

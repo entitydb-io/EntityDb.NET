@@ -1,33 +1,21 @@
-﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions.Processors;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
+using EntityDb.Common.Transactions.Subscribers.Processors;
 
 namespace EntityDb.Common.Transactions.Subscribers;
 
-internal sealed class TransactionProcessorSubscriber<TTransactionProcessor> : TransactionSubscriber
+internal sealed class TransactionProcessorSubscriber<TTransactionProcessor> : ITransactionSubscriber
     where TTransactionProcessor : ITransactionProcessor
 {
-    private readonly TTransactionProcessor _transactionProcessor;
+    private readonly ITransactionProcessorQueue<TTransactionProcessor> _transactionProcessorQueue;
 
-    public TransactionProcessorSubscriber(ILogger<TransactionProcessorSubscriber<TTransactionProcessor>> logger,
-        TTransactionProcessor transactionProcessor, bool testMode) : base(logger, testMode)
+    public TransactionProcessorSubscriber(ITransactionProcessorQueue<TTransactionProcessor> transactionProcessorQueue)
     {
-        _transactionProcessor = transactionProcessor;
+        _transactionProcessorQueue = transactionProcessorQueue;
     }
 
-    protected override Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken)
+    public void Notify(ITransaction transaction)
     {
-        return _transactionProcessor.ProcessTransaction(transaction, cancellationToken);
-    }
-
-    public static TransactionProcessorSubscriber<TTransactionProcessor> Create(IServiceProvider serviceProvider,
-        TTransactionProcessor transactionProcessor, bool testMode)
-    {
-        return ActivatorUtilities.CreateInstance<TransactionProcessorSubscriber<TTransactionProcessor>>(
-            serviceProvider, transactionProcessor, testMode);
+        _transactionProcessorQueue.Enqueue(transaction);
     }
 }
