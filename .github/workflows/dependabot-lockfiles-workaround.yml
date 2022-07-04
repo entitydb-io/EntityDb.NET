@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.DEPENDABOT_LOCKFILES_WORKAROUND_PAT }}
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v1
       - name: Force Restore Packages
