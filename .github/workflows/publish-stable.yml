@@ -55,7 +55,7 @@ jobs:
           mongodb-version: 5.0.3
           mongodb-replica-set: entitydb
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
