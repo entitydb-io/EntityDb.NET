@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is_semantic_version: ${{ steps.parse.outputs.is_semantic_version }}
+      version: ${{ steps.get_release.outputs.tag_name }}
     steps:
       - id: get_release
         uses: bruceadams/get-release@v1.2.2
@@ -60,7 +61,7 @@ jobs:
       - name: Run Project Tests
         run: dotnet test EntityDb.sln --no-restore -c Debug
       - name: Pack Projects into Nuget Packages
-        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.extract.outputs.version }}
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.tags.outputs.version }}
       - name: Publish to Stable
         run: dotnet nuget push ./**/*.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Packages & Symbols Artifact
