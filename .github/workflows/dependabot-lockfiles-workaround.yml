@@ -15,9 +15,6 @@ jobs:
       - name: Force Restore Packages
         run: dotnet restore --force-evaluate
       - name: Commit Updated Lockfiles
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          git add .
-          git commit -m "chore(deps): Update NuGet lockfiles"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: chore(deps): Update NuGet Lockfiles
