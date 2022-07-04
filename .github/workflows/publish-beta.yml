@@ -42,7 +42,7 @@ jobs:
         with:
           redis-version: 7.0.2
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
+        uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: 5.0.9
           mongodb-replica-set: entitydb
