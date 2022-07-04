@@ -42,9 +42,14 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());
 
-        var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
+        var commands = TransactionRepository.EnumerateCommands(commandQuery, cancellationToken);
 
-        var entity = snapshot.Reduce(commands);
+        var entity = snapshot;
+
+        await foreach (var command in commands)
+        {
+            entity = entity.Reduce(command);
+        }
 
         if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
         {

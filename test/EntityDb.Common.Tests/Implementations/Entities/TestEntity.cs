@@ -30,14 +30,14 @@ public record TestEntity
         return VersionNumber;
     }
 
-    public TestEntity Reduce(object[] commands)
+    public TestEntity Reduce(object command)
     {
-        return commands.Aggregate(this, (previousEntity, nextCommand) => nextCommand switch
+        return command switch
         {
-            DoNothing doNothing => doNothing.Reduce(previousEntity),
-            Count count => count.Reduce(previousEntity),
+            DoNothing doNothing => doNothing.Reduce(this),
+            Count count => count.Reduce(this),
             _ => throw new NotSupportedException()
-        });
+        };
     }
 
     public bool ShouldRecord()

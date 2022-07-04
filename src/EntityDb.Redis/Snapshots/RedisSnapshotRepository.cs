@@ -45,7 +45,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         }
 
         return _envelopeService
-            .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue);
+            .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue!);
     }
 
     public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
