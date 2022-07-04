@@ -36,7 +36,7 @@ jobs:
     environment: beta
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Start Redis
         uses: supercharge/redis-github-action@1.2.0
         with:
