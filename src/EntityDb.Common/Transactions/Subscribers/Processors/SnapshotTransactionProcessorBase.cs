@@ -1,9 +1,7 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,27 +13,22 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
 {
     public abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
-    protected static SnapshotCache CreateSnapshotCache()
-    {
-        return new SnapshotCache();
-    }
-
-    protected static async Task ProcessTransactionSteps(ISnapshotRepository<TSnapshot> snapshotRepository,
-        SnapshotCache snapshotCache,
-        ITransaction transaction, Func<IAppendCommandTransactionStep, Task<(TSnapshot?, TSnapshot)?>> getSnapshots,
-        CancellationToken cancellationToken)
+    protected static async Task ProcessTransactionSteps
+    (
+        ISnapshotRepository<TSnapshot> snapshotRepository,
+        SnapshotTransactionStepProcessorCache<TSnapshot> snapshotTransactionStepProcessorCache,
+        ITransaction transaction,
+        ISnapshotTransactionStepProcessor<TSnapshot> snapshotTransactionStepProcessor,
+        CancellationToken cancellationToken
+    )
     {
         var putQueue = new Dictionary<Pointer, TSnapshot>();
 
         foreach (var transactionStep in transaction.Steps)
         {
-            if (transactionStep is not IAppendCommandTransactionStep appendCommandTransactionStep)
-            {
-                continue;
-            }
+            var snapshots = await snapshotTransactionStepProcessor.GetSnapshots(transaction, transactionStep, cancellationToken);
 
-            if (await getSnapshots.Invoke(appendCommandTransactionStep) is not var (previousLatestSnapshot, nextSnapshot
-                ))
+            if (snapshots is not var (previousLatestSnapshot, nextSnapshot))
             {
                 continue;
             }
@@ -48,7 +41,7 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
             }
             else
             {
-                snapshotCache.PutSnapshot(snapshotId, nextSnapshot);
+                snapshotTransactionStepProcessorCache.PutSnapshot(snapshotId, nextSnapshot);
             }
 
             if (nextSnapshot.ShouldRecord())
@@ -62,21 +55,6 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
         foreach (var (snapshotPointer, snapshot) in putQueue)
         {
             await snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken);
-        }
-    }
-
-    protected class SnapshotCache
-    {
-        private readonly Dictionary<Pointer, TSnapshot> _cache = new();
-
-        public void PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot)
-        {
-            _cache[snapshotPointer] = snapshot;
-        }
-
-        public TSnapshot? GetSnapshotOrDefault(Pointer snapshotPointer)
-        {
-            return _cache.GetValueOrDefault(snapshotPointer);
         }
     }
 }

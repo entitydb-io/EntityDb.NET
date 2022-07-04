@@ -1,8 +1,5 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -41,46 +38,22 @@ internal sealed class
             return;
         }
 
-        var snapshotCache = CreateSnapshotCache();
+        var snapshotTransactionStepProcessorCache = new SnapshotTransactionStepProcessorCache<TProjection>();
 
-        async Task<(TProjection?, TProjection)?> GetSnapshots(
-            IAppendCommandTransactionStep appendCommandTransactionStep)
-        {
-            var projectionId = projectionRepository.GetProjectionIdOrDefault(appendCommandTransactionStep.Entity);
+        var projectionSnapshotTransactionStepProcessor = new ProjectionSnapshotTransactionStepProcessor<TProjection>
+        (
+            projectionRepository,
+            snapshotTransactionStepProcessorCache
+        );
 
-            if (projectionId is null)
-            {
-                return null;
-            }
-
-            var previousLatestPointer = projectionId.Value + appendCommandTransactionStep.PreviousEntityVersionNumber;
-
-            TProjection? previousLatestSnapshot = default;
-
-            if (previousLatestPointer.VersionNumber != VersionNumber.MinValue)
-            {
-                previousLatestSnapshot = snapshotCache.GetSnapshotOrDefault(previousLatestPointer) ??
-                                         await projectionRepository.GetSnapshot(previousLatestPointer,
-                                             cancellationToken);
-            }
-
-            var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
-            (
-                transaction.Id,
-                transaction.TimeStamp,
-                appendCommandTransactionStep.EntityId,
-                appendCommandTransactionStep.EntityVersionNumber,
-                appendCommandTransactionStep.Command
-            );
-
-            var nextSnapshot =
-                (previousLatestSnapshot ?? TProjection.Construct(projectionId.Value)).Reduce(annotatedCommand);
-
-            return (previousLatestSnapshot, nextSnapshot);
-        }
-
-        await ProcessTransactionSteps(projectionRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots,
-            cancellationToken);
+        await ProcessTransactionSteps
+        (
+            projectionRepository.SnapshotRepository,
+            snapshotTransactionStepProcessorCache,
+            transaction,
+            projectionSnapshotTransactionStepProcessor,
+            cancellationToken
+        );
     }
 
     public static ProjectionSnapshotTransactionProcessor<TProjection> Create(IServiceProvider serviceProvider,

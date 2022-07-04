@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -39,31 +37,22 @@ internal class EntitySnapshotTransactionProcessor<TEntity> : SnapshotTransaction
             return;
         }
 
-        var snapshotCache = CreateSnapshotCache();
+        var snapshotTransactionStepProcessorCache = new SnapshotTransactionStepProcessorCache<TEntity>();
 
-        async Task<(TEntity?, TEntity)?> GetSnapshots(IAppendCommandTransactionStep appendCommandTransactionStep)
-        {
-            if (appendCommandTransactionStep.Entity is not TEntity nextSnapshot)
-            {
-                return null;
-            }
+        var snapshotStepProcessor = new EntitySnapshotTransactionStepProcessor<TEntity>
+        (
+            entityRepository,
+            snapshotTransactionStepProcessorCache
+        );
 
-            var previousLatestPointer = appendCommandTransactionStep.EntityId +
-                                        appendCommandTransactionStep.PreviousEntityVersionNumber;
-
-            TEntity? previousLatestSnapshot = default;
-
-            if (previousLatestPointer.VersionNumber != VersionNumber.MinValue)
-            {
-                previousLatestSnapshot = snapshotCache.GetSnapshotOrDefault(previousLatestPointer) ??
-                                         await entityRepository.GetSnapshot(previousLatestPointer, cancellationToken);
-            }
-
-            return (previousLatestSnapshot, nextSnapshot);
-        }
-
-        await ProcessTransactionSteps(entityRepository.SnapshotRepository, snapshotCache, transaction, GetSnapshots,
-            cancellationToken);
+        await ProcessTransactionSteps
+        (
+            entityRepository.SnapshotRepository,
+            snapshotTransactionStepProcessorCache,
+            transaction,
+            snapshotStepProcessor,
+            cancellationToken
+        );
     }
 
     public static EntitySnapshotTransactionProcessor<TEntity> Create(IServiceProvider serviceProvider,
