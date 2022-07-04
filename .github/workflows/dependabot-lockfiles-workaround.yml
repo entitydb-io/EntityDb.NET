@@ -17,4 +17,4 @@ jobs:
       - name: Commit Updated Lockfiles
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: chore(deps): Update NuGet Lockfiles
+          commit_message: "chore(deps): Update NuGet Lockfiles"
