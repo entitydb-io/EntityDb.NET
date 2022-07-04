@@ -51,6 +51,10 @@ jobs:
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
         run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Pack Projects into Nuget Packages
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone.title }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
+      - name: Publish to Beta
+        run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Publish Coverage Results to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
@@ -69,7 +73,3 @@ jobs:
         with:
           name: CoverageReport
           path: CoverageReport
-      - name: Pack Projects into Nuget Packages
-        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone.title }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
-      - name: Publish to Beta
-        run: dotnet nuget push */**.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
