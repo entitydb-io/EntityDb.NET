@@ -13,7 +13,7 @@ jobs:
         with:
           token: ${{ secrets.DEPENDABOT_LOCKFILES_WORKAROUND_PAT }}
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
       - name: Force Restore Packages
         run: dotnet restore --force-evaluate
       - name: Commit Updated Lockfiles
