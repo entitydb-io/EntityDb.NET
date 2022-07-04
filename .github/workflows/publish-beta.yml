@@ -55,6 +55,13 @@ jobs:
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ github.event.pull_request.milestone.title }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
         run: dotnet nuget push ./**/*.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
+      - name: Packages & Symbols Artifact
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: Packages & Symbols
+          path: |
+            ./**/*.nupkg
+            ./**/*.snupkg
       - name: Publish Coverage Results to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
@@ -73,10 +80,3 @@ jobs:
         with:
           name: CoverageReport
           path: CoverageReport
-      - name: Packages & Symbols Artifact
-        uses: actions/upload-artifact@v2.2.3
-        with:
-          name: Packages & Symbols
-          path: |
-            ./**/*.nupkg
-            ./**/*.snupkg
