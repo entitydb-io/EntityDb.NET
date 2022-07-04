@@ -39,9 +39,10 @@ internal abstract class CommandBase
         {
             var entityName = entityNameResult.GetValueOrDefault<string>() ?? string.Empty;
 
-            return EntityNameRegex.IsMatch(entityName)
-                ? null
-                : "The entity name must begin with an letter, and can only contain letters.";
+            if (!EntityNameRegex.IsMatch(entityName))
+            {
+                entityNameResult.ErrorMessage = "The entity name must begin with an letter, and can only contain letters.";
+            }
         });
 
         command.AddArgument(entityNameArgument);
