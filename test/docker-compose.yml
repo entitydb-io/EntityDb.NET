@@ -5,7 +5,7 @@ services:
     ports:
       - "6379:6379"
   mongodb:
-    image: mongo:5.0.3
+    image: mongo:5.0.9
     ports:
       - "27017:27017"
     volumes:

@@ -44,7 +44,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.6.0
         with:
-          mongodb-version: 5.0.3
+          mongodb-version: 5.0.9
           mongodb-replica-set: entitydb
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v2
