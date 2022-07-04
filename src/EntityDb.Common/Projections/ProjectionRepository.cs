@@ -59,7 +59,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
         ITransactionRepository transactionRepository,
         ISnapshotRepository<TProjection>? snapshotRepository = null)
     {
-        if (snapshotRepository == null)
+        if (snapshotRepository is null)
         {
             return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
                 transactionRepository);
