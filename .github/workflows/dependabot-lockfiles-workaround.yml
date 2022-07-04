@@ -1,0 +1,23 @@
+on: pull_request
+
+name: Dependabot Lockfiles Workaround
+
+jobs:
+  dependabot-lockfiles-workaround:
+    name: Update NuGet Lockfiles
+    if: contains(github.head_ref, 'dependabot/nuget') && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v1
+      - name: Force Restore Packages
+        run: dotnet restore --force-evaluate
+      - name: Commit Updated Lockfiles
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add .
+          git commit -m "chore(deps): Update NuGet lockfiles"
+          git push
