@@ -31,16 +31,6 @@ internal abstract class CommandBase
         command.AddArgument(privateKey);
     }
 
-    protected static void AddClusterNameArgument(Command command)
-    {
-        var clusterNameArgument = new Argument<string>("cluster-name")
-        {
-            Description = "The name of the Cluster on which the entity will be provisioned."
-        };
-
-        command.AddArgument(clusterNameArgument);
-    }
-
     protected static void AddServiceNameArgument(Command command)
     {
         var serviceName = new Argument<string>("service-name")
