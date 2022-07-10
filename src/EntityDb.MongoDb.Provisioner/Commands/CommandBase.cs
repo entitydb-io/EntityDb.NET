@@ -48,13 +48,13 @@ internal abstract class CommandBase
             Description = "The name of the service that will use this database."
         };
 
-        serviceName.AddValidator(entityNameResult =>
+        serviceName.AddValidator(serviceNameResult =>
         {
-            var serviceName = entityNameResult.GetValueOrDefault<string>() ?? string.Empty;
+            var serviceName = serviceNameResult.GetValueOrDefault<string>() ?? string.Empty;
 
             if (!ServiceNameRegex.IsMatch(serviceName))
             {
-                entityNameResult.ErrorMessage = "The service name must begin with an letter, and can only contain letters.";
+                serviceNameResult.ErrorMessage = "The service name must begin with an letter, and can only contain letters.";
             }
         });
 

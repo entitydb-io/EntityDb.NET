@@ -14,8 +14,8 @@ internal class CreateCollections : CommandBase
         string GroupName,
         string PublicKey,
         string PrivateKey,
-        string EntityName,
-        string EntityPassword,
+        string ServiceName,
+        string ServicePassword,
         string ClusterName
     );
 
@@ -39,9 +39,9 @@ internal class CreateCollections : CommandBase
 
         var mongoClient =
             new MongoClient(
-                $"{expectedProtocol}{arguments.EntityName}:{arguments.EntityPassword}@{cluster.SrvAddress[expectedProtocol.Length..]}/admin");
+                $"{expectedProtocol}{arguments.ServiceName}:{arguments.ServicePassword}@{cluster.SrvAddress[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionCollections(arguments.EntityName);
+        await mongoClient.ProvisionCollections(arguments.ServiceName);
     }
 
     public static void AddTo(RootCommand rootCommand)
