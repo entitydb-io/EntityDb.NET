@@ -9,43 +9,53 @@ namespace EntityDb.MongoDb.Provisioner.Commands;
 
 internal class CreateCollections : CommandBase
 {
-    public static void AddTo(RootCommand rootCommand)
+    public record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string EntityName,
+        string EntityPassword,
+        string ClusterName
+    );
+
+    private static async Task Execute(Arguments arguments)
     {
-        var createCollections = new Command("create-collections");
+        const string expectedProtocol = "mongodb+srv://";
 
-        AddMongoDbAtlasArgumentsTo(createCollections);
-        AddClusterNameArgumentTo(createCollections);
-        AddEntityNameArgumentTo(createCollections);
-        AddEntityPasswordArgumentTo(createCollections);
+        var mongoDbAtlasClient = await GetMongoDbAtlasClient
+        (
+            arguments.GroupName,
+            arguments.PublicKey,
+            arguments.PrivateKey
+        );
 
-        createCollections.Handler = CommandHandler.Create(
-            async (string groupName, string publicKey, string privateKey, string clusterName, string entityName,
-                string entityPassword) =>
-            {
-                await Execute(groupName, publicKey, privateKey, clusterName, entityName, entityPassword);
-            });
+        var cluster = await mongoDbAtlasClient.GetCluster(arguments.ClusterName);
 
-        rootCommand.AddCommand(createCollections);
-    }
-
-    private static async Task Execute(string groupName, string publicKey, string privateKey, string clusterName,
-        string entityName, string entityPassword)
-    {
-        const string protocol = "mongodb+srv://";
-
-        var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
-
-        var cluster = await mongoDbAtlasClient.GetCluster(clusterName);
-
-        if (cluster is null || cluster.SrvAddress?.StartsWith(protocol) != true)
+        if (cluster is null || cluster.SrvAddress?.StartsWith(expectedProtocol) != true)
         {
             throw new InvalidOperationException();
         }
 
         var mongoClient =
             new MongoClient(
-                $"{protocol}{entityName}:{entityPassword}@{cluster.SrvAddress[protocol.Length..]}/admin");
+                $"{expectedProtocol}{arguments.EntityName}:{arguments.EntityPassword}@{cluster.SrvAddress[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionCollections(entityName);
+        await mongoClient.ProvisionCollections(arguments.EntityName);
+    }
+
+    public static void AddTo(RootCommand rootCommand)
+    {
+        var createCollections = new Command("create-collections")
+        {
+            Handler = CommandHandler.Create<Arguments>(Execute)
+        };
+
+        AddMongoDbAtlasArguments(createCollections);
+        AddClusterNameArgument(createCollections);
+        AddServiceNameArgument(createCollections);
+        AddServicePasswordArgument(createCollections);
+
+        rootCommand.AddCommand(createCollections);
     }
 }

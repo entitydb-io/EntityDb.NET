@@ -1,6 +1,5 @@
 ﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -8,52 +7,68 @@ namespace EntityDb.MongoDb.Provisioner.Commands;
 
 internal abstract class CommandBase
 {
-    private static readonly Regex EntityNameRegex = new("^[a-z][a-z]*$", RegexOptions.IgnoreCase);
+    private static readonly Regex ServiceNameRegex = new("^[a-z][a-z]*$", RegexOptions.IgnoreCase);
 
-    protected static void AddMongoDbAtlasArgumentsTo(Command command)
+    protected static void AddMongoDbAtlasArguments(Command command)
     {
-        var groupNameArgument = new Argument<string>("group-name",
-            "The name of the MongoDb Atlas Group/Project to access via API.");
-        var publicKeyArgument = new Argument<string>("public-key", "The public key used to authenticate via API.");
-        var privateKeyArgument =
-            new Argument<string>("private-key", "The private key used to authenticate via API.");
+        var groupName = new Argument<string>("group-name")
+        {
+            Description = "The name of the MongoDb Atlas Group/Project to access via API."
+        };
 
-        command.AddArgument(groupNameArgument);
-        command.AddArgument(publicKeyArgument);
-        command.AddArgument(privateKeyArgument);
+        var publicKey = new Argument<string>("public-key")
+        {
+            Description = "The public key used to authenticate via API."
+        };
+
+        var privateKey = new Argument<string>("private-key")
+        {
+            Description = "The private key used to authenticate via API."
+        };
+
+        command.AddArgument(groupName);
+        command.AddArgument(publicKey);
+        command.AddArgument(privateKey);
     }
 
-    protected static void AddClusterNameArgumentTo(Command command)
+    protected static void AddClusterNameArgument(Command command)
     {
-        var clusterNameArgument = new Argument<string>("cluster-name",
-            "The name of the Cluster on which the entity will be provisioned.");
+        var clusterNameArgument = new Argument<string>("cluster-name")
+        {
+            Description = "The name of the Cluster on which the entity will be provisioned."
+        };
 
         command.AddArgument(clusterNameArgument);
     }
 
-    protected static void AddEntityNameArgumentTo(Command command)
+    protected static void AddServiceNameArgument(Command command)
     {
-        var entityNameArgument = new Argument<string>("entity-name", "The name of the entity being provisioned.");
-
-        entityNameArgument.AddValidator(entityNameResult =>
+        var serviceName = new Argument<string>("service-name")
         {
-            var entityName = entityNameResult.GetValueOrDefault<string>() ?? string.Empty;
+            Description = "The name of the service that will use this database."
+        };
 
-            if (!EntityNameRegex.IsMatch(entityName))
+        serviceName.AddValidator(entityNameResult =>
+        {
+            var serviceName = entityNameResult.GetValueOrDefault<string>() ?? string.Empty;
+
+            if (!ServiceNameRegex.IsMatch(serviceName))
             {
-                entityNameResult.ErrorMessage = "The entity name must begin with an letter, and can only contain letters.";
+                entityNameResult.ErrorMessage = "The service name must begin with an letter, and can only contain letters.";
             }
         });
 
-        command.AddArgument(entityNameArgument);
+        command.AddArgument(serviceName);
     }
 
-    protected static void AddEntityPasswordArgumentTo(Command command)
+    protected static void AddServicePasswordArgument(Command command)
     {
-        var entityPasswordArgument =
-            new Argument<string>("entity-password", "The password for the entity service user.");
+        var servicePassword = new Argument<string>("service-password")
+        {
+            Description = "The password for the service that will use this database."
+        };
 
-        command.AddArgument(entityPasswordArgument);
+        command.AddArgument(servicePassword);
     }
 
     internal static Task<MongoDbAtlasClient> GetMongoDbAtlasClient(string groupName, string publicKey,

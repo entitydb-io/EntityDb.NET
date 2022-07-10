@@ -7,36 +7,65 @@ namespace EntityDb.MongoDb.Provisioner.Commands;
 
 internal class CreateUser : CommandBase
 {
-    public static void AddTo(RootCommand rootCommand)
+    public record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string ServiceName,
+        string ServicePassword
+    );
+
+    private static async Task Execute(Arguments arguments)
     {
-        var createUser = new Command("create-user");
+        const string adminDatabaseName = "admin";
 
-        AddMongoDbAtlasArgumentsTo(createUser);
-        AddEntityNameArgumentTo(createUser);
-        AddEntityPasswordArgumentTo(createUser);
+        using var mongoDbAtlasClient = await GetMongoDbAtlasClient
+        (
+            arguments.GroupName,
+            arguments.PublicKey,
+            arguments.PrivateKey
+        );
 
-        createUser.Handler = CommandHandler.Create(
-            async (string groupName, string publicKey, string privateKey, string entityName,
-                string entityPassword) =>
-            {
-                await Execute(groupName, publicKey, privateKey, entityName, entityPassword);
-            });
+        var userExists = await mongoDbAtlasClient.UserExists
+        (
+            adminDatabaseName,
+            arguments.ServiceName
+        );
 
-        rootCommand.AddCommand(createUser);
-    }
-
-    private static async Task Execute(string groupName, string publicKey, string privateKey, string entityName,
-        string entityPassword)
-    {
-        using var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
-
-        if (await mongoDbAtlasClient.UserExists("admin", entityName))
+        if (userExists)
         {
             return;
         }
 
-        var roles = new[] { new MongoDbAtlasUserRole { DatabaseName = "admin", RoleName = entityName } };
+        var roles = new[]
+        {
+            new MongoDbAtlasUserRole
+            {
+                DatabaseName = adminDatabaseName,
+                RoleName = arguments.ServiceName
+            }
+        };
 
-        await mongoDbAtlasClient.CreateUser("admin", entityName, entityPassword, roles);
+        await mongoDbAtlasClient.CreateUser
+        (
+            adminDatabaseName,
+            arguments.ServicePassword,
+            arguments.ServicePassword,
+            roles
+        );
+    }
+
+    public static void AddTo(RootCommand rootCommand)
+    {
+        var createUser = new Command("create-user");
+
+        AddMongoDbAtlasArguments(createUser);
+        AddServiceNameArgument(createUser);
+        AddServicePasswordArgument(createUser);
+
+        createUser.Handler = CommandHandler.Create<Arguments>(Execute);
+
+        rootCommand.AddCommand(createUser);
     }
 }
