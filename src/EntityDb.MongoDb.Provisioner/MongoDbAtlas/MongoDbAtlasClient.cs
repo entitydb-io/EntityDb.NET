@@ -165,6 +165,24 @@ internal class MongoDbAtlasClient : IDisposable
         throw new InvalidOperationException();
     }
 
+    public async Task<ServerlessInstance?> GetServerlessInstance(string instanceName)
+    {
+        var getServerlessInstanceResponse = await Send(() => new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = GetUri($"groups/{_groupId}/serverless/{instanceName}")
+        });
+
+        if (!getServerlessInstanceResponse.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var responseStream = await getServerlessInstanceResponse.Content.ReadAsStreamAsync();
+
+        return await JsonSerializer.DeserializeAsync<ServerlessInstance>(responseStream);
+    }
+
     public async Task<Cluster?> GetCluster(string clusterName)
     {
         var getClusterResponse = await Send(() => new HttpRequestMessage

@@ -8,30 +8,39 @@ namespace EntityDb.MongoDb.Provisioner.Commands;
 
 internal class CreateCollectionsDirect : CommandBase
 {
-    public static void AddTo(RootCommand rootCommand)
+    public record Arguments
+    (
+        string ServiceName,
+        string ConnectionString
+    );
+
+    private static async Task Execute(Arguments arguments)
     {
-        var createCollectionsDirect = new Command("create-collections-direct");
+        var mongoClient = new MongoClient(arguments.ConnectionString);
 
-        AddEntityNameArgumentTo(createCollectionsDirect);
-
-        var connectionStringArgument =
-            new Argument<string>("connection-string", "The connection string to the mongodb instance.");
-
-        createCollectionsDirect.AddArgument(connectionStringArgument);
-
-        createCollectionsDirect.Handler = CommandHandler.Create(
-            async (string entityName, string connectionString) =>
-            {
-                await Execute(entityName, connectionString);
-            });
-
-        rootCommand.AddCommand(createCollectionsDirect);
+        await mongoClient.ProvisionCollections(arguments.ServiceName);
     }
 
-    private static async Task Execute(string entityName, string connectionString)
+    private static void AddConnectionStringArgument(Command command)
     {
-        var mongoClient = new MongoClient(connectionString);
+        var connectionStringArgument = new Argument<string>("connection-string")
+        {
+            Description = "The connection string to the mongodb instance."
+        };
 
-        await mongoClient.ProvisionCollections(entityName);
+        command.AddArgument(connectionStringArgument);
+    }
+
+    public static void AddTo(RootCommand rootCommand)
+    {
+        var createCollectionsDirect = new Command("create-collections-direct")
+        {
+            Handler = CommandHandler.Create<Arguments>(Execute)
+        };
+
+        AddServiceNameArgument(createCollectionsDirect);
+        AddConnectionStringArgument(createCollectionsDirect);
+
+        rootCommand.AddCommand(createCollectionsDirect);
     }
 }
