@@ -24,7 +24,8 @@ internal static class Program
 
         CreateRole.AddTo(rootCommand);
         CreateUser.AddTo(rootCommand);
-        CreateCollections.AddTo(rootCommand);
+        CreateCollectionsCluster.AddTo(rootCommand);
+        CreateCollectionsServerless.AddTo(rootCommand);
         CreateCollectionsDirect.AddTo(rootCommand);
 
         return rootCommand.InvokeAsync(args);

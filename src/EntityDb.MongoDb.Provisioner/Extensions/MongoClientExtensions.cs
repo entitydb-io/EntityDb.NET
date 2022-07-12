@@ -77,17 +77,17 @@ public static class MongoClientExtensions
     ///     Provisions the needed collections on the database.
     /// </summary>
     /// <param name="mongoClient">The mongo client.</param>
-    /// <param name="entityName">The name of the entity, which is used as the database name.</param>
+    /// <param name="serviceName">The name of the service, which is used as the name of the database.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>An asynchronous task that, when complete, signals that the collections have been provisioned.</returns>
     /// <remarks>
     ///     You should ONLY use this in your code for integration testing. Real databases should be provisioned using the
     ///     dotnet tool EntityDb.MongoDb.Provisioner.
     /// </remarks>
-    public static async Task ProvisionCollections(this IMongoClient mongoClient, string entityName,
+    public static async Task ProvisionCollections(this IMongoClient mongoClient, string serviceName,
         CancellationToken cancellationToken = default)
     {
-        var mongoDatabase = mongoClient.GetDatabase(entityName);
+        var mongoDatabase = mongoClient.GetDatabase(serviceName);
 
         foreach (var (collectionName, collectionIndices) in Collections)
         {

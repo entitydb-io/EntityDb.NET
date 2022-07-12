@@ -8,69 +8,141 @@ namespace EntityDb.MongoDb.Provisioner.Commands;
 
 internal class CreateRole : CommandBase
 {
-    public static void AddTo(RootCommand rootCommand)
+    public record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string ServiceName
+    );
+
+    private static async Task Execute(Arguments arguments)
     {
-        var createRole = new Command("create-role");
+        using var mongoDbAtlasClient = await GetMongoDbAtlasClient
+        (
+            arguments.GroupName,
+            arguments.PublicKey,
+            arguments.PrivateKey
+        );
 
-        AddMongoDbAtlasArgumentsTo(createRole);
-        AddEntityNameArgumentTo(createRole);
-
-        createRole.Handler = CommandHandler.Create(
-            async (string groupName, string publicKey, string privateKey, string entityName) =>
-            {
-                await Execute(groupName, publicKey, privateKey, entityName);
-            });
-
-        rootCommand.AddCommand(createRole);
-    }
-
-    private static async Task Execute(string groupName, string publicKey, string privateKey, string entityName)
-    {
-        using var mongoDbAtlasClient = await GetMongoDbAtlasClient(groupName, publicKey, privateKey);
-
-        if (await mongoDbAtlasClient.RoleExists(entityName))
+        if (await mongoDbAtlasClient.RoleExists(arguments.ServiceName))
         {
             return;
         }
 
-        var allClusterResources = new MongoDbAtlasResource { Cluster = true };
+        var allClusterResources = new MongoDbAtlasResource
+        {
+            Cluster = true
+        };
 
-        var allDbResources = new MongoDbAtlasResource { Db = entityName };
+        var allDbResources = new MongoDbAtlasResource
+        {
+            Db = arguments.ServiceName
+        };
 
         var agentSignatureResource = new MongoDbAtlasResource
         {
-            Db = entityName,
+            Db = arguments.ServiceName,
             Collection = AgentSignatureDocument.CollectionName
         };
 
-        var commandResource = new MongoDbAtlasResource { Db = entityName, Collection = CommandDocument.CollectionName };
+        var commandResource = new MongoDbAtlasResource
+        {
+            Db = arguments.ServiceName,
+            Collection = CommandDocument.CollectionName
+        };
 
-        var leaseResource = new MongoDbAtlasResource { Db = entityName, Collection = LeaseDocument.CollectionName };
+        var leaseResource = new MongoDbAtlasResource
+        {
+            Db = arguments.ServiceName,
+            Collection = LeaseDocument.CollectionName
+        };
 
-        var tagResources = new MongoDbAtlasResource { Db = entityName, Collection = TagDocument.CollectionName };
+        var tagResources = new MongoDbAtlasResource
+        {
+            Db = arguments.ServiceName,
+            Collection = TagDocument.CollectionName
+        };
 
         var roleActions = new[]
         {
-            new MongoDbAtlasRoleAction { Action = "LIST_DATABASES", Resources = new[] { allClusterResources } },
-            new MongoDbAtlasRoleAction { Action = "LIST_COLLECTIONS", Resources = new[] { allDbResources } },
+            new MongoDbAtlasRoleAction
+            {
+                Action = "LIST_DATABASES",
+                Resources = new[]
+                {
+                    allClusterResources
+                }
+            },
+            new MongoDbAtlasRoleAction
+            {
+                Action = "LIST_COLLECTIONS",
+                Resources = new[]
+                {
+                    allDbResources
+                }
+            },
             new MongoDbAtlasRoleAction
             {
                 Action = "FIND",
-                Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
+                Resources = new[]
+                {
+                    agentSignatureResource,
+                    commandResource,
+                    leaseResource,
+                    tagResources
+                }
             },
             new MongoDbAtlasRoleAction
             {
                 Action = "INSERT",
-                Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
+                Resources = new[]
+                {
+                    agentSignatureResource,
+                    commandResource,
+                    leaseResource,
+                    tagResources
+                }
             },
             new MongoDbAtlasRoleAction
             {
                 Action = "CREATE_INDEX",
-                Resources = new[] { agentSignatureResource, commandResource, leaseResource, tagResources }
+                Resources = new[]
+                {
+                    agentSignatureResource,
+                    commandResource,
+                    leaseResource,
+                    tagResources
+                }
             },
-            new MongoDbAtlasRoleAction { Action = "REMOVE", Resources = new[] { leaseResource, tagResources } }
+            new MongoDbAtlasRoleAction
+            {
+                Action = "REMOVE",
+                Resources = new[]
+                {
+                    leaseResource,
+                    tagResources
+                }
+            }
         };
 
-        await mongoDbAtlasClient.CreateRole(entityName, roleActions);
+        await mongoDbAtlasClient.CreateRole
+        (
+            arguments.ServiceName,
+            roleActions
+        );
+    }
+
+    public static void AddTo(RootCommand rootCommand)
+    {
+        var createRole = new Command("create-role")
+        {
+            Handler = CommandHandler.Create<Arguments>(Execute)
+        };
+
+        AddMongoDbAtlasArguments(createRole);
+        AddServiceNameArgument(createRole);
+
+        rootCommand.AddCommand(createRole);
     }
 }
