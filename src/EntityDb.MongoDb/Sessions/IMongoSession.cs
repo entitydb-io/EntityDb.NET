@@ -14,7 +14,7 @@ internal interface IMongoSession : IDisposableResource
     Task Insert<TDocument>(string collectionName,
         TDocument[] bsonDocuments, CancellationToken cancellationToken);
 
-    Task<List<TDocument>> Find<TDocument>
+    IAsyncEnumerable<TDocument> Find<TDocument>
     (
         string collectionName,
         FilterDefinition<BsonDocument> filterDefinition,

@@ -73,7 +73,7 @@ public sealed class TransactionTests : TestsBase<Startup>
     (
         IServiceScope serviceScope,
         Func<bool, TResult[]> getExpectedResults,
-        Func<ITransactionRepository, ModifiedQueryOptions, Task<TResult[]>> getActualResults,
+        Func<ITransactionRepository, ModifiedQueryOptions, IAsyncEnumerable<TResult>> getActualResults,
         bool secondaryPreferred
     )
     {
@@ -100,15 +100,15 @@ public sealed class TransactionTests : TestsBase<Startup>
         // ACT
 
         var actualTrueResults =
-            await getActualResults.Invoke(transactionRepository, bufferModifier);
+            await getActualResults.Invoke(transactionRepository, bufferModifier).ToArrayAsync();
         var actualFalseResults =
-            await getActualResults.Invoke(transactionRepository, negateModifier);
+            await getActualResults.Invoke(transactionRepository, negateModifier).ToArrayAsync();
         var reversedActualTrueResults =
-            await getActualResults.Invoke(transactionRepository, reverseBufferModifier);
+            await getActualResults.Invoke(transactionRepository, reverseBufferModifier).ToArrayAsync();
         var reversedActualFalseResults =
-            await getActualResults.Invoke(transactionRepository, reverseNegateModifier);
+            await getActualResults.Invoke(transactionRepository, reverseNegateModifier).ToArrayAsync();
         var actualSkipTakeResults =
-            await getActualResults.Invoke(transactionRepository, bufferSubsetModifier);
+            await getActualResults.Invoke(transactionRepository, bufferSubsetModifier).ToArrayAsync();
 
         // ASSERT
 
@@ -134,10 +134,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateTransactionIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -159,10 +159,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateTransactionIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -184,10 +184,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateTransactionIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -209,10 +209,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetTransactionIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateTransactionIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -234,10 +234,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateEntityIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -259,10 +259,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateEntityIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -284,10 +284,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateEntityIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -309,10 +309,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<Id[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<Id> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetEntityIds(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateEntityIds(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -334,10 +334,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<object[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<object> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetAgentSignatures(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateAgentSignatures(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -359,10 +359,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<object[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<object> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetCommands(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateCommands(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -384,10 +384,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<ILease[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<ILease> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetLeases(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateLeases(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -409,10 +409,10 @@ public sealed class TransactionTests : TestsBase<Startup>
                 .ToArray();
         }
 
-        Task<ITag[]> GetActualResults(ITransactionRepository transactionRepository,
+        IAsyncEnumerable<ITag> GetActualResults(ITransactionRepository transactionRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return transactionRepository.GetTags(query.Modify(modifiedQueryOptions));
+            return transactionRepository.EnumerateTags(query.Modify(modifiedQueryOptions));
         }
 
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
@@ -839,7 +839,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ACT
 
-        var annotatedAgentSignatures = await transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery);
+        var annotatedAgentSignatures = await transactionRepository.EnumerateAnnotatedAgentSignatures(agentSignatureQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -897,7 +897,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ACT
 
-        var annotatedCommands = await transactionRepository.GetAnnotatedCommands(commandQuery);
+        var annotatedCommands = await transactionRepository.EnumerateAnnotatedCommands(commandQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -993,7 +993,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ACT
 
-        var actualInitialTags = await transactionRepository.GetTags(tagQuery);
+        var actualInitialTags = await transactionRepository.EnumerateTags(tagQuery).ToArrayAsync();
 
         var finalTransaction = transactionBuilder
             .Delete(tag)
@@ -1001,7 +1001,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
-        var actualFinalTags = await transactionRepository.GetTags(tagQuery);
+        var actualFinalTags = await transactionRepository.EnumerateTags(tagQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -1052,7 +1052,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ACT
 
-        var actualInitialLeases = await transactionRepository.GetLeases(leaseQuery);
+        var actualInitialLeases = await transactionRepository.EnumerateLeases(leaseQuery).ToArrayAsync();
 
         var finalTransaction = transactionBuilder
             .Delete(lease)
@@ -1060,7 +1060,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
 
-        var actualFinalLeases = await transactionRepository.GetLeases(leaseQuery);
+        var actualFinalLeases = await transactionRepository.EnumerateLeases(leaseQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -1104,7 +1104,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var transactionInserted = await transactionRepository.PutTransaction(transaction);
 
-        var newCommands = await transactionRepository.GetCommands(versionOneCommandQuery);
+        var newCommands = await transactionRepository.EnumerateCommands(versionOneCommandQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -1164,7 +1164,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         var secondTransactionInserted = await transactionRepository.PutTransaction(secondTransaction);
 
-        var newCommands = await transactionRepository.GetCommands(versionTwoCommandQuery);
+        var newCommands = await transactionRepository.EnumerateCommands(versionTwoCommandQuery).ToArrayAsync();
 
         // ASSERT
 

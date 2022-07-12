@@ -16,7 +16,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         return MongoSession.Insert(collectionName, bsonDocuments, cancellationToken);
     }
 
-    public Task<List<TDocument>> Find<TDocument>
+    public IAsyncEnumerable<TDocument> Find<TDocument>
     (
         string collectionName,
         FilterDefinition<BsonDocument> filterDefinition,

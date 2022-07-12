@@ -10,6 +10,7 @@ using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Polyfills;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
@@ -357,8 +358,8 @@ public class TestsBase<TStartup>
             .ReturnsAsync(true);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(commands);
+            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(AsyncEnumerablePolyfill.FromResult(commands));
 
         transactionRepositoryMock
             .Setup(repository => repository.DisposeAsync())

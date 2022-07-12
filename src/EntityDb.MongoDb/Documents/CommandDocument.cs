@@ -11,6 +11,7 @@ using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,7 +69,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
         );
     }
 
-    public static Task<VersionNumber> GetLastEntityVersionNumber
+    public static async Task<VersionNumber> GetLastEntityVersionNumber
     (
         IMongoSession mongoSession,
         Id entityId,
@@ -79,6 +80,12 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
 
         var documentQuery = GetQuery(commandQuery);
 
-        return documentQuery.GetEntityVersionNumber(mongoSession, cancellationToken);
+        var document = await documentQuery
+            .Execute(mongoSession, DocumentQueryExtensions.EntityVersionNumberProjection, cancellationToken)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return document is null
+            ? default
+            : document.EntityVersionNumber;
     }
 }

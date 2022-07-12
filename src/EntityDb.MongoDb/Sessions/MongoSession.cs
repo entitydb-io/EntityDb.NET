@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,7 +60,7 @@ internal record MongoSession
             );
     }
 
-    public async Task<List<TDocument>> Find<TDocument>
+    public async IAsyncEnumerable<TDocument> Find<TDocument>
     (
         string collectionName,
         FilterDefinition<BsonDocument> filter,
@@ -67,7 +68,7 @@ internal record MongoSession
         SortDefinition<BsonDocument>? sort,
         int? skip,
         int? limit,
-        CancellationToken cancellationToken
+        [EnumeratorCancellation] CancellationToken cancellationToken
     )
     {
         var find = MongoDatabase
@@ -98,28 +99,40 @@ internal record MongoSession
         Logger
             .LogInformation
             (
-                "Started Running MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}",
+                "Started Enumerating MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
                 serverSessionId,
                 query
             );
 
-        var documents = await find.ToListAsync(cancellationToken);
+        ulong documentCount = 0;
+
+        using var cursor = await find.ToCursorAsync(cancellationToken);
+
+        while (await cursor.MoveNextAsync(cancellationToken))
+        {
+            foreach (var document in cursor.Current)
+            {
+                documentCount += 1;
+
+                yield return document;
+            }
+        }
 
         Logger
             .LogInformation
             (
-                "Finished Running MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}\n\nDocuments Returned: {DocumentsReturned}",
+                "Finished Enumerating MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}\n\nDocuments Returned: {DocumentsReturned}",
                 MongoDatabase.DatabaseNamespace,
                 collectionName,
                 serverSessionId,
                 query,
-                documents.Count
+                documentCount
             );
-
-        return documents;
     }
+
+
 
     public async Task Delete<TDocument>(string collectionName,
         FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken)
@@ -197,7 +210,7 @@ internal record MongoSession
     {
         ClientSessionHandle.Dispose();
 
-        return ValueTask.CompletedTask;
+        return base.DisposeAsync();
     }
 
     private ReadPreference GetReadPreference()
