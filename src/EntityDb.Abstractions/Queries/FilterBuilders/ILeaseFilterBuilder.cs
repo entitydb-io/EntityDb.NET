@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -12,6 +13,7 @@ public interface ILeaseFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
     /// <ignore/>
     [Obsolete("This method will be removed in the future.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     TFilter LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
         => throw new NotSupportedException();
 

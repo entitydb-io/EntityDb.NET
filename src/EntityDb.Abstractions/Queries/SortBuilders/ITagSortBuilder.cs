@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.SortBuilders;
@@ -11,6 +12,7 @@ public interface ITagSortBuilder<TSort> : ISortBuilder<TSort>
 {
     /// <ignore/>
     [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     TSort TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> tagExpression)
         => throw new NotImplementedException();
 

@@ -1,5 +1,6 @@
 using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -12,6 +13,7 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
     /// <ignore/>
     [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     TFilter TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
         => throw new NotSupportedException();
 
