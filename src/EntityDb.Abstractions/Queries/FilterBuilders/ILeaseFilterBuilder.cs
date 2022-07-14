@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.ValueObjects;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -60,4 +61,37 @@ public interface ILeaseFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="leaseTypes" />.
     /// </returns>
     TFilter LeaseTypeIn(params Type[] leaseTypes);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Scope"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="scope">The lease scope</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Scope"/> is
+    ///     <paramref name="scope"/>.
+    /// </returns>
+    TFilter LeaseScopeEq(string scope);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Label"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="label">The lease label</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Label"/> is
+    ///     <paramref name="label"/>.
+    /// </returns>
+    TFilter LeaseLabelEq(string label);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Value"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="value">The lease value</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes leases whose <see cref="ILease.Value"/> is
+    ///     <paramref name="value"/>.
+    /// </returns>
+    TFilter LeaseValueEq(string value);
 }

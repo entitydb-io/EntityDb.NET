@@ -1,3 +1,4 @@
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.ValueObjects;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -59,4 +60,26 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="tagTypes" />.
     /// </returns>
     TFilter TagTypeIn(params Type[] tagTypes);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Label"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="label">The tag labels</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Label"/> is
+    ///     <paramref name="label"/>.
+    /// </returns>
+    TFilter TagLabelEq(string label);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Value"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="value">The tag values</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Value"/> is
+    ///     <paramref name="value"/>.
+    /// </returns>
+    TFilter TagValueEq(string value);
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Leases;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -36,4 +37,25 @@ public interface ILeaseSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders leases by type.</returns>
     TSort LeaseType(bool ascending);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Scope"/>.
+    /// </summary>
+    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
+    /// <returns>A <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Scope"/>.</returns>
+    TSort LeaseScope(bool ascending);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Label"/>.
+    /// </summary>
+    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
+    /// <returns>A <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Label"/>.</returns>
+    TSort LeaseLabel(bool ascending);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Value"/>.
+    /// </summary>
+    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
+    /// <returns>A <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Value"/>.</returns>
+    TSort LeaseValue(bool ascending);
 }
