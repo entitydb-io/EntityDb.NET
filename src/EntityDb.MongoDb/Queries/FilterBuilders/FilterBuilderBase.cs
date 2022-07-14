@@ -45,6 +45,11 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
         return FilterBuilder.Or(filters);
     }
 
+    protected static FilterDefinition<BsonDocument> Eq<TValue>(string fieldName, TValue value)
+    {
+        return FilterBuilder.Eq(fieldName, value);
+    }
+
     protected static FilterDefinition<BsonDocument> In<TValue>(string fieldName, IEnumerable<TValue> values)
     {
         return FilterBuilder.In(fieldName, values);

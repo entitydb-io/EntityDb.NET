@@ -30,6 +30,16 @@ internal sealed class TagFilterBuilder : FilterBuilderBase, ITagFilterBuilder<Fi
         return DataTypeIn(tagTypes);
     }
 
+    public FilterDefinition<BsonDocument> TagLabelEq(string label)
+    {
+        return Eq(nameof(TagDocument.Label), label);
+    }
+
+    public FilterDefinition<BsonDocument> TagValueEq(string value)
+    {
+        return Eq(nameof(TagDocument.Value), value);
+    }
+
     public FilterDefinition<BsonDocument> TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
     {
         return DataValueMatches(tagExpression);

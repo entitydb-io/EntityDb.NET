@@ -65,7 +65,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
             commandQuery.GetFilter(FilterBuilder),
             commandQuery.GetSort(SortBuilder),
             commandQuery.Skip,
-            commandQuery.Take
+            commandQuery.Take,
+            commandQuery.Options as MongoDbQueryOptions
         );
     }
 

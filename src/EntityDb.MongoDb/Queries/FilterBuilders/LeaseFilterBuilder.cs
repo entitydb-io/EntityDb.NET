@@ -30,6 +30,21 @@ internal sealed class LeaseFilterBuilder : FilterBuilderBase, ILeaseFilterBuilde
         return DataTypeIn(leaseTypes);
     }
 
+    public FilterDefinition<BsonDocument> LeaseScopeEq(string scope)
+    {
+        return Eq(nameof(LeaseDocument.Scope), scope);
+    }
+
+    public FilterDefinition<BsonDocument> LeaseLabelEq(string label)
+    {
+        return Eq(nameof(LeaseDocument.Label), label);
+    }
+
+    public FilterDefinition<BsonDocument> LeaseValueEq(string value)
+    {
+        return Eq(nameof(LeaseDocument.Value), value);
+    }
+
     public FilterDefinition<BsonDocument> LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
     {
         return DataValueMatches(leaseExpression);

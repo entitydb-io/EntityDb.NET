@@ -30,6 +30,16 @@ internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefi
         return SortDataValue(ascending, leaseExpression);
     }
 
+    public SortDefinition<BsonDocument> TagLabel(bool ascending)
+    {
+        return Sort(ascending, nameof(TagDocument.Label));
+    }
+
+    public SortDefinition<BsonDocument> TagValue(bool ascending)
+    {
+        return Sort(ascending, nameof(TagDocument.Value));
+    }
+
     protected override string[] GetHoistedFieldNames()
     {
         return TagDocument.HoistedFieldNames;
