@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record GetLastEntityCommandQuery(Id EntityId) : ICommandQuery
+internal sealed record GetLastEntityCommandQuery(Id EntityId, object? Options = null) : ICommandQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {

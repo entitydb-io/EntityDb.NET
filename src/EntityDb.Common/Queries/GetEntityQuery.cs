@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace EntityDb.Common.Queries;
 
 internal sealed record GetEntityCommandsQuery
-    (Pointer EntityPointer, VersionNumber SnapshotVersionNumber) : ICommandQuery
+    (Pointer EntityPointer, VersionNumber SnapshotVersionNumber, object? Options = null) : ICommandQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
