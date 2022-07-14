@@ -10,6 +10,11 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface ILeaseFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future.")]
+    TFilter LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes leases with an entity id which is contained in a set
     ///     of entity ids.
@@ -53,15 +58,4 @@ public interface ILeaseFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="leaseTypes" />.
     /// </returns>
     TFilter LeaseTypeIn(params Type[] leaseTypes);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes leases which do match a lease expression.
-    /// </summary>
-    /// <typeparam name="TLease">The type of lease in the lease expression.</typeparam>
-    /// <param name="leaseExpression">The lease expression.</param>
-    /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes leases which do match <paramref name="leaseExpression" />
-    ///     .
-    /// </returns>
-    TFilter LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression);
 }

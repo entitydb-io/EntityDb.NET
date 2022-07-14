@@ -10,6 +10,11 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    TFilter TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes tags with an entity id which is contained in a set of
     ///     entity ids.
@@ -52,12 +57,4 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="tagTypes" />.
     /// </returns>
     TFilter TagTypeIn(params Type[] tagTypes);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes tags which do match a tag expression.
-    /// </summary>
-    /// <typeparam name="TTag">The type of tag in the tag expression.</typeparam>
-    /// <param name="tagExpression">The tag expression.</param>
-    /// <returns>A <typeparamref name="TFilter" /> that only includes tags which do match <paramref name="tagExpression" />.</returns>
-    TFilter TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression);
 }

@@ -9,6 +9,11 @@ namespace EntityDb.Abstractions.Queries.SortBuilders;
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface ILeaseSortBuilder<TSort> : ISortBuilder<TSort>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    TSort LeaseProperty<TLease>(bool ascending, Expression<Func<TLease, object>> leaseExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders leases by entity id.
     /// </summary>
@@ -29,13 +34,4 @@ public interface ILeaseSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders leases by type.</returns>
     TSort LeaseType(bool ascending);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TSort" /> that orders leases by a lease expression.
-    /// </summary>
-    /// <typeparam name="TLease">The type of lease in the lease expression.</typeparam>
-    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
-    /// <param name="leaseExpression">The lease expression.</param>
-    /// <returns>A <typeparamref name="TSort" /> that orders leases by <paramref name="leaseExpression" />.</returns>
-    TSort LeaseProperty<TLease>(bool ascending, Expression<Func<TLease, object>> leaseExpression);
 }

@@ -9,6 +9,11 @@ namespace EntityDb.Abstractions.Queries.SortBuilders;
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface ITagSortBuilder<TSort> : ISortBuilder<TSort>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    TSort TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> tagExpression)
+        => throw new NotImplementedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders tags by entity id.
     /// </summary>
@@ -29,13 +34,4 @@ public interface ITagSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders tags by type.</returns>
     TSort TagType(bool ascending);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TSort" /> that orders tags by a tag expression.
-    /// </summary>
-    /// <typeparam name="TTag">The type of tag in the tag expression.</typeparam>
-    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
-    /// <param name="tagExpression">The tag expression.</param>
-    /// <returns>A <typeparamref name="TSort" /> that orders tags by <paramref name="tagExpression" />.</returns>
-    TSort TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> tagExpression);
 }
