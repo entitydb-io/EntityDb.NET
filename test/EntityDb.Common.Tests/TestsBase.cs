@@ -18,12 +18,14 @@ using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.InMemory.Extensions;
 using EntityDb.InMemory.Sessions;
 using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Moq;
 using Shouldly;
 using Xunit.Abstractions;
@@ -41,15 +43,22 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionAdders =
     {
-        new("MongoDb", serviceCollection =>
+        new("MongoDb", typeof(MongoDbQueryOptions), serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions(true);
+
+            serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
+            {
+                options.FindOptions = new FindOptions
+                {
+                    Collation = new Collation("en", numericOrdering: true)
+                };
+            });
 
             serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
             {
                 options.ConnectionString = "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb";
                 options.DatabaseName = "Test";
-                options.ReadTimeout = TimeSpan.FromSeconds(1);
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
@@ -419,7 +428,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record TransactionsAdder(string Name, AddDependenciesDelegate AddDependencies)
+    public record TransactionsAdder(string Name, Type QueryOptionsType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
