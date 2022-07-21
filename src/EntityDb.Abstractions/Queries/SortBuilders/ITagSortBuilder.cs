@@ -15,7 +15,7 @@ public interface ITagSortBuilder<TSort> : ISortBuilder<TSort>
     [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
     [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     TSort TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> tagExpression)
-        => throw new NotImplementedException();
+        => throw new NotSupportedException();
 
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders tags by entity id.
