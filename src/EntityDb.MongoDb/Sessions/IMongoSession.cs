@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Disposables;
+using EntityDb.MongoDb.Queries;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ internal interface IMongoSession : IDisposableResource
         SortDefinition<BsonDocument>? sortDefinition,
         int? skip,
         int? limit,
+        MongoDbQueryOptions? options,
         CancellationToken cancellationToken
     );
 

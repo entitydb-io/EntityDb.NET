@@ -10,6 +10,7 @@ using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Agents;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
@@ -17,7 +18,6 @@ using EntityDb.Common.Leases;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Queries.Modified;
 using EntityDb.Common.Tags;
-using EntityDb.Common.Tests.Implementations.Agents;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Queries;
@@ -28,6 +28,7 @@ using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -436,7 +437,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         foreach (var count in counts)
         {
-            transactionBuilder.Append(new Count(count));
+            transactionBuilder.Append(new StoreNumber(count));
             transactionBuilder.Add(new CountLease(count));
             transactionBuilder.Add(new CountTag(count));
         }
@@ -820,7 +821,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactionTimeStamp.WithMillisecondPrecision()
         };
 
-        var agentSignature = new CounterAgentSignature(123);
+        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
 
         var transaction = await BuildTransaction<TEntity>(serviceScope, expectedTransactionId, expectedEntityId,
             new[] { expectedCount }, transactionTimeStamp, agentSignature);
@@ -848,7 +849,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         annotatedAgentSignatures[0].TransactionId.ShouldBe(expectedTransactionId);
         annotatedAgentSignatures[0].EntityIds.Length.ShouldBe(1);
         annotatedAgentSignatures[0].EntityIds[0].ShouldBe(expectedEntityId);
-        annotatedAgentSignatures[0].Data.ShouldBe(agentSignature);
+        annotatedAgentSignatures[0].Data.ShouldBeEquivalentTo(agentSignature);
 
         expectedTransactionTimeStamps.Contains(annotatedAgentSignatures[0].TransactionTimeStamp).ShouldBeTrue();
     }
@@ -907,7 +908,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
         annotatedCommands[0].EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
-        var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<Count>().ShouldNotBeNull();
+        var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<StoreNumber>().ShouldNotBeNull();
 
         actualCountCommand.Number.ShouldBe(expectedCount);
 
@@ -1084,7 +1085,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var expectedCommand = new Count(1);
+        var expectedCommand = new StoreNumber(1);
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
@@ -1135,14 +1136,14 @@ public sealed class TransactionTests : TestsBase<Startup>
             entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var expectedCommand = new Count(2);
+        var expectedCommand = new StoreNumber(2);
 
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
             .CreateForSingleEntity(default!, default);
 
         var firstTransaction = transactionBuilder
-            .Append(new Count(1))
+            .Append(new StoreNumber(1))
             .Build(Id.NewId());
 
         var secondTransaction = transactionBuilder
@@ -1215,9 +1216,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
             var currentTimeStamp = new TimeStamp(originTimeStamp.Value.AddMinutes(i));
 
-            var agentSignature = new CounterAgentSignature(i);
+            var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
 
-            var commands = new object[] { new Count(i) };
+            var commands = new object[] { new StoreNumber(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1286,14 +1287,14 @@ public sealed class TransactionTests : TestsBase<Startup>
         var transactionIds = GetSortedIds((int)numberOfTransactionIds);
         var entityIds = GetSortedIds((int)numberOfTransactionIds);
 
+        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
+
         for (var i = 1UL; i <= numberOfTransactionIds; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
 
-            var agentSignature = new CounterAgentSignature(i);
-
-            var commands = new object[] { new Count(i) };
+            var commands = new object[] { new StoreNumber(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1353,14 +1354,14 @@ public sealed class TransactionTests : TestsBase<Startup>
         var transactionIds = GetSortedIds((int)numberOfEntityIds);
         var entityIds = GetSortedIds((int)numberOfEntityIds);
 
+        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
+
         for (var i = 1UL; i <= numberOfEntityIds; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
 
-            var agentSignature = new CounterAgentSignature(i);
-
-            var commands = new object[] { new Count(i) };
+            var commands = new object[] { new StoreNumber(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1417,7 +1418,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         for (var i = 1UL; i <= numberOfVersionNumbers; i++)
         {
-            var command = new Count(i);
+            var command = new StoreNumber(i);
 
             var leases = new[] { new CountLease(i) };
 
@@ -1441,8 +1442,9 @@ public sealed class TransactionTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects<TEntity>(
+    private async Task Generic_GivenTransactionAlreadyInserted_WhenQueryingByData_ThenReturnExpectedObjects<TOptions, TEntity>(
         TransactionsAdder transactionsAdder, EntityAdder entityAdder)
+        where TOptions : class
         where TEntity : IEntity<TEntity>
     {
         const ulong countTo = 20UL;
@@ -1461,14 +1463,14 @@ public sealed class TransactionTests : TestsBase<Startup>
         var transactionIds = GetSortedIds((int)countTo);
         var entityIds = GetSortedIds((int)countTo);
 
+        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
+
+        var commands = new object[] { new DoNothing() };
+
         for (var i = 1UL; i <= countTo; i++)
         {
             var currentTransactionId = transactionIds[i - 1];
             var currentEntityId = entityIds[i - 1];
-
-            var agentSignature = new CounterAgentSignature(i);
-
-            var commands = new object[] { new Count(i) };
 
             var leases = new[] { new CountLease(i) };
 
@@ -1484,19 +1486,17 @@ public sealed class TransactionTests : TestsBase<Startup>
             transactions.Add(transaction);
         }
 
-        var query = new CountQuery(gte, lte);
+        var options = serviceScope.ServiceProvider
+            .GetRequiredService<IOptionsFactory<TOptions>>()
+            .Create("Count");
+
+        var query = new CountQuery(gte, lte, options);
 
         await InsertTransactions(serviceScope, transactions);
-        await TestGetTransactionIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
-        await TestGetTransactionIds(serviceScope, query as ICommandQuery, expectedObjects);
         await TestGetTransactionIds(serviceScope, query as ILeaseQuery, expectedObjects);
         await TestGetTransactionIds(serviceScope, query as ITagQuery, expectedObjects);
-        await TestGetEntityIds(serviceScope, query as IAgentSignatureQuery, expectedObjects);
-        await TestGetEntityIds(serviceScope, query as ICommandQuery, expectedObjects);
         await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
         await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
-        await TestGetAgentSignatures(serviceScope, query, expectedObjects);
-        await TestGetCommands(serviceScope, query, expectedObjects);
         await TestGetLeases(serviceScope, query, expectedObjects);
         await TestGetTags(serviceScope, query, expectedObjects);
     }
@@ -1725,7 +1725,7 @@ public sealed class TransactionTests : TestsBase<Startup>
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
+            new[] { transactionsAdder.QueryOptionsType, entityAdder.EntityType },
             new object?[] { transactionsAdder, entityAdder }
         );
     }

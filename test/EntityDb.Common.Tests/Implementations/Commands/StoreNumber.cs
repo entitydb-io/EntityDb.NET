@@ -4,7 +4,7 @@ using EntityDb.Common.Tests.Implementations.Projections;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record Count(ulong Number) : IReducer<TestEntity>, IReducer<OneToOneProjection>
+public record StoreNumber(ulong Number) : IReducer<TestEntity>, IReducer<OneToOneProjection>
 {
     public OneToOneProjection Reduce(OneToOneProjection projection)
     {

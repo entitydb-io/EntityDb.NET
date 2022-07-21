@@ -26,4 +26,14 @@ internal sealed record TagReverseSortBuilder<TSort>
     {
         return TagSortBuilder.TagProperty(!ascending, tagExpression);
     }
+
+    public TSort TagLabel(bool ascending)
+    {
+        return TagSortBuilder.TagLabel(!ascending);
+    }
+
+    public TSort TagValue(bool ascending)
+    {
+        return TagSortBuilder.TagValue(!ascending);
+    }
 }

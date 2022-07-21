@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -10,6 +11,12 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface ICommandFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TFilter CommandMatches<TCommand>(Expression<Func<TCommand, bool>> commandExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes commands with an entity id which is contained in a set
     ///     of entity ids.
@@ -53,15 +60,4 @@ public interface ICommandFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="commandTypes" />.
     /// </returns>
     TFilter CommandTypeIn(params Type[] commandTypes);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes commands which do match a command expression.
-    /// </summary>
-    /// <typeparam name="TCommand">The type of command in the command expression.</typeparam>
-    /// <param name="commandExpression">The command expression.</param>
-    /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes commands which do match
-    ///     <paramref name="commandExpression" />.
-    /// </returns>
-    TFilter CommandMatches<TCommand>(Expression<Func<TCommand, bool>> commandExpression);
 }

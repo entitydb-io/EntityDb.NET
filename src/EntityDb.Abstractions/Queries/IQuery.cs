@@ -14,4 +14,9 @@ public interface IQuery
     ///     The number of objects to take.
     /// </summary>
     int? Take { get; }
+
+    /// <summary>
+    ///     Driver-specific options for this query
+    /// </summary>
+    object? Options { get; }
 }

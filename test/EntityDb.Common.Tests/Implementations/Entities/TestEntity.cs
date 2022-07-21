@@ -35,7 +35,7 @@ public record TestEntity
         return command switch
         {
             DoNothing doNothing => doNothing.Reduce(this),
-            Count count => count.Reduce(this),
+            StoreNumber storeNumber => storeNumber.Reduce(this),
             _ => throw new NotSupportedException()
         };
     }

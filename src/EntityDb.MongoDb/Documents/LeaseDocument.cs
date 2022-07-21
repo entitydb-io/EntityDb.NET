@@ -68,7 +68,8 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
             leaseQuery.GetFilter(FilterBuilder),
             leaseQuery.GetSort(SortBuilder),
             leaseQuery.Skip,
-            leaseQuery.Take
+            leaseQuery.Take,
+            leaseQuery.Options as MongoDbQueryOptions
         );
     }
 

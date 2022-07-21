@@ -1,5 +1,6 @@
 ﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
+using EntityDb.MongoDb.Queries;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -68,6 +69,7 @@ internal record MongoSession
         SortDefinition<BsonDocument>? sort,
         int? skip,
         int? limit,
+        MongoDbQueryOptions? options,
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
     {
@@ -75,7 +77,7 @@ internal record MongoSession
             .GetCollection<BsonDocument>(collectionName)
             .WithReadPreference(GetReadPreference())
             .WithReadConcern(GetReadConcern())
-            .Find(ClientSessionHandle, filter, new FindOptions { MaxTime = Options.ReadTimeout })
+            .Find(ClientSessionHandle, filter, options?.FindOptions)
             .Project(projection);
 
         if (sort is not null)
