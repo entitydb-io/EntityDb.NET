@@ -66,7 +66,8 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
             tagQuery.GetFilter(FilterBuilder),
             tagQuery.GetSort(SortBuilder),
             tagQuery.Skip,
-            tagQuery.Take
+            tagQuery.Take,
+            tagQuery.Options as MongoDbQueryOptions
         );
     }
 

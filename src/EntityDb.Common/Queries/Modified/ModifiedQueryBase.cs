@@ -7,4 +7,6 @@ internal abstract record ModifiedQueryBase(IQuery Query, ModifiedQueryOptions Mo
     public int? Skip => ModifiedQueryOptions.ReplaceSkip ?? Query.Skip;
 
     public int? Take => ModifiedQueryOptions.ReplaceTake ?? Query.Take;
+
+    public object? Options => Query.Options;
 }

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -10,6 +11,12 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TFilter AgentSignatureMatches<TAgentSignature>(Expression<Func<TAgentSignature, bool>> agentSignatureExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures with any entity id which is contained
     ///     in a set
@@ -33,16 +40,4 @@ public interface IAgentSignatureFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     <paramref name="agentSignatureTypes" />.
     /// </returns>
     TFilter AgentSignatureTypeIn(params Type[] agentSignatureTypes);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes agentSignatures which do match a agentSignature
-    ///     expression.
-    /// </summary>
-    /// <typeparam name="TAgentSignature">The type of agentSignature in the agentSignature expression.</typeparam>
-    /// <param name="agentSignatureExpression">The agentSignature expression.</param>
-    /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes agentSignatures which do match
-    ///     <paramref name="agentSignatureExpression" />.
-    /// </returns>
-    TFilter AgentSignatureMatches<TAgentSignature>(Expression<Func<TAgentSignature, bool>> agentSignatureExpression);
 }

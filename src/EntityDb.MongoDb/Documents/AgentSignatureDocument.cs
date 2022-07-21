@@ -57,7 +57,8 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
             agentSignatureQuery.GetFilter(FilterBuilder),
             agentSignatureQuery.GetSort(SortBuilder),
             agentSignatureQuery.Skip,
-            agentSignatureQuery.Take
+            agentSignatureQuery.Take,
+            agentSignatureQuery.Options as MongoDbQueryOptions
         );
     }
 }

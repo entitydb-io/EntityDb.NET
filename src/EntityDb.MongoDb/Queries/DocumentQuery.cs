@@ -12,11 +12,12 @@ internal record DocumentQuery<TDocument>
     FilterDefinition<BsonDocument> Filter,
     SortDefinition<BsonDocument>? Sort,
     int? Skip,
-    int? Limit
+    int? Limit,
+    MongoDbQueryOptions? Options
 )
 {
     public IAsyncEnumerable<TDocument> Execute(IMongoSession mongoSession, ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
     {
-        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, cancellationToken);
+        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, Options, cancellationToken);
     }
 }

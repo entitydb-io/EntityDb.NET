@@ -30,6 +30,21 @@ internal sealed class LeaseSortBuilder : SortBuilderBase, ILeaseSortBuilder<Sort
         return SortDataValue(ascending, leaseExpression);
     }
 
+    public SortDefinition<BsonDocument> LeaseScope(bool ascending)
+    {
+        return Sort(ascending, nameof(LeaseDocument.Scope));
+    }
+
+    public SortDefinition<BsonDocument> LeaseLabel(bool ascending)
+    {
+        return Sort(ascending, nameof(LeaseDocument.Label));
+    }
+
+    public SortDefinition<BsonDocument> LeaseValue(bool ascending)
+    {
+        return Sort(ascending, nameof(LeaseDocument.Value));
+    }
+
     protected override string[] GetHoistedFieldNames()
     {
         return LeaseDocument.HoistedFieldNames;

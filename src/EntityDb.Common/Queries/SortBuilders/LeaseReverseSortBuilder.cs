@@ -27,4 +27,19 @@ internal sealed record LeaseReverseSortBuilder<TSort>
     {
         return LeaseSortBuilder.LeaseProperty(!ascending, leaseExpression);
     }
+
+    public TSort LeaseScope(bool ascending)
+    {
+        return LeaseSortBuilder.LeaseScope(!ascending);
+    }
+
+    public TSort LeaseLabel(bool ascending)
+    {
+        return LeaseSortBuilder.LeaseLabel(!ascending);
+    }
+
+    public TSort LeaseValue(bool ascending)
+    {
+        return LeaseSortBuilder.LeaseValue(!ascending);
+    }
 }
