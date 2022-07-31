@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Envelopes;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
@@ -15,5 +14,5 @@ internal interface ITransactionDocument
 
     TimeStamp TransactionTimeStamp { get; }
 
-    Envelope<BsonDocument> Data { get; }
+    BsonDocument Data { get; }
 }

@@ -35,7 +35,7 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
                 TransactionId = transaction.Id,
                 EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct()
                     .ToArray(),
-                Data = envelopeService.Deconstruct(transaction.AgentSignature)
+                Data = envelopeService.Serialize(transaction.AgentSignature)
             }
         };
 

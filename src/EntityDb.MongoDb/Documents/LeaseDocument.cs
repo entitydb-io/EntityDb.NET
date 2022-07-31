@@ -46,7 +46,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
                 Value = insertLease.Value,
-                Data = envelopeService.Deconstruct(insertLease)
+                Data = envelopeService.Serialize(insertLease)
             })
             .ToArray();
 

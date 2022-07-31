@@ -144,7 +144,7 @@ internal static class DocumentQueryExtensions
 
         await foreach (var document in documents)
         {
-            yield return envelopeService.Reconstruct<TData>(document.Data);
+            yield return envelopeService.Deserialize<TData>(document.Data);
         }
     }
 
@@ -167,7 +167,7 @@ internal static class DocumentQueryExtensions
                 document.TransactionId,
                 document.TransactionTimeStamp,
                 document.EntityIds,
-                envelopeService.Reconstruct<TData>(document.Data)
+                envelopeService.Deserialize<TData>(document.Data)
             );
         }
     }
@@ -192,7 +192,7 @@ internal static class DocumentQueryExtensions
                 document.TransactionTimeStamp,
                 document.EntityId,
                 document.EntityVersionNumber,
-                envelopeService.Reconstruct<TData>(document.Data)
+                envelopeService.Deserialize<TData>(document.Data)
             );
         }
     }

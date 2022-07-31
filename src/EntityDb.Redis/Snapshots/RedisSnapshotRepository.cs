@@ -2,9 +2,7 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Extensions;
 using EntityDb.Redis.Sessions;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,12 +10,12 @@ namespace EntityDb.Redis.Snapshots;
 
 internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass, ISnapshotRepository<TSnapshot>
 {
-    private readonly IEnvelopeService<JsonElement> _envelopeService;
+    private readonly IEnvelopeService<byte[]> _envelopeService;
     private readonly IRedisSession _redisSession;
 
     public RedisSnapshotRepository
     (
-        IEnvelopeService<JsonElement> envelopeService,
+        IEnvelopeService<byte[]> envelopeService,
         IRedisSession redisSession
     )
     {
@@ -29,7 +27,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         CancellationToken cancellationToken = default)
     {
         var snapshotValue = _envelopeService
-            .DeconstructAndSerialize(snapshot);
+            .Serialize(snapshot);
 
         return await _redisSession.Insert(snapshotPointer, snapshotValue).WaitAsync(cancellationToken);
     }
@@ -45,7 +43,7 @@ internal class RedisSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
         }
 
         return _envelopeService
-            .DeserializeAndReconstruct<JsonElement, TSnapshot>(snapshotValue!);
+            .Deserialize<TSnapshot>(snapshotValue!);
     }
 
     public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
