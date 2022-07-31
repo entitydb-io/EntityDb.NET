@@ -9,6 +9,8 @@ namespace EntityDb.Abstractions.ValueObjects;
 /// <param name="Value">The backing value.</param>
 public readonly record struct TimeStamp(DateTime Value)
 {
+    private const long TicksPerMicrosecond = TimeSpan.TicksPerMillisecond / 1000;
+
     /// <summary>
     ///     The value of this constant is equivalent to 00:00:00.0000000 UTC, January 1, 1970.
     /// </summary>
@@ -26,6 +28,15 @@ public readonly record struct TimeStamp(DateTime Value)
     public TimeStamp WithMillisecondPrecision()
     {
         return new TimeStamp(Value - TimeSpan.FromTicks(Value.Ticks % TimeSpan.TicksPerMillisecond));
+    }
+
+    /// <summary>
+    ///     Gets a <see cref="TimeStamp" /> rounded down to the nearest microsecond.
+    /// </summary>
+    /// <returns>A <see cref="TimeStamp" /> rounded down to the nearest microsecond.</returns>
+    public TimeStamp WithMicrosecondPrecision()
+    {
+        return new TimeStamp(Value - TimeSpan.FromTicks(Value.Ticks % TicksPerMicrosecond));
     }
 
     /// <summary>
