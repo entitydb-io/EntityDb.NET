@@ -11,10 +11,10 @@ public class NpgsqlQueryOptions
     /// <summary>
     ///     Defines the collation for sorting on <see cref="ILease.Value"/>.
     /// </summary>
-    public string? LeaseValueSortCollation = null;
+    public string? LeaseValueSortCollation { get; set; }
 
     /// <summary>
     ///     Defines teh collation for sorting on <see cref="ITag.Value"/>.
     /// </summary>
-    public string? TagValueSortCollation = null;
+    public string? TagValueSortCollation { get; set; }
 }
