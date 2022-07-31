@@ -18,11 +18,9 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
     {
     }
 
-    protected override byte[] GenerateCorruptedBytes()
+    protected override BsonDocument GenerateCorruptedSerializedData()
     {
-        const string invalidBson = "I AM A STRING VALUE, NOT BSON!";
-
-        return Encoding.UTF8.GetBytes(invalidBson);
+        return null!;
     }
 
     [Theory]
@@ -47,10 +45,10 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
 
         var value = new TestRecord<bool>(true);
 
-        var bsonDocumentEnvelope = envelopeService.Deconstruct(value);
+        var bsonDocumentEnvelope = envelopeService.Serialize(value);
 
         var actualContainsTypeDiscriminatorProperty =
-            bsonDocumentEnvelope.Value.Contains(BsonDocumentEnvelopeService.TypeDiscriminatorPropertyName);
+            bsonDocumentEnvelope.GetElement("Value").Value.AsBsonDocument.Contains(MongoDbEnvelopeService.TypeDiscriminatorPropertyName);
 
         // ASSERT
 
