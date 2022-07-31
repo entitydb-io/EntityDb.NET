@@ -50,6 +50,13 @@ public static class ServiceCollectionExtensions
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), serviceFactory, serviceLifetime));
     }
 
+    internal static void Add<TService, TImplementation>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
+        where TService : class
+        where TImplementation : TService
+    {
+        serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), serviceLifetime));
+    }
+
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
         where TService : class
     {

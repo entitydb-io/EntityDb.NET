@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net6.0": {
+      "System.Linq.Async": {
+        "type": "Direct",
+        "requested": "[6.0.1, )",
+        "resolved": "6.0.1",
+        "contentHash": "0YhHcaroWpQ9UCot3Pizah7ryAzQhNvobLMSxeDIGmnXfkQn8u5owvpOH0K6EVB+z9L7u6Cc4W17Br/+jyttEQ==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
+        }
+      },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
+      },
+      "Npgsql": {
+        "type": "Transitive",
+        "resolved": "6.0.5",
+        "contentHash": "a11H5/b5yNTuFN0Ycjvb920oI6vQHadt6KhEMmcC7DfvsSHH8Z3wBam+CHmyWcfDxJJaxamcdBb8XA3BvqS4Kw==",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
+      },
+      "entitydb.abstractions": {
+        "type": "Project",
+        "dependencies": {
+          "System.Linq.Async": "6.0.1"
+        }
+      },
+      "entitydb.common": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Abstractions": "1.0.0",
+          "System.Linq.Async": "6.0.1"
+        }
+      },
+      "entitydb.npgsql": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.SqlDb": "1.0.0",
+          "Npgsql": "6.0.5",
+          "System.Linq.Async": "6.0.1"
+        }
+      },
+      "entitydb.sqldb": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common": "1.0.0",
+          "System.Linq.Async": "6.0.1"
+        }
+      }
+    }
+  }
+}

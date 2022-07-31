@@ -21,8 +21,11 @@ using EntityDb.InMemory.Sessions;
 using EntityDb.MongoDb.Provisioner.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
+using EntityDb.Npgsql.Provisioner.Extensions;
+using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
+using EntityDb.SqlDb.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -75,6 +78,40 @@ public class TestsBase<TStartup>
             });
 
             serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
+            });
+        }),
+
+
+        new("Npgsql", typeof(NpgsqlQueryOptions), (timeStamp) => timeStamp.WithMicrosecondPrecision(), serviceCollection =>
+        {
+            serviceCollection.AddAutoProvisionNpgsqlTransactions(true);
+
+            serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
+            {
+                options.LeaseValueSortCollation = "numeric";
+                options.TagValueSortCollation = "numeric";
+            });
+
+            serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
+            {
+                options.ConnectionString = "Host=localhost;Port=5432;Username=entitydb;Password=entitydb;Database=entitydb;Include Error Detail=true";
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;

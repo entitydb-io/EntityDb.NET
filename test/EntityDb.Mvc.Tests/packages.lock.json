@@ -483,6 +483,14 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
+      "Npgsql": {
+        "type": "Transitive",
+        "resolved": "6.0.5",
+        "contentHash": "a11H5/b5yNTuFN0Ycjvb920oI6vQHadt6KhEMmcC7DfvsSHH8Z3wBam+CHmyWcfDxJJaxamcdBb8XA3BvqS4Kw==",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
+      },
       "NuGet.Frameworks": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -1802,6 +1810,7 @@
           "EntityDb.Common": "1.0.0",
           "EntityDb.InMemory": "1.0.0",
           "EntityDb.MongoDb.Provisioner": "1.0.0",
+          "EntityDb.Npgsql.Provisioner": "1.0.0",
           "EntityDb.Redis": "1.0.0",
           "Microsoft.NET.Test.Sdk": "17.0.0",
           "Moq": "4.18.1",
@@ -1843,11 +1852,33 @@
           "System.Linq.Async": "6.0.1"
         }
       },
+      "entitydb.npgsql": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.SqlDb": "1.0.0",
+          "Npgsql": "6.0.5",
+          "System.Linq.Async": "6.0.1"
+        }
+      },
+      "entitydb.npgsql.provisioner": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Npgsql": "1.0.0",
+          "System.Linq.Async": "6.0.1"
+        }
+      },
       "entitydb.redis": {
         "type": "Project",
         "dependencies": {
           "EntityDb.Common": "1.0.0",
           "StackExchange.Redis": "2.6.48",
+          "System.Linq.Async": "6.0.1"
+        }
+      },
+      "entitydb.sqldb": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common": "1.0.0",
           "System.Linq.Async": "6.0.1"
         }
       }
