@@ -49,6 +49,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Npgsql.Provisioner
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.SqlDb", "src\EntityDb.SqlDb\EntityDb.SqlDb.csproj", "{F2491666-31D1-47B5-A493-F25E167D1FDF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Json", "src\EntityDb.Json\EntityDb.Json.csproj", "{4936FFE0-98E5-43A2-89C9-0415A13CAA9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,10 @@ Global
 		{F2491666-31D1-47B5-A493-F25E167D1FDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2491666-31D1-47B5-A493-F25E167D1FDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2491666-31D1-47B5-A493-F25E167D1FDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -135,6 +141,7 @@ Global
 		{2AADF21D-4F26-4BD6-852A-B28208863FDD} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 		{282DFD9B-14E4-4339-B55A-3567E128FF1B} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 		{F2491666-31D1-47B5-A493-F25E167D1FDF} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
+		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E9D288EE-9351-4018-ABE8-B0968AEB0465}

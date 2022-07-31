@@ -10,6 +10,7 @@
 [assembly: InternalsVisibleTo("EntityDb.Mvc")]
 [assembly: InternalsVisibleTo("EntityDb.Redis")]
 [assembly: InternalsVisibleTo("EntityDb.Void")]
+[assembly: InternalsVisibleTo("EntityDb.Json")]
 
 // test
 [assembly: InternalsVisibleTo("EntityDb.Common.Tests")]

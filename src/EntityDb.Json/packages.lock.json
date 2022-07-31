@@ -28,13 +28,6 @@
           "EntityDb.Abstractions": "1.0.0",
           "System.Linq.Async": "6.0.1"
         }
-      },
-      "entitydb.json": {
-        "type": "Project",
-        "dependencies": {
-          "EntityDb.Common": "1.0.0",
-          "System.Linq.Async": "6.0.1"
-        }
       }
     }
   }

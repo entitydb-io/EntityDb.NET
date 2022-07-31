@@ -5,11 +5,11 @@ using EntityDb.Npgsql.Converters;
 using EntityDb.Npgsql.Queries;
 using EntityDb.Npgsql.Transactions;
 using EntityDb.SqlDb.Converters;
-using EntityDb.SqlDb.Envelopes;
 using EntityDb.SqlDb.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
+using EntityDb.Json.Envelopes;
 
 namespace EntityDb.Npgsql.Extensions;
 
@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
 {
     internal static void AddSqlDbEnvelopeService(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<IEnvelopeService<string>, SqlDbEnvelopeService>();
+        serviceCollection.AddSingleton<IEnvelopeService<string>, JsonStringEnvelopeService>();
     }
 
     /// <summary>

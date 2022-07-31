@@ -1,34 +1,34 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.TypeResolvers;
-using EntityDb.SqlDb.Converters;
+using EntityDb.Json.Converters;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace EntityDb.SqlDb.Envelopes;
+namespace EntityDb.Json.Envelopes;
 
-internal sealed class SqlDbEnvelopeService : IEnvelopeService<string>
+internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<TSerializedData>
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    private readonly ILogger<JsonEnvelopeService<TSerializedData>> _logger;
+    private readonly ITypeResolver _typeResolver;
+
+    protected static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private readonly ILogger<SqlDbEnvelopeService> _logger;
-    private readonly ITypeResolver _typeResolver;
-
-    static SqlDbEnvelopeService()
+    static JsonEnvelopeService()
     {
         JsonSerializerOptions.Converters.Add(new EnvelopeHeadersConverter());
         JsonSerializerOptions.Converters.Add(new IdConverter());
         JsonSerializerOptions.Converters.Add(new VersionNumberConverter());
     }
 
-    public SqlDbEnvelopeService
+    protected JsonEnvelopeService
     (
-        ILogger<SqlDbEnvelopeService> logger,
+        ILogger<JsonEnvelopeService<TSerializedData>> logger,
         ITypeResolver typeResolver
     )
     {
@@ -36,7 +36,11 @@ internal sealed class SqlDbEnvelopeService : IEnvelopeService<string>
         _typeResolver = typeResolver;
     }
 
-    public string Serialize<TData>(TData data)
+    protected abstract TSerializedData SerializeEnvelope(Envelope<JsonElement> envelope);
+
+    protected abstract Envelope<JsonElement> DeserializeEnvelope(TSerializedData serializedData);
+
+    public TSerializedData Serialize<TData>(TData data)
     {
         try
         {
@@ -50,7 +54,7 @@ internal sealed class SqlDbEnvelopeService : IEnvelopeService<string>
 
             var envelope = new Envelope<JsonElement>(headers, jsonElement);
 
-            return JsonSerializer.Serialize(envelope, typeof(Envelope<JsonElement>), JsonSerializerOptions);
+            return SerializeEnvelope(envelope);
         }
         catch (Exception exception)
         {
@@ -60,12 +64,11 @@ internal sealed class SqlDbEnvelopeService : IEnvelopeService<string>
         }
     }
 
-    public TData Deserialize<TData>(string rawData)
+    public TData Deserialize<TData>(TSerializedData serializedData)
     {
         try
         {
-            var envelope = (Envelope<JsonElement>)JsonSerializer.Deserialize(rawData, typeof(Envelope<JsonElement>),
-                JsonSerializerOptions)!;
+            var envelope = DeserializeEnvelope(serializedData);
 
             return (TData)JsonSerializer.Deserialize(envelope.Value.GetRawText(),
                 _typeResolver.ResolveType(envelope.Headers), JsonSerializerOptions)!;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace EntityDb.SqlDb.Converters;
+namespace EntityDb.Json.Converters;
 
 internal class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
 {

@@ -3,36 +3,38 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace EntityDb.SqlDb.Converters;
+namespace EntityDb.Json.Converters;
 
-internal class VersionNumberConverter : JsonConverter<VersionNumber>
+internal class IdConverter : JsonConverter<Id>
 {
-    public override VersionNumber Read
+    public override Id Read
     (
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options
     )
     {
-        if (reader.TokenType != JsonTokenType.Number)
+        if (reader.TokenType != JsonTokenType.String)
         {
             throw new NotSupportedException();
         }
 
-        var ulongValue = reader.GetUInt64();
+        var stringValue = reader.GetString();
 
-        return new VersionNumber(ulongValue);
+        var guidValue = Guid.Parse(stringValue!);
+
+        return new Id(guidValue);
     }
 
     public override void Write
     (
         Utf8JsonWriter writer,
-        VersionNumber versionNumber,
+        Id id,
         JsonSerializerOptions options
     )
     {
-        var ulongValue = versionNumber.Value;
+        var stringValue = id.Value.ToString();
 
-        writer.WriteNumberValue(ulongValue);
+        writer.WriteStringValue(stringValue);
     }
 }
