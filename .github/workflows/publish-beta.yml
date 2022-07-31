@@ -37,15 +37,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.2.0
-        with:
-          redis-version: 7.0.2
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.7.0
-        with:
-          mongodb-version: 5.0.9
-          mongodb-replica-set: entitydb
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v2
       - name: Restore Dependencies

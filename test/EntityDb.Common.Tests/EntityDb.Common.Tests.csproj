@@ -8,4 +8,14 @@
         <ProjectReference Include="..\..\src\EntityDb.Redis\EntityDb.Redis.csproj"/>
     </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Testcontainers" Version="2.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="DockerVolumes\**\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
 </Project>

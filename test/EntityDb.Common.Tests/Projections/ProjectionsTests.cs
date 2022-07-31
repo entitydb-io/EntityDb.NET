@@ -14,9 +14,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Projections;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class ProjectionsTests : TestsBase<Startup>
 {
-    public ProjectionsTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public ProjectionsTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 

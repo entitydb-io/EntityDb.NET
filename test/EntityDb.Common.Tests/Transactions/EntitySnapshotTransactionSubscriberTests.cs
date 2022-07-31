@@ -12,13 +12,12 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
 {
-    public EntitySnapshotTransactionSubscriberTests(IServiceProvider startupServiceProvider) : base(
-        startupServiceProvider)
+    public EntitySnapshotTransactionSubscriberTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
-
 
     private async Task
         Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<

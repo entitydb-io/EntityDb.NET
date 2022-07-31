@@ -35,9 +35,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public sealed class TransactionTests : TestsBase<Startup>
 {
-    public TransactionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public TransactionTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 

@@ -13,9 +13,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public sealed class SnapshotTests : TestsBase<Startup>
 {
-    public SnapshotTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public SnapshotTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 

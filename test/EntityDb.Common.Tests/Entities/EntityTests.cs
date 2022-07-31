@@ -21,9 +21,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class EntityTests : TestsBase<Startup>
 {
-    public EntityTests(IServiceProvider serviceProvider) : base(serviceProvider)
+    public EntityTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(serviceProvider, databaseContainerFixture)
     {
     }
 

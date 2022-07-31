@@ -49,6 +49,10 @@ public class TestsBase<TStartup>
     {
         new("MongoDb", typeof(MongoDbQueryOptions), (timeStamp) => timeStamp.WithMillisecondPrecision(), serviceCollection =>
         {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
             serviceCollection.AddAutoProvisionMongoDbTransactions(true);
 
             serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
@@ -61,8 +65,8 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
             {
-                options.ConnectionString = "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb";
-                options.DatabaseName = "Test";
+                options.ConnectionString = databaseContainerFixture!.MongoDbContainer.ConnectionString.Replace("mongodb://:@", "mongodb://");
+                options.DatabaseName = databaseContainerFixture.MongoDbConfiguration.Database;
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
@@ -84,9 +88,12 @@ public class TestsBase<TStartup>
             });
         }),
 
-
         new("Npgsql", typeof(NpgsqlQueryOptions), (timeStamp) => timeStamp.WithMicrosecondPrecision(), serviceCollection =>
         {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
             serviceCollection.AddAutoProvisionNpgsqlTransactions(true);
 
             serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
@@ -97,7 +104,7 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
             {
-                options.ConnectionString = "Host=localhost;Port=5432;Username=entitydb;Password=entitydb;Database=entitydb;Include Error Detail=true";
+                options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.ConnectionString};Include Error Detail=true";
             });
 
             serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
@@ -122,14 +129,16 @@ public class TestsBase<TStartup>
     private readonly IConfiguration _configuration;
     private readonly ITest _test;
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
+    private readonly DatabaseContainerFixture? _databaseContainerFixture;
 
-    protected TestsBase(IServiceProvider startupServiceProvider)
+    protected TestsBase(IServiceProvider startupServiceProvider, DatabaseContainerFixture? databaseContainerFixture = null)
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
         _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
         _test =
             (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output)
                 as ITest).ShouldNotBeNull();
+        _databaseContainerFixture = databaseContainerFixture;
     }
 
     protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
@@ -151,11 +160,15 @@ public class TestsBase<TStartup>
     {
         return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
             serviceCollection.AddRedisSnapshots<TSnapshot>(true);
 
             serviceCollection.ConfigureAll<RedisSnapshotSessionOptions<TSnapshot>>(options =>
             {
-                options.ConnectionString = "127.0.0.1:6379";
+                options.ConnectionString = databaseContainerFixture!.RedisContainer.ConnectionString;
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
@@ -318,6 +331,11 @@ public class TestsBase<TStartup>
         });
 
         startup.AddServices(serviceCollection);
+
+        if (_databaseContainerFixture != null)
+        {
+            serviceCollection.AddSingleton(_databaseContainerFixture);
+        }
 
         configureServices?.Invoke(serviceCollection);
 
