@@ -12,11 +12,11 @@ namespace EntityDb.Common.Projections;
 public interface IProjection<TProjection> : ISnapshot<TProjection>
 {
     /// <summary>
-    ///     Returns a new <typeparamref name="TProjection" /> that incorporates the commands for a particular entity id.
+    ///     Returns a new <typeparamref name="TProjection" /> that incorporates the command for a particular entity id.
     /// </summary>
-    /// <param name="annotatedCommands">The annotated commands.</param>
-    /// <returns>A new <typeparamref name="TProjection" /> that incorporates <paramref name="annotatedCommands" />.</returns>
-    TProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands);
+    /// <param name="annotatedCommand">The annotated command.</param>
+    /// <returns>A new <typeparamref name="TProjection" /> that incorporates <paramref name="annotatedCommand" />.</returns>
+    TProjection Reduce(IEntityAnnotation<object> annotatedCommand);
 
     /// <summary>
     ///     Returns a <see cref="ICommandQuery" /> that is used to load the rest of the state for the given projection pointer.
