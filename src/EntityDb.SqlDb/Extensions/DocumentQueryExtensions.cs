@@ -25,6 +25,7 @@ internal static class DocumentQueryExtensions
         Func<IAsyncEnumerable<TDocument>, IAsyncEnumerable<Id>> mapToIds,
         CancellationToken cancellationToken
     )
+        where TDocument : ITransactionDocument
         where TOptions : class
     {
         var skip = documentQuery.Skip;

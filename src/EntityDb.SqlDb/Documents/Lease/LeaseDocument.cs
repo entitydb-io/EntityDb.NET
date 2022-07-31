@@ -15,7 +15,7 @@ namespace EntityDb.SqlDb.Documents.Lease;
 
 internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocument>
 {
-    public const string TableName = "Leases";
+    public static string TableName => "Leases";
 
     private static readonly LeaseFilterBuilder FilterBuilder = new();
 
@@ -72,7 +72,6 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
     {
         return new DocumentQuery<LeaseDocument>
         (
-            TableName,
             leaseQuery.GetFilter(FilterBuilder),
             leaseQuery.GetSort(SortBuilder),
             leaseQuery.Skip,

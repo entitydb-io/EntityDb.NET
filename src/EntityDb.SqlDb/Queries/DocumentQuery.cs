@@ -9,17 +9,17 @@ namespace EntityDb.SqlDb.Queries;
 
 internal record DocumentQuery<TDocument>
 (
-    string TableName,
     IFilterDefinition FilterDefinition,
     ISortDefinition? SortDefinition,
     int? Skip,
     int? Limit,
     object? Options
 )
+    where TDocument : ITransactionDocument
 {
     public IAsyncEnumerable<TDocument> Execute<TOptions>(ISqlDbSession<TOptions> sqlDbSession, IDocumentReader<TDocument> documentReader, CancellationToken cancellationToken)
         where TOptions : class
     {
-        return sqlDbSession.Find(TableName, documentReader, FilterDefinition, SortDefinition, Skip, Limit, Options as TOptions, cancellationToken);
+        return sqlDbSession.Find(documentReader, FilterDefinition, SortDefinition, Skip, Limit, Options as TOptions, cancellationToken);
     }
 }

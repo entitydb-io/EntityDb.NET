@@ -6,6 +6,7 @@ namespace EntityDb.SqlDb.Documents;
 
 internal interface ITransactionDocument
 {
+    static abstract string TableName { get; }
 
     Guid? Id { get; }
 
@@ -21,6 +22,7 @@ internal interface ITransactionDocument
 }
 
 internal interface ITransactionDocument<TDocument> : ITransactionDocument
+    where TDocument : ITransactionDocument
 {
     static abstract IDocumentReader<TDocument> DocumentReader { get; }
     static abstract IDocumentReader<TDocument> TransactionIdDocumentReader { get; }

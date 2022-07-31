@@ -14,7 +14,7 @@ namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument<AgentSignatureDocument>
 {
-    public const string TableName = "AgentSignatures";
+    public static string TableName => "AgentSignatures";
 
     private static readonly AgentSignatureFilterBuilder FilterBuilder = new();
 
@@ -63,7 +63,6 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument<
     {
         return new DocumentQuery<AgentSignatureDocument>
         (
-            TableName,
             agentSignatureQuery.GetFilter(FilterBuilder),
             agentSignatureQuery.GetSort(SortBuilder),
             agentSignatureQuery.Skip,

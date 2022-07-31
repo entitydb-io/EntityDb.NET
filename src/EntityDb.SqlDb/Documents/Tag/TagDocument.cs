@@ -15,7 +15,7 @@ namespace EntityDb.SqlDb.Documents.Tag;
 
 internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
 {
-    public const string TableName = "Tags";
+    public static string TableName => "Tags";
 
     private static readonly TagFilterBuilder FilterBuilder = new();
 
@@ -70,7 +70,6 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
     {
         return new DocumentQuery<TagDocument>
         (
-            TableName,
             tagQuery.GetFilter(FilterBuilder),
             tagQuery.GetSort(SortBuilder),
             tagQuery.Skip,

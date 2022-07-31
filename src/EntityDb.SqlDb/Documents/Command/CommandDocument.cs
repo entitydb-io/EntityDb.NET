@@ -18,7 +18,7 @@ namespace EntityDb.SqlDb.Documents.Command;
 
 internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDocument>
 {
-    public const string TableName = "Commands";
+    public static string TableName => "Commands";
 
     private static readonly CommandFilterBuilder FilterBuilder = new();
 
@@ -69,7 +69,6 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDo
     {
         return new DocumentQuery<CommandDocument>
         (
-            TableName,
             commandQuery.GetFilter(FilterBuilder),
             commandQuery.GetSort(SortBuilder),
             commandQuery.Skip,

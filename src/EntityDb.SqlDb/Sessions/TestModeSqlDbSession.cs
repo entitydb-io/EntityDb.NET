@@ -22,7 +22,6 @@ internal record TestModeSqlDbSession<TOptions>(ISqlDbSession<TOptions> SqlDbSess
 
     public IAsyncEnumerable<TDocument> Find<TDocument>
     (
-        string tableName,
         IDocumentReader<TDocument> documentReader,
         IFilterDefinition filterDefinition,
         ISortDefinition? sortDefinition,
@@ -31,10 +30,10 @@ internal record TestModeSqlDbSession<TOptions>(ISqlDbSession<TOptions> SqlDbSess
         TOptions? options,
         CancellationToken cancellationToken
     )
+        where TDocument : ITransactionDocument
     {
         return SqlDbSession.Find
         (
-            tableName,
             documentReader,
             filterDefinition,
             sortDefinition,

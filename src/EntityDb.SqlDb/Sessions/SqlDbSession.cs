@@ -86,7 +86,6 @@ internal class SqlDbSession<TOptions> : DisposableResourceBaseClass,
 
     public async IAsyncEnumerable<TDocument> Find<TDocument>
     (
-        string tableName,
         IDocumentReader<TDocument> documentReader,
         IFilterDefinition filterDefintiion,
         ISortDefinition? sortDefinition,
@@ -95,7 +94,10 @@ internal class SqlDbSession<TOptions> : DisposableResourceBaseClass,
         TOptions? options,
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
+        where TDocument : ITransactionDocument
     {
+        var tableName = TDocument.TableName;
+
         var dbQuery = _sqlConverter.ConvertQuery(tableName, documentReader, filterDefintiion, sortDefinition, skip, limit, options);
 
         dbQuery.Connection = DbConnection;

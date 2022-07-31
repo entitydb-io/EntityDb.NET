@@ -9,6 +9,7 @@ internal interface IEntityDocument : ITransactionDocument
 }
 
 internal interface IEntityDocument<TDocument> : IEntityDocument, ITransactionDocument<TDocument>
+    where TDocument : IEntityDocument
 {
     static abstract IDocumentReader<TDocument> EntityIdDocumentReader { get; }
 }

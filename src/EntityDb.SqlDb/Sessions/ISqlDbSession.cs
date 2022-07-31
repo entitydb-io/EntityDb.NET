@@ -24,7 +24,6 @@ internal interface ISqlDbSession<TOptions> : IDisposableResource
 
     IAsyncEnumerable<TDocument> Find<TDocument>
     (
-        string tableName,
         IDocumentReader<TDocument> documentReader,
         IFilterDefinition filterDefinition,
         ISortDefinition? sortDefinition,
@@ -32,7 +31,8 @@ internal interface ISqlDbSession<TOptions> : IDisposableResource
         int? limit,
         TOptions? options,
         CancellationToken cancellationToken
-    );
+    )
+        where TDocument : ITransactionDocument;
 
     Task Delete
     (
