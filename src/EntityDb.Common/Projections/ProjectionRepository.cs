@@ -43,9 +43,12 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
         var commandQuery = projection.GetCommandQuery(projectionPointer);
 
-        var annotatedCommands = await TransactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken);
+        var annotatedCommands = TransactionRepository.EnumerateAnnotatedCommands(commandQuery, cancellationToken);
 
-        projection = projection.Reduce(annotatedCommands);
+        await foreach (var annotatedCommand in annotatedCommands)
+        {
+            projection = projection.Reduce(annotatedCommand);
+        }
 
         if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
         {
