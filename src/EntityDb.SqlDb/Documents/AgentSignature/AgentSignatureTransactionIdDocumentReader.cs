@@ -13,13 +13,16 @@ internal class AgentSignatureTransactionIdDocumentReader : IDocumentReader<Agent
         nameof(AgentSignatureDocument.TransactionId),
     };
 
+    private static readonly int _transactionIdOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new AgentSignatureDocument
         {
-            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_transactionIdOrdinal))
         };
     }
 }

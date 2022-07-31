@@ -18,19 +18,34 @@ internal class AgentSignatureDocumentReader : IDocumentReader<AgentSignatureDocu
         nameof(AgentSignatureDocument.Data),
     };
 
+    private static readonly int _transactionIdOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionId));
+    
+    private static readonly int _transactionTimeStampOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionTimeStamp));
+    
+    private static readonly int _entityIdsOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.EntityIds));
+    
+    private static readonly int _dataTypeOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.DataType));
+
+    private static readonly int _dataOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.Data));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new AgentSignatureDocument
         {
-            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0)),
-            TransactionTimeStamp = new TimeStamp(await dbDataReader.GetFieldValueAsync<DateTime>(1)),
-            EntityIds = (await dbDataReader.GetFieldValueAsync<Guid[]>(2))
+            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_transactionIdOrdinal)),
+            TransactionTimeStamp = new TimeStamp(await dbDataReader.GetFieldValueAsync<DateTime>(_transactionTimeStampOrdinal)),
+            EntityIds = (await dbDataReader.GetFieldValueAsync<Guid[]>(_entityIdsOrdinal))
                 .Select(guid => new Id(guid))
                 .ToArray(),
-            DataType = await dbDataReader.GetFieldValueAsync<string>(3),
-            Data = await dbDataReader.GetFieldValueAsync<string>(4),
+            DataType = await dbDataReader.GetFieldValueAsync<string>(_dataTypeOrdinal),
+            Data = await dbDataReader.GetFieldValueAsync<string>(_dataOrdinal),
         };
     }
 }

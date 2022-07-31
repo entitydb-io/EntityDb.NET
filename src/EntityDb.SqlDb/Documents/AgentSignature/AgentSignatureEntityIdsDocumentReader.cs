@@ -14,13 +14,16 @@ internal class AgentSignatureEntityIdsDocumentReader : IDocumentReader<AgentSign
         nameof(AgentSignatureDocument.EntityIds),
     };
 
+    private static readonly int _entityIdsOrdinal =
+        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.EntityIds));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new AgentSignatureDocument
         {
-            EntityIds = (await dbDataReader.GetFieldValueAsync<Guid[]>(0))
+            EntityIds = (await dbDataReader.GetFieldValueAsync<Guid[]>(_entityIdsOrdinal))
                 .Select(guid => new Id(guid))
                 .ToArray()
         };
