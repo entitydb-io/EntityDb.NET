@@ -1,12 +1,8 @@
 namespace EntityDb.Common.Envelopes;
 
-internal interface IEnvelopeService<TEnvelopeValue>
+internal interface IEnvelopeService<TSerializedData>
 {
-    Envelope<TEnvelopeValue> Deconstruct<TData>(TData data);
+    TSerializedData Serialize<TData>(TData data);
 
-    byte[] Serialize(Envelope<TEnvelopeValue> envelope);
-
-    Envelope<TEnvelopeValue> Deserialize(byte[] rawData);
-
-    TData Reconstruct<TData>(Envelope<TEnvelopeValue> envelope);
+    TData Deserialize<TData>(TSerializedData serializedData);
 }
