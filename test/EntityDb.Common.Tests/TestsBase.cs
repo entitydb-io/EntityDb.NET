@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
@@ -43,7 +44,7 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionAdders =
     {
-        new("MongoDb", typeof(MongoDbQueryOptions), serviceCollection =>
+        new("MongoDb", typeof(MongoDbQueryOptions), (timeStamp) => timeStamp.WithMillisecondPrecision(), serviceCollection =>
         {
             serviceCollection.AddAutoProvisionMongoDbTransactions(true);
 
@@ -428,7 +429,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record TransactionsAdder(string Name, Type QueryOptionsType, AddDependenciesDelegate AddDependencies)
+    public record TransactionsAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
