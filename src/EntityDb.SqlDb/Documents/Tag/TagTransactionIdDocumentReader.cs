@@ -13,13 +13,16 @@ internal class TagTransactionIdDocumentReader : IDocumentReader<TagDocument>
         nameof(TagDocument.TransactionId),
     };
 
+    private static readonly int _transactionIdOrdinal
+        = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<TagDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new TagDocument
         {
-            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_transactionIdOrdinal))
         };
     }
 }

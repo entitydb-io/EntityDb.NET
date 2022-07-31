@@ -13,13 +13,16 @@ internal class LeaseTransactionIdDocumentReader : IDocumentReader<LeaseDocument>
         nameof(LeaseDocument.TransactionId),
     };
 
+    private static readonly int _transactionIdOrdinal
+        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.TransactionId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new LeaseDocument
         {
-            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_transactionIdOrdinal))
         };
     }
 }

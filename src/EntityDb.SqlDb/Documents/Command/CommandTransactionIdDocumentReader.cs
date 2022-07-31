@@ -13,13 +13,16 @@ internal class CommandTransactionIdDocumentReader : IDocumentReader<CommandDocum
         nameof(CommandDocument.TransactionId),
     };
 
+    private static readonly int _transactionIdOrdinal
+        = Array.IndexOf(_propertyNames, nameof(CommandDocument.TransactionId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<CommandDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new CommandDocument
         {
-            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            TransactionId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_transactionIdOrdinal))
         };
     }
 }

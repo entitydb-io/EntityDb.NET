@@ -13,13 +13,16 @@ internal class CommandEntityVersionNumberDocumentReader : IDocumentReader<Comman
         nameof(CommandDocument.EntityVersionNumber),
     };
 
+    private static readonly int _entityVersionNumberOrdinal
+        = Array.IndexOf(_propertyNames, nameof(CommandDocument.EntityVersionNumber));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<CommandDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new CommandDocument
         {
-            EntityVersionNumber = new VersionNumber(Convert.ToUInt64(await dbDataReader.GetFieldValueAsync<long>(0)))
+            EntityVersionNumber = new VersionNumber(Convert.ToUInt64(await dbDataReader.GetFieldValueAsync<long>(_entityVersionNumberOrdinal)))
         };
     }
 }

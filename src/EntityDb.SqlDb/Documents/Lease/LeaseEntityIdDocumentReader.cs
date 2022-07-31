@@ -13,13 +13,16 @@ internal class LeaseEntityIdDocumentReader : IDocumentReader<LeaseDocument>
         nameof(LeaseDocument.EntityId),
     };
 
+    private static readonly int _entityIdOrdinal
+        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new LeaseDocument
         {
-            EntityId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            EntityId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_entityIdOrdinal))
         };
     }
 }

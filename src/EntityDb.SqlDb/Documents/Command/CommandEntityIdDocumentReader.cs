@@ -13,13 +13,16 @@ internal class CommandEntityIdDocumentReader : IDocumentReader<CommandDocument>
         nameof(CommandDocument.EntityId),
     };
 
+    private static readonly int _entityIdOrdinal
+        = Array.IndexOf(_propertyNames, nameof(CommandDocument.EntityId));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<CommandDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new CommandDocument
         {
-            EntityId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(0))
+            EntityId = new Id(await dbDataReader.GetFieldValueAsync<Guid>(_entityIdOrdinal))
         };
     }
 }

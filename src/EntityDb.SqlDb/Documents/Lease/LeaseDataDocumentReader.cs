@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,13 +12,16 @@ internal class LeaseDataDocumentReader : IDocumentReader<LeaseDocument>
         nameof(LeaseDocument.Data),
     };
 
+    private static readonly int _dataOrdinal
+        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Data));
+
     public string[] GetPropertyNames() => _propertyNames;
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
         return new LeaseDocument
         {
-            Data = await dbDataReader.GetFieldValueAsync<string>(0)
+            Data = await dbDataReader.GetFieldValueAsync<string>(_dataOrdinal)
         };
     }
 }
