@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
@@ -82,6 +83,8 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
         return Array.Empty<string>();
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     protected FilterDefinition<BsonDocument> DataValueMatches<TData>(Expression<Func<TData, bool>> dataExpression)
     {
         var dataFilter = Builders<TData>.Filter.Where(dataExpression);
