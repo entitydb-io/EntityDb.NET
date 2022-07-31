@@ -172,18 +172,15 @@ internal class NpgsqlConverter : ISqlConverter<NpgsqlQueryOptions>
             {
                 Value = Convert.ToInt64(versionNumber.Value)
             },
-            string value => propertyName switch
-            {
-                nameof(ITransactionDocument.Data) => new NpgsqlParameter(parameterName, NpgsqlDbType.Jsonb)
-                {
-                    Value = value
-                },
-                _ => new NpgsqlParameter(parameterName, NpgsqlDbType.Varchar)
+            string value => propertyName == nameof(ITransactionDocument.Data)
+                ? new NpgsqlParameter(parameterName, NpgsqlDbType.Jsonb)
                 {
                     Value = value
                 }
-            }
-            ,
+                : new NpgsqlParameter(parameterName, NpgsqlDbType.Varchar)
+                {
+                    Value = value
+                },
             _ => throw new NotSupportedException()
         };
 
@@ -233,7 +230,7 @@ internal class NpgsqlConverter : ISqlConverter<NpgsqlQueryOptions>
             }
 
             parameterNameSets.Add($"({string.Join(", ", parameterNames)})");
-        };
+        }
 
         dbCommand.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", columnNames)}) VALUES {string.Join(", ", parameterNameSets)}";
 
