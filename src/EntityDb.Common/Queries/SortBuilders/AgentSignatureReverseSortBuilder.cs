@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders;
@@ -19,6 +20,8 @@ internal sealed record AgentSignatureReverseSortBuilder<TSort>
         return AgentSignatureSortBuilder.AgentSignatureType(!ascending);
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public TSort AgentSignatureProperty<TAgentSignature>(bool ascending,
         Expression<Func<TAgentSignature, object>> agentSignatureExpression)
     {

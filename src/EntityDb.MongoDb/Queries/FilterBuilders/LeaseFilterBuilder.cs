@@ -4,6 +4,7 @@ using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
@@ -45,6 +46,8 @@ internal sealed class LeaseFilterBuilder : FilterBuilderBase, ILeaseFilterBuilde
         return Eq(nameof(LeaseDocument.Value), value);
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public FilterDefinition<BsonDocument> LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
     {
         return DataValueMatches(leaseExpression);

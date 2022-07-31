@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders;
@@ -23,6 +24,8 @@ internal sealed record LeaseReverseSortBuilder<TSort>
         return LeaseSortBuilder.LeaseType(!ascending);
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public TSort LeaseProperty<TLease>(bool ascending, Expression<Func<TLease, object>> leaseExpression)
     {
         return LeaseSortBuilder.LeaseProperty(!ascending, leaseExpression);
