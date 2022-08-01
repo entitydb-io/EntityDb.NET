@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.AgentSignature;
 
-internal class AgentSignatureTransactionIdDocumentReader : IDocumentReader<AgentSignatureDocument>
+internal class AgentSignatureTransactionIdDocumentReader : AgentSignatureDocumentReaderBase, IDocumentReader<AgentSignatureDocument>
 {
-    private static readonly string[] _propertyNames =
+    static AgentSignatureTransactionIdDocumentReader()
     {
-        nameof(AgentSignatureDocument.TransactionId),
-    };
-
-    private static readonly int _transactionIdOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionId));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(AgentSignatureDocument.TransactionId),
+        });
+    }
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {

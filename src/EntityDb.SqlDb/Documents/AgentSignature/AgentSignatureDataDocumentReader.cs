@@ -1,21 +1,18 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.AgentSignature;
 
-internal class AgentSignatureDataDocumentReader : IDocumentReader<AgentSignatureDocument>
+internal class AgentSignatureDataDocumentReader : AgentSignatureDocumentReaderBase, IDocumentReader<AgentSignatureDocument>
 {
-    private static readonly string[] _propertyNames =
+    static AgentSignatureDataDocumentReader()
     {
-        nameof(AgentSignatureDocument.Data),
-    };
-
-    private static readonly int _dataOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.Data));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(AgentSignatureDocument.Data),
+        });
+    }
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {

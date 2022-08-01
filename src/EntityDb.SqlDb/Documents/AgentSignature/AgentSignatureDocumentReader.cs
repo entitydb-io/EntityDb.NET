@@ -7,33 +7,19 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.AgentSignature;
 
-internal class AgentSignatureDocumentReader : IDocumentReader<AgentSignatureDocument>
+internal class AgentSignatureDocumentReader : AgentSignatureDocumentReaderBase, IDocumentReader<AgentSignatureDocument>
 {
-    private static readonly string[] _propertyNames =
+    static AgentSignatureDocumentReader()
     {
-        nameof(AgentSignatureDocument.TransactionId),
-        nameof(AgentSignatureDocument.TransactionTimeStamp),
-        nameof(AgentSignatureDocument.EntityIds),
-        nameof(AgentSignatureDocument.DataType),
-        nameof(AgentSignatureDocument.Data),
-    };
-
-    private static readonly int _transactionIdOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionId));
-    
-    private static readonly int _transactionTimeStampOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.TransactionTimeStamp));
-    
-    private static readonly int _entityIdsOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.EntityIds));
-    
-    private static readonly int _dataTypeOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.DataType));
-
-    private static readonly int _dataOrdinal =
-        Array.IndexOf(_propertyNames, nameof(AgentSignatureDocument.Data));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(AgentSignatureDocument.TransactionId),
+            nameof(AgentSignatureDocument.TransactionTimeStamp),
+            nameof(AgentSignatureDocument.EntityIds),
+            nameof(AgentSignatureDocument.DataType),
+            nameof(AgentSignatureDocument.Data),
+        });
+    }
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
