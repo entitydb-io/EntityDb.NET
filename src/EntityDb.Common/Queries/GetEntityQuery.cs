@@ -2,7 +2,6 @@
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.ValueObjects;
-using System.Collections.Generic;
 
 namespace EntityDb.Common.Queries;
 

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using EntityDb.Abstractions.Queries.FilterBuilders;
+﻿using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Common.Extensions;
 using Moq;
 using Shouldly;

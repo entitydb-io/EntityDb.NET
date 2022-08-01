@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using MongoDB.Driver;
-using System;
 
 namespace EntityDb.MongoDb.Sessions;
 

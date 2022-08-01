@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using EntityDb.Common.Envelopes;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Tests.Envelopes;
 using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Extensions;

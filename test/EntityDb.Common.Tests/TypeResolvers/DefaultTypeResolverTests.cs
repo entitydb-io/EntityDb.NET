@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using EntityDb.Common.Envelopes;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.TypeResolvers;
 using Shouldly;
 using Xunit;

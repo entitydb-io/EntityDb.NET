@@ -1,5 +1,4 @@
 ﻿using EntityDb.Common.Envelopes;
-using System;
 
 namespace EntityDb.Common.TypeResolvers;
 

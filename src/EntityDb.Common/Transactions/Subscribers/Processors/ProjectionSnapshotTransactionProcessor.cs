@@ -2,9 +2,6 @@ using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Projections;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 

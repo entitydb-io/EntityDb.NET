@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -13,9 +11,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public sealed class SnapshotTests : TestsBase<Startup>
 {
-    public SnapshotTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public SnapshotTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 

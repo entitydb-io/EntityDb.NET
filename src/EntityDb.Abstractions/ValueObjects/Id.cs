@@ -1,5 +1,3 @@
-using System;
-
 namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>

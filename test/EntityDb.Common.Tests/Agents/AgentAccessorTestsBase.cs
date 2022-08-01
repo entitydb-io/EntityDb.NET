@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Agents;
+﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
 using MongoDB.Bson.Serialization;
-using System;
 
 namespace EntityDb.MongoDb.Serializers;
 

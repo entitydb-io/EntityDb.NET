@@ -1,18 +1,14 @@
 ﻿using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Annotations;
 using EntityDb.Common.Envelopes;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace EntityDb.MongoDb.Extensions;
 
@@ -63,21 +59,7 @@ internal static class DocumentQueryExtensions
 
         var documents = documentQuery.Execute(mongoSession, projection, cancellationToken);
 
-        var ids = mapToIds
-            .Invoke(documents)
-            .Distinct();
-
-        if (skip.HasValue)
-        {
-            ids = ids.Skip(skip.Value);
-        }
-
-        if (limit.HasValue)
-        {
-            ids = ids.Take(limit.Value);
-        }
-
-        return ids;
+        return documents.EnumerateIds(skip, limit, mapToIds);
     }
 
     public static IAsyncEnumerable<Id> EnumerateTransactionIds<TDocument>
@@ -148,52 +130,33 @@ internal static class DocumentQueryExtensions
         }
     }
 
-    public static async IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData>
+    public static IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         IEnvelopeService<BsonDocument> envelopeService,
-        [EnumeratorCancellation] CancellationToken cancellationToken
-    )
-        where TDocument : IEntitiesDocument
-        where TData : notnull
-    {
-        var documents = documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
-
-        await foreach (var document in documents)
-        {
-            yield return EntitiesAnnotation<TData>.CreateFromBoxedData
-            (
-                document.TransactionId,
-                document.TransactionTimeStamp,
-                document.EntityIds,
-                envelopeService.Deserialize<TData>(document.Data)
-            );
-        }
-    }
-
-    public static async IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData>
-    (
-        this DocumentQuery<TDocument> documentQuery,
-        IMongoSession mongoSession,
-        IEnvelopeService<BsonDocument> envelopeService,
-        [EnumeratorCancellation] CancellationToken cancellationToken
+        CancellationToken cancellationToken
     )
         where TDocument : IEntityDocument
         where TData : notnull
     {
         var documents = documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
 
-        await foreach (var document in documents)
-        {
-            yield return EntityAnnotation<TData>.CreateFromBoxedData
-            (
-                document.TransactionId,
-                document.TransactionTimeStamp,
-                document.EntityId,
-                document.EntityVersionNumber,
-                envelopeService.Deserialize<TData>(document.Data)
-            );
-        }
+        return documents.EnumerateEntityAnnotation<TDocument, BsonDocument, TData>(envelopeService, cancellationToken);
+    }
+
+    public static IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData>
+    (
+        this DocumentQuery<TDocument> documentQuery,
+        IMongoSession mongoSession,
+        IEnvelopeService<BsonDocument> envelopeService,
+        CancellationToken cancellationToken
+    )
+        where TDocument : IEntitiesDocument
+        where TData : notnull
+    {
+        var documents = documentQuery.Execute(mongoSession, NoDocumentIdProjection, cancellationToken);
+
+        return documents.EnumerateEntitiesAnnotation<TDocument, BsonDocument, TData>(envelopeService, cancellationToken);
     }
 }

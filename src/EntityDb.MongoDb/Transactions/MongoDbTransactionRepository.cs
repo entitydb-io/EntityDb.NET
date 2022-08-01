@@ -12,10 +12,6 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Transactions;
 

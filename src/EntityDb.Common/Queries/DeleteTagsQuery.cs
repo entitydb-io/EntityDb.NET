@@ -3,8 +3,6 @@ using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.ValueObjects;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EntityDb.Common.Queries;
 

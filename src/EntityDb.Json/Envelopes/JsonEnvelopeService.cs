@@ -1,34 +1,33 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.TypeResolvers;
-using EntityDb.Redis.Converters;
+using EntityDb.Json.Converters;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace EntityDb.Redis.Envelopes;
+namespace EntityDb.Json.Envelopes;
 
-internal sealed class RedisEnvelopeService : IEnvelopeService<byte[]>
+internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<TSerializedData>
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    private readonly ILogger<JsonEnvelopeService<TSerializedData>> _logger;
+    private readonly ITypeResolver _typeResolver;
+
+    protected static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private readonly ILogger<RedisEnvelopeService> _logger;
-    private readonly ITypeResolver _typeResolver;
-
-    static RedisEnvelopeService()
+    static JsonEnvelopeService()
     {
         JsonSerializerOptions.Converters.Add(new EnvelopeHeadersConverter());
         JsonSerializerOptions.Converters.Add(new IdConverter());
         JsonSerializerOptions.Converters.Add(new VersionNumberConverter());
     }
 
-    public RedisEnvelopeService
+    protected JsonEnvelopeService
     (
-        ILogger<RedisEnvelopeService> logger,
+        ILogger<JsonEnvelopeService<TSerializedData>> logger,
         ITypeResolver typeResolver
     )
     {
@@ -36,7 +35,11 @@ internal sealed class RedisEnvelopeService : IEnvelopeService<byte[]>
         _typeResolver = typeResolver;
     }
 
-    public byte[] Serialize<TData>(TData data)
+    protected abstract TSerializedData SerializeEnvelope(Envelope<JsonElement> envelope);
+
+    protected abstract Envelope<JsonElement> DeserializeEnvelope(TSerializedData serializedData);
+
+    public TSerializedData Serialize<TData>(TData data)
     {
         try
         {
@@ -50,7 +53,7 @@ internal sealed class RedisEnvelopeService : IEnvelopeService<byte[]>
 
             var envelope = new Envelope<JsonElement>(headers, jsonElement);
 
-            return JsonSerializer.SerializeToUtf8Bytes(envelope, typeof(Envelope<JsonElement>), JsonSerializerOptions);
+            return SerializeEnvelope(envelope);
         }
         catch (Exception exception)
         {
@@ -60,12 +63,11 @@ internal sealed class RedisEnvelopeService : IEnvelopeService<byte[]>
         }
     }
 
-    public TData Deserialize<TData>(byte[] serializedData)
+    public TData Deserialize<TData>(TSerializedData serializedData)
     {
         try
         {
-            var envelope = (Envelope<JsonElement>)JsonSerializer.Deserialize(serializedData, typeof(Envelope<JsonElement>),
-                JsonSerializerOptions)!;
+            var envelope = DeserializeEnvelope(serializedData);
 
             return (TData)JsonSerializer.Deserialize(envelope.Value.GetRawText(),
                 _typeResolver.ResolveType(envelope.Headers), JsonSerializerOptions)!;
