@@ -4,7 +4,7 @@ namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal abstract class AgentSignatureDocumentReaderBase
 {
-    private readonly string[] _propertyNames = Array.Empty<string>();
+    private readonly string[] _propertyNames;
 
     protected readonly int _transactionIdOrdinal;
     protected readonly int _transactionTimeStampOrdinal;

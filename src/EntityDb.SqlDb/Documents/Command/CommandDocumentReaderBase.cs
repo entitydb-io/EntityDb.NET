@@ -4,7 +4,7 @@ namespace EntityDb.SqlDb.Documents.Command;
 
 internal abstract class CommandDocumentReaderBase
 {
-    private readonly string[] _propertyNames = Array.Empty<string>();
+    private readonly string[] _propertyNames;
 
     protected readonly int _transactionIdOrdinal;
     protected readonly int _transactionTimeStampOrdinal;
