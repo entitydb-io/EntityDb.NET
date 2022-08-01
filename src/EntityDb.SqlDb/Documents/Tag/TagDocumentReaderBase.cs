@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.SqlDb.Documents.Tag;
+﻿namespace EntityDb.SqlDb.Documents.Tag;
 
 internal abstract class TagDocumentReaderBase
 {

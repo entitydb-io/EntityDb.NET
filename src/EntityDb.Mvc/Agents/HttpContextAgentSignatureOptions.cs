@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.Mvc.Agents;
+﻿namespace EntityDb.Mvc.Agents;
 
 /// <summary>
 ///     Configuration options for the Http Context agent.

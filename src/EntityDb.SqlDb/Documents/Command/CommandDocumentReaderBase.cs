@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.SqlDb.Documents.Command;
+﻿namespace EntityDb.SqlDb.Documents.Command;
 
 internal abstract class CommandDocumentReaderBase
 {

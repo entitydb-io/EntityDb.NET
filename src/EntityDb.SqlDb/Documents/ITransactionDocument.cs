@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace EntityDb.SqlDb.Documents;
+﻿namespace EntityDb.SqlDb.Documents;
 
 internal interface ITransactionDocument : Common.Documents.ITransactionDocument<string>
 {

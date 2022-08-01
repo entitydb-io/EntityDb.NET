@@ -7,9 +7,6 @@ using EntityDb.SqlDb.Sessions;
 using EntityDb.SqlDb.Transactions;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Npgsql.Transactions;
 

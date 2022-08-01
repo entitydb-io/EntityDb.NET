@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
+using EntityDb.Json.Envelopes;
 using EntityDb.Npgsql.Converters;
 using EntityDb.Npgsql.Queries;
 using EntityDb.Npgsql.Transactions;
@@ -9,7 +10,6 @@ using EntityDb.SqlDb.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
-using EntityDb.Json.Envelopes;
 
 namespace EntityDb.Npgsql.Extensions;
 

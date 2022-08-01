@@ -3,7 +3,6 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.SortDefinitions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;

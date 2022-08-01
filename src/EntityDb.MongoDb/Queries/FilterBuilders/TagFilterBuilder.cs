@@ -3,7 +3,6 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 

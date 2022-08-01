@@ -8,11 +8,7 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace EntityDb.MongoDb.Extensions;
 

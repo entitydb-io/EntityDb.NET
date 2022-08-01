@@ -1,6 +1,5 @@
-﻿using System;
+﻿using EntityDb.Abstractions.Transactions;
 using System.Data;
-using EntityDb.Abstractions.Transactions;
 
 namespace EntityDb.SqlDb.Sessions;
 

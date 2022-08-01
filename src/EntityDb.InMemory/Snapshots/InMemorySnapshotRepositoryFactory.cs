@@ -3,9 +3,6 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Snapshots;
 using EntityDb.InMemory.Sessions;
 using Microsoft.Extensions.Options;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Snapshots;
 

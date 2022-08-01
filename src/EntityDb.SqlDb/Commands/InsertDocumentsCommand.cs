@@ -1,7 +1,5 @@
 ﻿using EntityDb.SqlDb.Documents;
 using EntityDb.SqlDb.Sessions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Commands;
 

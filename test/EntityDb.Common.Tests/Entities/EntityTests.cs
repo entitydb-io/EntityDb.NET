@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;

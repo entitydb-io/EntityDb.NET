@@ -6,12 +6,8 @@ using EntityDb.SqlDb.Queries.Definitions.Filter;
 using EntityDb.SqlDb.Queries.Definitions.Sort;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Sessions;
 

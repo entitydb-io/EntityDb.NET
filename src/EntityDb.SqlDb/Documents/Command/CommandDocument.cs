@@ -9,10 +9,6 @@ using EntityDb.SqlDb.Queries;
 using EntityDb.SqlDb.Queries.FilterBuilders;
 using EntityDb.SqlDb.Queries.SortBuilders;
 using EntityDb.SqlDb.Sessions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Command;
 

@@ -2,7 +2,6 @@ using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.SqlDb.Documents.Tag;
 using EntityDb.SqlDb.Queries.Definitions.Filter;
-using System;
 
 namespace EntityDb.SqlDb.Queries.FilterBuilders;
 

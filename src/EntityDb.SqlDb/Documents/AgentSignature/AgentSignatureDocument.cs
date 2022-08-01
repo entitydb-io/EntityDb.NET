@@ -6,9 +6,6 @@ using EntityDb.SqlDb.Commands;
 using EntityDb.SqlDb.Queries;
 using EntityDb.SqlDb.Queries.FilterBuilders;
 using EntityDb.SqlDb.Queries.SortBuilders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EntityDb.SqlDb.Documents.AgentSignature;
 

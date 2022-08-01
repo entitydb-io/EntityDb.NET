@@ -1,8 +1,6 @@
 ﻿using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace EntityDb.MongoDb.Queries;
 

@@ -11,7 +11,6 @@ using EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
 using EntityDb.Common.Transactions.Subscribers.Processors;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks.Dataflow;

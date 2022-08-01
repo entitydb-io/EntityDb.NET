@@ -3,7 +3,6 @@ using EntityDb.Common.Exceptions;
 using EntityDb.Common.TypeResolvers;
 using EntityDb.Json.Converters;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

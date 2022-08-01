@@ -2,8 +2,6 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.InMemory.Sessions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Snapshots;
 

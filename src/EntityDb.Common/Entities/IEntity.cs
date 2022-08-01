@@ -1,5 +1,4 @@
 ﻿using EntityDb.Common.Snapshots;
-using System;
 
 namespace EntityDb.Common.Entities;
 

@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Disposables;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Disposables;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace EntityDb.Mvc.Tests.Seeder;
+﻿namespace EntityDb.Mvc.Tests.Seeder;
 
 public class HttpContextSeederOptions
 {

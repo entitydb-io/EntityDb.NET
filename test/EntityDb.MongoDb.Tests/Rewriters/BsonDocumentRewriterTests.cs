@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using EntityDb.MongoDb.Rewriters;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;

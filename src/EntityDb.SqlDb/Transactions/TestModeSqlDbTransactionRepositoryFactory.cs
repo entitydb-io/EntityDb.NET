@@ -1,6 +1,4 @@
 ﻿using EntityDb.SqlDb.Sessions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Transactions;
 

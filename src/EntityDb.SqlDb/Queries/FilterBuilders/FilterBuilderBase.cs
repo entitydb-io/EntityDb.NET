@@ -3,8 +3,6 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.SqlDb.Documents;
 using EntityDb.SqlDb.Queries.Definitions.Filter;
-using System;
-using System.Collections.Generic;
 
 namespace EntityDb.SqlDb.Queries.FilterBuilders;
 

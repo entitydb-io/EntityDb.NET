@@ -6,11 +6,7 @@ using EntityDb.Common.Polyfills;
 using EntityDb.SqlDb.Documents;
 using EntityDb.SqlDb.Queries;
 using EntityDb.SqlDb.Sessions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace EntityDb.SqlDb.Extensions;
 

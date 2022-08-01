@@ -2,8 +2,6 @@
 using EntityDb.SqlDb.Queries.Definitions.Filter;
 using EntityDb.SqlDb.Queries.Definitions.Sort;
 using EntityDb.SqlDb.Sessions;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace EntityDb.SqlDb.Queries;
 

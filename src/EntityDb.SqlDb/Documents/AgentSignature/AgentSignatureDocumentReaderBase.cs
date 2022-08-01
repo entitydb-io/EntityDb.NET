@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.SqlDb.Documents.AgentSignature;
+﻿namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal abstract class AgentSignatureDocumentReaderBase
 {

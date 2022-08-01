@@ -2,7 +2,6 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;

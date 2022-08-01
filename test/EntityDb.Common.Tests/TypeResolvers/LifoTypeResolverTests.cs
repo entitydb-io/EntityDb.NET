@@ -1,5 +1,4 @@
-﻿using System;
-using EntityDb.Common.Envelopes;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.TypeResolvers;

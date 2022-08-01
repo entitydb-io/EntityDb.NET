@@ -2,10 +2,7 @@
 using EntityDb.SqlDb.Documents;
 using EntityDb.SqlDb.Queries.Definitions.Filter;
 using EntityDb.SqlDb.Queries.Definitions.Sort;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Sessions;
 

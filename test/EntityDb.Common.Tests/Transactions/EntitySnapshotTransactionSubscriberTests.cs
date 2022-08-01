@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;

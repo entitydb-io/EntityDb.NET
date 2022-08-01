@@ -1,6 +1,5 @@
 ﻿using EntityDb.MongoDb.Provisioner.Transactions;
 using EntityDb.MongoDb.Transactions;
-using System;
 
 namespace EntityDb.MongoDb.Provisioner.Extensions;
 

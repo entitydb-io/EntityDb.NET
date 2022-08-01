@@ -8,12 +8,9 @@ using EntityDb.SqlDb.Queries.Definitions.Filter;
 using EntityDb.SqlDb.Queries.Definitions.Sort;
 using Npgsql;
 using NpgsqlTypes;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using System.Text;
 
 namespace EntityDb.Npgsql.Converters;

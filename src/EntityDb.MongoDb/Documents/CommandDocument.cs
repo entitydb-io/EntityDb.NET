@@ -11,9 +11,6 @@ using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents;
 

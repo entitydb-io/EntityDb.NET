@@ -3,11 +3,7 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Documents;
 using EntityDb.Common.Envelopes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace EntityDb.Common.Extensions;
 

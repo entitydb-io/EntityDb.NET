@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.SqlDb.Documents.Lease;
+﻿namespace EntityDb.SqlDb.Documents.Lease;
 
 internal abstract class LeaseDocumentReaderBase
 {

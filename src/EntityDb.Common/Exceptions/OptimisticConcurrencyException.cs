@@ -2,8 +2,6 @@
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
 
 namespace EntityDb.Common.Exceptions;
 

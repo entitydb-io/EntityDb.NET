@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.SqlDb.Documents.Command;
 using EntityDb.SqlDb.Queries.Definitions.Sort;
-using System;
 
 namespace EntityDb.SqlDb.Queries.SortBuilders;
 
