@@ -6,49 +6,23 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Lease;
 
-internal class LeaseDocumentReader : IDocumentReader<LeaseDocument>
+internal class LeaseDocumentReader : LeaseDocumentReaderBase, IDocumentReader<LeaseDocument>
 {
-    private static readonly string[] _propertyNames =
+    static LeaseDocumentReader()
     {
-        nameof(LeaseDocument.TransactionId),
-        nameof(LeaseDocument.TransactionTimeStamp),
-        nameof(LeaseDocument.EntityId),
-        nameof(LeaseDocument.EntityVersionNumber),
-        nameof(LeaseDocument.DataType),
-        nameof(LeaseDocument.Data),
-        nameof(LeaseDocument.Scope),
-        nameof(LeaseDocument.Label),
-        nameof(LeaseDocument.Value),
-    };
-
-    private static readonly int _transactionIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.TransactionId));
-
-    private static readonly int _transactionTimeStampOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.TransactionTimeStamp));
-
-    private static readonly int _entityIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityId));
-
-    private static readonly int _entityVersionNumberOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityVersionNumber));
-
-    private static readonly int _dataTypeOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.DataType));
-
-    private static readonly int _dataOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Data));
-
-    private static readonly int _scopeOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Scope));
-
-    private static readonly int _labelOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Label));
-
-    private static readonly int _valueOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Value));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(LeaseDocument.TransactionId),
+            nameof(LeaseDocument.TransactionTimeStamp),
+            nameof(LeaseDocument.EntityId),
+            nameof(LeaseDocument.EntityVersionNumber),
+            nameof(LeaseDocument.DataType),
+            nameof(LeaseDocument.Data),
+            nameof(LeaseDocument.Scope),
+            nameof(LeaseDocument.Label),
+            nameof(LeaseDocument.Value),
+        });
+    }
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {

@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Lease;
 
-internal class LeaseEntityIdDocumentReader : IDocumentReader<LeaseDocument>
+internal class LeaseEntityIdDocumentReader : LeaseDocumentReaderBase, IDocumentReader<LeaseDocument>
 {
-    private static readonly string[] _propertyNames =
+    static LeaseEntityIdDocumentReader()
     {
-        nameof(LeaseDocument.EntityId),
-    };
-
-    private static readonly int _entityIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityId));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(LeaseDocument.EntityId),
+        });
+    }
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
