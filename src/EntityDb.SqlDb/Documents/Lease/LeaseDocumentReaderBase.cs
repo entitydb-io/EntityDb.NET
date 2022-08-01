@@ -25,7 +25,7 @@ internal abstract class LeaseDocumentReaderBase
         _transactionIdOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.TransactionId));
         _transactionTimeStampOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.TransactionTimeStamp));
         _entityIdOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityId));
-        _entityVersionNumberOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityId));
+        _entityVersionNumberOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.EntityVersionNumber));
         _dataTypeOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.DataType));
         _dataOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Data));
         _scopeOrdinal = Array.IndexOf(_propertyNames, nameof(LeaseDocument.Scope));

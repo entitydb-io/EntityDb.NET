@@ -24,7 +24,7 @@ internal abstract class TagDocumentReaderBase
         _transactionIdOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionId));
         _transactionTimeStampOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionTimeStamp));
         _entityIdOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.EntityId));
-        _entityVersionNumberOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.EntityId));
+        _entityVersionNumberOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.EntityVersionNumber));
         _dataTypeOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.DataType));
         _dataOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.Data));
         _labelOrdinal = Array.IndexOf(_propertyNames, nameof(TagDocument.Label));
