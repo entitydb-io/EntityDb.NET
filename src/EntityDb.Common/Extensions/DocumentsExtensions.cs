@@ -1,7 +1,13 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Annotations;
+using EntityDb.Common.Documents;
+using EntityDb.Common.Envelopes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace EntityDb.Common.Extensions;
 
@@ -30,5 +36,56 @@ internal static class DocumentsExtensions
         }
 
         return ids;
+    }
+
+    public static async IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TSerializedData, TData>
+    (
+        this IAsyncEnumerable<TDocument> documents,
+        IEnvelopeService<TSerializedData> envelopeService,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    )
+        where TDocument : IEntityDocument<TSerializedData>
+        where TData : notnull
+    {
+        await using var enumerator = documents.GetAsyncEnumerator(cancellationToken);
+
+        while (await enumerator.MoveNextAsync(cancellationToken))
+        {
+            var document = enumerator.Current;
+
+            yield return EntityAnnotation<TData>.CreateFromBoxedData
+            (
+                document.TransactionId,
+                document.TransactionTimeStamp,
+                document.EntityId,
+                document.EntityVersionNumber,
+                envelopeService.Deserialize<TData>(document.Data)
+            );
+        }
+    }
+
+    public static async IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TSerializedData, TData>
+    (
+        this IAsyncEnumerable<TDocument> documents,
+        IEnvelopeService<TSerializedData> envelopeService,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    )
+        where TDocument : IEntitiesDocument<TSerializedData>
+        where TData : notnull
+    {
+        await using var enumerator = documents.GetAsyncEnumerator(cancellationToken);
+
+        while (await enumerator.MoveNextAsync(cancellationToken))
+        {
+            var document = enumerator.Current;
+
+            yield return EntitiesAnnotation<TData>.CreateFromBoxedData
+            (
+                document.TransactionId,
+                document.TransactionTimeStamp,
+                document.EntityIds,
+                envelopeService.Deserialize<TData>(document.Data)
+            );
+        }
     }
 }

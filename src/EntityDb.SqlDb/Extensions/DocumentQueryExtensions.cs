@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Annotations;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
@@ -116,12 +115,12 @@ internal static class DocumentQueryExtensions
         }
     }
 
-    public static async IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData, TOptions>
+    public static IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData, TOptions>
     (
         this DocumentQuery<TDocument> documentQuery,
         ISqlDbSession<TOptions> sqlDbSession,
         IEnvelopeService<string> envelopeService,
-        [EnumeratorCancellation] CancellationToken cancellationToken
+        CancellationToken cancellationToken
     )
         where TOptions : class
         where TDocument : IEntityDocument<TDocument>
@@ -134,25 +133,15 @@ internal static class DocumentQueryExtensions
             cancellationToken
         );
 
-        await foreach (var document in documents)
-        {
-            yield return EntityAnnotation<TData>.CreateFromBoxedData
-            (
-                document.TransactionId,
-                document.TransactionTimeStamp,
-                document.EntityId,
-                document.EntityVersionNumber,
-                envelopeService.Deserialize<TData>(document.Data)
-            );
-        }
+        return documents.EnumerateEntityAnnotation<TDocument, string, TData>(envelopeService, cancellationToken);
     }
 
-    public static async IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData, TOptions>
+    public static IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData, TOptions>
     (
         this DocumentQuery<TDocument> documentQuery,
         ISqlDbSession<TOptions> sqlDbSession,
         IEnvelopeService<string> envelopeService,
-        [EnumeratorCancellation] CancellationToken cancellationToken
+        CancellationToken cancellationToken
     )
         where TOptions : class
         where TDocument : IEntitiesDocument<TDocument>
@@ -165,15 +154,6 @@ internal static class DocumentQueryExtensions
             cancellationToken
         );
 
-        await foreach (var document in documents)
-        {
-            yield return EntitiesAnnotation<TData>.CreateFromBoxedData
-            (
-                document.TransactionId,
-                document.TransactionTimeStamp,
-                document.EntityIds,
-                envelopeService.Deserialize<TData>(document.Data)
-            );
-        }
+        return documents.EnumerateEntitiesAnnotation<TDocument, string, TData>(envelopeService, cancellationToken);
     }
 }

@@ -1,11 +1,7 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿namespace EntityDb.SqlDb.Documents;
 
-namespace EntityDb.SqlDb.Documents;
-
-internal interface IEntityDocument : ITransactionDocument
+internal interface IEntityDocument : Common.Documents.IEntityDocument<string>, ITransactionDocument
 {
-    Id EntityId { get; }
-    VersionNumber EntityVersionNumber { get; }
 }
 
 internal interface IEntityDocument<TDocument> : IEntityDocument, ITransactionDocument<TDocument>
