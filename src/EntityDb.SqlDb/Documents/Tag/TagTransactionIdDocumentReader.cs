@@ -6,17 +6,16 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Tag;
 
-internal class TagTransactionIdDocumentReader : IDocumentReader<TagDocument>
+internal class TagTransactionIdDocumentReader : TagDocumentReaderBase, IDocumentReader<TagDocument>
 {
     private static readonly string[] _propertyNames =
     {
         nameof(TagDocument.TransactionId),
     };
 
-    private static readonly int _transactionIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionId));
-
-    public string[] GetPropertyNames() => _propertyNames;
+    public TagTransactionIdDocumentReader() : base(_propertyNames)
+    {
+    }
 
     public async Task<TagDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {

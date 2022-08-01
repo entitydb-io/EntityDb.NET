@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Tag;
 
-internal class TagDocumentReader : IDocumentReader<TagDocument>
+internal class TagDocumentReader : TagDocumentReaderBase, IDocumentReader<TagDocument>
 {
     private static readonly string[] _propertyNames =
     {
@@ -20,31 +20,9 @@ internal class TagDocumentReader : IDocumentReader<TagDocument>
         nameof(TagDocument.Value),
     };
 
-    private static readonly int _transactionIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionId));
-
-    private static readonly int _transactionTimeStampOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.TransactionTimeStamp));
-
-    private static readonly int _entityIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.EntityId));
-
-    private static readonly int _entityVersionNumberOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.EntityVersionNumber));
-
-    private static readonly int _dataTypeOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.DataType));
-
-    private static readonly int _dataOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.Data));
-
-    private static readonly int _labelOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.Label));
-
-    private static readonly int _valueOrdinal
-        = Array.IndexOf(_propertyNames, nameof(TagDocument.Value));
-
-    public string[] GetPropertyNames() => _propertyNames;
+    public TagDocumentReader() : base(_propertyNames)
+    {
+    }
 
     public async Task<TagDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
