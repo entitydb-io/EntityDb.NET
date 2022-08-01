@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.ValueObjects;
 using StackExchange.Redis;
-using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions;
 

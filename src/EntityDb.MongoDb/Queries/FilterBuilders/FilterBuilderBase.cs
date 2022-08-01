@@ -5,8 +5,6 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.FilterDefinitions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 

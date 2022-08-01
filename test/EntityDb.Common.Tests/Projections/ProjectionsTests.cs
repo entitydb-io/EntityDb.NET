@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.ValueObjects;
@@ -14,9 +12,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Projections;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class ProjectionsTests : TestsBase<Startup>
 {
-    public ProjectionsTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public ProjectionsTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 

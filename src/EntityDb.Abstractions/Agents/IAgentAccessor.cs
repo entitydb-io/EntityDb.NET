@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace EntityDb.Abstractions.Agents;
+﻿namespace EntityDb.Abstractions.Agents;
 
 /// <summary>
 ///     Represents a type that can access an instance of <see cref="IAgent" />.

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EntityDb.Common.Exceptions;
+﻿namespace EntityDb.Common.Exceptions;
 
 /// <summary>
 ///     The exception that is thrown when an actor requests a snapshot that does not exist.

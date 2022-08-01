@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.ValueObjects;
-using System;
 
 namespace EntityDb.Common.Annotations;
 

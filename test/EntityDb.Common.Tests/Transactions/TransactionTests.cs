@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
@@ -35,9 +31,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Transactions;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public sealed class TransactionTests : TestsBase<Startup>
 {
-    public TransactionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
+    public TransactionTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
     {
     }
 
@@ -808,23 +805,14 @@ public sealed class TransactionTests : TestsBase<Startup>
             entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var transactionTimeStamp = TimeStamp.UtcNow;
-
         var expectedTransactionId = Id.NewId();
         var expectedEntityId = Id.NewId();
-        var expectedTransactionTimeStamps = new[]
-        {
-            transactionTimeStamp,
-
-            // A TimeStamp can be more precise than milliseconds.
-            // This allows for database types that cannot be more precise than milliseconds.
-            transactionTimeStamp.WithMillisecondPrecision()
-        };
+        var expectedTransactionTimeStamp = transactionsAdder.FixTimeStamp(TimeStamp.UtcNow);
 
         var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
 
         var transaction = await BuildTransaction<TEntity>(serviceScope, expectedTransactionId, expectedEntityId,
-            new[] { expectedCount }, transactionTimeStamp, agentSignature);
+            new[] { expectedCount }, expectedTransactionTimeStamp, agentSignature);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -847,11 +835,10 @@ public sealed class TransactionTests : TestsBase<Startup>
         annotatedAgentSignatures.Length.ShouldBe(1);
 
         annotatedAgentSignatures[0].TransactionId.ShouldBe(expectedTransactionId);
+        annotatedAgentSignatures[0].TransactionTimeStamp.ShouldBe(expectedTransactionTimeStamp);
         annotatedAgentSignatures[0].EntityIds.Length.ShouldBe(1);
         annotatedAgentSignatures[0].EntityIds[0].ShouldBe(expectedEntityId);
         annotatedAgentSignatures[0].Data.ShouldBeEquivalentTo(agentSignature);
-
-        expectedTransactionTimeStamps.Contains(annotatedAgentSignatures[0].TransactionTimeStamp).ShouldBeTrue();
     }
 
     private async Task Generic_GivenCommandInserted_WhenGettingAnnotatedCommand_ThenReturnAnnotatedCommand<TEntity>(
@@ -868,21 +855,12 @@ public sealed class TransactionTests : TestsBase<Startup>
             entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var transactionTimeStamp = TimeStamp.UtcNow;
-
         var expectedTransactionId = Id.NewId();
         var expectedEntityId = Id.NewId();
-        var expectedTransactionTimeStamps = new[]
-        {
-            transactionTimeStamp,
-
-            // A TimeStamp can be more precise than milliseconds.
-            // This allows for database types that cannot be more precise than milliseconds.
-            transactionTimeStamp.WithMillisecondPrecision()
-        };
+        var expectedTransactionTimeStamp = transactionsAdder.FixTimeStamp(TimeStamp.UtcNow);
 
         var transaction = await BuildTransaction<TEntity>(serviceScope, expectedTransactionId, expectedEntityId,
-            new[] { expectedCount }, transactionTimeStamp);
+            new[] { expectedCount }, expectedTransactionTimeStamp);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -905,14 +883,13 @@ public sealed class TransactionTests : TestsBase<Startup>
         annotatedCommands.Length.ShouldBe(1);
 
         annotatedCommands[0].TransactionId.ShouldBe(expectedTransactionId);
+        annotatedCommands[0].TransactionTimeStamp.ShouldBe(expectedTransactionTimeStamp);
         annotatedCommands[0].EntityId.ShouldBe(expectedEntityId);
         annotatedCommands[0].EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
         var actualCountCommand = annotatedCommands[0].Data.ShouldBeAssignableTo<StoreNumber>().ShouldNotBeNull();
 
         actualCountCommand.Number.ShouldBe(expectedCount);
-
-        expectedTransactionTimeStamps.Contains(annotatedCommands[0].TransactionTimeStamp).ShouldBeTrue();
     }
 
     private async Task Generic_GivenEntityInserted_WhenGettingEntity_ThenReturnEntity<TEntity>(

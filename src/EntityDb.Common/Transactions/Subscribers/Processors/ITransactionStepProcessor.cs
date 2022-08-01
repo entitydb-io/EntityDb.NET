@@ -1,7 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 

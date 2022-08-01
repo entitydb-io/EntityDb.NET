@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
@@ -21,9 +17,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class EntityTests : TestsBase<Startup>
 {
-    public EntityTests(IServiceProvider serviceProvider) : base(serviceProvider)
+    public EntityTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(serviceProvider, databaseContainerFixture)
     {
     }
 

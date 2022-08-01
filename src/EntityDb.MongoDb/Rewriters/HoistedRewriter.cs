@@ -1,7 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.IO;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EntityDb.MongoDb.Rewriters;
 

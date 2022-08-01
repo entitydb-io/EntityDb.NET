@@ -1,6 +1,4 @@
 ﻿using EntityDb.MongoDb.Sessions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Commands;
 

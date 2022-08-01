@@ -1,9 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 

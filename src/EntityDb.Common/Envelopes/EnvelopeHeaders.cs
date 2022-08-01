@@ -1,6 +1,4 @@
 using EntityDb.Common.TypeResolvers;
-using System;
-using System.Collections.Generic;
 
 namespace EntityDb.Common.Envelopes;
 

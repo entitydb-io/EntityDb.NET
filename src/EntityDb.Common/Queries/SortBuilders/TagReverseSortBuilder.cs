@@ -1,5 +1,4 @@
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 

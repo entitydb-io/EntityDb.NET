@@ -5,6 +5,7 @@
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <EnablePreviewFeatures>True</EnablePreviewFeatures>
+		<ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
 	<ItemGroup>

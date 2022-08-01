@@ -3,8 +3,6 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Redis.Sessions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 

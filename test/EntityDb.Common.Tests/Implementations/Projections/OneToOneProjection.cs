@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;

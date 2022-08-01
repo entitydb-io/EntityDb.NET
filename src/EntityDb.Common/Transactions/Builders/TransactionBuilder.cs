@@ -9,7 +9,6 @@ using EntityDb.Common.Commands;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Transactions.Steps;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace EntityDb.Common.Transactions.Builders;

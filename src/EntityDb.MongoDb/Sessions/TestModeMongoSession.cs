@@ -2,9 +2,6 @@
 using EntityDb.MongoDb.Queries;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
 

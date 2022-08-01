@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using EntityDb.Common.Tests.Agents;
+﻿using EntityDb.Common.Tests.Agents;
 using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Microsoft.AspNetCore.Http;

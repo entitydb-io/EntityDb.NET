@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
-using System.Collections.Generic;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 

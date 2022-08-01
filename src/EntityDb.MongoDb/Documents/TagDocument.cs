@@ -9,7 +9,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
-using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
 

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using Xunit;
-using System.Linq;
 
 namespace EntityDb.Common.Tests.Transactions;
 

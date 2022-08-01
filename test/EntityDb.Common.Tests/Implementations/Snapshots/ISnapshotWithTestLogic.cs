@@ -1,5 +1,3 @@
-using System;
-using System.Threading;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
 
