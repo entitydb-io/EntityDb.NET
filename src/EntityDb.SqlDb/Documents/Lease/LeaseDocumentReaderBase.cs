@@ -4,21 +4,21 @@ namespace EntityDb.SqlDb.Documents.Lease;
 
 internal abstract class LeaseDocumentReaderBase
 {
-    private static string[] _propertyNames = Array.Empty<string>();
+    private readonly string[] _propertyNames;
 
-    protected static int _transactionIdOrdinal;
-    protected static int _transactionTimeStampOrdinal;
-    protected static int _entityIdOrdinal;
-    protected static int _entityVersionNumberOrdinal;
-    protected static int _dataTypeOrdinal;
-    protected static int _dataOrdinal;
-    protected static int _scopeOrdinal;
-    protected static int _labelOrdinal;
-    protected static int _valueOrdinal;
+    protected readonly int _transactionIdOrdinal;
+    protected readonly int _transactionTimeStampOrdinal;
+    protected readonly int _entityIdOrdinal;
+    protected readonly int _entityVersionNumberOrdinal;
+    protected readonly int _dataTypeOrdinal;
+    protected readonly int _dataOrdinal;
+    protected readonly int _scopeOrdinal;
+    protected readonly int _labelOrdinal;
+    protected readonly int _valueOrdinal;
 
     public string[] GetPropertyNames() => _propertyNames;
 
-    protected static void Configure(string[] propertyNames)
+    protected LeaseDocumentReaderBase(string[] propertyNames)
     {
         _propertyNames = propertyNames;
 

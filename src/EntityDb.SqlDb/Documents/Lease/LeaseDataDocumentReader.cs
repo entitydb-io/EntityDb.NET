@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,12 +6,13 @@ namespace EntityDb.SqlDb.Documents.Lease;
 
 internal class LeaseDataDocumentReader : LeaseDocumentReaderBase, IDocumentReader<LeaseDocument>
 {
-    static LeaseDataDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(LeaseDocument.Data),
-        });
+        nameof(LeaseDocument.Data),
+    };
+
+    public LeaseDataDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

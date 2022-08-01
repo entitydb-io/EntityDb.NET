@@ -8,20 +8,21 @@ namespace EntityDb.SqlDb.Documents.Lease;
 
 internal class LeaseDocumentReader : LeaseDocumentReaderBase, IDocumentReader<LeaseDocument>
 {
-    static LeaseDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(LeaseDocument.TransactionId),
-            nameof(LeaseDocument.TransactionTimeStamp),
-            nameof(LeaseDocument.EntityId),
-            nameof(LeaseDocument.EntityVersionNumber),
-            nameof(LeaseDocument.DataType),
-            nameof(LeaseDocument.Data),
-            nameof(LeaseDocument.Scope),
-            nameof(LeaseDocument.Label),
-            nameof(LeaseDocument.Value),
-        });
+        nameof(LeaseDocument.TransactionId),
+        nameof(LeaseDocument.TransactionTimeStamp),
+        nameof(LeaseDocument.EntityId),
+        nameof(LeaseDocument.EntityVersionNumber),
+        nameof(LeaseDocument.DataType),
+        nameof(LeaseDocument.Data),
+        nameof(LeaseDocument.Scope),
+        nameof(LeaseDocument.Label),
+        nameof(LeaseDocument.Value),
+    };
+
+    public LeaseDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

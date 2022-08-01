@@ -8,12 +8,13 @@ namespace EntityDb.SqlDb.Documents.Command;
 
 internal class CommandEntityIdDocumentReader : CommandDocumentReaderBase, IDocumentReader<CommandDocument>
 {
-    static CommandEntityIdDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(CommandDocument.EntityId),
-        });
+        nameof(CommandDocument.EntityId),
+    };
+
+    public CommandEntityIdDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<CommandDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

@@ -8,12 +8,13 @@ namespace EntityDb.SqlDb.Documents.Lease;
 
 internal class LeaseTransactionIdDocumentReader : LeaseDocumentReaderBase, IDocumentReader<LeaseDocument>
 {
-    static LeaseTransactionIdDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(LeaseDocument.TransactionId),
-        });
+        nameof(LeaseDocument.TransactionId),
+    };
+
+    public LeaseTransactionIdDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<LeaseDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

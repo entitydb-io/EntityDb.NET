@@ -6,12 +6,13 @@ namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal class AgentSignatureDataDocumentReader : AgentSignatureDocumentReaderBase, IDocumentReader<AgentSignatureDocument>
 {
-    static AgentSignatureDataDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(AgentSignatureDocument.Data),
-        });
+        nameof(AgentSignatureDocument.Data),
+    };
+
+    public AgentSignatureDataDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

@@ -9,16 +9,17 @@ namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal class AgentSignatureDocumentReader : AgentSignatureDocumentReaderBase, IDocumentReader<AgentSignatureDocument>
 {
-    static AgentSignatureDocumentReader()
+    private static readonly string[] _propertyNames =
     {
-        Configure(new[]
-        {
-            nameof(AgentSignatureDocument.TransactionId),
-            nameof(AgentSignatureDocument.TransactionTimeStamp),
-            nameof(AgentSignatureDocument.EntityIds),
-            nameof(AgentSignatureDocument.DataType),
-            nameof(AgentSignatureDocument.Data),
-        });
+        nameof(AgentSignatureDocument.TransactionId),
+        nameof(AgentSignatureDocument.TransactionTimeStamp),
+        nameof(AgentSignatureDocument.EntityIds),
+        nameof(AgentSignatureDocument.DataType),
+        nameof(AgentSignatureDocument.Data),
+    };
+
+    public AgentSignatureDocumentReader() : base(_propertyNames)
+    {
     }
 
     public async Task<AgentSignatureDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)

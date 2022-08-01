@@ -4,17 +4,17 @@ namespace EntityDb.SqlDb.Documents.AgentSignature;
 
 internal abstract class AgentSignatureDocumentReaderBase
 {
-    private static string[] _propertyNames = Array.Empty<string>();
+    private readonly string[] _propertyNames = Array.Empty<string>();
 
-    protected static int _transactionIdOrdinal;
-    protected static int _transactionTimeStampOrdinal;
-    protected static int _entityIdsOrdinal;
-    protected static int _dataTypeOrdinal;
-    protected static int _dataOrdinal;
+    protected readonly int _transactionIdOrdinal;
+    protected readonly int _transactionTimeStampOrdinal;
+    protected readonly int _entityIdsOrdinal;
+    protected readonly int _dataTypeOrdinal;
+    protected readonly int _dataOrdinal;
 
     public string[] GetPropertyNames() => _propertyNames;
 
-    protected static void Configure(string[] propertyNames)
+    protected AgentSignatureDocumentReaderBase(string[] propertyNames)
     {
         _propertyNames = propertyNames;
 
