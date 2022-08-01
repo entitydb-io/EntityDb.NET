@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 namespace EntityDb.SqlDb.Documents.Command;
 
-internal class CommandEntityIdDocumentReader : IDocumentReader<CommandDocument>
+internal class CommandEntityIdDocumentReader : CommandDocumentReaderBase, IDocumentReader<CommandDocument>
 {
-    private static readonly string[] _propertyNames =
+    static CommandEntityIdDocumentReader()
     {
-        nameof(CommandDocument.EntityId),
-    };
-
-    private static readonly int _entityIdOrdinal
-        = Array.IndexOf(_propertyNames, nameof(CommandDocument.EntityId));
-
-    public string[] GetPropertyNames() => _propertyNames;
+        Configure(new[]
+        {
+            nameof(CommandDocument.EntityId),
+        });
+    }
 
     public async Task<CommandDocument> Read(DbDataReader dbDataReader, CancellationToken cancellationToken)
     {
