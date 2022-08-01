@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Envelopes;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.SqlDb.Documents;
 using EntityDb.SqlDb.Queries;
@@ -35,21 +36,7 @@ internal static class DocumentQueryExtensions
 
         var documents = documentQuery.Execute(sqlDbSession, documentReader, cancellationToken);
 
-        var ids = mapToIds
-            .Invoke(documents)
-            .Distinct();
-
-        if (skip.HasValue)
-        {
-            ids = ids.Skip(skip.Value);
-        }
-
-        if (limit.HasValue)
-        {
-            ids = ids.Take(limit.Value);
-        }
-
-        return ids;
+        return documents.EnumerateIds(skip, limit, mapToIds);
     }
 
     public static IAsyncEnumerable<Id> EnumerateTransactionIds<TDocument, TOptions>
