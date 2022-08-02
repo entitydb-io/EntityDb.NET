@@ -42,10 +42,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = addLeasesTransactionStep.EntityId,
                 EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
+                DataType = insertLease.GetType().Name,
+                Data = envelopeService.Serialize(insertLease),
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
-                Value = insertLease.Value,
-                Data = envelopeService.Serialize(insertLease)
+                Value = insertLease.Value
             })
             .ToArray();
 
