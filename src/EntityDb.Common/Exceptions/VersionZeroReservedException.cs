@@ -1,8 +1,6 @@
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
-using System;
-using System.Threading;
 
 namespace EntityDb.Common.Exceptions;
 

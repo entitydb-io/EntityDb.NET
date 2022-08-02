@@ -4,9 +4,6 @@ using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Sessions;
 

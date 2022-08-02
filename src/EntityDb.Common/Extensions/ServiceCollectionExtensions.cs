@@ -11,7 +11,6 @@ using EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
 using EntityDb.Common.Transactions.Subscribers.Processors;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks.Dataflow;
@@ -48,6 +47,13 @@ public static class ServiceCollectionExtensions
         where TService : class
     {
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), serviceFactory, serviceLifetime));
+    }
+
+    internal static void Add<TService, TImplementation>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
+        where TService : class
+        where TImplementation : TService
+    {
+        serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), serviceLifetime));
     }
 
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)

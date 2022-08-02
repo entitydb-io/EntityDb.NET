@@ -3,7 +3,7 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
@@ -30,6 +30,18 @@ internal sealed class TagFilterBuilder : FilterBuilderBase, ITagFilterBuilder<Fi
         return DataTypeIn(tagTypes);
     }
 
+    public FilterDefinition<BsonDocument> TagLabelEq(string label)
+    {
+        return Eq(nameof(TagDocument.Label), label);
+    }
+
+    public FilterDefinition<BsonDocument> TagValueEq(string value)
+    {
+        return Eq(nameof(TagDocument.Value), value);
+    }
+
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public FilterDefinition<BsonDocument> TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
     {
         return DataValueMatches(tagExpression);

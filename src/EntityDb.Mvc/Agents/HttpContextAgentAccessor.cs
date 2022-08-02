@@ -3,9 +3,6 @@ using EntityDb.Common.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Mvc.Agents;
 

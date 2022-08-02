@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;

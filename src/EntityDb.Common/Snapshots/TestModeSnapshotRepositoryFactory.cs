@@ -1,7 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Snapshots;
 

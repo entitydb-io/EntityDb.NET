@@ -2,7 +2,6 @@ using EntityDb.MongoDb.Provisioner.Extensions;
 using MongoDB.Driver;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Commands;
 

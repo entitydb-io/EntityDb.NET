@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using EntityDb.Common.Exceptions;
+﻿using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests;
 using EntityDb.Redis.Sessions;
 using Shouldly;

@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         bool removeTypeDiscriminatorProperty)
     {
         serviceCollection.AddSingleton(serviceProvider =>
-            BsonDocumentEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
+            MongoDbEnvelopeService.Create(serviceProvider, removeTypeDiscriminatorProperty));
     }
 
     /// <summary>

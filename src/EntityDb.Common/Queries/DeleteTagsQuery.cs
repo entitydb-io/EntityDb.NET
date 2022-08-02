@@ -3,13 +3,10 @@ using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Tags;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EntityDb.Common.Queries;
 
-internal sealed record DeleteTagsQuery(Id EntityId, IReadOnlyCollection<ITag> Tags) : ITagQuery
+internal sealed record DeleteTagsQuery(Id EntityId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagQuery
 {
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {
@@ -19,9 +16,10 @@ internal sealed record DeleteTagsQuery(Id EntityId, IReadOnlyCollection<ITag> Ta
             builder.Or
             (
                 Tags
-                    .Select(deleteLease => builder.TagMatches((Tag lease) =>
-                        lease.Label == deleteLease.Label &&
-                        lease.Value == deleteLease.Value))
+                    .Select(deleteTag => builder.And(
+                        builder.TagLabelEq(deleteTag.Label),
+                        builder.TagValueEq(deleteTag.Value)
+                    ))
                     .ToArray()
             )
         );

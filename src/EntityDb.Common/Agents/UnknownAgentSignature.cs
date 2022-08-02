@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace EntityDb.Common.Agents;
+﻿namespace EntityDb.Common.Agents;
 
 /// <summary>
 ///     Represents the signature of an unknown actor.

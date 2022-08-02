@@ -5,9 +5,6 @@ using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
@@ -20,80 +17,88 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         _transactionRepository = transactionRepository;
     }
 
-    public Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(IAgentSignatureQuery agentSignatureQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _transactionRepository.GetTransactionIds(agentSignatureQuery, cancellationToken));
+        return WrapQuery(() => _transactionRepository.EnumerateTransactionIds(agentSignatureQuery, cancellationToken));
     }
 
-    public Task<Id[]> GetTransactionIds(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetTransactionIds(commandQuery, cancellationToken));
-    }
-
-    public Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetTransactionIds(leaseQuery, cancellationToken));
-    }
-
-    public Task<Id[]> GetTransactionIds(ITagQuery tagQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetTransactionIds(tagQuery, cancellationToken));
-    }
-
-    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery,
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ICommandQuery commandQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _transactionRepository.GetEntityIds(agentSignatureQuery, cancellationToken));
+        return WrapQuery(() => _transactionRepository.EnumerateTransactionIds(commandQuery, cancellationToken));
     }
 
-    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetEntityIds(commandQuery, cancellationToken));
-    }
-
-    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetEntityIds(leaseQuery, cancellationToken));
-    }
-
-    public Task<Id[]> GetEntityIds(ITagQuery tagQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetEntityIds(tagQuery, cancellationToken));
-    }
-
-    public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ILeaseQuery leaseQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _transactionRepository.GetAgentSignatures(agentSignatureQuery, cancellationToken));
+        return WrapQuery(() => _transactionRepository.EnumerateTransactionIds(leaseQuery, cancellationToken));
     }
 
-    public Task<object[]> GetCommands(ICommandQuery commandQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetCommands(commandQuery, cancellationToken));
-    }
-
-    public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetLeases(leaseQuery, cancellationToken));
-    }
-
-    public Task<ITag[]> GetTags(ITagQuery tagQuery, CancellationToken cancellationToken = default)
-    {
-        return WrapQuery(() => _transactionRepository.GetTags(tagQuery, cancellationToken));
-    }
-
-    public Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ITagQuery tagQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() =>
-            _transactionRepository.GetAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken));
+        return WrapQuery(() => _transactionRepository.EnumerateTransactionIds(tagQuery, cancellationToken));
     }
 
-    public Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery,
+    public IAsyncEnumerable<Id> EnumerateEntityIds(IAgentSignatureQuery agentSignatureQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _transactionRepository.GetAnnotatedCommands(commandQuery, cancellationToken));
+        return WrapQuery(() => _transactionRepository.EnumerateEntityIds(agentSignatureQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateEntityIds(commandQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateEntityIds(leaseQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateEntityIds(tagQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<object> EnumerateAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateAgentSignatures(agentSignatureQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<object> EnumerateCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateCommands(commandQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateLeases(leaseQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<ITag> EnumerateTags(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateTags(tagQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<IEntitiesAnnotation<object>> EnumerateAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken));
+    }
+
+    public IAsyncEnumerable<IEntityAnnotation<object>> EnumerateAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _transactionRepository.EnumerateAnnotatedCommands(commandQuery, cancellationToken));
     }
 
     public Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
@@ -106,7 +111,7 @@ internal abstract class TransactionRepositoryWrapper : DisposableResourceBaseCla
         await _transactionRepository.DisposeAsync();
     }
 
-    protected abstract Task<T[]> WrapQuery<T>(Func<Task<T[]>> task);
+    protected abstract IAsyncEnumerable<T> WrapQuery<T>(Func<IAsyncEnumerable<T>> enumerable);
 
     protected abstract Task<bool> WrapCommand(Func<Task<bool>> task);
 }

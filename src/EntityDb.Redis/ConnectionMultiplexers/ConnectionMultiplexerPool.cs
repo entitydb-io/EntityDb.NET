@@ -1,8 +1,6 @@
 using EntityDb.Common.Disposables;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Redis.ConnectionMultiplexers;
 

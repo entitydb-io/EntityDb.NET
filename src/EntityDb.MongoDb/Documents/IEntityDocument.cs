@@ -1,9 +1,8 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Common.Documents;
+using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
 
-internal interface IEntityDocument : ITransactionDocument
+internal interface IEntityDocument : IEntityDocument<BsonDocument>, ITransactionDocument
 {
-    Id EntityId { get; }
-    VersionNumber EntityVersionNumber { get; }
 }

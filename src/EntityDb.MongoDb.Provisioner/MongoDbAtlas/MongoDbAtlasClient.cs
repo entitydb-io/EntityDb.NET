@@ -1,12 +1,8 @@
 ﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas.Models;
-using System;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.MongoDbAtlas;
 

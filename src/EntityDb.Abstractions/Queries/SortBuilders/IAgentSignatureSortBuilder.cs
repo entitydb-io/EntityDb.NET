@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.SortBuilders;
@@ -9,6 +9,13 @@ namespace EntityDb.Abstractions.Queries.SortBuilders;
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface IAgentSignatureSortBuilder<TSort> : ISortBuilder<TSort>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TSort AgentSignatureProperty<TAgentSignature>(bool ascending,
+        Expression<Func<TAgentSignature, object>> agentSignatureExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders agentSignatures by entity ids.
     /// </summary>
@@ -22,14 +29,4 @@ public interface IAgentSignatureSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders agentSignatures by type.</returns>
     TSort AgentSignatureType(bool ascending);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TSort" /> that orders agentSignatures by a agentSignature expression.
-    /// </summary>
-    /// <typeparam name="TAgentSignature">The type of agentSignature in the agentSignature expression.</typeparam>
-    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
-    /// <param name="agentSignatureExpression">The agentSignature expression.</param>
-    /// <returns>A <typeparamref name="TSort" /> that orders agentSignatures by <paramref name="agentSignatureExpression" />.</returns>
-    TSort AgentSignatureProperty<TAgentSignature>(bool ascending,
-        Expression<Func<TAgentSignature, object>> agentSignatureExpression);
 }

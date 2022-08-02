@@ -9,7 +9,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
-using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -42,9 +41,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = addTagsTransactionStep.EntityId,
                 EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
+                DataType = insertTag.GetType().Name,
+                Data = envelopeService.Serialize(insertTag),
                 Label = insertTag.Label,
-                Value = insertTag.Value,
-                Data = envelopeService.Deconstruct(insertTag)
+                Value = insertTag.Value
             })
             .ToArray();
 
@@ -66,7 +66,8 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
             tagQuery.GetFilter(FilterBuilder),
             tagQuery.GetSort(SortBuilder),
             tagQuery.Skip,
-            tagQuery.Take
+            tagQuery.Take,
+            tagQuery.Options as MongoDbQueryOptions
         );
     }
 

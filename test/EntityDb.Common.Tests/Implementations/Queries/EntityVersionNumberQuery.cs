@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record EntityVersionNumberQuery(VersionNumber Gte, VersionNumber Lte) : ICommandQuery, ILeaseQuery, ITagQuery
+public record EntityVersionNumberQuery(VersionNumber Gte, VersionNumber Lte, object? Options = null) : ICommandQuery, ILeaseQuery, ITagQuery
 {
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {

@@ -1,9 +1,6 @@
 ﻿using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Extensions;
 

@@ -4,8 +4,6 @@ using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 

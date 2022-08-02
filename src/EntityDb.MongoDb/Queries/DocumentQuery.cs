@@ -1,9 +1,6 @@
 ﻿using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Queries;
 
@@ -13,12 +10,12 @@ internal record DocumentQuery<TDocument>
     FilterDefinition<BsonDocument> Filter,
     SortDefinition<BsonDocument>? Sort,
     int? Skip,
-    int? Limit
+    int? Limit,
+    MongoDbQueryOptions? Options
 )
 {
-    public Task<List<TDocument>> Execute(IMongoSession mongoSession,
-        ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
+    public IAsyncEnumerable<TDocument> Execute(IMongoSession mongoSession, ProjectionDefinition<BsonDocument, TDocument> projection, CancellationToken cancellationToken)
     {
-        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, cancellationToken);
+        return mongoSession.Find(CollectionName, Filter, projection, Sort, Skip, Limit, Options, cancellationToken);
     }
 }

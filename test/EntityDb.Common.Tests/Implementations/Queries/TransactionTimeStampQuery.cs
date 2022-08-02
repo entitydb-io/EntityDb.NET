@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte) : IAgentSignatureQuery, ICommandQuery,
+public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : IAgentSignatureQuery, ICommandQuery,
     ILeaseQuery, ITagQuery
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)

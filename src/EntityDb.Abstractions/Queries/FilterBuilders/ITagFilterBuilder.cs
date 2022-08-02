@@ -1,5 +1,6 @@
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.ValueObjects;
-using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
@@ -10,6 +11,12 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TFilter TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes tags with an entity id which is contained in a set of
     ///     entity ids.
@@ -54,10 +61,24 @@ public interface ITagFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     TFilter TagTypeIn(params Type[] tagTypes);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes tags which do match a tag expression.
+    ///     Returns a <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Label"/> is
+    ///     a particular value.
     /// </summary>
-    /// <typeparam name="TTag">The type of tag in the tag expression.</typeparam>
-    /// <param name="tagExpression">The tag expression.</param>
-    /// <returns>A <typeparamref name="TFilter" /> that only includes tags which do match <paramref name="tagExpression" />.</returns>
-    TFilter TagMatches<TTag>(Expression<Func<TTag, bool>> tagExpression);
+    /// <param name="label">The tag labels</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Label"/> is
+    ///     <paramref name="label"/>.
+    /// </returns>
+    TFilter TagLabelEq(string label);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Value"/> is
+    ///     a particular value.
+    /// </summary>
+    /// <param name="value">The tag values</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter"/> that only includes tags whose <see cref="ITag.Value"/> is
+    ///     <paramref name="value"/>.
+    /// </returns>
+    TFilter TagValueEq(string value);
 }

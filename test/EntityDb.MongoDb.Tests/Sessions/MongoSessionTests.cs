@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using EntityDb.Common.Exceptions;
+﻿using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests;
 using EntityDb.MongoDb.Sessions;
 using Shouldly;

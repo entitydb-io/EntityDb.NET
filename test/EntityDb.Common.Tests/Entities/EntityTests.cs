@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
@@ -11,6 +7,7 @@ using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
+using EntityDb.Common.Polyfills;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +17,10 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 
+[Collection(nameof(DatabaseContainerCollection))]
 public class EntityTests : TestsBase<Startup>
 {
-    public EntityTests(IServiceProvider serviceProvider) : base(serviceProvider)
+    public EntityTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(serviceProvider, databaseContainerFixture)
     {
     }
 
@@ -127,8 +125,8 @@ public class EntityTests : TestsBase<Startup>
             .Returns(ValueTask.CompletedTask);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => commands.ToArray())
+            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(() => AsyncEnumerablePolyfill.FromResult(commands))
             .Verifiable();
 
         var transactionRepositoryFactoryMock =
@@ -167,7 +165,7 @@ public class EntityTests : TestsBase<Startup>
         currenEntity.VersionNumber.ShouldBe(expectedVersionNumber);
 
         transactionRepositoryMock
-            .Verify(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()),
+            .Verify(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()),
                 Times.Once);
     }
 

@@ -1,9 +1,7 @@
 ﻿using EntityDb.Common.Disposables;
+using EntityDb.MongoDb.Queries;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Sessions;
 
@@ -16,7 +14,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         return MongoSession.Insert(collectionName, bsonDocuments, cancellationToken);
     }
 
-    public Task<List<TDocument>> Find<TDocument>
+    public IAsyncEnumerable<TDocument> Find<TDocument>
     (
         string collectionName,
         FilterDefinition<BsonDocument> filterDefinition,
@@ -24,6 +22,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         SortDefinition<BsonDocument>? sortDefinition,
         int? skip,
         int? limit,
+        MongoDbQueryOptions? options,
         CancellationToken cancellationToken
     )
     {
@@ -35,6 +34,7 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
             sortDefinition,
             skip,
             limit,
+            options,
             cancellationToken
         );
     }

@@ -1,6 +1,4 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 

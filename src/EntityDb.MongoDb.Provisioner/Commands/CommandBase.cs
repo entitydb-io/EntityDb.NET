@@ -1,7 +1,6 @@
 ﻿using EntityDb.MongoDb.Provisioner.MongoDbAtlas;
 using System.CommandLine;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Commands;
 

@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Transactions.Builders;
-using System;
 
 namespace EntityDb.Common.Exceptions;
 

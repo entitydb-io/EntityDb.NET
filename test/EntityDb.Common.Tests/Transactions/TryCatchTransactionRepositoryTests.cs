@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Transactions;
 using Microsoft.Extensions.Logging;
@@ -27,65 +24,62 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
 
         transactionRepositoryMock
-            .Setup(repository =>
-                repository.GetTransactionIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateTransactionIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetTransactionIds(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateTransactionIds(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetTransactionIds(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateTransactionIds(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetTransactionIds(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateTransactionIds(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository =>
-                repository.GetEntityIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateEntityIds(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetEntityIds(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateEntityIds(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetEntityIds(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateEntityIds(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetEntityIds(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateEntityIds(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository =>
-                repository.GetAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetLeases(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateLeases(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetTags(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+            .Setup(repository => repository.EnumerateTags(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
             .Setup(repository =>
-                repository.GetAnnotatedAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+                repository.EnumerateAnnotatedAgentSignatures(It.IsAny<IAgentSignatureQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
             .Setup(repository =>
-                repository.GetAnnotatedCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotImplementedException());
+                repository.EnumerateAnnotatedCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
 
         transactionRepositoryMock
             .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
@@ -97,22 +91,33 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         // ACT
 
         var transactionIdsFromAgentSignatureQuery =
-            await tryCatchTransactionRepository.GetTransactionIds(default(IAgentSignatureQuery)!);
+            await tryCatchTransactionRepository.EnumerateTransactionIds(default(IAgentSignatureQuery)!).ToArrayAsync();
         var transactionIdsFromCommandQuery =
-            await tryCatchTransactionRepository.GetTransactionIds(default(ICommandQuery)!);
-        var transactionIdsFromLeaseQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ILeaseQuery)!);
-        var transactionIdsFromTagQuery = await tryCatchTransactionRepository.GetTransactionIds(default(ITagQuery)!);
+            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ICommandQuery)!).ToArrayAsync();
+        var transactionIdsFromLeaseQuery =
+            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ILeaseQuery)!).ToArrayAsync();
+        var transactionIdsFromTagQuery =
+            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ITagQuery)!).ToArrayAsync();
         var entityIdsFromAgentSignatureQuery =
-            await tryCatchTransactionRepository.GetEntityIds(default(IAgentSignatureQuery)!);
-        var entityIdsFromCommandQuery = await tryCatchTransactionRepository.GetEntityIds(default(ICommandQuery)!);
-        var entityIdsFromLeaseQuery = await tryCatchTransactionRepository.GetEntityIds(default(ILeaseQuery)!);
-        var entityIdsFromTagQuery = await tryCatchTransactionRepository.GetEntityIds(default(ITagQuery)!);
-        var agentSignatures = await tryCatchTransactionRepository.GetAgentSignatures(default!);
-        var commands = await tryCatchTransactionRepository.GetCommands(default!);
-        var leases = await tryCatchTransactionRepository.GetLeases(default!);
-        var tags = await tryCatchTransactionRepository.GetTags(default!);
-        var annotatedCommands = await tryCatchTransactionRepository.GetAnnotatedCommands(default!);
-        var inserted = await tryCatchTransactionRepository.PutTransaction(default!);
+            await tryCatchTransactionRepository.EnumerateEntityIds(default(IAgentSignatureQuery)!).ToArrayAsync();
+        var entityIdsFromCommandQuery =
+            await tryCatchTransactionRepository.EnumerateEntityIds(default(ICommandQuery)!).ToArrayAsync();
+        var entityIdsFromLeaseQuery =
+            await tryCatchTransactionRepository.EnumerateEntityIds(default(ILeaseQuery)!).ToArrayAsync();
+        var entityIdsFromTagQuery =
+            await tryCatchTransactionRepository.EnumerateEntityIds(default(ITagQuery)!).ToArrayAsync();
+        var agentSignatures =
+            await tryCatchTransactionRepository.EnumerateAgentSignatures(default!).ToArrayAsync();
+        var commands =
+            await tryCatchTransactionRepository.EnumerateCommands(default!).ToArrayAsync();
+        var leases =
+            await tryCatchTransactionRepository.EnumerateLeases(default!).ToArrayAsync();
+        var tags =
+            await tryCatchTransactionRepository.EnumerateTags(default!).ToArrayAsync();
+        var annotatedCommands =
+            await tryCatchTransactionRepository.EnumerateAnnotatedCommands(default!).ToArrayAsync();
+        var inserted =
+            await tryCatchTransactionRepository.PutTransaction(default!);
 
         // ASSERT
 
@@ -130,7 +135,6 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
         tags.ShouldBeEmpty();
         annotatedCommands.ShouldBeEmpty();
         inserted.ShouldBeFalse();
-
         loggerVerifier.Invoke(Times.Exactly(14));
     }
 }

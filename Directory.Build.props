@@ -5,5 +5,10 @@
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <EnablePreviewFeatures>True</EnablePreviewFeatures>
+		<ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
+	</ItemGroup>
 </Project>

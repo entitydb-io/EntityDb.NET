@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record TransactionIdQuery(Id TransactionId) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
+public record TransactionIdQuery(Id TransactionId, object? Options = null) : IAgentSignatureQuery, ICommandQuery, ILeaseQuery,
     ITagQuery
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)

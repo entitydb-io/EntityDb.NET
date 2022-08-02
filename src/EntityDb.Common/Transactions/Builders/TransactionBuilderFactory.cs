@@ -2,8 +2,6 @@
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions.Builders;
 
