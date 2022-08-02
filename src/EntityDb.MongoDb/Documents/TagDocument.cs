@@ -41,9 +41,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = addTagsTransactionStep.EntityId,
                 EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
+                DataType = insertTag.GetType().Name,
+                Data = envelopeService.Serialize(insertTag),
                 Label = insertTag.Label,
-                Value = insertTag.Value,
-                Data = envelopeService.Serialize(insertTag)
+                Value = insertTag.Value
             })
             .ToArray();
 
