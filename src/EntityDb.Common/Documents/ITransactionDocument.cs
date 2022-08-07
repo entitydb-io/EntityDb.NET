@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Documents;
 
-internal interface ITransactionDocument<TSerializedData>
+internal interface ITransactionDocument<out TSerializedData>
 {
     Id TransactionId { get; }
 

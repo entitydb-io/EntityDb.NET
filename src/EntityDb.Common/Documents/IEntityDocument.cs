@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Documents;
 
-internal interface IEntityDocument<TSerializedData> : ITransactionDocument<TSerializedData>
+internal interface IEntityDocument<out TSerializedData> : ITransactionDocument<TSerializedData>
 {
     Id EntityId { get; }
     VersionNumber EntityVersionNumber { get; }
