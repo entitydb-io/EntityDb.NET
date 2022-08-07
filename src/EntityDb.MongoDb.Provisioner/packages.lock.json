@@ -55,38 +55,38 @@
       },
       "MongoDB.Bson": {
         "type": "Transitive",
-        "resolved": "2.16.1",
-        "contentHash": "d647KTPQ7hWqJmvCg80iiVdm239llaUwMyIeRF/0zKpN+ddRWh9jT/g6R6WQrmi4qd7yodvv/Jn0rpEqh4QN8g==",
+        "resolved": "2.17.1",
+        "contentHash": "IBr5w6ygeUCTobiS4J2UlYeIsnjSJvOOf31g60EkRa3NIeyrYs7Y51HeOvJ8r6NPcKv1hLj8xwoop6hDTetAdA==",
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "5.0.0"
         }
       },
       "MongoDB.Driver": {
         "type": "Transitive",
-        "resolved": "2.16.1",
-        "contentHash": "LqDWfRG7gM1tZKcG9Q/vuQGYF5GsBuxUF5KcOgvWrE6P7pSkOSL9xGZ7ABZ6XRVECGEQs+N6GyU1E4ViI4lh+g==",
+        "resolved": "2.17.1",
+        "contentHash": "A5Yvm3RUdkSYnvKWVb/bZfvhzG+L+t0n80JuUXf0p2QG1TbtqHE9hX/FBK+BoF7sw9rzUTw8VHYeqX5rT0rxdA==",
         "dependencies": {
-          "MongoDB.Bson": "2.16.1",
-          "MongoDB.Driver.Core": "2.16.1",
-          "MongoDB.Libmongocrypt": "1.5.3"
+          "MongoDB.Bson": "2.17.1",
+          "MongoDB.Driver.Core": "2.17.1",
+          "MongoDB.Libmongocrypt": "1.5.5"
         }
       },
       "MongoDB.Driver.Core": {
         "type": "Transitive",
-        "resolved": "2.16.1",
-        "contentHash": "oJZnXHnAyTd/haHYdbfKMRmPEZ1fFrndv8xhorHeTkUDeGgsPA89vpGMHcjppUyHMYBpLgHbn6GoMkleHKsTHg==",
+        "resolved": "2.17.1",
+        "contentHash": "lfuuQvCXcco6mG096PL8xRO+dBdHsDTR3DiYfK/ICHgFlL5RfKlBuE0xClEGKtaZ4Spe28/fF/GUcrrA/yfoAQ==",
         "dependencies": {
           "DnsClient": "1.6.1",
-          "MongoDB.Bson": "2.16.1",
-          "MongoDB.Libmongocrypt": "1.5.3",
+          "MongoDB.Bson": "2.17.1",
+          "MongoDB.Libmongocrypt": "1.5.5",
           "SharpCompress": "0.30.1",
           "System.Buffers": "4.5.1"
         }
       },
       "MongoDB.Libmongocrypt": {
         "type": "Transitive",
-        "resolved": "1.5.3",
-        "contentHash": "OWWxuyuxbjAmOLPoaoUEYnIW4F7qexS6XYOdu6absxyGAqLBWEY+M4WY2Y0km2UUG1+QOPdebpb/7cg5BIEbdw=="
+        "resolved": "1.5.5",
+        "contentHash": "0DV4l2PjXirSJHD/b+LpOK3IfUDvkbpvvZBM2w1aYL6E/4vbhfyr/FP5laDNx2zRylqN1hIZO+EL7NgO/5GpVg=="
       },
       "SharpCompress": {
         "type": "Transitive",
@@ -134,7 +134,7 @@
         "type": "Project",
         "dependencies": {
           "EntityDb.Common": "1.0.0",
-          "MongoDB.Driver": "2.16.1",
+          "MongoDB.Driver": "2.17.1",
           "System.Linq.Async": "6.0.1"
         }
       }

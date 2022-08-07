@@ -33,8 +33,8 @@
       },
       "Npgsql": {
         "type": "Transitive",
-        "resolved": "6.0.5",
-        "contentHash": "a11H5/b5yNTuFN0Ycjvb920oI6vQHadt6KhEMmcC7DfvsSHH8Z3wBam+CHmyWcfDxJJaxamcdBb8XA3BvqS4Kw==",
+        "resolved": "6.0.6",
+        "contentHash": "IIwnoJp0sFkhAydT/KKe/0NhlJKhYPIrXSE95AuU/2dqHNI9alxvjClJSGL+QE8NGqq1SFn+NenxVtm/JYsrJg==",
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         }
@@ -68,7 +68,7 @@
         "type": "Project",
         "dependencies": {
           "EntityDb.SqlDb": "1.0.0",
-          "Npgsql": "6.0.5",
+          "Npgsql": "6.0.6",
           "System.Linq.Async": "6.0.1"
         }
       },
