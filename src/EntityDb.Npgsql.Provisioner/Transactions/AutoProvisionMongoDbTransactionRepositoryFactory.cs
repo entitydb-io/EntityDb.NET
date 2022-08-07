@@ -59,7 +59,11 @@ internal sealed class
 
         var npgsqlConnection = new NpgsqlConnection(options.ConnectionString);
 
+        await npgsqlConnection.OpenAsync(cancellationToken);
+
         await npgsqlConnection.ProvisionTables(cancellationToken);
+
+        await npgsqlConnection.CloseAsync();
 
         _provisioned = true;
 

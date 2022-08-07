@@ -10,7 +10,7 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>entitydb-provision-mongodb</ToolCommandName>
         <PackageTags>EntityDb EventSourcing DDD CQRS MongoDb</PackageTags>
-        <Description>A dotnet tool for provisioning a role, user, and database for usage with the EntityDb.MongoDb pacakge. Note - this tool is made for provisioning on a MongoDb Atlas Cluster. It does not work for other instances of MongoDb at this time.</Description>
+        <Description>A dotnet tool for provisioning a role, user, and database for usage with the EntityDb.MongoDb pacakge.</Description>
     </PropertyGroup>
 
     <ItemGroup>

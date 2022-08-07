@@ -83,15 +83,11 @@ public static class NpgsqlConnectionExtensions
     public static async Task ProvisionTables(this NpgsqlConnection npgsqlConnection,
         CancellationToken cancellationToken = default)
     {
-        await npgsqlConnection.OpenAsync(cancellationToken);
-
         foreach (var command in Commands)
         {
             var dbCommand = new NpgsqlCommand(command, npgsqlConnection);
 
             await dbCommand.ExecuteNonQueryAsync(cancellationToken);
         }
-
-        await npgsqlConnection.CloseAsync();
     }
 }

@@ -1,49 +1,29 @@
-﻿using EntityDb.Npgsql.Provisioner.Extensions;
-using Npgsql;
+﻿using EntityDb.Npgsql.Provisioner.Commands;
+using System.CommandLine;
 
-// Global Args
+namespace EntityDb.Npgsql.Provisioner;
 
-var host = "localhost";
-var port = 5432;
+internal static class Program
+{
+    public static Task<int> Main(string[] args)
+    {
+#if DEBUG
+        if (args.Length == 0)
+        {
+            Console.Write("Please enter args: ");
 
+            var input = Console.ReadLine() ?? string.Empty;
 
-// Args
+            args = input.Split(' ');
+        }
+#endif
 
-var serviceName = "entitydb";
-var servicePassword = "entitydb";
+        var rootCommand = new RootCommand();
 
-//// Handler
+        CreateDatabase.AddTo(rootCommand);
+        CreateTables.AddTo(rootCommand);
+        CreateRole.AddTo(rootCommand);
 
-//var rootConnectionString = $"Host={host};Port={port};Username={rootUsername};Password={rootPassword};Include Error Detail=true";
-
-//var rootDbConnection = new NpgsqlConnection(rootConnectionString);
-
-//await rootDbConnection.OpenAsync();
-
-//var rootCommands = new string[]
-//{
-//    $"CREATE DATABASE {serviceName}",
-//    $"CREATE USER {serviceName} PASSWORD '{servicePassword}'",
-//};
-
-//foreach (var rootCommand in rootCommands)
-//{
-//    await new NpgsqlCommand(rootCommand, rootDbConnection).ExecuteNonQueryAsync();
-//}
-
-
-//await rootDbConnection.CloseAsync();
-
-
-
-
-
-// Args
-
-// Handler
-
-var scopedConnectionString = $"Host={host};Port={port};Username={serviceName};Password={servicePassword};Include Error Detail=true;Database={serviceName}";
-
-var scopedDbConnection = new NpgsqlConnection(scopedConnectionString);
-
-await scopedDbConnection.ProvisionTables();
+        return rootCommand.InvokeAsync(args);
+    }
+}
