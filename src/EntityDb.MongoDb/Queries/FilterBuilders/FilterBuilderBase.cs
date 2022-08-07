@@ -5,8 +5,7 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries.FilterDefinitions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
@@ -45,6 +44,11 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
         return FilterBuilder.Or(filters);
     }
 
+    protected static FilterDefinition<BsonDocument> Eq<TValue>(string fieldName, TValue value)
+    {
+        return FilterBuilder.Eq(fieldName, value);
+    }
+
     protected static FilterDefinition<BsonDocument> In<TValue>(string fieldName, IEnumerable<TValue> values)
     {
         return FilterBuilder.In(fieldName, values);
@@ -77,6 +81,8 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
         return Array.Empty<string>();
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     protected FilterDefinition<BsonDocument> DataValueMatches<TData>(Expression<Func<TData, bool>> dataExpression)
     {
         var dataFilter = Builders<TData>.Filter.Where(dataExpression);

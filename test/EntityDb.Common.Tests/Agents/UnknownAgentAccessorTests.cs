@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using EntityDb.Common.Agents;
+﻿using EntityDb.Common.Agents;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Tests.Agents;

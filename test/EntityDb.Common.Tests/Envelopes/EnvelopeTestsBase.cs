@@ -1,5 +1,4 @@
-﻿using System;
-using EntityDb.Common.Envelopes;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -14,7 +13,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     {
     }
 
-    protected abstract byte[] GenerateCorruptedBytes();
+    protected abstract TEnvelopeValue GenerateCorruptedSerializedData();
 
     [Fact]
     public void GivenValidRecord_WhenDeconstructedSerializedAndDeserialized_ThenReconstructReturnsEquivalentRecord()
@@ -32,13 +31,9 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         var boxedRecord = (IRecord)record;
 
-        var envelope = envelopeService.Deconstruct(boxedRecord);
+        var envelope = envelopeService.Serialize(boxedRecord);
 
-        var rawData = envelopeService.Serialize(envelope);
-
-        var reconstructedEnvelope = envelopeService.Deserialize(rawData);
-
-        var reconstructedBoxedRecord = envelopeService.Reconstruct<IRecord>(reconstructedEnvelope);
+        var reconstructedBoxedRecord = envelopeService.Deserialize<IRecord>(envelope);
 
         var reconstructedRecord = (TestRecord<bool>)reconstructedBoxedRecord;
 
@@ -48,7 +43,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     }
 
     [Fact]
-    public void WhenSerializingCorruptedEnvelope_ThrowSerializeException()
+    public void WhenDeserializingCorruptedEnvelope_ThrowDeserializeException()
     {
         // ARRANGE
 
@@ -57,49 +52,15 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
         var envelopeService = serviceScope.ServiceProvider
             .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
 
-        var envelope = new Envelope<TEnvelopeValue>(default!, default!);
-
-        // ACT
-
-        Should.Throw<SerializeException>(() => { envelopeService.Serialize(envelope); });
-    }
-
-    [Fact]
-    public void WhenDeserializingCorruptedBytes_ThrowDeserializeException()
-    {
-        // ARRANGE
-
-        using var serviceScope = CreateServiceScope();
-
-        var envelopeService = serviceScope.ServiceProvider
-            .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
-
-        var corruptedBytes = GenerateCorruptedBytes();
+        var corruptedSerializedData = GenerateCorruptedSerializedData();
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() => { envelopeService.Deserialize(corruptedBytes); });
+        Should.Throw<DeserializeException>(() => { envelopeService.Deserialize<object>(corruptedSerializedData); });
     }
 
     [Fact]
-    public void WhenReconstructingCorruptedEnvelope_ThrowDeserializeException()
-    {
-        // ARRANGE
-
-        using var serviceScope = CreateServiceScope();
-
-        var envelopeService = serviceScope.ServiceProvider
-            .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
-
-        var envelope = new Envelope<TEnvelopeValue>(default!, default!);
-
-        // ASSERT
-
-        Should.Throw<DeserializeException>(() => { envelopeService.Reconstruct<object>(envelope); });
-    }
-
-    [Fact]
-    public void WhenDeconstructingNull_ThrowSerializeException()
+    public void WhenSerializingNull_ThrowSerializeException()
     {
         // ARRANGE
 
@@ -110,7 +71,7 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<SerializeException>(() => { envelopeService.Deconstruct<object?>(null); });
+        Should.Throw<SerializeException>(() => { envelopeService.Serialize<object?>(null); });
     }
 
     private interface IRecord

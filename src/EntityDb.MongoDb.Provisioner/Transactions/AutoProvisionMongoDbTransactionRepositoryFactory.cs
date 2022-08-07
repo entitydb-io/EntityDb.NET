@@ -3,9 +3,6 @@ using EntityDb.MongoDb.Sessions;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Provisioner.Transactions;
 

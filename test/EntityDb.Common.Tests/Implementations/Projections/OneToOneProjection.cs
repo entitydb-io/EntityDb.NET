@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;
@@ -34,17 +31,16 @@ public record OneToOneProjection
         return VersionNumber;
     }
 
-    public OneToOneProjection Reduce(params IEntityAnnotation<object>[] annotatedCommands)
+    public OneToOneProjection Reduce(IEntityAnnotation<object> annotatedCommand)
     {
-        return annotatedCommands.Aggregate(this, (previousProjection, nextAnnotatedCommand) =>
-            nextAnnotatedCommand switch
+        return annotatedCommand switch
+        {
+            IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(this) with
             {
-                IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(previousProjection) with
-                {
-                    EntityVersionNumber = reducer.EntityVersionNumber
-                },
-                _ => throw new NotSupportedException()
-            });
+                EntityVersionNumber = reducer.EntityVersionNumber
+            },
+            _ => throw new NotSupportedException()
+        };
     }
 
     public bool ShouldRecord()

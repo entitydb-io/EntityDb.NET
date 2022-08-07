@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -30,14 +27,14 @@ public record TestEntity
         return VersionNumber;
     }
 
-    public TestEntity Reduce(object[] commands)
+    public TestEntity Reduce(object command)
     {
-        return commands.Aggregate(this, (previousEntity, nextCommand) => nextCommand switch
+        return command switch
         {
-            DoNothing doNothing => doNothing.Reduce(previousEntity),
-            Count count => count.Reduce(previousEntity),
+            DoNothing doNothing => doNothing.Reduce(this),
+            StoreNumber storeNumber => storeNumber.Reduce(this),
             _ => throw new NotSupportedException()
-        });
+        };
     }
 
     public bool ShouldRecord()

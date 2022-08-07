@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using System;
 
 namespace EntityDb.Common.Exceptions;
 

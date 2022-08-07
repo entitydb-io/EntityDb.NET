@@ -6,10 +6,6 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Entities;
 
@@ -42,9 +38,14 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
         var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());
 
-        var commands = await TransactionRepository.GetCommands(commandQuery, cancellationToken);
+        var commands = TransactionRepository.EnumerateCommands(commandQuery, cancellationToken);
 
-        var entity = snapshot.Reduce(commands);
+        var entity = snapshot;
+
+        await foreach (var command in commands)
+        {
+            entity = entity.Reduce(command);
+        }
 
         if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
         {

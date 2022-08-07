@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Agents;
-using System;
 
 namespace EntityDb.Common.Exceptions;
 

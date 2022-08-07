@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace EntityDb.InMemory.Sessions;
 

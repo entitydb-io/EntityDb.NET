@@ -4,7 +4,18 @@
         <ProjectReference Include="..\..\src\EntityDb.Common\EntityDb.Common.csproj"/>
         <ProjectReference Include="..\..\src\EntityDb.InMemory\EntityDb.InMemory.csproj"/>
         <ProjectReference Include="..\..\src\EntityDb.MongoDb.Provisioner\EntityDb.MongoDb.Provisioner.csproj"/>
+        <ProjectReference Include="..\..\src\EntityDb.Npgsql.Provisioner\EntityDb.Npgsql.Provisioner.csproj"/>
         <ProjectReference Include="..\..\src\EntityDb.Redis\EntityDb.Redis.csproj"/>
     </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Testcontainers" Version="2.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="DockerVolumes\**\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

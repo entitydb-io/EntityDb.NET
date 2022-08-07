@@ -1,13 +1,12 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Extensions;
+using EntityDb.Json.Envelopes;
 using EntityDb.Redis.ConnectionMultiplexers;
-using EntityDb.Redis.Envelopes;
 using EntityDb.Redis.Snapshots;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 
 namespace EntityDb.Redis.Extensions;
 
@@ -19,7 +18,7 @@ public static class ServiceCollectionExtensions
 {
     internal static void AddJsonElementEnvelopeService(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<IEnvelopeService<JsonElement>, JsonElementEnvelopeService>();
+        serviceCollection.AddSingleton<IEnvelopeService<byte[]>, JsonBytesEnvelopeService>();
     }
 
     /// <summary>

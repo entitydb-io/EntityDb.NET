@@ -6,26 +6,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using System;
 
 namespace EntityDb.MongoDb.Envelopes;
 
-internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
+internal class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
 {
     public const string TypeDiscriminatorPropertyName = "_t";
 
-    private readonly ILogger<BsonDocumentEnvelopeService> _logger;
+    private readonly ILogger<MongoDbEnvelopeService> _logger;
     private readonly bool _removeTypeDiscriminatorProperty;
     private readonly ITypeResolver _typeResolver;
 
-    static BsonDocumentEnvelopeService()
+    static MongoDbEnvelopeService()
     {
         BsonSerializer.RegisterSerializer(new EnvelopeSerializer());
     }
 
-    public BsonDocumentEnvelopeService
+    public MongoDbEnvelopeService
     (
-        ILogger<BsonDocumentEnvelopeService> logger,
+        ILogger<MongoDbEnvelopeService> logger,
         ITypeResolver typeResolver,
         bool removeTypeDiscriminatorProperty
     )
@@ -35,7 +34,7 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         _removeTypeDiscriminatorProperty = removeTypeDiscriminatorProperty;
     }
 
-    public Envelope<BsonDocument> Deconstruct<TData>(TData data)
+    public BsonDocument Serialize<TData>(TData data)
     {
         try
         {
@@ -48,21 +47,9 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
 
             var headers = EnvelopeHelper.GetEnvelopeHeaders(data!.GetType());
 
-            return new Envelope<BsonDocument>(headers, bsonDocument);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Unable to deconstruct");
+            var envelope = new Envelope<BsonDocument>(headers, bsonDocument);
 
-            throw new SerializeException();
-        }
-    }
-
-    public byte[] Serialize(Envelope<BsonDocument> envelope)
-    {
-        try
-        {
-            return envelope.ToBsonDocument().ToBson();
+            return envelope.ToBsonDocument();
         }
         catch (Exception exception)
         {
@@ -72,13 +59,13 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
     }
 
-    public Envelope<BsonDocument> Deserialize(byte[] rawData)
+    public TData Deserialize<TData>(BsonDocument serializedData)
     {
         try
         {
-            var bsonDocument = new RawBsonDocument(rawData);
+            var envelope = (Envelope<BsonDocument>)BsonSerializer.Deserialize(serializedData, typeof(Envelope<BsonDocument>));
 
-            return (Envelope<BsonDocument>)BsonSerializer.Deserialize(bsonDocument, typeof(Envelope<BsonDocument>));
+            return (TData)BsonSerializer.Deserialize(envelope.Value, _typeResolver.ResolveType(envelope.Headers));
         }
         catch (Exception exception)
         {
@@ -88,24 +75,10 @@ internal class BsonDocumentEnvelopeService : IEnvelopeService<BsonDocument>
         }
     }
 
-    public TData Reconstruct<TData>(Envelope<BsonDocument> envelope)
-    {
-        try
-        {
-            return (TData)BsonSerializer.Deserialize(envelope.Value, _typeResolver.ResolveType(envelope.Headers));
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Unable to reconstruct");
-
-            throw new DeserializeException();
-        }
-    }
-
     public static IEnvelopeService<BsonDocument> Create(IServiceProvider serviceProvider,
         bool removeTypeDiscriminatorProperty)
     {
-        return ActivatorUtilities.CreateInstance<BsonDocumentEnvelopeService>(serviceProvider,
+        return ActivatorUtilities.CreateInstance<MongoDbEnvelopeService>(serviceProvider,
             removeTypeDiscriminatorProperty);
     }
 }

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
+using EntityDb.Common.Polyfills;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
@@ -17,12 +14,17 @@ using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.InMemory.Extensions;
 using EntityDb.InMemory.Sessions;
 using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
+using EntityDb.Npgsql.Provisioner.Extensions;
+using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
+using EntityDb.SqlDb.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Moq;
 using Shouldly;
 using Xunit.Abstractions;
@@ -40,15 +42,26 @@ public class TestsBase<TStartup>
 
     private static readonly TransactionsAdder[] AllTransactionAdders =
     {
-        new("MongoDb", serviceCollection =>
+        new("MongoDb", typeof(MongoDbQueryOptions), (timeStamp) => timeStamp.WithMillisecondPrecision(), serviceCollection =>
         {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
             serviceCollection.AddAutoProvisionMongoDbTransactions(true);
+
+            serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
+            {
+                options.FindOptions = new FindOptions
+                {
+                    Collation = new Collation("en", numericOrdering: true)
+                };
+            });
 
             serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
             {
-                options.ConnectionString = "mongodb://127.0.0.1:27017/?connect=direct&replicaSet=entitydb";
-                options.DatabaseName = "Test";
-                options.ReadTimeout = TimeSpan.FromSeconds(1);
+                options.ConnectionString = databaseContainerFixture!.MongoDbContainer.ConnectionString.Replace("mongodb://:@", "mongodb://");
+                options.DatabaseName = databaseContainerFixture.MongoDbConfiguration.Database;
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
@@ -68,20 +81,59 @@ public class TestsBase<TStartup>
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;
             });
+        }),
+
+        new("Npgsql", typeof(NpgsqlQueryOptions), (timeStamp) => timeStamp.WithMicrosecondPrecision(), serviceCollection =>
+        {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
+            serviceCollection.AddAutoProvisionNpgsqlTransactions(true);
+
+            serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
+            {
+                options.LeaseValueSortCollation = "numeric";
+                options.TagValueSortCollation = "numeric";
+            });
+
+            serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
+            {
+                options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.ConnectionString};Include Error Detail=true";
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
+            });
         })
     };
 
     private readonly IConfiguration _configuration;
     private readonly ITest _test;
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
+    private readonly DatabaseContainerFixture? _databaseContainerFixture;
 
-    protected TestsBase(IServiceProvider startupServiceProvider)
+    protected TestsBase(IServiceProvider startupServiceProvider, DatabaseContainerFixture? databaseContainerFixture = null)
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
         _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
         _test =
             (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output)
                 as ITest).ShouldNotBeNull();
+        _databaseContainerFixture = databaseContainerFixture;
     }
 
     protected Task RunGenericTestAsync(Type[] typeArguments, object?[] invokeParameters)
@@ -103,11 +155,15 @@ public class TestsBase<TStartup>
     {
         return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
             serviceCollection.AddRedisSnapshots<TSnapshot>(true);
 
             serviceCollection.ConfigureAll<RedisSnapshotSessionOptions<TSnapshot>>(options =>
             {
-                options.ConnectionString = "127.0.0.1:6379";
+                options.ConnectionString = databaseContainerFixture!.RedisContainer.ConnectionString;
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
@@ -271,6 +327,11 @@ public class TestsBase<TStartup>
 
         startup.AddServices(serviceCollection);
 
+        if (_databaseContainerFixture != null)
+        {
+            serviceCollection.AddSingleton(_databaseContainerFixture);
+        }
+
         configureServices?.Invoke(serviceCollection);
 
         serviceCollection.AddSingleton(typeof(ILogger<>), typeof(TestLogger<>));
@@ -357,8 +418,8 @@ public class TestsBase<TStartup>
             .ReturnsAsync(true);
 
         transactionRepositoryMock
-            .Setup(repository => repository.GetCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(commands);
+            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(AsyncEnumerablePolyfill.FromResult(commands));
 
         transactionRepositoryMock
             .Setup(repository => repository.DisposeAsync())
@@ -418,7 +479,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record TransactionsAdder(string Name, AddDependenciesDelegate AddDependencies)
+    public record TransactionsAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {

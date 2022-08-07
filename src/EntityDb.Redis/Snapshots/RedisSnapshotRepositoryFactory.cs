@@ -6,10 +6,6 @@ using EntityDb.Redis.ConnectionMultiplexers;
 using EntityDb.Redis.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.Redis.Snapshots;
 
@@ -17,7 +13,7 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
     ISnapshotRepositoryFactory<TSnapshot>
 {
     private readonly ConnectionMultiplexerFactory _connectionMultiplexerFactory;
-    private readonly IEnvelopeService<JsonElement> _envelopeService;
+    private readonly IEnvelopeService<byte[]> _envelopeService;
     private readonly IOptionsFactory<RedisSnapshotSessionOptions<TSnapshot>> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
@@ -26,7 +22,7 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         IServiceProvider serviceProvider,
         ConnectionMultiplexerFactory connectionMultiplexerFactory,
         IOptionsFactory<RedisSnapshotSessionOptions<TSnapshot>> optionsFactory,
-        IEnvelopeService<JsonElement> envelopeService
+        IEnvelopeService<byte[]> envelopeService
     )
     {
         _serviceProvider = serviceProvider;

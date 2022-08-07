@@ -7,7 +7,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
-using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -35,7 +34,8 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
                 TransactionId = transaction.Id,
                 EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct()
                     .ToArray(),
-                Data = envelopeService.Deconstruct(transaction.AgentSignature)
+                DataType = transaction.AgentSignature.GetType().Name,
+                Data = envelopeService.Serialize(transaction.AgentSignature)
             }
         };
 
@@ -57,7 +57,8 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
             agentSignatureQuery.GetFilter(FilterBuilder),
             agentSignatureQuery.GetSort(SortBuilder),
             agentSignatureQuery.Skip,
-            agentSignatureQuery.Take
+            agentSignatureQuery.Take,
+            agentSignatureQuery.Options as MongoDbQueryOptions
         );
     }
 }

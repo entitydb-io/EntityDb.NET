@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.SortBuilders;
@@ -9,6 +9,12 @@ namespace EntityDb.Abstractions.Queries.SortBuilders;
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface ICommandSortBuilder<TSort> : ISortBuilder<TSort>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TSort CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders commands by entity id.
     /// </summary>
@@ -29,13 +35,4 @@ public interface ICommandSortBuilder<TSort> : ISortBuilder<TSort>
     /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
     /// <returns>A <typeparamref name="TSort" /> that orders commands by type.</returns>
     TSort CommandType(bool ascending);
-
-    /// <summary>
-    ///     Returns a <typeparamref name="TSort" /> that orders commands by a command expression.
-    /// </summary>
-    /// <typeparam name="TCommand">The type of command in the command expression.</typeparam>
-    /// <param name="ascending">Pass <c>true</c> for ascending order or <c>false</c> for descending order.</param>
-    /// <param name="commandExpression">The command expression.</param>
-    /// <returns>A <typeparamref name="TSort" /> that orders commands by <paramref name="commandExpression" />.</returns>
-    TSort CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression);
 }

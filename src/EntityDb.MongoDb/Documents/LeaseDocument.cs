@@ -9,7 +9,6 @@ using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using MongoDB.Bson;
-using System.Linq;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -43,10 +42,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = addLeasesTransactionStep.EntityId,
                 EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
+                DataType = insertLease.GetType().Name,
+                Data = envelopeService.Serialize(insertLease),
                 Scope = insertLease.Scope,
                 Label = insertLease.Label,
-                Value = insertLease.Value,
-                Data = envelopeService.Deconstruct(insertLease)
+                Value = insertLease.Value
             })
             .ToArray();
 
@@ -68,7 +68,8 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
             leaseQuery.GetFilter(FilterBuilder),
             leaseQuery.GetSort(SortBuilder),
             leaseQuery.Skip,
-            leaseQuery.Take
+            leaseQuery.Take,
+            leaseQuery.Options as MongoDbQueryOptions
         );
     }
 

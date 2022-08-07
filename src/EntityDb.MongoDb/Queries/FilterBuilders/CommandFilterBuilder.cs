@@ -3,7 +3,7 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.FilterBuilders;
@@ -31,6 +31,8 @@ internal sealed class CommandFilterBuilder : FilterBuilderBase,
         return DataTypeIn(commandTypes);
     }
 
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
     public FilterDefinition<BsonDocument> CommandMatches<TCommand>(
         Expression<Func<TCommand, bool>> commandExpression)
     {

@@ -1,8 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace EntityDb.Common.Transactions;
 
@@ -19,19 +17,40 @@ internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapp
         _logger = logger;
     }
 
-    protected override async Task<T[]> WrapQuery<T>(Func<Task<T[]>> task)
+    protected override async IAsyncEnumerable<T> WrapQuery<T>(Func<IAsyncEnumerable<T>> enumerable)
     {
         using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
+            IAsyncEnumerator<T> enumerator;
+
             try
             {
-                return await task.Invoke();
+                enumerator = enumerable.Invoke().GetAsyncEnumerator();
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "The operation cannot be completed");
 
-                return Array.Empty<T>();
+                yield break;
+            }
+
+            while (true)
+            {
+                try
+                {
+                    if (!await enumerator.MoveNextAsync())
+                    {
+                        yield break;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "The operation cannot be completed");
+
+                    yield break;
+                }
+
+                yield return enumerator.Current;
             }
         }
     }

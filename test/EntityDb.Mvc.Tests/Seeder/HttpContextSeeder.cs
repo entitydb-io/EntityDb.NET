@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Bogus;
+﻿using Bogus;
 using EntityDb.Abstractions.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;

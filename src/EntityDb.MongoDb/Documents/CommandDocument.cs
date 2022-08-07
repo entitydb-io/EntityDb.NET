@@ -11,8 +11,6 @@ using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -42,7 +40,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = appendCommandTransactionStep.EntityId,
                 EntityVersionNumber = appendCommandTransactionStep.EntityVersionNumber,
-                Data = envelopeService.Deconstruct(appendCommandTransactionStep.Command)
+                DataType = appendCommandTransactionStep.Command.GetType().Name,
+                Data = envelopeService.Serialize(appendCommandTransactionStep.Command)
             }
         };
 
@@ -64,11 +63,12 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
             commandQuery.GetFilter(FilterBuilder),
             commandQuery.GetSort(SortBuilder),
             commandQuery.Skip,
-            commandQuery.Take
+            commandQuery.Take,
+            commandQuery.Options as MongoDbQueryOptions
         );
     }
 
-    public static Task<VersionNumber> GetLastEntityVersionNumber
+    public static async Task<VersionNumber> GetLastEntityVersionNumber
     (
         IMongoSession mongoSession,
         Id entityId,
@@ -79,6 +79,12 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
 
         var documentQuery = GetQuery(commandQuery);
 
-        return documentQuery.GetEntityVersionNumber(mongoSession, cancellationToken);
+        var document = await documentQuery
+            .Execute(mongoSession, DocumentQueryExtensions.EntityVersionNumberProjection, cancellationToken)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return document is null
+            ? default
+            : document.EntityVersionNumber;
     }
 }
