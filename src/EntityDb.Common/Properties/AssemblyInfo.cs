@@ -3,10 +3,9 @@
 // src
 [assembly: InternalsVisibleTo("EntityDb.SqlDb")]
 [assembly: InternalsVisibleTo("EntityDb.Npgsql")]
-[assembly: InternalsVisibleTo("EntityDb.Npgsql.Provisioner")]
 [assembly: InternalsVisibleTo("EntityDb.InMemory")]
 [assembly: InternalsVisibleTo("EntityDb.MongoDb")]
-[assembly: InternalsVisibleTo("EntityDb.MongoDb.Provisioner")]
+[assembly: InternalsVisibleTo("EntityDb.Provisioner")]
 [assembly: InternalsVisibleTo("EntityDb.Mvc")]
 [assembly: InternalsVisibleTo("EntityDb.Redis")]
 [assembly: InternalsVisibleTo("EntityDb.Void")]

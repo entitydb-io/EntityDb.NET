@@ -14,4 +14,14 @@ internal static class MongoDbTransactionRepositoryFactoryExtensions
             ? new TestModeMongoDbTransactionRepositoryFactory(mongoDbTransactionRepositoryFactory)
             : mongoDbTransactionRepositoryFactory;
     }
+
+    public static IMongoDbTransactionRepositoryFactory UseAuthProvision(
+        this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory,
+        IServiceProvider serviceProvider,
+        bool autoProvision)
+    {
+        return autoProvision
+            ? AutoProvisionMongoDbTransactionRepositoryFactory.Create(serviceProvider, mongoDbTransactionRepositoryFactory)
+            : mongoDbTransactionRepositoryFactory;
+    }
 }

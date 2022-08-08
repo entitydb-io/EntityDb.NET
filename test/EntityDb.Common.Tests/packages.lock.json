@@ -1802,15 +1802,6 @@
           "System.Linq.Async": "6.0.1"
         }
       },
-      "entitydb.mongodb.provisioner": {
-        "type": "Project",
-        "dependencies": {
-          "EntityDb.MongoDb": "1.0.0",
-          "System.CommandLine": "2.0.0-beta4.22272.1",
-          "System.CommandLine.NamingConventionBinder": "2.0.0-beta4.22272.1",
-          "System.Linq.Async": "6.0.1"
-        }
-      },
       "entitydb.npgsql": {
         "type": "Project",
         "dependencies": {
@@ -1819,9 +1810,10 @@
           "System.Linq.Async": "6.0.1"
         }
       },
-      "entitydb.npgsql.provisioner": {
+      "entitydb.provisioner": {
         "type": "Project",
         "dependencies": {
+          "EntityDb.MongoDb": "1.0.0",
           "EntityDb.Npgsql": "1.0.0",
           "System.CommandLine": "2.0.0-beta4.22272.1",
           "System.CommandLine.NamingConventionBinder": "2.0.0-beta4.22272.1",

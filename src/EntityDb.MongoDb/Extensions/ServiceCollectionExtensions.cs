@@ -4,14 +4,12 @@ using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.MongoDb.Extensions;
 
 /// <summary>
 ///     Extensions for service collections.
 /// </summary>
-[ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
 public static class ServiceCollectionExtensions
 {
     internal static void AddBsonDocumentEnvelopeService(this IServiceCollection serviceCollection,
@@ -27,8 +25,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
+    /// <param name="autoProvision">Modifies the behavior of the repository to auto-provision collections.</param>
     public static void AddMongoDbTransactions(this IServiceCollection serviceCollection,
-        bool testMode = false)
+        bool testMode = false, bool autoProvision = false)
     {
         serviceCollection.AddBsonDocumentEnvelopeService(true);
 
@@ -43,6 +42,7 @@ public static class ServiceCollectionExtensions
             serviceProvider => serviceProvider
                 .GetRequiredService<MongoDbTransactionRepositoryFactory>()
                 .UseTestMode(testMode)
+                .UseAuthProvision(serviceProvider, autoProvision)
         );
     }
 }

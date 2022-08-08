@@ -2,6 +2,6 @@
 
 // src
 [assembly: InternalsVisibleTo("EntityDb.Npgsql")]
-[assembly: InternalsVisibleTo("EntityDb.Npgsql.Provisioner")]
+[assembly: InternalsVisibleTo("EntityDb.Provisioner")]
 
 // test

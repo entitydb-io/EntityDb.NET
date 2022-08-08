@@ -13,10 +13,10 @@ using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.InMemory.Extensions;
 using EntityDb.InMemory.Sessions;
-using EntityDb.MongoDb.Provisioner.Extensions;
+using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Sessions;
-using EntityDb.Npgsql.Provisioner.Extensions;
+using EntityDb.Npgsql.Extensions;
 using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
@@ -48,7 +48,7 @@ public class TestsBase<TStartup>
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
 
-            serviceCollection.AddAutoProvisionMongoDbTransactions(true);
+            serviceCollection.AddMongoDbTransactions(true, true);
 
             serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
             {
@@ -89,7 +89,7 @@ public class TestsBase<TStartup>
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
 
-            serviceCollection.AddAutoProvisionNpgsqlTransactions(true);
+            serviceCollection.AddNpgsqlTransactions(true, true);
 
             serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
             {

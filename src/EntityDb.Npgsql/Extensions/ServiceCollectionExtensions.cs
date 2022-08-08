@@ -9,14 +9,12 @@ using EntityDb.SqlDb.Converters;
 using EntityDb.SqlDb.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Npgsql.Extensions;
 
 /// <summary>
 ///     Extensions for service collections.
 /// </summary>
-[ExcludeFromCodeCoverage(Justification = "All of the tests in this project are using the auto-provisioning variant.")]
 public static class ServiceCollectionExtensions
 {
     internal static void AddSqlDbEnvelopeService(this IServiceCollection serviceCollection)
@@ -30,8 +28,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
+    /// <param name="autoProvision">Modifies the behavior of the repository to auto-provision collections.</param>
     public static void AddNpgsqlTransactions(this IServiceCollection serviceCollection,
-        bool testMode = false)
+        bool testMode = false, bool autoProvision = false)
     {
         serviceCollection.AddSqlDbEnvelopeService();
 
@@ -51,6 +50,7 @@ public static class ServiceCollectionExtensions
             serviceProvider => serviceProvider
                 .GetRequiredService<NpgsqlTransactionRepositoryFactory>()
                 .UseTestMode(testMode)
+                .UseAutoProvision(serviceProvider, autoProvision)
         );
     }
 }
