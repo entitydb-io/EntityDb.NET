@@ -10,7 +10,7 @@ internal class MongoDbCommand
         var mongoDb = new Command("mongodb");
 
         CreateCollections.AddTo(mongoDb);
-        MongoDbAtlasCommand.AddTo(parentCommand);
+        MongoDbAtlasCommand.AddTo(mongoDb);
 
         parentCommand.AddCommand(mongoDb);
     }
