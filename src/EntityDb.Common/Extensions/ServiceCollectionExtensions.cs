@@ -39,8 +39,6 @@ public static class ServiceCollectionExtensions
 
         serviceCollection.AddHostedService(serviceProvider =>
           serviceProvider.GetRequiredService<BufferBlockTransactionQueue<TTransactionProcessor>>());
-
-        serviceCollection.AddSingleton<ITransactionSubscriber, TransactionProcessorSubscriber<TTransactionProcessor>>();
     }
 
     internal static void Add<TService>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime,
@@ -74,10 +72,7 @@ public static class ServiceCollectionExtensions
 
         serviceCollection.AddSingleton<TransactionProcessorSubscriber<TTransactionProcessor>>();
 
-        serviceCollection.AddSingleton<ITransactionSubscriber>(
-            serviceProvider =>
-                serviceProvider.GetRequiredService<TransactionProcessorSubscriber<TTransactionProcessor>>()
-        );
+        serviceCollection.AddSingleton<ITransactionSubscriber, TransactionProcessorSubscriber<TTransactionProcessor>>();
 
         if (testMode)
         {
