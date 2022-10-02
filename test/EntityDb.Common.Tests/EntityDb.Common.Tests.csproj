@@ -17,4 +17,9 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.3.2" />
+	  <PackageReference Update="Shouldly" Version="4.1.0" />
+	</ItemGroup>
+
 </Project>
