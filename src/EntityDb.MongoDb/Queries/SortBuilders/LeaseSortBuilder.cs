@@ -2,7 +2,6 @@
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;
 
@@ -23,12 +22,6 @@ internal sealed class LeaseSortBuilder : SortBuilderBase, ILeaseSortBuilder<Sort
         return SortDataType(ascending);
     }
 
-    public SortDefinition<BsonDocument> LeaseProperty<TLease>(bool ascending,
-        Expression<Func<TLease, object>> leaseExpression)
-    {
-        return SortDataValue(ascending, leaseExpression);
-    }
-
     public SortDefinition<BsonDocument> LeaseScope(bool ascending)
     {
         return Sort(ascending, nameof(LeaseDocument.Scope));
@@ -42,10 +35,5 @@ internal sealed class LeaseSortBuilder : SortBuilderBase, ILeaseSortBuilder<Sort
     public SortDefinition<BsonDocument> LeaseValue(bool ascending)
     {
         return Sort(ascending, nameof(LeaseDocument.Value));
-    }
-
-    protected override string[] GetHoistedFieldNames()
-    {
-        return LeaseDocument.HoistedFieldNames;
     }
 }
