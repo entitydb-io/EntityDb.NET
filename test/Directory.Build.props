@@ -1,7 +1,6 @@
 <Project>
     <Import Project="../Directory.Build.props"/>
 
-    <!--Build-->
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
@@ -9,7 +8,6 @@
         <NoWarn>1701;1702;CA1822</NoWarn>
     </PropertyGroup>
 
-    <!--Pack-->
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
