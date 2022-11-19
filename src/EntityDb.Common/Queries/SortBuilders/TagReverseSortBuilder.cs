@@ -1,6 +1,4 @@
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace EntityDb.Common.Queries.SortBuilders;
 
@@ -20,13 +18,6 @@ internal sealed record TagReverseSortBuilder<TSort>
     public TSort TagType(bool ascending)
     {
         return TagSortBuilder.TagType(!ascending);
-    }
-
-    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
-    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
-    public TSort TagProperty<TTag>(bool ascending, Expression<Func<TTag, object>> tagExpression)
-    {
-        return TagSortBuilder.TagProperty(!ascending, tagExpression);
     }
 
     public TSort TagLabel(bool ascending)

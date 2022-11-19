@@ -8,13 +8,23 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Testcontainers" Version="2.1.0" />
+		<PackageReference Include="Testcontainers" Version="2.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="DockerVolumes\**\*">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="coverlet.collector" Version="3.2.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+	  <PackageReference Update="Shouldly" Version="4.1.0" />
+	  <PackageReference Update="Xunit.DependencyInjection" Version="8.6.1" />
 	</ItemGroup>
 
 </Project>

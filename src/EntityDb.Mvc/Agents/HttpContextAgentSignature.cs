@@ -71,7 +71,7 @@ public static class HttpContextAgentSignature
     public sealed record NameValuesPairSnapshot
     (
         string Name,
-        string[] Values
+        string?[] Values
     );
 
     /// <summary>
