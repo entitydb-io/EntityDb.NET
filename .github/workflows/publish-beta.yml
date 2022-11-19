@@ -48,7 +48,7 @@ jobs:
       - name: Publish to Beta
         run: dotnet nuget push ./**/*.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Packages & Symbols Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: Packages & Symbols
           path: |
@@ -60,7 +60,7 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./TestResults/**/*.xml
       - name: Generate Coverage Report
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.10
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.12
         with:
           reports: './TestResults/**/coverage.opencover.xml'
           targetdir: 'CoverageReport'
@@ -68,7 +68,7 @@ jobs:
           license: ${{ secrets.REPORTGENERATOR_LICENSE }}
           toolpath: 'reportgeneratortool'
       - name: Coverage Report Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: CoverageReport
           path: CoverageReport
