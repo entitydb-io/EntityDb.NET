@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0": {
+    "net7.0": {
       "StackExchange.Redis": {
         "type": "Direct",
         "requested": "[2.6.66, )",
