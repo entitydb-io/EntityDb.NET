@@ -42,7 +42,7 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Pack Projects into Nuget Packages
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ needs.milestone.outputs.version }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
