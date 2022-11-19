@@ -23,6 +23,9 @@ public class SqlDbTransactionSessionOptions
     /// </summary>
     public bool SecondaryPreferred { get; set; }
 
+    /// <summary>
+    ///     Determines the isolation level for transactions.
+    /// </summary>
     public IsolationLevel IsolationLevel { get; set; } = IsolationLevel.Snapshot;
 
     /// <summary>
