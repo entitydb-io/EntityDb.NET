@@ -5,6 +5,9 @@ namespace EntityDb.Common.Tests.Implementations.Snapshots;
 
 public interface ISnapshotWithTestLogic<TSnapshot> : ISnapshot<TSnapshot>
 {
+    Guid IdValue { get; }
+    ulong VersionNumberValue { get; }
+
     VersionNumber VersionNumber { get; }
     static abstract string RedisKeyNamespace { get; }
     static abstract AsyncLocal<Func<TSnapshot, bool>?> ShouldRecordLogic { get; }

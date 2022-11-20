@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;
@@ -6,16 +7,34 @@ using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
 public record OneToOneProjection
 (
-    Id Id,
-    VersionNumber VersionNumber = default,
-    VersionNumber EntityVersionNumber = default
+    [property: NotMapped] Id Id,
+    [property: NotMapped] VersionNumber VersionNumber = default
 ) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
+    [Column("Id")]
+    public Guid IdValue
+    {
+        get => Id.Value;
+        init => Id = new Id(value);
+    }
+
+    [Column("VersionNumber")]
+    public ulong VersionNumberValue
+    {
+        get => VersionNumber.Value;
+        init => VersionNumber = new VersionNumber(value);
+    }
+
+    public OneToOneProjection() : this(default(Id))
+    {
+    }
+
     public static OneToOneProjection Construct(Id projectionId)
     {
         return new OneToOneProjection(projectionId);
@@ -37,7 +56,7 @@ public record OneToOneProjection
         {
             IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(this) with
             {
-                EntityVersionNumber = reducer.EntityVersionNumber
+                VersionNumber = reducer.EntityVersionNumber
             },
             _ => throw new NotSupportedException()
         };
@@ -55,7 +74,7 @@ public record OneToOneProjection
 
     public ICommandQuery GetCommandQuery(Pointer projectionPointer)
     {
-        return new GetEntityCommandsQuery(projectionPointer, EntityVersionNumber);
+        return new GetEntityCommandsQuery(projectionPointer, VersionNumber);
     }
 
     public static Id? GetProjectionIdOrDefault(object entity)

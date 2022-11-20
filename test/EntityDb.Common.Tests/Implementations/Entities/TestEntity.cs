@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -7,11 +8,29 @@ namespace EntityDb.Common.Tests.Implementations.Entities;
 
 public record TestEntity
     (
-        Id Id,
-        VersionNumber VersionNumber = default
+        [property:NotMapped] Id Id,
+        [property:NotMapped] VersionNumber VersionNumber = default
     )
     : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
+    [Column("EntityId")]
+    public Guid IdValue
+    {
+        get => Id.Value;
+        init => Id = new Id(value);
+    }
+
+    [Column("EntityVersionNumber")]
+    public ulong VersionNumberValue
+    {
+        get => VersionNumber.Value;
+        init => VersionNumber = new VersionNumber(value);
+    }
+
+    public TestEntity() : this(default(Id))
+    {
+    }
+
     public static TestEntity Construct(Id entityId)
     {
         return new TestEntity(entityId);
