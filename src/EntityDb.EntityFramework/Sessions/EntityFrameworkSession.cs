@@ -45,8 +45,6 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
 
-        var test = await _dbContext.Snapshots.AllAsync(_ => true, cancellationToken);
-
         return reference?.Snapshot;
     }
 
