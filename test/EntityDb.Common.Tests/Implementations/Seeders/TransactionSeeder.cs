@@ -13,7 +13,7 @@ namespace EntityDb.Common.Tests.Implementations.Seeders;
 public static class TransactionStepSeeder
 {
     public static IEnumerable<ITransactionStep> CreateFromCommands<TEntity>(Id entityId, uint numCommands)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         for (var previousVersionNumber = new VersionNumber(0);
              previousVersionNumber.Value < numCommands;
@@ -47,7 +47,7 @@ public static class TransactionSeeder
     }
 
     public static ITransaction Create<TEntity>(Id entityId, uint numCommands)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         var transactionSteps = TransactionStepSeeder.CreateFromCommands<TEntity>(entityId, numCommands).ToArray();
 

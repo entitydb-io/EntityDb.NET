@@ -7,16 +7,17 @@ using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.EntityFramework.Snapshots;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
-public record OneToOneProjection
-(
-    [property: NotMapped] Id Id,
-    [property: NotMapped] VersionNumber VersionNumber = default
-) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
+public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
+    public required Id Id { get; init; }
+    public VersionNumber VersionNumber { get; init; }
+
     [Column("Id")]
     public Guid IdValue
     {
@@ -31,13 +32,26 @@ public record OneToOneProjection
         init => VersionNumber = new VersionNumber(value);
     }
 
-    public OneToOneProjection() : this(default(Id))
-    {
-    }
-
     public static OneToOneProjection Construct(Id projectionId)
     {
-        return new OneToOneProjection(projectionId);
+        return new OneToOneProjection
+        { 
+            Id = projectionId,
+        };
+    }
+
+    public static void Configure(OwnedNavigationBuilder<SnapshotReference<OneToOneProjection>, OneToOneProjection> oneToOneProjectionBuilder)
+    {
+        oneToOneProjectionBuilder
+            .Ignore(oneToOneProjection => oneToOneProjection.Id)
+            .Ignore(oneToOneProjection => oneToOneProjection.VersionNumber);
+
+        oneToOneProjectionBuilder
+            .HasKey(oneToOneProjection => new
+            {
+                oneToOneProjection.IdValue,
+                oneToOneProjection.VersionNumberValue,
+            });
     }
 
     public Id GetId()

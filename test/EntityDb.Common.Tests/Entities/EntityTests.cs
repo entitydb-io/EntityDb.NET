@@ -32,7 +32,7 @@ public class EntityTests : TestsBase<Startup>
         VersionNumber to,
         TEntity? entity = default
     )
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         var transactionBuilder = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
@@ -54,7 +54,7 @@ public class EntityTests : TestsBase<Startup>
 
     private async Task Generic_GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM<TEntity>(
         TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -97,7 +97,7 @@ public class EntityTests : TestsBase<Startup>
 
     private async Task Generic_GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns<TEntity>(
         EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -172,7 +172,7 @@ public class EntityTests : TestsBase<Startup>
     private async Task
         Generic_GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
             EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -202,7 +202,7 @@ public class EntityTests : TestsBase<Startup>
     private async Task
         Generic_GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
             EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -233,7 +233,7 @@ public class EntityTests : TestsBase<Startup>
     private async Task
         Generic_GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<
             TEntity>(EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -264,7 +264,7 @@ public class EntityTests : TestsBase<Startup>
     private async Task
         Generic_GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot<TEntity>(
             EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -302,7 +302,7 @@ public class EntityTests : TestsBase<Startup>
 
     private async Task Generic_GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow<TEntity>(
         EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 

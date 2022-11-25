@@ -8,6 +8,7 @@ using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.Common.Projections;
+using EntityDb.Common.Tests.Implementations.DbContexts;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -162,11 +163,11 @@ public class TestsBase<TStartup>
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
 
-            serviceCollection.AddDbContextFactory<SnapshotDbContext<TSnapshot>>(options => options
+            serviceCollection.AddDbContextFactory<GenericDbContext<TSnapshot>>(options => options
                     .UseNpgsql($"{databaseContainerFixture!.PostgreSqlContainer.ConnectionString};Include Error Detail=true")
                     .EnableSensitiveDataLogging());
 
-            serviceCollection.AddEntityFrameworkSnapshots<TSnapshot, SnapshotDbContext<TSnapshot>>(testMode: true);
+            serviceCollection.AddEntityFrameworkSnapshots<TSnapshot, GenericDbContext<TSnapshot>>(testMode: true);
 
             serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.Write, options =>
             {
@@ -186,7 +187,7 @@ public class TestsBase<TStartup>
     }
 
     private static SnapshotAdder RedisSnapshotAdder<TSnapshot>()
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
@@ -222,7 +223,7 @@ public class TestsBase<TStartup>
     }
 
     private static SnapshotAdder InMemorySnapshotAdder<TSnapshot>()
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         return new SnapshotAdder($"InMemory<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {

@@ -21,7 +21,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     private async Task
         Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(
             SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -68,7 +68,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     private async Task
         Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<
             TSnapshot>(SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -116,7 +116,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
     private async Task Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(
         SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 

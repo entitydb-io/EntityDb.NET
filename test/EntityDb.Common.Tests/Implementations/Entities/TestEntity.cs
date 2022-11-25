@@ -2,38 +2,52 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
+using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.EntityFramework.Snapshots;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
-public record TestEntity
-    (
-        [property:NotMapped] Id Id,
-        [property:NotMapped] VersionNumber VersionNumber = default
-    )
-    : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
+public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
-    [Column("EntityId")]
+    public required Id Id { get; init; }
+    public VersionNumber VersionNumber { get; init; }
+
+    [Column("Id")]
     public Guid IdValue
     {
         get => Id.Value;
         init => Id = new Id(value);
     }
 
-    [Column("EntityVersionNumber")]
+    [Column("VersionNumber")]
     public ulong VersionNumberValue
     {
         get => VersionNumber.Value;
         init => VersionNumber = new VersionNumber(value);
     }
 
-    public TestEntity() : this(default(Id))
-    {
-    }
-
     public static TestEntity Construct(Id entityId)
     {
-        return new TestEntity(entityId);
+        return new TestEntity
+        {
+            Id = entityId,
+        };
+    }
+
+    public static void Configure(OwnedNavigationBuilder<SnapshotReference<TestEntity>, TestEntity> testEntityBuilder)
+    {
+        testEntityBuilder
+            .Ignore(testEntity => testEntity.Id)
+            .Ignore(testEntity => testEntity.VersionNumber);
+
+        testEntityBuilder
+            .HasKey(testEntity => new
+            {
+                testEntity.IdValue,
+                testEntity.VersionNumberValue,
+            });
     }
 
     public Id GetId()

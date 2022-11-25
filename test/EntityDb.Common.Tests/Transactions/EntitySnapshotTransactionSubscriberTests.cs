@@ -21,7 +21,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
         Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotTransactionSubscriber_ThenAlwaysWriteSnapshot<
             TEntity>(
             TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
@@ -75,7 +75,7 @@ public class EntitySnapshotTransactionSubscriberTests : TestsBase<Startup>
     private async Task
         Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntitySnapshotTransactionSubscriber_ThenNeverWriteSnapshot<
             TEntity>(TransactionsAdder transactionsAdder, SnapshotAdder snapshotAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
