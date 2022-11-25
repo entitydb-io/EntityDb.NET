@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
     public static void AddEntityFrameworkSnapshots<TSnapshot, TDbContext>(this IServiceCollection serviceCollection, bool testMode = false)
         where TSnapshot : class
-        where TDbContext : DbContext, ISnapshotDbContext<TSnapshot>
+        where TDbContext : SnapshotReferenceDbContext<TSnapshot>
     {
         serviceCollection.Add<EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext>>
         (

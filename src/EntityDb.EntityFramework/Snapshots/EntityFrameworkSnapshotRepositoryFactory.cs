@@ -11,7 +11,7 @@ namespace EntityDb.EntityFramework.Snapshots;
 internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> : DisposableResourceBaseClass,
     ISnapshotRepositoryFactory<TSnapshot>
     where TSnapshot : class
-    where TDbContext : DbContext, ISnapshotDbContext<TSnapshot>
+    where TDbContext : SnapshotReferenceDbContext<TSnapshot>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IDbContextFactory<TDbContext> _dbContextFactory;

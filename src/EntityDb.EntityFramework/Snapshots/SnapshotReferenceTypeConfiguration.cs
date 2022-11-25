@@ -7,14 +7,9 @@ namespace EntityDb.EntityFramework.Snapshots;
 public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfiguration<SnapshotReference<TSnapshot>>
     where TSnapshot : class
 {
-    private readonly string _tableName = $"{typeof(TSnapshot).Name}SnapshotReferences";
-
     /// <inheritdoc />
-    public void Configure(EntityTypeBuilder<SnapshotReference<TSnapshot>> snapshotReferenceBuilder)
+    public virtual void Configure(EntityTypeBuilder<SnapshotReference<TSnapshot>> snapshotReferenceBuilder)
     {
-        snapshotReferenceBuilder
-            .ToTable(_tableName);
-
         snapshotReferenceBuilder
             .HasKey
             (
@@ -28,11 +23,17 @@ public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfigur
                 nameof(SnapshotReference<TSnapshot>.PointerVersionNumber)
             );
 
-        snapshotReferenceBuilder
-            .Navigation(snapshotReference => snapshotReference.Snapshot)
-            .AutoInclude();
+        var snapshotBuilder = snapshotReferenceBuilder
+            .OwnsOne(snapshotReference => snapshotReference.Snapshot);
 
-        snapshotReferenceBuilder
-            .HasOne(snapshotReference => snapshotReference.Snapshot);
+        Configure(snapshotBuilder);
+    }
+
+    /// <summary>
+    ///     Configures the snapshot of type <typeparamref name="TSnapshot" />.
+    /// </summary>
+    /// <param name="snapshotBuilder">The builder to be used to configure the snapshot type.</param>
+    protected virtual void Configure(OwnedNavigationBuilder<SnapshotReference<TSnapshot>, TSnapshot> snapshotBuilder)
+    {
     }
 }

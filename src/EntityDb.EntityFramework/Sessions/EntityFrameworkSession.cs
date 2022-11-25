@@ -11,7 +11,7 @@ namespace EntityDb.EntityFramework.Sessions;
 
 internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourceBaseClass, IEntityFrameworkSession<TSnapshot>
     where TSnapshot : class
-    where TDbContext : DbContext, ISnapshotDbContext<TSnapshot>
+    where TDbContext : SnapshotReferenceDbContext<TSnapshot>
 {
     private readonly TDbContext _dbContext;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
