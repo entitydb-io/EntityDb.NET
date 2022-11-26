@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
-using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,20 +11,6 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
 {
     public required Id Id { get; init; }
     public VersionNumber VersionNumber { get; init; }
-
-    [Column("Id")]
-    public Guid IdValue
-    {
-        get => Id.Value;
-        init => Id = new Id(value);
-    }
-
-    [Column("VersionNumber")]
-    public ulong VersionNumberValue
-    {
-        get => VersionNumber.Value;
-        init => VersionNumber = new VersionNumber(value);
-    }
 
     public static TestEntity Construct(Id entityId)
     {
@@ -39,14 +23,10 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
     public static void Configure(OwnedNavigationBuilder<SnapshotReference<TestEntity>, TestEntity> testEntityBuilder)
     {
         testEntityBuilder
-            .Ignore(testEntity => testEntity.Id)
-            .Ignore(testEntity => testEntity.VersionNumber);
-
-        testEntityBuilder
             .HasKey(testEntity => new
             {
-                testEntity.IdValue,
-                testEntity.VersionNumberValue,
+                testEntity.Id,
+                testEntity.VersionNumber,
             });
     }
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EntityDb.Abstractions.ValueObjects;
+using EntityDb.EntityFramework.Converters;
+using Microsoft.EntityFrameworkCore;
 
 namespace EntityDb.EntityFramework.Snapshots;
 
@@ -17,6 +19,22 @@ public abstract class SnapshotReferenceDbContext<TSnapshot> : DbContext
     /// <inheritdoc cref="DbContext(DbContextOptions)" />
     protected SnapshotReferenceDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
     {
+    }
+
+    /// <inheritdoc />
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder
+            .Properties<Id>()
+            .HaveConversion<IdConverter>();
+
+        configurationBuilder
+            .Properties<VersionNumber>()
+            .HaveConversion<VersionNumberConverter>();
+
+        configurationBuilder
+            .Properties<TimeStamp>()
+            .HaveConversion<TimeStampConverter>();
     }
 
     /// <inheritdoc />

@@ -18,20 +18,6 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
     public required Id Id { get; init; }
     public VersionNumber VersionNumber { get; init; }
 
-    [Column("Id")]
-    public Guid IdValue
-    {
-        get => Id.Value;
-        init => Id = new Id(value);
-    }
-
-    [Column("VersionNumber")]
-    public ulong VersionNumberValue
-    {
-        get => VersionNumber.Value;
-        init => VersionNumber = new VersionNumber(value);
-    }
-
     public static OneToOneProjection Construct(Id projectionId)
     {
         return new OneToOneProjection
@@ -43,14 +29,10 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
     public static void Configure(OwnedNavigationBuilder<SnapshotReference<OneToOneProjection>, OneToOneProjection> oneToOneProjectionBuilder)
     {
         oneToOneProjectionBuilder
-            .Ignore(oneToOneProjection => oneToOneProjection.Id)
-            .Ignore(oneToOneProjection => oneToOneProjection.VersionNumber);
-
-        oneToOneProjectionBuilder
             .HasKey(oneToOneProjection => new
             {
-                oneToOneProjection.IdValue,
-                oneToOneProjection.VersionNumberValue,
+                oneToOneProjection.Id,
+                oneToOneProjection.VersionNumber,
             });
     }
 
