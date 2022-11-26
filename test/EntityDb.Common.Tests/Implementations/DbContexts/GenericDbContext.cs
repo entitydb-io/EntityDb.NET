@@ -24,29 +24,19 @@ internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext<TSnapsho
         }
     }
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        builder
-            .ApplyConfiguration(new SnapshotReferenceTypeConfiguration<TSnapshot>());
-    }
+    protected override SnapshotReferenceTypeConfiguration<TSnapshot> SnapshotReferenceTypeConfiguration { get; } = new();
 }
-
 
 public class SnapshotReferenceTypeConfiguration<TSnapshot> : EntityFramework.Snapshots.SnapshotReferenceTypeConfiguration<TSnapshot>
     where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
 {
-    public override void Configure(EntityTypeBuilder<SnapshotReference<TSnapshot>> snapshotReferenceBuilder)
+    public SnapshotReferenceTypeConfiguration() : base($"{typeof(TSnapshot).Name}SnapshotReferences", $"{typeof(TSnapshot).Name}Snapshots")
     {
-        base.Configure(snapshotReferenceBuilder);
-
-        snapshotReferenceBuilder.ToTable($"{typeof(TSnapshot).Name}SnapshotReferences");
     }
 
     protected override void Configure(OwnedNavigationBuilder<SnapshotReference<TSnapshot>, TSnapshot> snapshotBuilder)
     {
         base.Configure(snapshotBuilder);
-
-        snapshotBuilder.ToTable($"{typeof(TSnapshot).Name}Snapshots");
 
         TSnapshot.Configure(snapshotBuilder);
     }

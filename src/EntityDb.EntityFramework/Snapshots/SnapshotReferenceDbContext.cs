@@ -12,6 +12,11 @@ public abstract class SnapshotReferenceDbContext<TSnapshot> : DbContext
     where TSnapshot : class
 {
     /// <summary>
+    ///     The TypeConfiguration for Snapshot References.
+    /// </summary>
+    protected abstract SnapshotReferenceTypeConfiguration<TSnapshot> SnapshotReferenceTypeConfiguration { get; }
+
+    /// <summary>
     ///     A database set for resolving snapshots from snapshot pointers.
     /// </summary>
     public required DbSet<SnapshotReference<TSnapshot>> SnapshotReferences { get; set; }
@@ -43,6 +48,6 @@ public abstract class SnapshotReferenceDbContext<TSnapshot> : DbContext
         base.OnModelCreating(builder);
 
         builder
-            .ApplyConfiguration(new SnapshotReferenceTypeConfiguration<TSnapshot>());
+            .ApplyConfiguration(SnapshotReferenceTypeConfiguration);
     }
 }
