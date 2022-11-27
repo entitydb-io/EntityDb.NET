@@ -26,5 +26,5 @@ public class SnapshotReference<TSnapshot>
     /// <summary>
     ///     The Snapshot.
     /// </summary>
-    public required TSnapshot Snapshot { get; init; }
+    public required TSnapshot Snapshot { get; set; }
 }

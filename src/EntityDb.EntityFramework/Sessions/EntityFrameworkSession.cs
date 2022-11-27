@@ -51,19 +51,32 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
         return reference?.Snapshot;
     }
 
-    public async Task Insert(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken)
+    public async Task Upsert(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
-        var reference = new SnapshotReference<TSnapshot>
-        {
-            Id = Guid.NewGuid(),
-            PointerId = snapshotPointer.Id,
-            PointerVersionNumber = snapshotPointer.VersionNumber,
-            Snapshot = snapshot
-        };
+        var dbSet = _dbContext.Set<SnapshotReference<TSnapshot>>();
 
-        _dbContext.Set<SnapshotReference<TSnapshot>>().Add(reference);
+        var previousReference = await dbSet
+            .Where(SnapshotPointerPredicate(snapshotPointer))
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (previousReference != null)
+        {
+            previousReference.Snapshot = snapshot;
+        }
+        else
+        {
+            var reference = new SnapshotReference<TSnapshot>
+            {
+                Id = Guid.NewGuid(),
+                PointerId = snapshotPointer.Id,
+                PointerVersionNumber = snapshotPointer.VersionNumber,
+                Snapshot = snapshot
+            };
+
+            dbSet.Add(reference);
+        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
