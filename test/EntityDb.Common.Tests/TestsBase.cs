@@ -399,17 +399,21 @@ public class TestsBase<TStartup>
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
-                It.IsAny<TException>(),
+                It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ));
 
         loggerMock
+            .Setup(logger => logger.IsEnabled(It.IsAny<LogLevel>()))
+            .Returns((LogLevel logLevel) => logLevel == LogLevel.Error);
+
+        loggerMock
             .Setup(logger => logger.Log
             (
-                LogLevel.Error,
+                It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
-                It.IsAny<TException>(),
+                It.Is<Exception>(exception => exception is TException),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ))
             .Verifiable();
@@ -430,10 +434,10 @@ public class TestsBase<TStartup>
                 (
                     logger => logger.Log
                     (
-                        LogLevel.Error,
+                        It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
                         It.IsAny<EventId>(),
                         It.IsAny<It.IsAnyType>(),
-                        It.IsAny<TException>(),
+                        It.Is<Exception>(exception => exception is TException),
                         It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                     ),
                     times

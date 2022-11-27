@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace EntityDb.EntityFramework.Snapshots;
 
 internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> : DisposableResourceBaseClass,
-    ISnapshotRepositoryFactory<TSnapshot>
+    IEntityFrameworkSnapshotRepositoryFactory<TSnapshot>
     where TSnapshot : class
     where TDbContext : SnapshotReferenceDbContext
 {
@@ -29,13 +29,8 @@ internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> :
         _optionsFactory = optionsFactory;
     }
 
-    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName,
-        CancellationToken cancellationToken = default)
+    public ISnapshotRepository<TSnapshot> CreateRepository(IEntityFrameworkSession<TSnapshot> entityFrameworkSession)
     {
-        var options = _optionsFactory.Create(snapshotSessionOptionsName);
-
-        var entityFrameworkSession = await CreateSession(options, cancellationToken);
-
         var entityFrameworkSnapshotRepository = new EntityFrameworkSnapshotRepository<TSnapshot>
         (
             entityFrameworkSession
@@ -44,8 +39,7 @@ internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> :
         return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, entityFrameworkSnapshotRepository);
     }
 
-    private async Task<IEntityFrameworkSession<TSnapshot>> CreateSession(EntityFrameworkSnapshotSessionOptions options,
-        CancellationToken cancellationToken)
+    public async Task<IEntityFrameworkSession<TSnapshot>> CreateSession(EntityFrameworkSnapshotSessionOptions options, CancellationToken cancellationToken)
     {
         var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -61,5 +55,10 @@ internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> :
             connectionString,
             keyNamespace
         );
+    }
+
+    public EntityFrameworkSnapshotSessionOptions GetTransactionSessionOptions(string snapshotSessionOptionsName)
+    {
+        return _optionsFactory.Create(snapshotSessionOptionsName);
     }
 }

@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
         );
 
-        serviceCollection.Add
+        serviceCollection.Add<ISnapshotRepositoryFactory<TSnapshot>>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
             serviceProvider => serviceProvider

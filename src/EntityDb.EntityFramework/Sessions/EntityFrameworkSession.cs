@@ -3,6 +3,7 @@ using EntityDb.Common.Exceptions;
 using EntityDb.EntityFramework.Predicates;
 using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
@@ -15,6 +16,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
 {
     private readonly TDbContext _dbContext;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
+
+    private IDbContextTransaction? Transaction { get; set; }
 
     public EntityFrameworkSession(TDbContext dbContext, EntityFrameworkSnapshotSessionOptions options)
     {
@@ -81,5 +84,37 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     )
     {
         return ActivatorUtilities.CreateInstance<EntityFrameworkSession<TSnapshot, TDbContext>>(serviceProvider, dbContext, options);
+    }
+
+    public async Task StartTransaction(CancellationToken cancellationToken)
+    {
+        Transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransaction(CancellationToken cancellationToken)
+    {
+        if (Transaction != null)
+        {
+            await Transaction.CommitAsync(cancellationToken);
+            await Transaction.DisposeAsync();
+
+            Transaction = null;
+        }
+    }
+
+    public async Task AbortTransaction(CancellationToken cancellationToken)
+    {
+        if (Transaction != null)
+        {
+            await Transaction.RollbackAsync(cancellationToken);
+            await Transaction.DisposeAsync();
+
+            Transaction = null;
+        }
+    }
+
+    public IEntityFrameworkSession<TSnapshot> WithSnapshotSessionOptions(EntityFrameworkSnapshotSessionOptions snapshotSessionOptions)
+    {
+        return new EntityFrameworkSession<TSnapshot, TDbContext>(_dbContext, snapshotSessionOptions);
     }
 }

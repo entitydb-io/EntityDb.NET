@@ -16,9 +16,22 @@ internal class EntityFrameworkSnapshotRepository<TSnapshot> : DisposableResource
 
     public async Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
     {
-        await _entityFrameworkSession.Delete(snapshotPointers, cancellationToken);
+        try
+        {
+            await _entityFrameworkSession.StartTransaction(cancellationToken);
 
-        return true;
+            await _entityFrameworkSession.Delete(snapshotPointers, cancellationToken);
+
+            await _entityFrameworkSession.CommitTransaction(cancellationToken);
+
+            return true;
+        }
+        catch
+        {
+            await _entityFrameworkSession.AbortTransaction(cancellationToken);
+
+            throw;
+        }
     }
 
     public Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
@@ -28,8 +41,21 @@ internal class EntityFrameworkSnapshotRepository<TSnapshot> : DisposableResource
 
     public async Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default)
     {
-        await _entityFrameworkSession.Insert(snapshotPointer, snapshot, cancellationToken);
+        try
+        {
+            await _entityFrameworkSession.StartTransaction(cancellationToken);
 
-        return true;
+            await _entityFrameworkSession.Upsert(snapshotPointer, snapshot, cancellationToken);
+
+            await _entityFrameworkSession.CommitTransaction(cancellationToken);
+
+            return true;
+        }
+        catch
+        {
+            await _entityFrameworkSession.AbortTransaction(cancellationToken);
+
+            throw;
+        }
     }
 }
