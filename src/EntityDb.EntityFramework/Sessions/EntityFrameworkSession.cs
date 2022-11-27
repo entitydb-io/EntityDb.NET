@@ -11,7 +11,7 @@ namespace EntityDb.EntityFramework.Sessions;
 
 internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourceBaseClass, IEntityFrameworkSession<TSnapshot>
     where TSnapshot : class
-    where TDbContext : SnapshotReferenceDbContext<TSnapshot>
+    where TDbContext : SnapshotReferenceDbContext
 {
     private readonly TDbContext _dbContext;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
@@ -33,14 +33,14 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     {
         AssertNotReadOnly();
 
-        await _dbContext.SnapshotReferences
+        await _dbContext.Set<SnapshotReference<TSnapshot>>()
             .Where(PredicateExpressionBuilder.Or(snapshotPointers, SnapshotPointerPredicate))
             .ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task<TSnapshot?> Get(Pointer snapshotPointer, CancellationToken cancellationToken)
     {
-        var reference = await _dbContext.SnapshotReferences
+        var reference = await _dbContext.Set<SnapshotReference<TSnapshot>>()
             .Where(SnapshotPointerPredicate(snapshotPointer))
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
@@ -60,7 +60,7 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
             Snapshot = snapshot
         };
 
-        _dbContext.SnapshotReferences.Add(reference);
+        _dbContext.Set<SnapshotReference<TSnapshot>>().Add(reference);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

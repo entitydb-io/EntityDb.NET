@@ -5,24 +5,12 @@ using Microsoft.EntityFrameworkCore;
 namespace EntityDb.EntityFramework.Snapshots;
 
 /// <summary>
-///     A minimal DbContext for snapshot references.
+///     A DbContext that adds basic converters for types defined in <see cref="EntityDb.Abstractions.ValueObjects"/>
 /// </summary>
-/// <typeparam name="TSnapshot">The type of the snapshot</typeparam>
-public abstract class SnapshotReferenceDbContext<TSnapshot> : DbContext
-    where TSnapshot : class
+public class SnapshotReferenceDbContext : DbContext
 {
-    /// <summary>
-    ///     The TypeConfiguration for Snapshot References.
-    /// </summary>
-    protected abstract SnapshotReferenceTypeConfiguration<TSnapshot> SnapshotReferenceTypeConfiguration { get; }
-
-    /// <summary>
-    ///     A database set for resolving snapshots from snapshot pointers.
-    /// </summary>
-    public required DbSet<SnapshotReference<TSnapshot>> SnapshotReferences { get; set; }
-
     /// <inheritdoc cref="DbContext(DbContextOptions)" />
-    protected SnapshotReferenceDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+    public SnapshotReferenceDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
     {
     }
 
@@ -40,14 +28,5 @@ public abstract class SnapshotReferenceDbContext<TSnapshot> : DbContext
         configurationBuilder
             .Properties<TimeStamp>()
             .HaveConversion<TimeStampConverter>();
-    }
-
-    /// <inheritdoc />
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-
-        builder
-            .ApplyConfiguration(SnapshotReferenceTypeConfiguration);
     }
 }

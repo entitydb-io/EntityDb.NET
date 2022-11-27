@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EntityDb.Common.Tests.Implementations.DbContexts;
 
-internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext<TSnapshot>
+internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext
     where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
 {
     public GenericDbContext(DbContextOptions<GenericDbContext<TSnapshot>> options) : base(options)
@@ -24,7 +24,12 @@ internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext<TSnapsho
         }
     }
 
-    protected override SnapshotReferenceTypeConfiguration<TSnapshot> SnapshotReferenceTypeConfiguration { get; } = new();
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.ApplyConfiguration(new SnapshotReferenceTypeConfiguration<TSnapshot>());
+    }
 }
 
 public class SnapshotReferenceTypeConfiguration<TSnapshot> : EntityFramework.Snapshots.SnapshotReferenceTypeConfiguration<TSnapshot>
