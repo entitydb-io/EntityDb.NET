@@ -27,17 +27,14 @@ public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfigur
         snapshotReferenceBuilder.ToTable(_snapshotReferencesTableName);
 
         snapshotReferenceBuilder
-            .HasKey
-            (
-                nameof(SnapshotReference<TSnapshot>.Id)
-            );
+            .HasKey(snapshotReference => snapshotReference.Id);
 
         snapshotReferenceBuilder
-            .HasAlternateKey
-            (
-                nameof(SnapshotReference<TSnapshot>.PointerId),
-                nameof(SnapshotReference<TSnapshot>.PointerVersionNumber)
-            );
+            .HasAlternateKey(snapshotReference => new
+            {
+                snapshotReference.PointerId,
+                snapshotReference.PointerVersionNumber
+            });
 
         var snapshotBuilder = snapshotReferenceBuilder
             .OwnsOne(snapshotReference => snapshotReference.Snapshot);

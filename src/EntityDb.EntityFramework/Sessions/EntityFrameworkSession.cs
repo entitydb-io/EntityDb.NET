@@ -25,8 +25,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     private static Expression<Func<SnapshotReference<TSnapshot>, bool>> SnapshotPointerPredicate(Pointer snapshotPointer)
     {
         return snapshotReference =>
-            snapshotReference.PointerId == snapshotPointer.Id.Value &&
-            snapshotReference.PointerVersionNumber == snapshotPointer.VersionNumber.Value;
+            snapshotReference.PointerId == snapshotPointer.Id &&
+            snapshotReference.PointerVersionNumber == snapshotPointer.VersionNumber;
     }
 
     public async Task Delete(IEnumerable<Pointer> snapshotPointers, CancellationToken cancellationToken)
@@ -55,8 +55,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
         var reference = new SnapshotReference<TSnapshot>
         {
             Id = Guid.NewGuid(),
-            PointerId = snapshotPointer.Id.Value,
-            PointerVersionNumber = snapshotPointer.VersionNumber.Value,
+            PointerId = snapshotPointer.Id,
+            PointerVersionNumber = snapshotPointer.VersionNumber,
             Snapshot = snapshot
         };
 

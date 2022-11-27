@@ -1,4 +1,6 @@
-﻿namespace EntityDb.EntityFramework.Snapshots;
+﻿using EntityDb.Abstractions.ValueObjects;
+
+namespace EntityDb.EntityFramework.Snapshots;
 
 /// <summary>
 ///     Represents a unique snapshot and its pointer.
@@ -14,12 +16,12 @@ public class SnapshotReference<TSnapshot>
     /// <summary>
     ///     The ID of the Snapshot Pointer.
     /// </summary>
-    public required Guid PointerId { get; init; }
+    public required Id PointerId { get; init; }
 
     /// <summary>
     ///     The Version Number of the Snapshot Pointer.
     /// </summary>
-    public required ulong PointerVersionNumber { get; init; }
+    public required VersionNumber PointerVersionNumber { get; init; }
 
     /// <summary>
     ///     The Snapshot.
