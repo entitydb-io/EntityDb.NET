@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Redis.Sessions;
 
@@ -30,6 +31,7 @@ public class RedisSnapshotSessionOptions<TSnapshot>
     public bool SecondaryPreferred { get; set; }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
         return $"{nameof(RedisSnapshotSessionOptions<TSnapshot>)}<{typeof(TSnapshot).Name}";

@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.EntityFramework.Sessions;
 
@@ -13,6 +14,7 @@ public class EntityFrameworkSnapshotSessionOptions
     public bool ReadOnly { get; set; }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
         return $"{nameof(EntityFrameworkSnapshotSessionOptions)}";
