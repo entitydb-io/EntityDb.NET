@@ -16,6 +16,7 @@ namespace EntityDb.Common.Tests.Implementations.Projections;
 public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
     public required Id Id { get; init; }
+    public TimeStamp LastEventAt { get; init; }
     public VersionNumber VersionNumber { get; init; }
 
     public static OneToOneProjection Construct(Id projectionId)
@@ -52,6 +53,7 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         {
             IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(this) with
             {
+                LastEventAt = reducer.TransactionTimeStamp,
                 VersionNumber = reducer.EntityVersionNumber
             },
             _ => throw new NotSupportedException()
