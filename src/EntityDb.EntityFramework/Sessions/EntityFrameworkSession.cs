@@ -5,6 +5,7 @@ using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
@@ -104,6 +105,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
         Transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
     }
 
+    [ExcludeFromCodeCoverage(Justification =
+        "Tests should run with the Debug configuration, and should not execute this method.")]
     public async Task CommitTransaction(CancellationToken cancellationToken)
     {
         if (Transaction != null)
