@@ -45,8 +45,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     public async Task<TSnapshot?> Get(Pointer snapshotPointer, CancellationToken cancellationToken)
     {
         var reference = await _dbContext.Set<SnapshotReference<TSnapshot>>()
-            .Where(SnapshotPointerPredicate(snapshotPointer))
             .AsNoTracking()
+            .Where(SnapshotPointerPredicate(snapshotPointer))
             .SingleOrDefaultAsync(cancellationToken);
 
         return reference?.Snapshot;
