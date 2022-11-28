@@ -46,17 +46,6 @@ internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> :
         return EntityFrameworkSession<TSnapshot, TDbContext>.Create(_serviceProvider, dbContext, options);
     }
 
-    public static EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> Create(IServiceProvider serviceProvider,
-        string connectionString, string keyNamespace)
-    {
-        return ActivatorUtilities.CreateInstance<EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext>>
-        (
-            serviceProvider,
-            connectionString,
-            keyNamespace
-        );
-    }
-
     public EntityFrameworkSnapshotSessionOptions GetTransactionSessionOptions(string snapshotSessionOptionsName)
     {
         return _optionsFactory.Create(snapshotSessionOptionsName);
