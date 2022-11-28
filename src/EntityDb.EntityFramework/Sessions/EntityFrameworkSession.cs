@@ -37,9 +37,15 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     {
         AssertNotReadOnly();
 
-        await _dbContext.Set<SnapshotReference<TSnapshot>>()
+        var set = _dbContext.Set<SnapshotReference<TSnapshot>>();
+
+        var snapshots = await set
             .Where(PredicateExpressionBuilder.Or(snapshotPointers, SnapshotPointerPredicate))
-            .ExecuteDeleteAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
+
+        set.RemoveRange(snapshots);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<TSnapshot?> Get(Pointer snapshotPointer, CancellationToken cancellationToken)
