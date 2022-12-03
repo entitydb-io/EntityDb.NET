@@ -2,7 +2,7 @@
 
 public class NamespaceNode : Node
 {
-    public override void Add(string path, Node node)
+    public override void AddChild(string path, Node node)
     {
         var components = path.Split('.', 2);
 
@@ -21,6 +21,6 @@ public class NamespaceNode : Node
             ChildNodes.Add(highestComponent, childNode);
         }
 
-        childNode.Add(components[1], node);
+        childNode.AddChild(components[1], node);
     }
 }
