@@ -180,7 +180,7 @@ internal record MongoSession
     public void StartTransaction()
     {
         AssertNotReadOnly();
-        
+
         ClientSessionHandle.StartTransaction(new TransactionOptions
         (
             writeConcern: WriteConcern,

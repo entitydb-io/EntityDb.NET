@@ -62,17 +62,17 @@ public class TypeNode : MemberInfoNode, INestableNode
 
         foreach (var (path, node) in ConstructorNodes)
         {
-            yield return new (path, node);
+            yield return new(path, node);
         }
 
         foreach (var (path, node) in PropertyNodes)
         {
-            yield return new (path, node);
+            yield return new(path, node);
         }
 
         foreach (var (path, node) in MethodNodes)
         {
-            yield return new (path, node);
+            yield return new(path, node);
         }
     }
 }
