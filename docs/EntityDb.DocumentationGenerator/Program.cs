@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,66 +12,91 @@ var directory = new DirectoryInfo(path);
 
 var executingAssembly = Assembly.GetExecutingAssembly();
 
-var assemblies = directory.GetFiles("EntityDb.*.dll")
+var types = directory.GetFiles($"EntityDb.*.dll")
     .Where(assemblyFile => !assemblyFile.Name.Contains(executingAssembly.GetName().Name!))
     .Select(assemblyFile => Assembly.LoadFrom(assemblyFile.FullName))
+    .SelectMany(assembly => assembly.GetTypes().Where(type => type.IsPublic))
     .ToArray();
 
 // Build Node Tree
 
-var rootNode = new NamespaceNode();
+var documentationTree = new NamespaceNode();
 
-foreach (var assembly in assemblies)
+foreach (var type in types)
 {
-    var assemblyNode = new AssemblyNode(assembly);
+    var typeNode = new TypeNode(type);
 
-    var assemblyName = assembly.GetName().Name!;
+    documentationTree.Add(type.FullName!, typeNode);
 
-    rootNode.Add(assemblyName, assemblyNode);
+    var bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-    foreach (var type in assembly.GetTypes().Where(type => type.Namespace!.StartsWith(assemblyName)))
+    foreach (var constructorInfo in typeNode.Type.GetConstructors(bindingFlags))
     {
-        var typeNode = new TypeNode(type);
-
-        rootNode.Add(type.FullName!, typeNode);
-
-        var propertyAccessors = type.GetProperties()
-            .SelectMany(propertyInfo => propertyInfo.GetAccessors());
-
-        var eventAccessors = type.GetEvents()
-            .SelectMany(eventInfo => new[]
-            {
-                eventInfo.GetAddMethod(),
-                eventInfo.GetRemoveMethod()
-            });
-
-        var members = type.GetMembers()
-            .Except(propertyAccessors)
-            .Except(eventAccessors);
-
-        foreach (var member in members)
+        if (constructorInfo.IsPrivate || constructorInfo.IsAssembly)
         {
-            MemberInfoNode memberInfoNode = member switch
-            {
-                ConstructorInfo constructorInfo => new ConstructorNode(constructorInfo),
-                EventInfo eventInfo => new EventNode(eventInfo),
-                FieldInfo fieldInfo => new FieldNode(fieldInfo),
-                MethodInfo methodInfo => new MethodNode(methodInfo),
-                PropertyInfo propertyInfo => new PropertyNode(propertyInfo),
-                TypeInfo typeInfo => new TypeInfoNode(typeInfo),
-                _ => throw new InvalidOperationException()
-            };
-
-            try
-            {
-                typeNode.Add(memberInfoNode.GetName(), memberInfoNode);
-            }
-            catch
-            {
-            }
+            continue;
         }
+
+        var constructorNode = new ConstructorNode(constructorInfo);
+
+        typeNode.Add(constructorNode.GetXmlDocCommentName(), constructorNode);
+    }
+
+    var propertyAccessors = new List<MethodInfo>();
+
+    foreach (var propertyInfo in typeNode.Type.GetProperties(bindingFlags))
+    {
+        var accessors = propertyInfo.GetAccessors();
+
+        if (accessors.All(methodInfo => methodInfo.IsPrivate || methodInfo.IsAssembly))
+        {
+            continue;
+        }
+
+        var propertyNode = new PropertyNode(propertyInfo);
+
+        typeNode.Add(propertyNode.GetXmlDocCommentName(), propertyNode);
+
+        propertyAccessors.AddRange(accessors);
+    }
+
+    foreach (var methodInfo in typeNode.Type.GetMethods(bindingFlags).Except(propertyAccessors))
+    {
+        if (methodInfo.IsPrivate || methodInfo.IsAssembly)
+        {
+            continue;
+        }
+
+        var methodNode = new MethodNode(methodInfo);
+
+        typeNode.Add(methodNode.GetXmlDocCommentName(), methodNode);
     }
 }
+
+var xmlDocCommentTree = new Dictionary<string, Node>();
+
+void BuildXmlDocCommentTree(IDictionary<string, Node> childNodes, string parentName = "")
+{
+    foreach (var (name, node) in childNodes)
+    {
+        var xmlDocCommentNamePrefix = node switch
+        {
+            TypeNode => "T",
+            PropertyNode => "P",
+            MethodNode or ConstructorNode => "M",
+            _ => null
+        };
+
+        if (xmlDocCommentNamePrefix != null)
+        {
+            xmlDocCommentTree.Add($"{xmlDocCommentNamePrefix}:{parentName}{name}", node);
+        }
+
+        BuildXmlDocCommentTree(node.ChildNodes, $"{parentName}{name}.");
+    }
+}
+
+BuildXmlDocCommentTree(documentationTree.ChildNodes, "");
 
 var documentationFiles = directory.GetFiles("EntityDb.*.xml")
     .Select(documentationFile =>
@@ -91,5 +117,16 @@ foreach (var documentationFile in documentationFiles)
         var member = members.Current!;
 
         var name = member.GetAttribute("name", "");
-    } 
+
+        var node = xmlDocCommentTree[name];
+
+        node.HasXmlDocComment = true;
+    }
+}
+
+foreach (var (x, n) in xmlDocCommentTree)
+{
+    if (!n.HasXmlDocComment && !x.Contains("#ctor") && !x.Contains(".Tags.") && !x.Contains(".Leases.") && !x.Contains(".HttpContextAgentSignature."))
+    {
+    }
 }

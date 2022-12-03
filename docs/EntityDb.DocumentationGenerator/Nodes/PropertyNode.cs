@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using EntityDb.DocumentationGenerator.Helpers;
 
 namespace EntityDb.DocumentationGenerator.Nodes
 {
@@ -11,9 +12,9 @@ namespace EntityDb.DocumentationGenerator.Nodes
             this.propertyInfo = propertyInfo;
         }
 
-        public override string GetName()
+        public override string GetXmlDocCommentName()
         {
-            return base.GetName();
+            return PropertyInfoHelper.GetXmlDocCommentName(propertyInfo);
         }
     }
 }

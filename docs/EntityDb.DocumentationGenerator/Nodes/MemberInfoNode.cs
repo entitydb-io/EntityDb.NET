@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using EntityDb.DocumentationGenerator.Helpers;
 
 namespace EntityDb.DocumentationGenerator.Nodes
 {
@@ -11,9 +13,14 @@ namespace EntityDb.DocumentationGenerator.Nodes
             this.memberInfo = memberInfo;
         }
 
-        public virtual string GetName()
+        public virtual string GetXmlDocCommentName()
         {
-            return MemberInfoNameHelper.ReplacePeriodWithHash(memberInfo.Name);
+            return MemberInfoHelper.GetXmlDocCommentName(memberInfo);
+        }
+
+        public override void Add(string path, Node node)
+        {
+            throw new InvalidOperationException();
         }
     }
 }
