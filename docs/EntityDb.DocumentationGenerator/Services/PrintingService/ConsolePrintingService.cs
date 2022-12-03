@@ -7,7 +7,9 @@ public class ConsolePrintingService : IPrintingService
 {
     public void Print(NamespaceNode namespaceNode)
     {
-        PrintNamespaceNode(0, "", namespaceNode);
+        Console.WriteLine($"Namespaces:");
+
+        PrintNamespaceNode(1, "", namespaceNode);
     }
 
     private static string GetPadding(int depth)
@@ -17,17 +19,9 @@ public class ConsolePrintingService : IPrintingService
 
     private static void PrintNamespaceNode(int depth, string fullPath, NamespaceNode namespaceNode)
     {
-        int nextNamespaceNodeDepth;
-
         if (namespaceNode.AssemblyNode != null || namespaceNode.TypeNodeCount > 0)
         {
             Console.WriteLine($"{GetPadding(depth)}- {fullPath[1..]}");
-
-            nextNamespaceNodeDepth = depth + 2;
-        }
-        else
-        {
-            nextNamespaceNodeDepth = depth;
         }
 
         if (namespaceNode.AssemblyNode != null)
@@ -39,14 +33,9 @@ public class ConsolePrintingService : IPrintingService
         PrintNodes(depth + 1, "Structs", namespaceNode.StructNodes);
         PrintNodes(depth + 1, "Interfaces", namespaceNode.InterfaceNodes);
 
-        if (depth != nextNamespaceNodeDepth)
-        {
-            Console.WriteLine($"{GetPadding(depth + 1)}- Namespaces:");
-        }
-
         foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
         {
-            PrintNamespaceNode(nextNamespaceNodeDepth, $"{fullPath}.{childPath}", childNamespaceNode);
+            PrintNamespaceNode(1, $"{fullPath}.{childPath}", childNamespaceNode);
         }
     }
 
