@@ -6,18 +6,18 @@ namespace EntityDb.DocumentationGenerator.Nodes;
 
 public class MethodNode : MemberInfoNode
 {
-    private readonly MethodInfo methodInfo;
+    public MethodInfo MethodInfo { get; }
 
     public string? Returns { get; set; }
 
     public MethodNode(MethodInfo methodInfo) : base(methodInfo)
     {
-        this.methodInfo = methodInfo;
+        MethodInfo = methodInfo;
     }
 
     public override string GetXmlDocCommentName()
     {
-        return MethodInfoHelper.GetXmlDocCommentName(methodInfo);
+        return MethodInfoHelper.GetXmlDocCommentName(MethodInfo);
     }
 
     public override void AddDocumentation(XPathNavigator documentation)

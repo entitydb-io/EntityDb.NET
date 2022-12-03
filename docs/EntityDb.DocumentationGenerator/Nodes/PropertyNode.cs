@@ -5,15 +5,15 @@ namespace EntityDb.DocumentationGenerator.Nodes;
 
 public class PropertyNode : MemberInfoNode
 {
-    private readonly PropertyInfo propertyInfo;
+    public PropertyInfo PropertyInfo { get; }
 
     public PropertyNode(PropertyInfo propertyInfo) : base(propertyInfo)
     {
-        this.propertyInfo = propertyInfo;
+        PropertyInfo = propertyInfo;
     }
 
     public override string GetXmlDocCommentName()
     {
-        return PropertyInfoHelper.GetXmlDocCommentName(propertyInfo);
+        return PropertyInfoHelper.GetXmlDocCommentName(PropertyInfo);
     }
 }
