@@ -1,19 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="XmlDocMarkdown.Core" Version="2.8.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\EntityDb.Abstractions\EntityDb.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\EntityDb.Common\EntityDb.Common.csproj" />
+	<ProjectReference Include="..\..\src\EntityDb.InMemory\EntityDb.InMemory.csproj" />
+	<ProjectReference Include="..\..\src\EntityDb.Json\EntityDb.Json.csproj" />
     <ProjectReference Include="..\..\src\EntityDb.MongoDb\EntityDb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\EntityDb.Mvc\EntityDb.Mvc.csproj" />
+	<ProjectReference Include="..\..\src\EntityDb.Npgsql\EntityDb.Npgsql.csproj" />
     <ProjectReference Include="..\..\src\EntityDb.Redis\EntityDb.Redis.csproj" />
+    <ProjectReference Include="..\..\src\EntityDb.SqlDb\EntityDb.SqlDb.csproj" />
     <ProjectReference Include="..\..\src\EntityDb.Void\EntityDb.Void.csproj" />
   </ItemGroup>
 
