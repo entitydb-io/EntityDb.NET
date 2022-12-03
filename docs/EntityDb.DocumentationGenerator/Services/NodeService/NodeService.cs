@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using EntityDb.DocumentationGenerator.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.NodeService;
@@ -18,13 +19,16 @@ internal class NodeService : INodeService
             var bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
             var constructorInfos = typeNode.Type
-                .GetConstructors(bindingFlags);
+                .GetConstructors(bindingFlags)
+                .Where(constructorInfo => constructorInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
 
             var propertyInfos = typeNode.Type
-                .GetProperties(bindingFlags);
+                .GetProperties(bindingFlags)
+                .Where(propertyInfo => propertyInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
 
             var methodInfos = typeNode.Type
                 .GetMethods(bindingFlags)
+                .Where(methodInfo => methodInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null)
                 .Except(propertyInfos
                     .SelectMany(propertyInfo => propertyInfo.GetAccessors()));
 

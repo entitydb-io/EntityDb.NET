@@ -113,24 +113,43 @@ public class ConsolePrintingService : IPrintingService
     {
         return node switch
         {
-            ConstructorNode constructorNode => GetMethodBaseName(constructorNode.ConstructorInfo),
-            MethodNode methodNode => GetMethodBaseName(methodNode.MethodInfo),
+            ConstructorNode constructorNode => GetConstructorInfoName(constructorNode.ConstructorInfo),
+            MethodNode methodNode => GetMethodInfoName(methodNode.MethodInfo),
             TypeNode typeNode => GetTypeName(typeNode.Type),
-            PropertyNode propertyNode => propertyNode.PropertyInfo.Name,
+            PropertyNode propertyNode => GetPropertyInfoName(propertyNode.PropertyInfo),
             _ => throw new NotImplementedException(),
         };
     }
 
-    private static string GetMethodBaseName(MethodBase methodBase)
+    private static string GetTypesName(IEnumerable<Type> types)
     {
-        var declaringTypeName = GetTypeName(methodBase.DeclaringType!);
+        var typeNames = types
+            .Select(type => GetTypeName(type));
 
-        var parameterTypeNames = methodBase.GetParameters()
+        return $"<{string.Join(",", typeNames)}>";
+    }
+
+    private static string GetParameterInfosName(IEnumerable<ParameterInfo> parameterInfos)
+    {
+        var parameterTypeNames = parameterInfos
             .Select(parameterInfo => GetTypeName(parameterInfo.ParameterType));
 
-        var methodName = $"{declaringTypeName}({string.Join(", ", parameterTypeNames)})";
+        return $"({string.Join(", ", parameterTypeNames)})";
+    }
 
-        return methodName;
+    private static string GetConstructorInfoName(ConstructorInfo constructorInfo)
+    {
+        return $"{GetTypeName(constructorInfo.DeclaringType!)}{GetParameterInfosName(constructorInfo.GetParameters())}";
+    }
+
+    private static string GetMethodInfoName(MethodInfo methodInfo)
+    {
+        return $"{GetTypeName(methodInfo.ReturnType)} {methodInfo.Name}{GetParameterInfosName(methodInfo.GetParameters())}";
+    }
+
+    private static string GetPropertyInfoName(PropertyInfo propertyInfo)
+    {
+        return $"{GetTypeName(propertyInfo.PropertyType)} {propertyInfo.Name}";
     }
 
     private static string GetTypeName(Type type)
@@ -142,18 +161,11 @@ public class ConsolePrintingService : IPrintingService
 
         if (!type.IsGenericType)
         {
-            return type.Name;
+            return type.FullName ?? type.Name;
         }
-
-        var nameBuilder = new StringBuilder();
 
         var typeNamePrefix = type.Name.Split('`', 2)[0];
 
-        var genericArgumentNames = type.GetGenericArguments()
-            .Select(genericArgument => genericArgument.Name);
-
-        var typeName = $"{typeNamePrefix}<{string.Join(",", genericArgumentNames)}>";
-
-        return typeName;
+        return $"{typeNamePrefix}{GetTypesName(type.GetGenericArguments())}";
     }
 }
