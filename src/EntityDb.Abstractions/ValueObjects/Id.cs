@@ -28,7 +28,7 @@ public readonly record struct Id(Guid Value)
     ///     separated by hyphens. An example of a return value is
     ///     "382c74c3-721d-4f34-80e5-57657b6cbc27". To convert the hexadecimal
     ///     digits from a through f to uppercase, call the
-    ///     <see cref="M:System.String.ToUpper" /> method on the returned
+    ///     <see cref="string.ToUpper()" /> method on the returned
     ///     string.
     /// </returns>
     public override string ToString()

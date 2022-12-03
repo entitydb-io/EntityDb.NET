@@ -125,6 +125,7 @@ public class ConsolePrintingService : IPrintingService
 
         if (node is TypeNode typeNode)
         {
+            PrintNodes(depth + 1, "Fields", typeNode.FieldNodes);
             PrintNodes(depth + 1, "Constructors", typeNode.ConstructorNodes);
             PrintNodes(depth + 1, "Properties", typeNode.PropertyNodes);
             PrintNodes(depth + 1, "Methods", typeNode.MethodNodes);
@@ -139,6 +140,7 @@ public class ConsolePrintingService : IPrintingService
             MethodNode methodNode => GetMethodInfoName(methodNode.MethodInfo),
             TypeNode typeNode => GetTypeName(typeNode.Type),
             PropertyNode propertyNode => GetPropertyInfoName(propertyNode.PropertyInfo),
+            FieldNode fieldNode => GetFieldInfoName(fieldNode.FieldInfo),
             _ => throw new NotImplementedException(),
         };
     }
@@ -172,6 +174,11 @@ public class ConsolePrintingService : IPrintingService
     private static string GetPropertyInfoName(PropertyInfo propertyInfo)
     {
         return $"{GetTypeName(propertyInfo.PropertyType)} {propertyInfo.Name}";
+    }
+
+    private static string GetFieldInfoName(FieldInfo fieldInfo)
+    {
+        return $"{GetTypeName(fieldInfo.FieldType)} {fieldInfo.Name}";
     }
 
     private static string GetTypeName(Type type)

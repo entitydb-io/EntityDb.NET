@@ -11,7 +11,7 @@ namespace EntityDb.Common.Commands;
 ///     can be avoided by implementing this interface!
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity</typeparam>
-internal interface IDeleteLeasesCommand<in TEntity>
+public interface IDeleteLeasesCommand<in TEntity>
 {
     /// <summary>
     ///     Returns the leases that need to be deleted.

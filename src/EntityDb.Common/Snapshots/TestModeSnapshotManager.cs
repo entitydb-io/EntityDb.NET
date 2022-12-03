@@ -42,9 +42,6 @@ internal class TestModeSnapshotManager<TSnapshot> : DisposableResourceBaseClass
         }
     }
 
-    /// <remarks>
-    ///     This should only be called by the snapshot repository factory.
-    /// </remarks>
     public override async ValueTask DisposeAsync()
     {
         foreach (var (snapshotRepository, storedSnapshotPointers) in _dictionary.ToArray())

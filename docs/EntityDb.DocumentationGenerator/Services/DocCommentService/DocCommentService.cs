@@ -11,11 +11,17 @@ public class DocCommentService : IDocCommentService
     {
         return node switch
         {
+            FieldNode fieldNode => GetFieldInfoName(fieldNode.FieldInfo),
             ConstructorNode constructorNode => GetConstructorInfoName(constructorNode.ConstructorInfo),
             MethodNode methodNode => GetMethodInfoName(methodNode.MethodInfo),
             PropertyNode propertyNode => GetPropertyInfoName(propertyNode.PropertyInfo),
             _ => throw new NotImplementedException(),
         };
+    }
+
+    private static string GetFieldInfoName(FieldInfo fieldInfo)
+    {
+        return fieldInfo.Name;
     }
 
     private static string GetConstructorInfoName(ConstructorInfo constructorInfo)
@@ -115,6 +121,11 @@ public class DocCommentService : IDocCommentService
             return $"{type.Namespace}.{baseName}{{{string.Join(',', list)}}}";
         }
 
+        if (type.IsNested)
+        {
+            return $"{GetTypeName(type.DeclaringType!)}.{GetMemberInfoName(type)}";
+        }
+
         return $"{type.Namespace}.{GetMemberInfoName(type)}";
     }
 
@@ -163,15 +174,16 @@ public class DocCommentService : IDocCommentService
 
         return flatNodeDictionary;
 
-        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> memberInfoNodes, string parentName = "")
+        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> nodes, string parentName = "")
         {
-            foreach (var (name, node) in memberInfoNodes)
+            foreach (var (name, node) in nodes)
             {
                 var xmlDocCommentNamePrefix = node switch
                 {
                     TypeNode => "T",
                     PropertyNode => "P",
                     MethodNode or ConstructorNode => "M",
+                    FieldNode => "F",
                     _ => null
                 };
 

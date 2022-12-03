@@ -3,6 +3,8 @@
 public class TypeNode : MemberInfoNode, INestableNode
 {
     public Type Type { get; }
+    public Dictionary<string, TypeNode> NestedTypeNodes { get; init; } = new();
+    public Dictionary<string, FieldNode> FieldNodes { get; init; } = new();
     public Dictionary<string, ConstructorNode> ConstructorNodes { get; init; } = new();
     public Dictionary<string, PropertyNode> PropertyNodes { get; init; } = new();
     public Dictionary<string, MethodNode> MethodNodes { get; init; } = new();
@@ -16,6 +18,14 @@ public class TypeNode : MemberInfoNode, INestableNode
     {
         switch (node)
         {
+            case TypeNode typeNode:
+                NestedTypeNodes.Add(path, typeNode);
+                break;
+
+            case FieldNode fieldNode:
+                FieldNodes.Add(path, fieldNode);
+                break;
+
             case ConstructorNode constructorNode:
                 ConstructorNodes.Add(path, constructorNode);
                 break;
@@ -35,6 +45,21 @@ public class TypeNode : MemberInfoNode, INestableNode
 
     public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
+        foreach (var (path, node) in NestedTypeNodes)
+        {
+            yield return new(path, node);
+
+            foreach (var nestedChildNode in node.GetChildNodes())
+            {
+                yield return nestedChildNode;
+            }
+        }
+
+        foreach (var (path, node) in FieldNodes)
+        {
+            yield return new(path, node);
+        }
+
         foreach (var (path, node) in ConstructorNodes)
         {
             yield return new (path, node);

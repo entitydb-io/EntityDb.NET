@@ -8,7 +8,7 @@ public class AssemblyService : IAssemblyService
     {
         var executingAssembly = Assembly.GetExecutingAssembly();
 
-        return directory.GetFiles($"EntityDb.Abstractions.dll")
+        return directory.GetFiles($"EntityDb.*.dll")
             .Where(assemblyFile => !assemblyFile.Name.Contains(executingAssembly.GetName().Name!))
             .Select(assemblyFile => Assembly.LoadFrom(assemblyFile.FullName))
             .OrderBy(assembly => assembly.GetName().Name);

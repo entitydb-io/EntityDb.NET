@@ -11,7 +11,7 @@ namespace EntityDb.Common.Commands;
 ///     can be avoided by implementing this interface!
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity</typeparam>
-internal interface IAddTagsCommand<in TEntity>
+public interface IAddTagsCommand<in TEntity>
 {
     /// <summary>
     ///     Returns the tags that need to be added.
