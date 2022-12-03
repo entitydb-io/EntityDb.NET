@@ -1,88 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace EntityDb.Common.Envelopes
+namespace EntityDb.Common.Envelopes;
+
+internal static class EnvelopeHelper
 {
-    internal static class EnvelopeHelper
+    public const string Platform = nameof(Platform);
+    public const string ThisPlatform = ".NET";
+    public const string Type = nameof(Type);
+    public const string AssemblyFullName = nameof(AssemblyFullName);
+    public const string TypeFullName = nameof(TypeFullName);
+    public const string MemberInfoName = nameof(MemberInfoName);
+
+    public static bool NotThisPlatform(EnvelopeHeaders envelopeHeaders)
     {
-        public const string Platform = nameof(Platform);
-        public const string ThisPlatform = ".NET";
-        public const string Type = nameof(Type);
-        public const string AssemblyFullName = nameof(AssemblyFullName);
-        public const string TypeFullName = nameof(TypeFullName);
-        public const string MemberInfoName = nameof(MemberInfoName);
+        return !envelopeHeaders.Value.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
+    }
 
-        public static bool NotThisPlatform(IReadOnlyDictionary<string, string> headers)
+    public static bool TryGetAssemblyFullName
+    (
+        EnvelopeHeaders envelopeHeaders,
+        [NotNullWhen(true)] out string? assemblyFullName
+    )
+    {
+        return envelopeHeaders.Value.TryGetValue(AssemblyFullName, out assemblyFullName);
+    }
+
+    public static bool TryGetTypeFullName
+    (
+        EnvelopeHeaders envelopeHeaders,
+        [NotNullWhen(true)] out string? typeFullName
+    )
+    {
+        return envelopeHeaders.Value.TryGetValue(TypeFullName, out typeFullName);
+    }
+
+    public static bool TryGetMemberInfoName
+    (
+        EnvelopeHeaders envelopeHeaders,
+        [NotNullWhen(true)] out string? memberInfoName
+    )
+    {
+        return envelopeHeaders.Value.TryGetValue(MemberInfoName, out memberInfoName);
+    }
+
+    public static EnvelopeHeaders GetEnvelopeHeaders
+    (
+        Type type,
+        bool includeFullNames = true,
+        bool includeMemberInfoName = true
+    )
+    {
+        var value = new Dictionary<string, string> { [Platform] = ThisPlatform, [Type] = type.Name };
+
+        if (includeFullNames)
         {
-            return !headers.TryGetValue(Platform, out var platform) || platform != ThisPlatform;
-        }
+            var assemblyFullName = type.Assembly.FullName;
 
-        public static bool TryGetAssemblyFullName
-        (
-            IReadOnlyDictionary<string, string> headers,
-            [NotNullWhen(true)] out string? assemblyFullName
-        )
-        {
-            return headers.TryGetValue(AssemblyFullName, out assemblyFullName);
-        }
-
-        public static bool TryGetTypeFullName
-        (
-            IReadOnlyDictionary<string, string> headers,
-            [NotNullWhen(true)] out string? typeFullName
-        )
-        {
-            return headers.TryGetValue(TypeFullName, out typeFullName);
-        }
-
-        public static bool TryGetMemberInfoName
-        (
-            IReadOnlyDictionary<string, string> headers,
-            [NotNullWhen(true)] out string? memberInfoName
-        )
-        {
-            return headers.TryGetValue(MemberInfoName, out memberInfoName);
-        }
-
-        public static Dictionary<string, string> GetTypeHeaders
-        (
-            Type type,
-            bool includeFullNames = true,
-            bool includeMemberInfoName = true
-        )
-        {
-            var headers = new Dictionary<string, string> { [Platform] = ThisPlatform, [Type] = type.Name };
-
-            if (includeFullNames)
+            if (assemblyFullName is not null)
             {
-                var assemblyFullName = type.Assembly.FullName;
-
-                if (assemblyFullName != null)
-                {
-                    headers.Add(AssemblyFullName, assemblyFullName);
-                }
-
-                var typeFullName = type.FullName;
-
-                if (typeFullName != null)
-                {
-                    headers.Add(TypeFullName, typeFullName);
-                }
+                value.Add(AssemblyFullName, assemblyFullName);
             }
 
-            if (includeMemberInfoName)
+            var typeFullName = type.FullName;
+
+            if (typeFullName is not null)
             {
-                headers.Add(MemberInfoName, type.Name);
+                value.Add(TypeFullName, typeFullName);
             }
-
-            return headers;
         }
 
-        public static string[] GetTypeHeaderValues(this Type[] types)
+        if (includeMemberInfoName)
         {
-            return types.Select(type => type.Name).ToArray();
+            value.Add(MemberInfoName, type.Name);
         }
+
+        return new EnvelopeHeaders(value);
+    }
+
+    public static IEnumerable<string> GetTypeHeaderValues(this IEnumerable<Type> types)
+    {
+        return types.Select(type => type.Name);
     }
 }

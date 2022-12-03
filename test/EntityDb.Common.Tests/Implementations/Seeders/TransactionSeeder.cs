@@ -1,35 +1,56 @@
+using System.Collections.Immutable;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Tests.Implementations.AgentSignature;
-using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Agents;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Common.Transactions;
-using System;
+using EntityDb.Common.Transactions.Steps;
 
-namespace EntityDb.Common.Tests.Implementations.Seeders
+namespace EntityDb.Common.Tests.Implementations.Seeders;
+
+public static class TransactionStepSeeder
 {
-    public static class TransactionSeeder
+    public static IEnumerable<ITransactionStep> CreateFromCommands<TEntity>(Id entityId, uint numCommands)
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        public static ITransaction<TransactionEntity> Create
-        (
-            int generateCount,
-            int repeatCount,
-            Guid? transactionId = null,
-            ulong? previousEntityVersionNumber = null,
-            bool wellBehavedNextEntityVersionNumber = true,
-            Guid? entityId = null,
-            bool insertLease = false,
-            bool deleteLease = false,
-            bool insertTag = false,
-            bool deleteTag = false
-        )
+        for (var previousVersionNumber = new VersionNumber(0);
+             previousVersionNumber.Value < numCommands;
+             previousVersionNumber = previousVersionNumber.Next())
         {
-            return new Transaction<TransactionEntity>
+            var entityVersionNumber = previousVersionNumber.Next();
+
+            yield return new AppendCommandTransactionStep
             {
-                Id = transactionId ?? Guid.NewGuid(),
-                TimeStamp = DateTime.UtcNow,
-                AgentSignature = new NoAgentSignature(),
-                Steps = TransactionStepSeeder.Create(generateCount, repeatCount, previousEntityVersionNumber,
-                    wellBehavedNextEntityVersionNumber, entityId, insertLease, deleteLease, insertTag, deleteTag)
+                EntityId = entityId,
+                Entity = TEntity.Construct(entityId).WithVersionNumber(entityVersionNumber),
+                EntityVersionNumber = entityVersionNumber,
+                PreviousEntityVersionNumber = previousVersionNumber,
+                Command = CommandSeeder.Create()
             };
         }
+    }
+}
+
+public static class TransactionSeeder
+{
+    public static ITransaction Create(params ITransactionStep[] transactionSteps)
+    {
+        return new Transaction
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Steps = transactionSteps.ToImmutableArray()
+        };
+    }
+
+    public static ITransaction Create<TEntity>(Id entityId, uint numCommands)
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+    {
+        var transactionSteps = TransactionStepSeeder.CreateFromCommands<TEntity>(entityId, numCommands).ToArray();
+
+        return Create(transactionSteps);
     }
 }

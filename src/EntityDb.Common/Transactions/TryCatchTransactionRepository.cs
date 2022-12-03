@@ -1,46 +1,81 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Transactions;
-using System;
-using System.Threading.Tasks;
+﻿using EntityDb.Abstractions.Transactions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace EntityDb.Common.Transactions
+namespace EntityDb.Common.Transactions;
+
+internal sealed class TryCatchTransactionRepository : TransactionRepositoryWrapper
 {
-    internal sealed class TryCatchTransactionRepository<TEntity> : TransactionRepositoryWrapper<TEntity>
+    private readonly ILogger<TryCatchTransactionRepository> _logger;
+
+    public TryCatchTransactionRepository
+    (
+        ITransactionRepository transactionRepository,
+        ILogger<TryCatchTransactionRepository> logger
+    ) : base(transactionRepository)
     {
-        private readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        public TryCatchTransactionRepository(ITransactionRepository<TEntity> transactionRepository, ILogger logger) :
-            base(transactionRepository)
+    protected override async IAsyncEnumerable<T> WrapQuery<T>(Func<IAsyncEnumerable<T>> enumerable)
+    {
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
-            _logger = logger;
-        }
+            IAsyncEnumerator<T> enumerator;
 
-        protected override async Task<T[]> WrapQuery<T>(Task<T[]> task)
-        {
             try
             {
-                return await task;
+                enumerator = enumerable.Invoke().GetAsyncEnumerator();
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "The operation cannot be completed.");
+                _logger.LogError(exception, "The operation cannot be completed");
 
-                return Array.Empty<T>();
+                yield break;
+            }
+
+            while (true)
+            {
+                try
+                {
+                    if (!await enumerator.MoveNextAsync())
+                    {
+                        yield break;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "The operation cannot be completed");
+
+                    yield break;
+                }
+
+                yield return enumerator.Current;
             }
         }
+    }
 
-        protected override async Task<bool> WrapCommand(Task<bool> task)
+    protected override async Task<bool> WrapCommand(Func<Task<bool>> task)
+    {
+        using (_logger.BeginScope("TryCatchId: {TryCatchId}", Guid.NewGuid()))
         {
             try
             {
-                return await task;
+                return await task.Invoke();
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "The operation cannot be completed.");
+                _logger.LogError(exception, "The operation cannot be completed");
 
                 return default;
             }
         }
+    }
+
+    public static ITransactionRepository Create(IServiceProvider serviceProvider,
+        ITransactionRepository transactionRepository)
+    {
+        return ActivatorUtilities.CreateInstance<TryCatchTransactionRepository>(serviceProvider,
+            transactionRepository);
     }
 }

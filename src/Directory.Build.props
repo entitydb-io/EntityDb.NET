@@ -1,38 +1,36 @@
 <Project>
-    <Import Project="../Directory.Build.props" />
-  
-    <!--Build-->
+    <Import Project="../Directory.Build.props"/>
+
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-  
-    <!--Pack-->
+
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <Authors>Chris Philips</Authors>
         <Company>entitydb.io</Company>
-        <Copyright>2021 © entitydb.io</Copyright>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Copyright>2021 - 2022 © entitydb.io</Copyright>
         <RepositoryUrl>https://github.com/entitydb-io/entitydb</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <NeutralLanguage>en</NeutralLanguage>
         <PackageIcon>ICON.png</PackageIcon>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\ICON.png">
-            <Pack>True</Pack>
-            <PackagePath></PackagePath>
-        </None>
+        <None Include="..\..\ICON.png" Pack="true" PackagePath="\"/>
+        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\"/>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
-  
+
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-  
+
 </Project>

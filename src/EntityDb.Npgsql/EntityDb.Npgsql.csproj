@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<PackageTags>EntityDb EventSourcing DDD CQRS Npgsql</PackageTags>
+		<Description>An implementation of the EntityDb Transaction Repository interface, specifically for Npgsql.</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Npgsql" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\EntityDb.SqlDb\EntityDb.SqlDb.csproj" />
+	</ItemGroup>
+
+</Project>

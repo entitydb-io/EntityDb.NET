@@ -1,0 +1,64 @@
+on:
+  release:
+    types:
+      - published
+
+name: Publish to Stable
+
+jobs:
+  tag:
+    name: Try Parsing Tag
+    runs-on: ubuntu-latest
+    outputs:
+      is_semantic_version: ${{ steps.parse.outputs.is_semantic_version }}
+      version: ${{ steps.get_release.outputs.tag_name }}
+    steps:
+      - id: get_release
+        uses: bruceadams/get-release@v1.3.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - id: parse
+        env:
+          GITHUB_TAG: ${{ steps.get_release.outputs.tag_name }}
+        run: |
+          # This pattern comes from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+          # However, Bash uses POSIX regular expressions, and there are some unsupported features.
+          # POSIX does not support non-capturing groups: (?:...)
+          # - To make it compatible, the non-capture modifiers have been removed
+          # POSIX does not support the digit metacharacter: \d
+          # - To make it compatible, the digit metacharacters have been replaced with [0-9]
+          
+          semantic_version_pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
+
+          if [[ ${GITHUB_TAG} =~ $semantic_version_pattern ]]; then
+            echo "is_semantic_version=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_semantic_version=false" >> $GITHUB_OUTPUT
+          fi
+
+  stable:
+    needs: tag
+    if: ${{ needs.tag.outputs.is_semantic_version == 'true' }}
+    name: Publish to Stable
+    runs-on: ubuntu-latest
+    environment: stable
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+      - name: Restore Dependencies
+        run: dotnet restore EntityDb.sln --locked-mode
+      - name: Run Project Tests
+        run: dotnet test EntityDb.sln --no-restore -c Debug
+      - name: Pack Projects into Nuget Packages
+        run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version=${{ needs.tag.outputs.version }}
+      - name: Publish to Stable
+        run: dotnet nuget push ./**/*.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
+      - name: Packages & Symbols Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: Packages & Symbols
+          path: |
+            ./**/*.nupkg
+            ./**/*.snupkg

@@ -1,46 +1,51 @@
-﻿using EntityDb.Common.Transactions;
-using EntityDb.MongoDb.Sessions;
-using System.Threading.Tasks;
+﻿using EntityDb.MongoDb.Sessions;
 
-namespace EntityDb.MongoDb.Transactions
+namespace EntityDb.MongoDb.Transactions;
+
+internal class
+    TestModeMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
 {
-    internal class
-        TestModeMongoDbTransactionRepositoryFactory<TEntity> : MongoDbTransactionRepositoryFactoryWrapper<TEntity>
+    private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
+
+    public TestModeMongoDbTransactionRepositoryFactory(
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
+        mongoDbTransactionRepositoryFactory)
     {
-        private static readonly TransactionSessionOptions _testTransactionSessionOptions = new()
+    }
+
+    public override async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
+        CancellationToken cancellationToken)
+    {
+        if (_sessions.HasValue)
         {
-            ReadOnly = false,
+            return _sessions.Value.TestMode
+                .WithTransactionSessionOptions(options);
+        }
+
+        var normalOptions = new MongoDbTransactionSessionOptions
+        {
+            ConnectionString = options.ConnectionString,
+            DatabaseName = options.DatabaseName,
         };
 
-        private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
+        var normalSession = await base.CreateSession(normalOptions, cancellationToken);
 
-        public TestModeMongoDbTransactionRepositoryFactory(IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory) : base(mongoDbTransactionRepositoryFactory)
+        var testModeSession = new TestModeMongoSession(normalSession);
+
+        normalSession.StartTransaction();
+
+        _sessions = (normalSession, testModeSession);
+
+        return _sessions.Value.TestMode
+            .WithTransactionSessionOptions(options);
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        if (_sessions.HasValue)
         {
-        }
-
-        public override async Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
-        {
-            if (!_sessions.HasValue)
-            {
-                var normalSession = await base.CreateSession(_testTransactionSessionOptions);
-                var testModeSession = new TestModeMongoSession(normalSession);
-
-                normalSession.StartTransaction();
-
-                _sessions = (normalSession, testModeSession);
-            }
-
-            return _sessions.Value.TestMode
-                .WithTransactionSessionOptions(transactionSessionOptions);
-        }
-
-        public override async ValueTask DisposeAsync()
-        {
-            if (_sessions.HasValue)
-            {
-                await _sessions.Value.Normal.AbortTransaction();
-                await _sessions.Value.Normal.DisposeAsync();
-            }
+            await _sessions.Value.Normal.AbortTransaction();
+            await _sessions.Value.Normal.DisposeAsync();
         }
     }
 }

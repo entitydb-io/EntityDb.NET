@@ -1,14 +1,14 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
+using MongoDB.Bson;
 
-namespace EntityDb.MongoDb.Queries
+namespace EntityDb.MongoDb.Queries;
+
+internal abstract class BuilderBase
 {
-    internal abstract class BuilderBase
-    {
-        protected static readonly string DataTypeNameFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Headers)}.{EnvelopeHelper.Type}";
+    protected const string DataTypeNameFieldName =
+        $"{nameof(DocumentBase.Data)}.{nameof(Envelope<BsonDocument>.Headers)}.{EnvelopeHelper.Type}";
 
-        protected static readonly string DataValueFieldName =
-            $"{nameof(DocumentBase.Data)}.{nameof(DocumentBase.Data.Value)}";
-    }
+    protected const string DataValueFieldName =
+        $"{nameof(DocumentBase.Data)}.{nameof(Envelope<BsonDocument>.Value)}";
 }

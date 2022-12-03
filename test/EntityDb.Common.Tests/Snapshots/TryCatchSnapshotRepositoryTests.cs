@@ -1,61 +1,80 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Entities;
 using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Entities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
-using System;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace EntityDb.Common.Tests.Transactions
+namespace EntityDb.Common.Tests.Snapshots;
+
+public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
 {
-    public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
+    public TryCatchSnapshotRepositoryTests(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        public TryCatchSnapshotRepositoryTests(IServiceProvider serviceProvider) : base(serviceProvider)
+    }
+
+    private async Task Generic_GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged<TEntity>(
+        EntityAdder entityAdder)
+        where TEntity : IEntity<TEntity>
+    {
+        // ARRANGE
+
+        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
+
+        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TEntity>>(MockBehavior.Strict);
+
+        snapshotRepositoryMock
+            .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotImplementedException());
+
+        snapshotRepositoryMock
+            .Setup(repository =>
+                repository.PutSnapshot(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotImplementedException());
+
+        snapshotRepositoryMock
+            .Setup(repository => repository.DeleteSnapshots(It.IsAny<Pointer[]>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotImplementedException());
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-        }
+            entityAdder.AddDependencies.Invoke(serviceCollection);
 
-        [Fact]
-        public async Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged()
-        {
-            // ARRANGE
+            serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
-            var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
+            serviceCollection.AddSingleton(loggerFactory);
+        });
 
-            loggerMock
-                .Setup(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()))
-                .Verifiable();
+        var tryCatchSnapshotRepository = TryCatchSnapshotRepository<TEntity>
+            .Create(serviceScope.ServiceProvider, snapshotRepositoryMock.Object);
 
-            var snapshotRepositoryMock = new Mock<ISnapshotRepository<TransactionEntity>>(MockBehavior.Strict);
+        // ACT
 
-            snapshotRepositoryMock
-                .Setup(repository => repository.GetSnapshot(It.IsAny<Guid>()))
-                .ThrowsAsync(new NotImplementedException());
+        var snapshot = await tryCatchSnapshotRepository.GetSnapshotOrDefault(default);
+        var inserted = await tryCatchSnapshotRepository.PutSnapshot(default, default!);
+        var deleted = await tryCatchSnapshotRepository.DeleteSnapshots(default!);
 
-            snapshotRepositoryMock
-                .Setup(repository => repository.PutSnapshot(It.IsAny<Guid>(), It.IsAny<TransactionEntity>()))
-                .ThrowsAsync(new NotImplementedException());
+        // ASSERT
 
-            snapshotRepositoryMock
-                .Setup(repository => repository.DeleteSnapshots(It.IsAny<Guid[]>()))
-                .ThrowsAsync(new NotImplementedException());
+        snapshot.ShouldBe(default);
+        inserted.ShouldBeFalse();
+        deleted.ShouldBeFalse();
 
-            var tryCatchSnapshotRepository = new TryCatchSnapshotRepository<TransactionEntity>(snapshotRepositoryMock.Object, loggerMock.Object);
+        loggerVerifier.Invoke(Times.Exactly(3));
+    }
 
-            // ACT
-
-            var snapshot = await tryCatchSnapshotRepository.GetSnapshot(default);
-            var inserted = await tryCatchSnapshotRepository.PutSnapshot(default, default!);
-            var deleted = await tryCatchSnapshotRepository.DeleteSnapshots(default!);
-
-            // ASSERT
-
-            snapshot.ShouldBe(default);
-            inserted.ShouldBeFalse();
-            deleted.ShouldBeFalse();
-
-            loggerMock.Verify(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()), Times.Exactly(3));
-        }
+    [Theory]
+    [MemberData(nameof(AddEntity))]
+    public Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged(EntityAdder entityAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entityAdder.EntityType },
+            new object?[] { entityAdder }
+        );
     }
 }

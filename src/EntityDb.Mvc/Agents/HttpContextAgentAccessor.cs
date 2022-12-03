@@ -4,29 +4,53 @@ using EntityDb.Common.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace EntityDb.Mvc.Agents
+namespace EntityDb.Mvc.Agents;
+
+internal sealed class HttpContextAgentAccessor : IAgentAccessor
 {
-    internal sealed class HttpContextAgentAccessor : AgentAccessorBase
+    private static readonly Dictionary<string, string> DefaultApplicationInfo = new();
+    private readonly IAgentSignatureAugmenter? _agentSignatureAugmenter;
+
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
+
+    public HttpContextAgentAccessor
+    (
+        IHttpContextAccessor httpContextAccessor,
+        IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory,
+        IAgentSignatureAugmenter? agentSignatureAugmenter = null
+    )
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IOptionsFactory<HttpContextAgentSignatureOptions> _httpContextAgentOptionsFactory;
+        _httpContextAccessor = httpContextAccessor;
+        _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
+        _agentSignatureAugmenter = agentSignatureAugmenter;
+    }
 
-        public HttpContextAgentAccessor(IHttpContextAccessor httpContextAccessor, IOptionsFactory<HttpContextAgentSignatureOptions> httpContextAgentOptionsFactory)
+    public async Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken)
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext is null)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _httpContextAgentOptionsFactory = httpContextAgentOptionsFactory;
+            throw new NoAgentException();
         }
 
-        protected override IAgent CreateAgent()
+        var applicationInfo = DefaultApplicationInfo;
+
+        if (_agentSignatureAugmenter != null)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-
-            if (httpContext == null)
-            {
-                throw new NoAgentException();
-            }
-
-            return new HttpContextAgent(httpContext, _httpContextAgentOptionsFactory);
+            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfoAsync(cancellationToken);
         }
+
+        var signatureOptions = _httpContextAgentOptionsFactory.Create(signatureOptionsName);
+
+        var signature = HttpContextAgentSignature.GetSnapshot
+        (
+            httpContext,
+            signatureOptions,
+            applicationInfo
+        );
+
+        return new StandardAgent(signature);
     }
 }

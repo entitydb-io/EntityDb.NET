@@ -1,46 +1,47 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using System;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
 
-namespace EntityDb.Common.Snapshots
+namespace EntityDb.Common.Snapshots;
+
+internal sealed class TestModeSnapshotRepository<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepository<TSnapshot>
 {
-    internal sealed class TestModeSnapshotRepository<TEntity> : ISnapshotRepository<TEntity>
+    private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
+    private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager;
+
+    public TestModeSnapshotRepository
+    (
+        ISnapshotRepository<TSnapshot> snapshotRepository,
+        TestModeSnapshotManager<TSnapshot> testModeSnapshotManager
+    )
     {
-        private readonly ISnapshotRepository<TEntity> _snapshotRepository;
-        private readonly TestModeSnapshotManager _testModeSnapshotManager;
+        _snapshotRepository = snapshotRepository;
+        _testModeSnapshotManager = testModeSnapshotManager;
+    }
 
-        public TestModeSnapshotRepository
-        (
-            ISnapshotRepository<TEntity> snapshotRepository,
-            TestModeSnapshotManager testModeSnapshotManager
-        )
-        {
-            _snapshotRepository = snapshotRepository;
-            _testModeSnapshotManager = testModeSnapshotManager;
-        }
+    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+        CancellationToken cancellationToken = default)
+    {
+        _testModeSnapshotManager.AddSnapshotPointer(this, snapshotPointer);
 
-        public Task<bool> PutSnapshot(Guid entityId, TEntity entity)
-        {
-            _testModeSnapshotManager.AddEntityId(entityId);
+        return _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken);
+    }
 
-            return _snapshotRepository.PutSnapshot(entityId, entity);
-        }
+    public Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)
+    {
+        return _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken);
+    }
 
-        public Task<TEntity?> GetSnapshot(Guid entityId)
-        {
-            return _snapshotRepository.GetSnapshot(entityId);
-        }
+    public Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
+    {
+        _testModeSnapshotManager.RemoveSnapshotPointers(this, snapshotPointers);
 
-        public Task<bool> DeleteSnapshots(Guid[] entityIds)
-        {
-            _testModeSnapshotManager.RemoveEntityIds(entityIds);
+        return _snapshotRepository.DeleteSnapshots(snapshotPointers, cancellationToken);
+    }
 
-            return _snapshotRepository.DeleteSnapshots(entityIds);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _snapshotRepository.DisposeAsync();
-        }
+    public override async ValueTask DisposeAsync()
+    {
+        await _snapshotRepository.DisposeAsync();
     }
 }

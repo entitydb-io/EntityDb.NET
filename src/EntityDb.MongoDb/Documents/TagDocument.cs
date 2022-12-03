@@ -1,125 +1,85 @@
-using EntityDb.Abstractions.Loggers;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
 using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record TagDocument : DocumentBase, IEntityDocument
 {
-    internal sealed record TagDocument : DocumentBase, IEntityDocument
+    public const string CollectionName = "Tags";
+
+    private static readonly TagFilterBuilder FilterBuilder = new();
+
+    private static readonly TagSortBuilder SortBuilder = new();
+
+    public string Label { get; init; } = default!;
+    public string Value { get; init; } = default!;
+    public Id EntityId { get; init; }
+    public VersionNumber EntityVersionNumber { get; init; }
+
+    public static InsertDocumentsCommand<TagDocument> GetInsertCommand
+    (
+        IEnvelopeService<BsonDocument> envelopeService,
+        ITransaction transaction,
+        IAddTagsTransactionStep addTagsTransactionStep
+    )
     {
-        public const string CollectionName = "Tags";
-
-        public static readonly TagFilterBuilder _filterBuilder = new();
-
-        public static readonly TagSortBuilder _sortBuilder = new();
-
-        public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
-
-        public string Label { get; init; } = default!;
-        public string Value { get; init; } = default!;
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-
-        public static IReadOnlyCollection<TagDocument>? BuildInsert<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            int transactionStepIndex,
-            ILogger logger
-        )
-        {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-            var insertTags = transactionStep.Tags.Insert;
-
-            if (insertTags.Length == 0)
+        var tagDocuments = addTagsTransactionStep.Tags
+            .Select(insertTag => new TagDocument
             {
-                return null;
-            }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = addTagsTransactionStep.EntityId,
+                EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
+                DataType = insertTag.GetType().Name,
+                Data = envelopeService.Serialize(insertTag),
+                Label = insertTag.Label,
+                Value = insertTag.Value
+            })
+            .ToArray();
 
-            return insertTags
-                .Select(insertTag => new TagDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityId = transactionStep.EntityId,
-                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
-                    Label = insertTag.Label,
-                    Value = insertTag.Value,
-                    Data = BsonDocumentEnvelope.Deconstruct(insertTag, logger)
-                })
-                .ToArray();
-        }
-
-        public static FilterDefinition<BsonDocument>? BuildDelete<TEntity>
+        return new InsertDocumentsCommand<TagDocument>
         (
-            ITransaction<TEntity> transaction,
-            int transactionStepIndex
-        )
-        {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-            var deleteTags = transactionStep.Tags.Delete;
+            CollectionName,
+            tagDocuments
+        );
+    }
 
-            if (deleteTags.Length == 0)
-            {
-                return null;
-            }
-
-            var deleteTagsQuery = new DeleteTagsQuery(transactionStep.EntityId, deleteTags);
-
-            return deleteTagsQuery.GetFilter(_filterBuilder);
-        }
-
-        public static InsertDocumentsCommand<TEntity, TagDocument> GetInsertCommand<TEntity>
+    public static DocumentQuery<TagDocument> GetQuery
+    (
+        ITagQuery tagQuery
+    )
+    {
+        return new DocumentQuery<TagDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, TagDocument>
-            (
-                mongoSession,
-                CollectionName,
-                BuildInsert<TEntity>
-            );
-        }
+            CollectionName,
+            tagQuery.GetFilter(FilterBuilder),
+            tagQuery.GetSort(SortBuilder),
+            tagQuery.Skip,
+            tagQuery.Take,
+            tagQuery.Options as MongoDbQueryOptions
+        );
+    }
 
-        public static DocumentQuery<TagDocument> GetQuery
-        (
-            IMongoSession mongoSession,
-            ITagQuery tagQuery
-        )
-        {
-            return new DocumentQuery<TagDocument>
-            (
-                mongoSession,
-                CollectionName,
-                tagQuery.GetFilter(_filterBuilder),
-                tagQuery.GetSort(_sortBuilder),
-                tagQuery.Skip,
-                tagQuery.Take
-            );
-        }
+    public static DeleteDocumentsCommand GetDeleteCommand
+    (
+        IDeleteTagsTransactionStep deleteTagsTransactionStep
+    )
+    {
+        var deleteTagsQuery = new DeleteTagsQuery(deleteTagsTransactionStep.EntityId, deleteTagsTransactionStep.Tags);
 
-        public static DeleteDocumentsCommand<TEntity> GetDeleteCommand<TEntity>
+        return new DeleteDocumentsCommand
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new DeleteDocumentsCommand<TEntity>
-            (
-                mongoSession,
-                CollectionName,
-                BuildDelete<TEntity>
-            );
-        }
+            CollectionName,
+            deleteTagsQuery.GetFilter(FilterBuilder)
+        );
     }
 }

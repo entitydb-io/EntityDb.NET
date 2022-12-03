@@ -1,76 +1,64 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using MongoDB.Bson;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
 {
-    internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
+    public const string CollectionName = "AgentSignatures";
+
+    private static readonly AgentSignatureFilterBuilder FilterBuilder = new();
+
+    private static readonly AgentSignatureSortBuilder SortBuilder = new();
+
+    public Id[] EntityIds { get; init; } = default!;
+
+    public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
+    (
+        IEnvelopeService<BsonDocument> envelopeService,
+        ITransaction transaction
+    )
     {
-        public const string CollectionName = "AgentSignatures";
-
-        private static readonly AgentSignatureFilterBuilder _filterBuilder = new();
-
-        private static readonly AgentSignatureSortBuilder _sortBuilder = new();
-
-        public Guid[] EntityIds { get; init; } = default!;
-
-        public static IReadOnlyCollection<AgentSignatureDocument> Build<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            int transactionStepIndex,
-            ILogger logger
-        )
+        var documents = new[]
         {
-            return new[]
+            new AgentSignatureDocument
             {
-                new AgentSignatureDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityIds = transaction.Steps.Select(command => command.EntityId).Distinct().ToArray(),
-                    Data = BsonDocumentEnvelope.Deconstruct(transaction.AgentSignature, logger)
-                }
-            };
-        }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityIds = transaction.Steps.Select(transactionStep => transactionStep.EntityId).Distinct()
+                    .ToArray(),
+                DataType = transaction.AgentSignature.GetType().Name,
+                Data = envelopeService.Serialize(transaction.AgentSignature)
+            }
+        };
 
-        public static InsertDocumentsCommand<TEntity, AgentSignatureDocument> GetInsertCommand<TEntity>
+        return new InsertDocumentsCommand<AgentSignatureDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, AgentSignatureDocument>
-            (
-                mongoSession,
-                CollectionName,
-                Build<TEntity>
-            );
-        }
+            CollectionName,
+            documents
+        );
+    }
 
-        public static DocumentQuery<AgentSignatureDocument> GetQuery
+    public static DocumentQuery<AgentSignatureDocument> GetQuery
+    (
+        IAgentSignatureQuery agentSignatureQuery
+    )
+    {
+        return new DocumentQuery<AgentSignatureDocument>
         (
-            IMongoSession mongoSession,
-            IAgentSignatureQuery agentSignatureQuery
-        )
-        {
-            return new DocumentQuery<AgentSignatureDocument>
-            (
-                mongoSession,
-                CollectionName,
-                agentSignatureQuery.GetFilter(_filterBuilder),
-                agentSignatureQuery.GetSort(_sortBuilder),
-                agentSignatureQuery.Skip,
-                agentSignatureQuery.Take
-            );
-        }
+            CollectionName,
+            agentSignatureQuery.GetFilter(FilterBuilder),
+            agentSignatureQuery.GetSort(SortBuilder),
+            agentSignatureQuery.Skip,
+            agentSignatureQuery.Take,
+            agentSignatureQuery.Options as MongoDbQueryOptions
+        );
     }
 }

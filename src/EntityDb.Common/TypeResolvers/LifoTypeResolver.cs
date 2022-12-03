@@ -1,44 +1,39 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Logging;
 
-namespace EntityDb.Common.TypeResolvers
+namespace EntityDb.Common.TypeResolvers;
+
+internal sealed class LifoTypeResolver : ITypeResolver
 {
-    internal sealed class LifoTypeResolver : ITypeResolver
+    private readonly ILogger<LifoTypeResolver> _logger;
+    private readonly IPartialTypeResolver[] _partialTypeResolvers;
+
+    public LifoTypeResolver(ILogger<LifoTypeResolver> logger,
+        IEnumerable<IPartialTypeResolver> partialTypeResolvers)
     {
-        private readonly ILogger _logger;
-        private readonly IPartialTypeResolver[] _partialTypeResolvers;
+        _logger = logger;
+        _partialTypeResolvers = partialTypeResolvers.Reverse().ToArray();
+    }
 
-        public LifoTypeResolver(ILoggerFactory loggerFactory,
-            IEnumerable<IPartialTypeResolver> partialTypeResolvers)
+    public Type ResolveType(EnvelopeHeaders headers)
+    {
+        foreach (var partialTypeResolver in _partialTypeResolvers)
         {
-            _logger = loggerFactory.CreateLogger<LifoTypeResolver>();
-            _partialTypeResolvers = partialTypeResolvers.Reverse().ToArray();
-        }
-
-        public Type ResolveType(IReadOnlyDictionary<string, string> headers)
-        {
-            foreach (var partialTypeResolver in _partialTypeResolvers)
+            try
             {
-                try
+                if (partialTypeResolver.TryResolveType(headers, out var resolvedType))
                 {
-                    if (partialTypeResolver.TryResolveType(headers, out var resolvedType))
-                    {
-                        return resolvedType;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(exception,
-                        "Type resolver threw an exception. Moving on to next type resolver.");
+                    return resolvedType;
                 }
             }
-
-            throw new CannotResolveTypeException();
+            catch (Exception exception)
+            {
+                _logger.LogError(exception,
+                    "Type resolver threw an exception. Moving on to next partial type resolver");
+            }
         }
+
+        throw new CannotResolveTypeException();
     }
 }

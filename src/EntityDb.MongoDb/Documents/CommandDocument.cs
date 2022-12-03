@@ -1,98 +1,90 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Transactions.Steps;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
 using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Envelopes;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
 using EntityDb.MongoDb.Sessions;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using MongoDB.Bson;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal sealed record CommandDocument : DocumentBase, IEntityDocument
 {
-    internal sealed record CommandDocument : DocumentBase, IEntityDocument
+    public const string CollectionName = "Commands";
+
+    private static readonly CommandFilterBuilder FilterBuilder = new();
+
+    private static readonly CommandSortBuilder SortBuilder = new();
+
+    public Id EntityId { get; init; }
+    public VersionNumber EntityVersionNumber { get; init; }
+
+    public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
+    (
+        IEnvelopeService<BsonDocument> envelopeService,
+        ITransaction transaction,
+        IAppendCommandTransactionStep appendCommandTransactionStep
+    )
     {
-        public const string CollectionName = "Commands";
-
-        private static readonly CommandFilterBuilder _filterBuilder = new();
-
-        private static readonly CommandSortBuilder _sortBuilder = new();
-
-        public Guid EntityId { get; init; }
-        public ulong EntityVersionNumber { get; init; }
-
-        public static IReadOnlyCollection<CommandDocument>? BuildInsert<TEntity>
-        (
-            ITransaction<TEntity> transaction,
-            int transactionStepIndex,
-            ILogger logger
-        )
+        var documents = new[]
         {
-            var transactionStep = transaction.Steps[transactionStepIndex];
-
-            return new[]
+            new CommandDocument
             {
-                new CommandDocument
-                {
-                    TransactionTimeStamp = transaction.TimeStamp,
-                    TransactionId = transaction.Id,
-                    EntityId = transactionStep.EntityId,
-                    EntityVersionNumber = transactionStep.NextEntityVersionNumber,
-                    Data = BsonDocumentEnvelope.Deconstruct(transactionStep.Command, logger)
-                }
-            };
-        }
+                TransactionTimeStamp = transaction.TimeStamp,
+                TransactionId = transaction.Id,
+                EntityId = appendCommandTransactionStep.EntityId,
+                EntityVersionNumber = appendCommandTransactionStep.EntityVersionNumber,
+                DataType = appendCommandTransactionStep.Command.GetType().Name,
+                Data = envelopeService.Serialize(appendCommandTransactionStep.Command)
+            }
+        };
 
-        public static InsertDocumentsCommand<TEntity, CommandDocument> GetInsertCommand<TEntity>
+        return new InsertDocumentsCommand<CommandDocument>
         (
-            IMongoSession mongoSession
-        )
-        {
-            return new InsertDocumentsCommand<TEntity, CommandDocument>
-            (
-                mongoSession,
-                CollectionName,
-                BuildInsert<TEntity>
-            );
-        }
+            CollectionName,
+            documents
+        );
+    }
 
-        public static DocumentQuery<CommandDocument> GetQuery
+    public static DocumentQuery<CommandDocument> GetQuery
+    (
+        ICommandQuery commandQuery
+    )
+    {
+        return new DocumentQuery<CommandDocument>
         (
-            IMongoSession mongoSession,
-            ICommandQuery commandQuery
-        )
-        {
-            return new DocumentQuery<CommandDocument>
-            (
-                mongoSession,
-                CollectionName,
-                commandQuery.GetFilter(_filterBuilder),
-                commandQuery.GetSort(_sortBuilder),
-                commandQuery.Skip,
-                commandQuery.Take
-            );
-        }
+            CollectionName,
+            commandQuery.GetFilter(FilterBuilder),
+            commandQuery.GetSort(SortBuilder),
+            commandQuery.Skip,
+            commandQuery.Take,
+            commandQuery.Options as MongoDbQueryOptions
+        );
+    }
 
-        public static Task<ulong> GetLastEntityVersionNumber
-        (
-            IMongoSession mongoSession,
-            Guid entityId
-        )
-        {
-            var commandQuery = new GetLastEntityVersionQuery(entityId);
+    public static async Task<VersionNumber> GetLastEntityVersionNumber
+    (
+        IMongoSession mongoSession,
+        Id entityId,
+        CancellationToken cancellationToken
+    )
+    {
+        var commandQuery = new GetLastEntityCommandQuery(entityId);
 
-            var documentQuery = GetQuery
-            (
-                mongoSession,
-                commandQuery
-            );
+        var documentQuery = GetQuery(commandQuery);
 
-            return documentQuery.GetEntityVersionNumber();
-        }
+        var document = await documentQuery
+            .Execute(mongoSession, DocumentQueryExtensions.EntityVersionNumberProjection, cancellationToken)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return document is null
+            ? default
+            : document.EntityVersionNumber;
     }
 }

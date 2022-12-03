@@ -1,76 +1,147 @@
-﻿using EntityDb.Common.Exceptions;
-using EntityDb.Common.Snapshots;
+﻿using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
+using EntityDb.Common.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace EntityDb.Redis.Sessions
+namespace EntityDb.Redis.Sessions;
+
+internal sealed record RedisSession<TSnapshot>
+(
+    ILogger<RedisSession<TSnapshot>> Logger,
+    IDatabase Database,
+    RedisSnapshotSessionOptions<TSnapshot> Options
+) : DisposableResourceBaseRecord, IRedisSession
 {
-    internal record RedisSession(IConnectionMultiplexer ConnectionMultiplexer, SnapshotSessionOptions SnapshotSessionOptions) : IRedisSession
+    public async Task<bool> Insert(Pointer snapshotPointer, RedisValue redisValue)
     {
-        private CommandFlags GetCommandFlags()
-        {
-            if (!SnapshotSessionOptions.ReadOnly)
-            {
-                return CommandFlags.DemandMaster;
-            }
+        AssertNotReadOnly();
 
-            return SnapshotSessionOptions.SecondaryPreferred
-                ? CommandFlags.PreferReplica
-                : CommandFlags.PreferMaster;
+        var redisKey = GetSnapshotKey(snapshotPointer);
+
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Insert on `{DatabaseIndex}.{RedisKey}`",
+                Database.Database,
+                redisKey.ToString()
+            );
+
+        var redisTransaction = Database.CreateTransaction();
+
+        var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
+
+        await redisTransaction.ExecuteAsync(GetCommandFlags());
+
+        var inserted = await insertedTask;
+
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Insert on `{DatabaseIndex}.{RedisKey}`\n\nInserted: {Inserted}",
+                Database.Database,
+                redisKey.ToString(),
+                inserted
+            );
+
+        return inserted;
+    }
+
+    public async Task<RedisValue> Find(Pointer snapshotPointer)
+    {
+        var redisKey = GetSnapshotKey(snapshotPointer);
+
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Query on `{DatabaseIndex}.{RedisKey}`",
+                Database.Database,
+                redisKey.ToString()
+            );
+
+        var redisValue = await Database.StringGetAsync(redisKey, GetCommandFlags());
+
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Query on `{DatabaseIndex}.{RedisKey}`\n\nHas Value: {HasValue}",
+                Database.Database,
+                redisKey.ToString(),
+                redisValue.HasValue
+            );
+
+        return redisValue;
+    }
+
+    public async Task<bool> Delete(Pointer[] snapshotPointers)
+    {
+        AssertNotReadOnly();
+
+        Logger
+            .LogInformation
+            (
+                "Started Running Redis Delete on `{DatabaseIndex}` for {NumberOfKeys} Key(s)",
+                Database.Database,
+                snapshotPointers.Length
+            );
+
+        var redisTransaction = Database.CreateTransaction();
+
+        var deleteSnapshotTasks = snapshotPointers
+            .Select(snapshotPointer => redisTransaction.KeyDeleteAsync(GetSnapshotKey(snapshotPointer)))
+            .ToArray();
+
+        await redisTransaction.ExecuteAsync(GetCommandFlags());
+
+        await Task.WhenAll(deleteSnapshotTasks);
+
+        var allDeleted = deleteSnapshotTasks.All(task => task.Result);
+
+        Logger
+            .LogInformation
+            (
+                "Finished Running Redis Delete on `{DatabaseIndex}` for {NumberOfKeys} Key(s)\n\nAll Deleted: {AllDeleted}",
+                Database.Database,
+                snapshotPointers.Length,
+                allDeleted
+            );
+
+        return allDeleted;
+    }
+
+    private CommandFlags GetCommandFlags()
+    {
+        if (!Options.ReadOnly)
+        {
+            return CommandFlags.DemandMaster;
         }
 
-        private void AssertNotReadOnly()
+        return Options.SecondaryPreferred
+            ? CommandFlags.PreferReplica
+            : CommandFlags.PreferMaster;
+    }
+
+    private void AssertNotReadOnly()
+    {
+        if (Options.ReadOnly)
         {
-            if (SnapshotSessionOptions.ReadOnly)
-            {
-                throw new CannotWriteInReadOnlyModeException();
-            }
+            throw new CannotWriteInReadOnlyModeException();
         }
+    }
 
-        public async Task<bool> Insert(RedisKey redisKey, RedisValue redisValue)
-        {
-            AssertNotReadOnly();
+    private RedisKey GetSnapshotKey(Pointer snapshotPointer)
+    {
+        return $"{Options.KeyNamespace}#{snapshotPointer.Id.Value}@{snapshotPointer.VersionNumber.Value}";
+    }
 
-            var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
-
-            var insertedTask = redisTransaction.StringSetAsync(redisKey, redisValue);
-
-            await redisTransaction.ExecuteAsync(GetCommandFlags());
-
-            return await insertedTask;
-        }
-
-        public async Task<RedisValue> Find(RedisKey redisKey)
-        {
-            var redisDatabase = ConnectionMultiplexer.GetDatabase();
-
-            return await redisDatabase.StringGetAsync(redisKey, GetCommandFlags());
-        }
-
-        public async Task<bool> Delete(IEnumerable<RedisKey> redisKeys)
-        {
-            AssertNotReadOnly();
-
-            var redisTransaction = ConnectionMultiplexer.GetDatabase().CreateTransaction();
-
-            var deleteSnapshotTasks = redisKeys
-                .Select(key => redisTransaction.KeyDeleteAsync(key))
-                .ToArray();
-
-            await redisTransaction.ExecuteAsync(GetCommandFlags());
-
-            await Task.WhenAll(deleteSnapshotTasks);
-
-            return deleteSnapshotTasks.All(task => task.Result);
-        }
-
-        public virtual ValueTask DisposeAsync()
-        {
-            ConnectionMultiplexer.Dispose();
-
-            return ValueTask.CompletedTask;
-        }
+    public static IRedisSession Create
+    (
+        IServiceProvider serviceProvider,
+        IDatabase database,
+        RedisSnapshotSessionOptions<TSnapshot> options
+    )
+    {
+        return ActivatorUtilities.CreateInstance<RedisSession<TSnapshot>>(serviceProvider, database, options);
     }
 }

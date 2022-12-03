@@ -1,10 +1,8 @@
-﻿using System;
+﻿using EntityDb.Common.Documents;
+using MongoDB.Bson;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal interface IEntityDocument : IEntityDocument<BsonDocument>, ITransactionDocument
 {
-    internal interface IEntityDocument : ITransactionDocument
-    {
-        Guid EntityId { get; }
-        ulong EntityVersionNumber { get; }
-    }
 }

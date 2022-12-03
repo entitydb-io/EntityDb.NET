@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - '**'
+      - main
     tags-ignore:
       - '**'
     paths:
@@ -20,22 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.2.0
-        with:
-          redis-version: 6.2.5
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
-        with:
-          mongodb-version: 5.0.3
-          mongodb-replica-set: entitydb
+        uses: actions/checkout@v3
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Publish Coverage Results
         uses: codacy/codacy-coverage-reporter-action@v1
         with:

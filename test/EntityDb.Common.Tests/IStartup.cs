@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDb.Common.Tests
+namespace EntityDb.Common.Tests;
+
+public interface IStartup
 {
-    public interface IStartup
-    {
-        void AddServices(IServiceCollection serviceCollection);
-    }
+    void AddServices(IServiceCollection serviceCollection);
 }

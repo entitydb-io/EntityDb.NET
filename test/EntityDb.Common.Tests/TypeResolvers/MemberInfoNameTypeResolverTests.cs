@@ -1,79 +1,76 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.TypeResolvers;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
-namespace EntityDb.Common.Tests.TypeResolvers
+namespace EntityDb.Common.Tests.TypeResolvers;
+
+public class MemberInfoNameTypeResolverTests
 {
-    public class MemberInfoNameTypeResolverTests
+    [Fact]
+    public void GivenMemberInfoNameTypeResolverKnowsExpectedType_WhenResolvingType_ThenReturnExpectedType()
     {
-        [Fact]
-        public void GivenMemberInfoNameTypeResolverKnowsExpectedType_WhenResolvingType_ThenReturnExpectedType()
+        // ARRANGE
+
+        var expectedType = typeof(string);
+
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
-            // ARRANGE
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+            [EnvelopeHelper.MemberInfoName] = expectedType.Name
+        });
 
-            var expectedType = typeof(string);
+        var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { expectedType });
 
-            var headers = new Dictionary<string, string>
-            {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-                [EnvelopeHelper.MemberInfoName] = expectedType.Name
-            };
+        // ACT
 
-            var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { expectedType });
+        var resolved = typeResolver.TryResolveType(envelopeHeaders, out var actualType);
 
-            // ACT
+        // ASSERT
 
-            var resolved = typeResolver.TryResolveType(headers, out var actualType);
+        resolved.ShouldBeTrue();
+        actualType.ShouldBe(expectedType);
+    }
 
-            // ASSERT
+    [Fact]
+    public void GivenNonEmptyMemberInfoNameTypeResolver_WhenResolvingTypeWithNoInformation_ThenReturnNull()
+    {
+        // ARRANGE
 
-            resolved.ShouldBeTrue();
-            actualType.ShouldBe(expectedType);
-        }
+        var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { typeof(string) });
 
-        [Fact]
-        public void GivenNonEmptyMemberInfoNameTypeResolver_WhenResolvingTypeWithNoInformation_ThenReturnNull()
+        var headers = new EnvelopeHeaders(new Dictionary<string, string>());
+
+        // ACT
+
+        var resolved = typeResolver.TryResolveType(headers, out var actualType);
+
+        // ASSERT
+
+        resolved.ShouldBeFalse();
+        actualType.ShouldBeNull();
+    }
+
+    [Fact]
+    public void GivenEmptyMemberInfoNameTypeResolver_WhenResolvingType_ThenReturnNull()
+    {
+        // ARRANGE
+
+        var typeResolver = new MemberInfoNamePartialTypeResolver(Array.Empty<Type>());
+
+        var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
-            // ARRANGE
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
+            [EnvelopeHelper.MemberInfoName] = ""
+        });
 
-            var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { typeof(string) });
+        // ACT
 
-            var headers = new Dictionary<string, string>();
+        var resolved = typeResolver.TryResolveType(envelopeHeaders, out var actualType);
 
-            // ACT
+        // ASSERT
 
-            var resolved = typeResolver.TryResolveType(headers, out var actualType);
-
-            // ASSERT
-
-            resolved.ShouldBeFalse();
-            actualType.ShouldBeNull();
-        }
-
-        [Fact]
-        public void GivenEmptyMemberInfoNameTypeResolver_WhenResolvingType_ThenReturnNull()
-        {
-            // ARRANGE
-
-            var typeResolver = new MemberInfoNamePartialTypeResolver(Array.Empty<Type>());
-
-            var headers = new Dictionary<string, string>
-            {
-                [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-                [EnvelopeHelper.MemberInfoName] = ""
-            };
-
-            // ACT
-
-            var resolved = typeResolver.TryResolveType(headers, out var actualType);
-
-            // ASSERT
-
-            resolved.ShouldBeFalse();
-            actualType.ShouldBeNull();
-        }
+        resolved.ShouldBeFalse();
+        actualType.ShouldBeNull();
     }
 }

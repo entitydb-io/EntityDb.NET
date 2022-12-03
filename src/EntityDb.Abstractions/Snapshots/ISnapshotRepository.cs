@@ -1,35 +1,40 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using System;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 
-namespace EntityDb.Abstractions.Snapshots
+namespace EntityDb.Abstractions.Snapshots;
+
+/// <summary>
+///     Represents a collection of <typeparamref name="TSnapshot" /> snapshots.
+/// </summary>
+/// <typeparam name="TSnapshot">The type of snapshot stored in the <see cref="ISnapshotRepository{TSnapshot}" />.</typeparam>
+public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
     /// <summary>
-    ///     Represents a collection of <typeparamref name="TEntity" /> snapshots.
+    ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or
+    ///     <c>default(<typeparamref name="TSnapshot" />)</c>.
     /// </summary>
-    /// <typeparam name="TEntity">The type of entity stored in the <see cref="ISnapshotRepository{TEntity}" />.</typeparam>
-    public interface ISnapshotRepository<TEntity> : IDisposableResource
-    {
-        /// <summary>
-        ///     Returns a <typeparamref name="TEntity" /> snapshot or <c>default(<typeparamref name="TEntity" />)</c>.
-        /// </summary>
-        /// <param name="entityId">The id of the entity.</param>
-        /// <returns>A <typeparamref name="TEntity" /> snapshot or <c>default(<typeparamref name="TEntity" />)</c>.</returns>
-        Task<TEntity?> GetSnapshot(Guid entityId);
+    /// <param name="snapshotPointer">A pointer to a specific snapshot.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>
+    ///     An exact version of snapshot of a <typeparamref name="TSnapshot" /> or
+    ///     <c>default(<typeparamref name="TSnapshot" />)</c>.
+    /// </returns>
+    Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        ///     Inserts a <typeparamref name="TEntity" /> snapshot.
-        /// </summary>
-        /// <param name="entityId">The id of the entity.</param>
-        /// <param name="entity">The entity.</param>
-        /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-        Task<bool> PutSnapshot(Guid entityId, TEntity entity);
+    /// <summary>
+    ///     Inserts a <typeparamref name="TSnapshot" /> snapshot.
+    /// </summary>
+    /// <param name="snapshotPointer">A pointer to a specific snapshot.</param>
+    /// <param name="snapshot">The snapshot.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
+    Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        ///     Deletes multiple <typeparamref name="TEntity" /> snapshots.
-        /// </summary>
-        /// <param name="entityIds">The id of the entitie snapshots to delete.</param>
-        /// <returns><c>true</c> if the deletes all succeeded, or <c>false</c> if any deletes failed.</returns>
-        Task<bool> DeleteSnapshots(Guid[] entityIds);
-    }
+    /// <summary>
+    ///     Deletes multiple <typeparamref name="TSnapshot" /> snapshots.
+    /// </summary>
+    /// <param name="snapshotPointers">Pointers to specific snapshots.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns><c>true</c> if the deletes all succeeded, or <c>false</c> if any deletes failed.</returns>
+    Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default);
 }

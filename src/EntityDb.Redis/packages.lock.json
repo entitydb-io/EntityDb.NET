@@ -1,16 +1,30 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0": {
+    "net7.0": {
       "StackExchange.Redis": {
         "type": "Direct",
-        "requested": "[2.2.88, )",
-        "resolved": "2.2.88",
-        "contentHash": "JJi1jcO3/ZiamBhlsC/TR8aZmYf+nqpGzMi0HRRCy5wJkUPmMnRp0kBA6V84uhU8b531FHSdTDaFCAyCUJomjA==",
+        "requested": "[2.6.70, )",
+        "resolved": "2.6.70",
+        "contentHash": "O1QpPNrcGZXXClqdNe69/ySwRPINTwSnZQr0qxKfBMUPqemmJ5UXVwCznVIwMEYhoBlZtIgC+ZYywhNb8oXaKg==",
         "dependencies": {
-          "Pipelines.Sockets.Unofficial": "2.2.0",
+          "Pipelines.Sockets.Unofficial": "2.2.2",
           "System.Diagnostics.PerformanceCounter": "5.0.0"
         }
+      },
+      "System.Linq.Async": {
+        "type": "Direct",
+        "requested": "[6.0.1, )",
+        "resolved": "6.0.1",
+        "contentHash": "0YhHcaroWpQ9UCot3Pizah7ryAzQhNvobLMSxeDIGmnXfkQn8u5owvpOH0K6EVB+z9L7u6Cc4W17Br/+jyttEQ==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
+        }
+      },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -36,10 +50,10 @@
       },
       "Pipelines.Sockets.Unofficial": {
         "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "7hzHplEIVOGBl5zOQZGX/DiJDHjq+RVRVrYgDiqXb6RriqWAdacXxp+XO9WSrATCEXyNOUOQg9aqQArsjase/A==",
+        "resolved": "2.2.2",
+        "contentHash": "Bhk0FWxH1paI+18zr1g5cTL+ebeuDcBCR+rRFO+fKEhretgjs7MF2Mc1P64FGLecWp4zKCUOPzngBNrqVyY7Zg==",
         "dependencies": {
-          "System.IO.Pipelines": "5.0.0"
+          "System.IO.Pipelines": "5.0.1"
         }
       },
       "System.Configuration.ConfigurationManager": {
@@ -72,8 +86,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "irMYm3vhVgRsYvHTU5b2gsT2CwT/SMM6LZFzuJjpIvT5Z4CshxNsaoBC1X/LltwuR3Opp8d6jOS/60WwOb7Q2Q=="
+        "resolved": "5.0.1",
+        "contentHash": "qEePWsaq9LoEEIqhbGe6D5J8c9IqQOUuTzzV6wn1POlfdLkJliZY3OlB0j0f17uMWlqZYjH7txj+2YbyrIA8Yg=="
       },
       "System.Security.AccessControl": {
         "type": "Transitive",
@@ -112,12 +126,23 @@
         }
       },
       "entitydb.abstractions": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "System.Linq.Async": "[6.0.1, )"
+        }
       },
       "entitydb.common": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Abstractions": "1.0.0"
+          "EntityDb.Abstractions": "[1.0.0, )",
+          "System.Linq.Async": "[6.0.1, )"
+        }
+      },
+      "entitydb.json": {
+        "type": "Project",
+        "dependencies": {
+          "EntityDb.Common": "[1.0.0, )",
+          "System.Linq.Async": "[6.0.1, )"
         }
       }
     }

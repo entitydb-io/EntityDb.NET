@@ -1,37 +1,34 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using System.Threading.Tasks;
+using EntityDb.Common.Disposables;
 
-namespace EntityDb.Common.Snapshots
+namespace EntityDb.Common.Snapshots;
+
+internal sealed class TestModeSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepositoryFactory<TSnapshot>
 {
-    internal sealed class TestModeSnapshotRepositoryFactory<TEntity> : ISnapshotRepositoryFactory<TEntity>
+    private readonly ISnapshotRepositoryFactory<TSnapshot> _snapshotRepositoryFactory;
+    private readonly TestModeSnapshotManager<TSnapshot> _testModeSnapshotManager = new();
+
+    public TestModeSnapshotRepositoryFactory
+    (
+        ISnapshotRepositoryFactory<TSnapshot> snapshotRepositoryFactory
+    )
     {
-        private readonly ISnapshotRepositoryFactory<TEntity> _snapshotRepositoryFactory;
-        private readonly TestModeSnapshotManager _testModeSnapshotManager = new();
+        _snapshotRepositoryFactory = snapshotRepositoryFactory;
+    }
 
-        public TestModeSnapshotRepositoryFactory
-        (
-            ISnapshotRepositoryFactory<TEntity> snapshotRepositoryFactory
-        )
-        {
-            _snapshotRepositoryFactory = snapshotRepositoryFactory;
-        }
+    public async Task<ISnapshotRepository<TSnapshot>> CreateRepository(string snapshotSessionOptionsName,
+        CancellationToken cancellationToken = default)
+    {
+        var snapshotRepository =
+            await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
 
-        public async Task<ISnapshotRepository<TEntity>> CreateRepository(string snapshotSessionOptionsName)
-        {
-            var snapshotRepository = await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName);
+        return new TestModeSnapshotRepository<TSnapshot>(snapshotRepository, _testModeSnapshotManager);
+    }
 
-            return new TestModeSnapshotRepository<TEntity>(snapshotRepository, _testModeSnapshotManager);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            var deleteEntityIds = _testModeSnapshotManager.GetDeleteEntityIds();
-
-            var snapshotRepository = await CreateRepository("");
-
-            await snapshotRepository.DeleteSnapshots(deleteEntityIds);
-
-            await _snapshotRepositoryFactory.DisposeAsync();
-        }
+    public override async ValueTask DisposeAsync()
+    {
+        await _testModeSnapshotManager.DisposeAsync();
+        await _snapshotRepositoryFactory.DisposeAsync();
     }
 }

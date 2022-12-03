@@ -1,9 +1,8 @@
-﻿namespace EntityDb.Common.Tests
+﻿namespace EntityDb.Common.Tests;
+
+public static class TestSessionOptions
 {
-    public static class TestSessionOptions
-    {
-        public const string Write = nameof(Write);
-        public const string ReadOnly = nameof(ReadOnly);
-        public const string ReadOnlySecondaryPreferred = nameof(ReadOnlySecondaryPreferred);
-    }
+    public const string Write = nameof(Write);
+    public const string ReadOnly = nameof(ReadOnly);
+    public const string ReadOnlySecondaryPreferred = nameof(ReadOnlySecondaryPreferred);
 }

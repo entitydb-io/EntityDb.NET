@@ -1,43 +1,45 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using System;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
 
-namespace EntityDb.Common.Snapshots
+namespace EntityDb.Common.Snapshots;
+
+internal abstract class SnapshotRepositoryWrapper<TSnapshot> : DisposableResourceBaseClass,
+    ISnapshotRepository<TSnapshot>
 {
-    internal abstract class SnapshotRepositoryWrapper<TEntity> : ISnapshotRepository<TEntity>
+    private readonly ISnapshotRepository<TSnapshot> _snapshotRepository;
+
+    protected SnapshotRepositoryWrapper
+    (
+        ISnapshotRepository<TSnapshot> snapshotRepository
+    )
     {
-        private readonly ISnapshotRepository<TEntity> _snapshotRepository;
-
-        protected SnapshotRepositoryWrapper
-        (
-            ISnapshotRepository<TEntity> snapshotRepository
-        )
-        {
-            _snapshotRepository = snapshotRepository;
-        }
-
-        public virtual Task<bool> PutSnapshot(Guid entityId, TEntity entity)
-        {
-            return WrapCommand(_snapshotRepository.PutSnapshot(entityId, entity));
-        }
-
-        public virtual Task<TEntity?> GetSnapshot(Guid entityId)
-        {
-            return WrapQuery(_snapshotRepository.GetSnapshot(entityId));
-        }
-
-        public virtual Task<bool> DeleteSnapshots(Guid[] entityIds)
-        {
-            return WrapCommand(_snapshotRepository.DeleteSnapshots(entityIds));
-        }
-
-        public virtual ValueTask DisposeAsync()
-        {
-            return _snapshotRepository.DisposeAsync();
-        }
-
-        protected abstract Task<TEntity?> WrapQuery(Task<TEntity?> task);
-
-        protected abstract Task<bool> WrapCommand(Task<bool> task);
+        _snapshotRepository = snapshotRepository;
     }
+
+    public virtual Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapCommand(() => _snapshotRepository.PutSnapshot(snapshotPointer, snapshot, cancellationToken));
+    }
+
+    public virtual Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer,
+        CancellationToken cancellationToken = default)
+    {
+        return WrapQuery(() => _snapshotRepository.GetSnapshotOrDefault(snapshotPointer, cancellationToken));
+    }
+
+    public virtual Task<bool> DeleteSnapshots(Pointer[] snapshotPointers, CancellationToken cancellationToken = default)
+    {
+        return WrapCommand(() => _snapshotRepository.DeleteSnapshots(snapshotPointers, cancellationToken));
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        await _snapshotRepository.DisposeAsync();
+    }
+
+    protected abstract Task<TSnapshot?> WrapQuery(Func<Task<TSnapshot?>> task);
+
+    protected abstract Task<bool> WrapCommand(Func<Task<bool>> task);
 }

@@ -1,33 +1,37 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Queries.FilterBuilders;
 using EntityDb.Abstractions.Queries.SortBuilders;
-using System;
+using EntityDb.Abstractions.ValueObjects;
 
-namespace EntityDb.Common.Queries
+namespace EntityDb.Common.Queries;
+
+internal sealed record GetEntityCommandsQuery
+    (Pointer EntityPointer, VersionNumber SnapshotVersionNumber, object? Options = null) : ICommandQuery
 {
-    internal abstract record GetEntityQuery(Guid EntityId) : ICommandQuery
+    public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
-        protected abstract TFilter GetSubFilter<TFilter>(ICommandFilterBuilder<TFilter> builder);
-
-        public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
+        var filters = new List<TFilter>
         {
-            return builder.And
-            (
-                builder.EntityIdIn(EntityId),
-                GetSubFilter(builder)
-            );
+            builder.EntityIdIn(EntityPointer.Id), builder.EntityVersionNumberGte(SnapshotVersionNumber.Next())
+        };
+
+        if (EntityPointer.VersionNumber != VersionNumber.MinValue)
+        {
+            filters.Add(builder.EntityVersionNumberLte(EntityPointer.VersionNumber));
         }
 
-        public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
-        {
-            return builder.Combine
-            (
-                builder.EntityVersionNumber(true)
-            );
-        }
-
-        public int? Skip => null;
-
-        public int? Take => null;
+        return builder.And(filters.ToArray());
     }
+
+    public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
+    {
+        return builder.Combine
+        (
+            builder.EntityVersionNumber(true)
+        );
+    }
+
+    public int? Skip => null;
+
+    public int? Take => null;
 }

@@ -2,17 +2,16 @@
 using EntityDb.Mvc.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDb.Mvc.Tests
+namespace EntityDb.Mvc.Tests;
+
+public class Startup : StartupBase
 {
-    public class Startup : StartupBase
+    public override void AddServices(IServiceCollection serviceCollection)
     {
-        public override void AddServices(IServiceCollection serviceCollection)
-        {
-            base.AddServices(serviceCollection);
+        base.AddServices(serviceCollection);
 
-            // Agent
+        // Agent
 
-            serviceCollection.AddHttpContextAgentAccessor();
-        }
+        serviceCollection.AddHttpContextAgentAccessor();
     }
 }

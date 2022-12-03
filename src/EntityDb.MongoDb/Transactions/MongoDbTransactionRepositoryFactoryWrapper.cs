@@ -1,41 +1,41 @@
 ﻿using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Transactions;
+using EntityDb.Common.Disposables;
 using EntityDb.MongoDb.Sessions;
-using System.Threading.Tasks;
 
-namespace EntityDb.MongoDb.Transactions
+namespace EntityDb.MongoDb.Transactions;
+
+internal abstract class MongoDbTransactionRepositoryFactoryWrapper : DisposableResourceBaseClass,
+    IMongoDbTransactionRepositoryFactory
 {
-    internal abstract class MongoDbTransactionRepositoryFactoryWrapper<TEntity> : IMongoDbTransactionRepositoryFactory<TEntity>
+    private readonly IMongoDbTransactionRepositoryFactory _mongoDbTransactionRepositoryFactory;
+
+    protected MongoDbTransactionRepositoryFactoryWrapper(
+        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory)
     {
-        private readonly IMongoDbTransactionRepositoryFactory<TEntity> _mongoDbTransactionRepositoryFactory;
+        _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
+    }
 
-        protected MongoDbTransactionRepositoryFactoryWrapper(
-            IMongoDbTransactionRepositoryFactory<TEntity> mongoDbTransactionRepositoryFactory)
-        {
-            _mongoDbTransactionRepositoryFactory = mongoDbTransactionRepositoryFactory;
-        }
+    public virtual MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
+    {
+        return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
+    }
 
-        public virtual TransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
-        {
-            return _mongoDbTransactionRepositoryFactory.GetTransactionSessionOptions(transactionSessionOptionsName);
-        }
+    public virtual Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
+        CancellationToken cancellationToken)
+    {
+        return _mongoDbTransactionRepositoryFactory.CreateSession(options, cancellationToken);
+    }
 
-        public virtual Task<IMongoSession> CreateSession(TransactionSessionOptions transactionSessionOptions)
-        {
-            return _mongoDbTransactionRepositoryFactory.CreateSession(transactionSessionOptions);
-        }
+    public virtual ITransactionRepository CreateRepository
+    (
+        IMongoSession mongoSession
+    )
+    {
+        return _mongoDbTransactionRepositoryFactory.CreateRepository(mongoSession);
+    }
 
-        public virtual ITransactionRepository<TEntity> CreateRepository
-        (
-            IMongoSession mongoSession
-        )
-        {
-            return _mongoDbTransactionRepositoryFactory.CreateRepository(mongoSession);
-        }
-
-        public virtual ValueTask DisposeAsync()
-        {
-            return _mongoDbTransactionRepositoryFactory.DisposeAsync();
-        }
+    public override async ValueTask DisposeAsync()
+    {
+        await _mongoDbTransactionRepositoryFactory.DisposeAsync();
     }
 }

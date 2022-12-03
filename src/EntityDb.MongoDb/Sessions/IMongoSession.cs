@@ -1,29 +1,35 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
-using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Queries;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Threading.Tasks;
 
-namespace EntityDb.MongoDb.Sessions
+namespace EntityDb.MongoDb.Sessions;
+
+internal interface IMongoSession : IDisposableResource
 {
-    internal interface IMongoSession : IDisposableResource
-    {
-        IMongoDatabase MongoDatabase { get; }
-        ILogger Logger { get; }
-        ITypeResolver TypeResolver { get; }
+    IMongoDatabase MongoDatabase { get; }
 
-        Task Insert<TDocument>(string collectionName,
-            TDocument[] bsonDocuments);
-        IFindFluent<TDocument, TDocument> Find<TDocument>(string collectionName,
-            FilterDefinition<TDocument> documentFilter);
-        Task Delete<TDocument>(string collectionName,
-            FilterDefinition<TDocument> documentFilter);
+    Task Insert<TDocument>(string collectionName,
+        TDocument[] bsonDocuments, CancellationToken cancellationToken);
 
-        void StartTransaction();
-        Task CommitTransaction();
-        Task AbortTransaction();
+    IAsyncEnumerable<TDocument> Find<TDocument>
+    (
+        string collectionName,
+        FilterDefinition<BsonDocument> filterDefinition,
+        ProjectionDefinition<BsonDocument, TDocument> projectionDefinition,
+        SortDefinition<BsonDocument>? sortDefinition,
+        int? skip,
+        int? limit,
+        MongoDbQueryOptions? options,
+        CancellationToken cancellationToken
+    );
 
-        IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions);
-    }
+    Task Delete<TDocument>(string collectionName,
+        FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken);
+
+    void StartTransaction();
+    Task CommitTransaction(CancellationToken cancellationToken);
+    Task AbortTransaction();
+
+    IMongoSession WithTransactionSessionOptions(MongoDbTransactionSessionOptions options);
 }

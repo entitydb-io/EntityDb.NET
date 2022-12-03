@@ -1,47 +1,39 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
-using System;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
 
-namespace EntityDb.Abstractions.Entities
+namespace EntityDb.Abstractions.Entities;
+
+/// <summary>
+///     Encapsulates the transaction repository and the snapshot repository of an entity.
+/// </summary>
+/// <typeparam name="TEntity">The type of the entity.</typeparam>
+public interface IEntityRepository<TEntity> : IDisposableResource
 {
     /// <summary>
-    ///     Encapsulates the transaction repository and the snapshot repository of an entity.
+    ///     The backing transaction repository.
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public interface IEntityRepository<TEntity> : IDisposableResource
-    {
-        /// <summary>
-        ///     The backing transaction repository.
-        /// </summary>
-        ITransactionRepository<TEntity> TransactionRepository { get; }
+    ITransactionRepository TransactionRepository { get; }
 
-        /// <summary>
-        ///     The backing snapshot repository (if snapshot is available).
-        /// </summary>
-        ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+    /// <summary>
+    ///     The backing snapshot repository (if snapshot is available).
+    /// </summary>
+    ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
-        /// <summary>
-        ///     Returns the current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.
-        /// </summary>
-        /// <param name="entityId">The id of the entity.</param>
-        /// <returns>The current state of a <typeparamref name="TEntity" /> or constructs a new <typeparamref name="TEntity" />.</returns>
-        Task<TEntity> GetCurrent(Guid entityId);
+    /// <summary>
+    ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Pointer" />.
+    /// </summary>
+    /// <param name="entityPointer">A pointer to the entity.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The snapshot of a <typeparamref name="TEntity" /> for <paramref name="entityPointer" />.</returns>
+    Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        ///     Returns a previous state of <typeparamref name="TEntity" />.
-        /// </summary>
-        /// <param name="entityId">The id of the entity.</param>
-        /// <param name="lteVersionNumber">The version of the entity to fetch.</param>
-        /// <returns>A previous state of <typeparamref name="TEntity" />.</returns>
-        Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber);
-
-        /// <summary>
-        ///     Inserts a single transaction with an atomic commit.
-        /// </summary>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
-        Task<bool> PutTransaction(ITransaction<TEntity> transaction);
-    }
+    /// <summary>
+    ///     Inserts a single transaction with an atomic commit.
+    /// </summary>
+    /// <param name="transaction">The transaction.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
+    Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default);
 }

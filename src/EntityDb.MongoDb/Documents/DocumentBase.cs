@@ -1,24 +1,15 @@
-﻿using EntityDb.MongoDb.Envelopes;
+﻿using EntityDb.Abstractions.ValueObjects;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Serializers;
-using System;
 
-namespace EntityDb.MongoDb.Documents
+namespace EntityDb.MongoDb.Documents;
+
+internal abstract record DocumentBase
 {
-    internal abstract record DocumentBase : ITransactionDocument
-    {
-        static DocumentBase()
-        {
-            BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-        }
+    [BsonIgnoreIfNull] public ObjectId? _id { get; init; }
 
-        public DateTime TransactionTimeStamp { get; init; }
-
-        [BsonIgnoreIfNull] public ObjectId? _id { get; init; }
-
-        public Guid TransactionId { get; init; }
-        public BsonDocumentEnvelope Data { get; init; } = default!;
-    }
+    public TimeStamp TransactionTimeStamp { get; init; }
+    public Id TransactionId { get; init; }
+    public string DataType { get; init; } = default!;
+    public BsonDocument Data { get; init; } = default!;
 }

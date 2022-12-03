@@ -1,14 +1,15 @@
-﻿namespace EntityDb.Abstractions.Agents
+﻿namespace EntityDb.Abstractions.Agents;
+
+/// <summary>
+///     Represents a type that can access an instance of <see cref="IAgent" />.
+/// </summary>
+public interface IAgentAccessor
 {
     /// <summary>
-    ///     Represents a type that can access an instance of <see cref="IAgent" /> within a service scope.
+    ///     Returns the agent.
     /// </summary>
-    public interface IAgentAccessor
-    {
-        /// <summary>
-        ///     Returns the agent of the service scope.
-        /// </summary>
-        /// <returns>The agent of the service scope.</returns>
-        IAgent GetAgent();
-    }
+    /// <param name="signatureOptionsName">The name of the signature options object.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The agent.</returns>
+    Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken = default);
 }

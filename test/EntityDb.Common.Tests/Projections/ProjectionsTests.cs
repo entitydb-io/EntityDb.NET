@@ -1,0 +1,126 @@
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Projections;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Entities;
+using EntityDb.Common.Exceptions;
+using EntityDb.Common.Projections;
+using EntityDb.Common.Tests.Implementations.Seeders;
+using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
+using Xunit;
+
+namespace EntityDb.Common.Tests.Projections;
+
+[Collection(nameof(DatabaseContainerCollection))]
+public class ProjectionsTests : TestsBase<Startup>
+{
+    public ProjectionsTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
+    {
+    }
+
+    private async Task Generic_GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow<TProjection>(
+        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+        where TProjection : IProjection<TProjection>
+    {
+        // ARRANGE
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
+            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
+            projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
+        });
+
+        await using var projectionRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+
+        // ACT & ASSERT
+
+        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(() =>
+            projectionRepository.GetSnapshot(default));
+    }
+
+
+    private async Task
+        Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(
+            TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder,
+            SnapshotAdder projectionSnapshotAdder)
+        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+    {
+        // ARRANGE
+
+        const uint numberOfVersionNumbers = 5;
+        const uint replaceAtVersionNumber = 3;
+
+        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
+            projection.GetVersionNumber() == new VersionNumber(replaceAtVersionNumber);
+
+        var projectionId = Id.NewId();
+        var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            transactionsAdder.AddDependencies.Invoke(serviceCollection);
+            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
+            projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
+        });
+
+        await using var entityRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
+            .CreateRepository(TestSessionOptions.Write);
+
+        await using var projectionRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
+            .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
+
+        var transactionInserted = await entityRepository.PutTransaction(transaction);
+
+        // ARRANGE ASSERTIONS
+
+        numberOfVersionNumbers.ShouldBeGreaterThan(replaceAtVersionNumber);
+
+        transactionInserted.ShouldBeTrue();
+
+        projectionRepository.SnapshotRepository.ShouldNotBeNull();
+
+        // ACT
+
+        var currentProjection = await projectionRepository.GetSnapshot(projectionId);
+        var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshotOrDefault(projectionId);
+
+        // ASSERT
+
+        currentProjection.GetVersionNumber().Value.ShouldBe(numberOfVersionNumbers);
+
+        projectionSnapshot.ShouldNotBe(default);
+
+        projectionSnapshot!.GetVersionNumber().Value.ShouldBe(replaceAtVersionNumber);
+    }
+
+    [Theory]
+    [MemberData(nameof(AddTransactionsEntitySnapshotsAndProjectionSnapshots))]
+    public Task GivenEmptyTransactionRepository_WhenGettingProjection_ThenThrow(TransactionsAdder transactionsAdder,
+        SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { projectionSnapshotAdder.SnapshotType },
+            new object?[] { transactionsAdder, entitySnapshotAdder, projectionSnapshotAdder }
+        );
+    }
+
+    [Theory]
+    [MemberData(nameof(AddTransactionsEntitySnapshotsAndProjectionSnapshots))]
+    public Task GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection(
+        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entitySnapshotAdder.SnapshotType, projectionSnapshotAdder.SnapshotType },
+            new object?[] { transactionsAdder, entitySnapshotAdder, projectionSnapshotAdder }
+        );
+    }
+}

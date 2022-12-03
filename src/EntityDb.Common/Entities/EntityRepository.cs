@@ -1,115 +1,104 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Queries;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace EntityDb.Common.Entities
+namespace EntityDb.Common.Entities;
+
+internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityRepository<TEntity>
+    where TEntity : IEntity<TEntity>
 {
-    internal class EntityRepository<TEntity> : IEntityRepository<TEntity>
-        where TEntity : IEntity<TEntity>
+    private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
+
+    public EntityRepository
+    (
+        IEnumerable<ITransactionSubscriber> transactionSubscribers,
+        ITransactionRepository transactionRepository,
+        ISnapshotRepository<TEntity>? snapshotRepository = null
+    )
     {
-        private readonly IEnumerable<ITransactionSubscriber<TEntity>> _transactionSubscribers;
-        private readonly ITransactionRepository<TEntity> _transactionRepository;
-        private readonly ISnapshotRepository<TEntity>? _snapshotRepository;
+        _transactionSubscribers = transactionSubscribers;
+        TransactionRepository = transactionRepository;
+        SnapshotRepository = snapshotRepository;
+    }
 
-        public EntityRepository
-        (
-            IEnumerable<ITransactionSubscriber<TEntity>> transactionSubscribers,
-            ITransactionRepository<TEntity> transactionRepository,
-            ISnapshotRepository<TEntity>? snapshotRepository = null
-        )
+    public ITransactionRepository TransactionRepository { get; }
+    public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+
+    public async Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default)
+    {
+        var snapshot = SnapshotRepository is not null
+            ? await SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken) ??
+              TEntity.Construct(entityPointer.Id)
+            : TEntity.Construct(entityPointer.Id);
+
+        var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());
+
+        var commands = TransactionRepository.EnumerateCommands(commandQuery, cancellationToken);
+
+        var entity = snapshot;
+
+        await foreach (var command in commands)
         {
-            _transactionSubscribers = transactionSubscribers;
-            _transactionRepository = transactionRepository;
-            _snapshotRepository = snapshotRepository;
+            entity = entity.Reduce(command);
         }
 
-        public ITransactionRepository<TEntity> TransactionRepository => _transactionRepository;
-
-        public ISnapshotRepository<TEntity>? SnapshotRepository => _snapshotRepository;
-
-        public async Task<TEntity> GetCurrent(Guid entityId)
+        if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
         {
-            var entity = await _snapshotRepository.GetSnapshotOrDefault(entityId) ?? TEntity.Construct(entityId);
-
-            var versionNumber = entity.GetVersionNumber();
-
-            var commandQuery = new GetCurrentEntityQuery(entityId, versionNumber);
-
-            var commands = await _transactionRepository.GetCommands(commandQuery);
-
-            entity = entity.Reduce(commands);
-
-            if (entity.GetVersionNumber() == 0)
-            {
-                throw new EntityNotCreatedException();
-            }
-
-            return entity;
+            throw new SnapshotPointerDoesNotExistException();
         }
 
-        public async Task<TEntity> GetAtVersion(Guid entityId, ulong lteVersionNumber)
+        return entity;
+    }
+
+    public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
+    {
+        try
         {
-            var commandQuery = new GetEntityAtVersionQuery(entityId, lteVersionNumber);
+            return await TransactionRepository.PutTransaction(transaction, cancellationToken);
+        }
+        finally
+        {
+            Publish(transaction);
+        }
+    }
 
-            var commands = await _transactionRepository.GetCommands(commandQuery);
+    public override async ValueTask DisposeAsync()
+    {
+        await TransactionRepository.DisposeAsync();
 
-            return TEntity
-                .Construct(entityId)
-                .Reduce(commands);
+        if (SnapshotRepository is not null)
+        {
+            await SnapshotRepository.DisposeAsync();
+        }
+    }
+
+    private void Publish(ITransaction transaction)
+    {
+        foreach (var transactionSubscriber in _transactionSubscribers)
+        {
+            transactionSubscriber.Notify(transaction);
+        }
+    }
+
+    public static EntityRepository<TEntity> Create
+    (
+        IServiceProvider serviceProvider,
+        ITransactionRepository transactionRepository,
+        ISnapshotRepository<TEntity>? snapshotRepository = null
+    )
+    {
+        if (snapshotRepository is null)
+        {
+            return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider,
+                transactionRepository);
         }
 
-        public async Task<bool> PutTransaction(ITransaction<TEntity> transaction)
-        {
-            try
-            {
-                return await _transactionRepository.PutTransaction(transaction);
-            }
-            finally
-            {
-                Publish(transaction);
-            }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _transactionRepository.DisposeAsync();
-
-            if (_snapshotRepository != null)
-            {
-                await _snapshotRepository.DisposeAsync();
-            }
-        }
-
-        private void Publish(ITransaction<TEntity> transaction)
-        {
-            foreach (var transactionSubscriber in _transactionSubscribers)
-            {
-                transactionSubscriber.Notify(transaction);
-            }
-        }
-
-        public static EntityRepository<TEntity> Create
-        (
-            IServiceProvider serviceProvider,
-            ITransactionRepository<TEntity> transactionRepository,
-            ISnapshotRepository<TEntity>? snapshotRepository = null
-        )
-        {
-            if (snapshotRepository == null)
-            {
-                return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider,
-                    transactionRepository);
-            }
-
-            return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository,
-                snapshotRepository);
-        }
+        return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository,
+            snapshotRepository);
     }
 }

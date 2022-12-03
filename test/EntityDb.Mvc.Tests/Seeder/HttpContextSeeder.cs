@@ -1,129 +1,105 @@
 ﻿using Bogus;
+using EntityDb.Abstractions.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
-using System;
-using System.Linq;
-using System.Security.Claims;
 
-namespace EntityDb.Mvc.Tests.Seeder
+namespace EntityDb.Mvc.Tests.Seeder;
+
+public static class HttpContextSeeder
 {
-    public static class HttpContextSeeder
+    private static ConnectionInfo CreateConnectionInfo(HttpContextSeederOptions httpContextSeederOptions)
     {
-        private static ConnectionInfo CreateConnectionInfo(HttpContextSeederOptions httpContextSeederOptions)
-        {
-            var connectionInfoMock = new Mock<ConnectionInfo>(MockBehavior.Strict);
+        var connectionInfoMock = new Mock<ConnectionInfo>(MockBehavior.Strict);
 
-            connectionInfoMock
-                .SetupGet(info => info.Id)
-                .Returns(Guid.NewGuid().ToString());
+        connectionInfoMock
+            .SetupGet(info => info.Id)
+            .Returns(Id.NewId().ToString()!);
 
-            var faker = new Faker();
+        var faker = new Faker();
 
-            connectionInfoMock
-                .SetupGet(info => info.RemoteIpAddress)
-                .Returns(httpContextSeederOptions.HasIpAddress ? faker.Internet.IpAddress() : null);
+        connectionInfoMock
+            .SetupGet(info => info.RemoteIpAddress)
+            .Returns(httpContextSeederOptions.HasIpAddress ? faker.Internet.IpAddress() : null);
 
-            connectionInfoMock
-                .SetupGet(info => info.RemotePort)
-                .Returns(faker.Internet.Port());
+        connectionInfoMock
+            .SetupGet(info => info.RemotePort)
+            .Returns(faker.Internet.Port());
 
-            connectionInfoMock
-                .SetupGet(info => info.LocalIpAddress)
-                .Returns(httpContextSeederOptions.HasIpAddress ? faker.Internet.IpAddress() : null);
+        connectionInfoMock
+            .SetupGet(info => info.LocalIpAddress)
+            .Returns(httpContextSeederOptions.HasIpAddress ? faker.Internet.IpAddress() : null);
 
-            connectionInfoMock
-                .SetupGet(info => info.LocalPort)
-                .Returns(faker.Internet.Port());
+        connectionInfoMock
+            .SetupGet(info => info.LocalPort)
+            .Returns(faker.Internet.Port());
 
-            return connectionInfoMock.Object;
-        }
+        return connectionInfoMock.Object;
+    }
 
-        private static HttpRequest CreateHttpRequest(HttpContextSeederOptions httpContextSeederOptions)
-        {
-            var query = httpContextSeederOptions.QueryStringParams.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+    private static HttpRequest CreateHttpRequest(HttpContextSeederOptions httpContextSeederOptions)
+    {
+        var query = httpContextSeederOptions.QueryStringParams.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            var queryCollectionMock = new Mock<IQueryCollection>(MockBehavior.Strict);
+        var queryCollectionMock = new Mock<IQueryCollection>(MockBehavior.Strict);
 
-            queryCollectionMock
-                .Setup(dictionary => dictionary.GetEnumerator())
-                .Returns(query.GetEnumerator());
+        queryCollectionMock
+            .Setup(dictionary => dictionary.GetEnumerator())
+            .Returns(query.GetEnumerator());
 
-            var headers = httpContextSeederOptions.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
+        var headers = httpContextSeederOptions.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value));
 
-            var headerDictionaryMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
+        var headerDictionaryMock = new Mock<IHeaderDictionary>(MockBehavior.Strict);
 
-            headerDictionaryMock
-                .Setup(dictionary => dictionary.GetEnumerator())
-                .Returns(headers.GetEnumerator());
+        headerDictionaryMock
+            .Setup(dictionary => dictionary.GetEnumerator())
+            .Returns(headers.GetEnumerator());
 
-            var httpRequestMock = new Mock<HttpRequest>(MockBehavior.Strict);
+        var httpRequestMock = new Mock<HttpRequest>(MockBehavior.Strict);
 
-            httpRequestMock
-                .SetupGet(request => request.Method)
-                .Returns(httpContextSeederOptions.Method);
+        httpRequestMock
+            .SetupGet(request => request.Method)
+            .Returns(httpContextSeederOptions.Method);
 
-            httpRequestMock
-                .SetupGet(request => request.Scheme)
-                .Returns(httpContextSeederOptions.Scheme);
+        httpRequestMock
+            .SetupGet(request => request.Scheme)
+            .Returns(httpContextSeederOptions.Scheme);
 
-            httpRequestMock
-                .SetupGet(request => request.Host)
-                .Returns(new HostString(httpContextSeederOptions.Host));
+        httpRequestMock
+            .SetupGet(request => request.Host)
+            .Returns(new HostString(httpContextSeederOptions.Host));
 
-            httpRequestMock
-                .SetupGet(request => request.Path)
-                .Returns(new PathString(httpContextSeederOptions.Path));
+        httpRequestMock
+            .SetupGet(request => request.Path)
+            .Returns(new PathString(httpContextSeederOptions.Path));
 
-            httpRequestMock
-                .SetupGet(request => request.Protocol)
-                .Returns(httpContextSeederOptions.Protocol);
+        httpRequestMock
+            .SetupGet(request => request.Protocol)
+            .Returns(httpContextSeederOptions.Protocol);
 
-            httpRequestMock
-                .SetupGet(request => request.Query)
-                .Returns(queryCollectionMock.Object);
+        httpRequestMock
+            .SetupGet(request => request.Query)
+            .Returns(queryCollectionMock.Object);
 
-            httpRequestMock
-                .SetupGet(request => request.Headers)
-                .Returns(headerDictionaryMock.Object);
+        httpRequestMock
+            .SetupGet(request => request.Headers)
+            .Returns(headerDictionaryMock.Object);
 
-            return httpRequestMock.Object;
-        }
+        return httpRequestMock.Object;
+    }
 
-        private static ClaimsPrincipal CreateClaimsPrincipal(HttpContextSeederOptions httpContextSeederOptions)
-        {
-            var claimsPrincipal = new ClaimsPrincipal();
-            var claimsIdentity = new ClaimsIdentity();
+    public static HttpContext CreateHttpContext(HttpContextSeederOptions httpContextSeederOptions)
+    {
+        var httpContextMock = new Mock<HttpContext>(MockBehavior.Strict);
 
-            if (httpContextSeederOptions.Role != null)
-            {
-                var claim = new Claim(ClaimTypes.Role, httpContextSeederOptions.Role);
+        httpContextMock
+            .SetupGet(context => context.Request)
+            .Returns(CreateHttpRequest(httpContextSeederOptions));
 
-                claimsIdentity.AddClaim(claim);
-            }
+        httpContextMock
+            .SetupGet(context => context.Connection)
+            .Returns(CreateConnectionInfo(httpContextSeederOptions));
 
-            claimsPrincipal.AddIdentity(claimsIdentity);
-
-            return claimsPrincipal;
-        }
-
-        public static HttpContext CreateHttpContext(HttpContextSeederOptions httpContextSeederOptions)
-        {
-            var httpContextMock = new Mock<HttpContext>(MockBehavior.Strict);
-
-            httpContextMock
-                .SetupGet(context => context.Request)
-                .Returns(CreateHttpRequest(httpContextSeederOptions));
-
-            httpContextMock
-                .SetupGet(context => context.Connection)
-                .Returns(CreateConnectionInfo(httpContextSeederOptions));
-
-            httpContextMock
-                .SetupGet(context => context.User)
-                .Returns(CreateClaimsPrincipal(httpContextSeederOptions));
-
-            return httpContextMock.Object;
-        }
+        return httpContextMock.Object;
     }
 }

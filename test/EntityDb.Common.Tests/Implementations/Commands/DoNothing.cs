@@ -1,13 +1,21 @@
-﻿using EntityDb.Abstractions.Commands;
+﻿using EntityDb.Abstractions.Reducers;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Tests.Implementations.Projections;
 
-namespace EntityDb.Common.Tests.Implementations.Commands
+namespace EntityDb.Common.Tests.Implementations.Commands;
+
+public record DoNothing : IReducer<TestEntity>, IReducer<OneToOneProjection>
 {
-    public record DoNothing : ICommand<TransactionEntity>
+    public OneToOneProjection Reduce(OneToOneProjection projection)
     {
-        public TransactionEntity Reduce(TransactionEntity entity)
+        return projection with
         {
-            return entity with { VersionNumber = entity.VersionNumber + 1 };
-        }
+            VersionNumber = projection.VersionNumber.Next()
+        };
+    }
+
+    public TestEntity Reduce(TestEntity entity)
+    {
+        return entity with { VersionNumber = entity.VersionNumber.Next() };
     }
 }

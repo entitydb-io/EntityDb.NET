@@ -1,14 +1,36 @@
-using EntityDb.Abstractions.Annotations;
-using System;
+﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.ValueObjects;
 
-namespace EntityDb.Common.Annotations
+namespace EntityDb.Common.Annotations;
+
+internal record EntityAnnotation<TData>
+(
+    Id TransactionId,
+    TimeStamp TransactionTimeStamp,
+    Id EntityId,
+    VersionNumber EntityVersionNumber,
+    TData Data
+) : IEntityAnnotation<TData>
 {
-    internal record EntityAnnotation<TData>
+    public static IEntityAnnotation<TData> CreateFromBoxedData
     (
-        Guid TransactionId,
-        DateTime TransactionTimeStamp,
-        Guid EntityId,
-        ulong EntityVersionNumber,
-        TData Data
-    ) : IEntityAnnotation<TData>;
+        Id transactionId,
+        TimeStamp transactionTimeStamp,
+        Id entityId,
+        VersionNumber entityVersionNumber,
+        object boxedData
+    )
+    {
+        var dataAnnotationType = typeof(EntityAnnotation<>).MakeGenericType(boxedData.GetType());
+
+        return (IEntityAnnotation<TData>)Activator.CreateInstance
+        (
+            dataAnnotationType,
+            transactionId,
+            transactionTimeStamp,
+            entityId,
+            entityVersionNumber,
+            boxedData
+        )!;
+    }
 }

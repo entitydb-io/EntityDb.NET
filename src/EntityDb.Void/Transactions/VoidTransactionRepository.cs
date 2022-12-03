@@ -1,84 +1,102 @@
 ﻿using EntityDb.Abstractions.Annotations;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
-using System;
-using System.Threading.Tasks;
+using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
 
-namespace EntityDb.Void.Transactions
+namespace EntityDb.Void.Transactions;
+
+internal sealed class VoidTransactionRepository : DisposableResourceBaseClass, ITransactionRepository
 {
-    internal sealed class VoidTransactionRepository<TEntity> : ITransactionRepository<TEntity>
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
     {
-        public Task<Guid[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetTransactionIds(ICommandQuery commandQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetTransactionIds(ILeaseQuery leaseQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetTransactionIds(ITagQuery tagQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateTransactionIds(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateEntityIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetEntityIds(ICommandQuery commandQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetEntityIds(ILeaseQuery leaseQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<Guid[]> GetEntityIds(ITagQuery tagQuery)
-        {
-            return Task.FromResult(Array.Empty<Guid>());
-        }
+    public IAsyncEnumerable<Id> EnumerateEntityIds(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<Id>();
+    }
 
-        public Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery)
-        {
-            return Task.FromResult(Array.Empty<object>());
-        }
+    public IAsyncEnumerable<object> EnumerateAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<object>();
+    }
 
-        public Task<ICommand<TEntity>[]> GetCommands(ICommandQuery commandQuery)
-        {
-            return Task.FromResult(Array.Empty<ICommand<TEntity>>());
-        }
+    public IAsyncEnumerable<object> EnumerateCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<object>();
+    }
 
-        public Task<ILease[]> GetLeases(ILeaseQuery leaseQuery)
-        {
-            return Task.FromResult(Array.Empty<ILease>());
-        }
+    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<ILease>();
+    }
 
-        public Task<ITag[]> GetTags(ITagQuery tagQuery)
-        {
-            return Task.FromResult(Array.Empty<ITag>());
-        }
+    public IAsyncEnumerable<ITag> EnumerateTags(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<ITag>();
+    }
 
-        public Task<IEntityAnnotation<ICommand<TEntity>>[]> GetAnnotatedCommands(ICommandQuery commandQuery)
-        {
-            return Task.FromResult(Array.Empty<IEntityAnnotation<ICommand<TEntity>>>());
-        }
+    public IAsyncEnumerable<IEntitiesAnnotation<object>> EnumerateAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<IEntitiesAnnotation<object>>();
+    }
 
-        public Task<bool> PutTransaction(ITransaction<TEntity> transaction)
-        {
-            return Task.FromResult(true);
-        }
+    public IAsyncEnumerable<IEntityAnnotation<object>> EnumerateAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return AsyncEnumerable.Empty<IEntityAnnotation<object>>();
+    }
+
+    public Task<bool> PutTransaction(ITransaction transaction,
+        CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(false);
     }
 }

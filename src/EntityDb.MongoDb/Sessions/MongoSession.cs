@@ -1,139 +1,277 @@
-﻿using EntityDb.Abstractions.Loggers;
-using EntityDb.Abstractions.TypeResolvers;
+﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Transactions;
+using EntityDb.MongoDb.Queries;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
-namespace EntityDb.MongoDb.Sessions
+namespace EntityDb.MongoDb.Sessions;
+
+internal record MongoSession
+(
+    ILogger<MongoSession> Logger,
+    IMongoDatabase MongoDatabase,
+    IClientSessionHandle ClientSessionHandle,
+    MongoDbTransactionSessionOptions Options
+) : DisposableResourceBaseRecord, IMongoSession
 {
-    internal record MongoSession
-    (
-        IMongoDatabase MongoDatabase,
-        IClientSessionHandle ClientSessionHandle,
-        ILogger Logger,
-        ITypeResolver TypeResolver,
-        TransactionSessionOptions TransactionSessionOptions
-    ) : IMongoSession
+    private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
+
+    public async Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments,
+        CancellationToken cancellationToken)
     {
-        private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
+        AssertNotReadOnly();
 
-        private ReadPreference GetReadPreference()
-        {
-            if (!TransactionSessionOptions.ReadOnly)
-            {
-                return ReadPreference.Primary;
-            }
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
 
-            return TransactionSessionOptions.SecondaryPreferred
-                ? ReadPreference.SecondaryPreferred
-                : ReadPreference.PrimaryPreferred;
-        }
-
-        [ExcludeFromCodeCoverage(Justification = "Tests should always run in a transaction.")]
-        private ReadConcern GetReadConcern()
-        {
-            if (ClientSessionHandle.IsInTransaction)
-            {
-                return ReadConcern.Snapshot;
-            }
-
-            return ReadConcern.Majority;
-        }
-
-        private void AssertNotReadOnly()
-        {
-            if (TransactionSessionOptions.ReadOnly)
-            {
-                throw new CannotWriteInReadOnlyModeException();
-            }
-        }
-
-        public async Task Insert<TDocument>(string collectionName, TDocument[] bsonDocuments)
-        {
-            AssertNotReadOnly();
-
-            await MongoDatabase
-                .GetCollection<TDocument>(collectionName)
-                .InsertManyAsync
-                (
-                    ClientSessionHandle,
-                    bsonDocuments
-                );
-        }
-
-        public IFindFluent<TDocument, TDocument> Find<TDocument>(string collectionName,
-            FilterDefinition<TDocument> filter)
-        {
-            return MongoDatabase
-                .GetCollection<TDocument>(collectionName)
-                .WithReadPreference(GetReadPreference())
-                .WithReadConcern(GetReadConcern())
-                .Find(ClientSessionHandle, filter, new FindOptions
-                {
-                    MaxTime = TransactionSessionOptions.ReadTimeout
-                });
-        }
-
-        public async Task Delete<TDocument>(string collectionName,
-            FilterDefinition<TDocument> documentFilter)
-        {
-            AssertNotReadOnly();
-
-            await MongoDatabase
-                .GetCollection<TDocument>(collectionName)
-                .DeleteManyAsync
-                (
-                    ClientSessionHandle,
-                    documentFilter
-                );
-        }
-
-        public IMongoSession WithTransactionSessionOptions(TransactionSessionOptions transactionSessionOptions)
-        {
-            return this with
-            {
-                TransactionSessionOptions = transactionSessionOptions,
-            };
-        }
-
-        public void StartTransaction()
-        {
-            AssertNotReadOnly();
-
-            ClientSessionHandle.StartTransaction(new TransactionOptions
+        Logger
+            .LogInformation
             (
-                writeConcern: WriteConcern,
-                maxCommitTime: TransactionSessionOptions.WriteTimeout
-            ));
-        }
+                "Started Running MongoDb Insert on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nDocuments Inserted: {DocumentsInserted}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                bsonDocuments.Length
+            );
 
-        [ExcludeFromCodeCoverage(Justification = "Tests should run witht he Debug configuration, and should not execute this method.")]
-        public async Task CommitTransaction()
+        await MongoDatabase
+            .GetCollection<TDocument>(collectionName)
+            .InsertManyAsync
+            (
+                ClientSessionHandle,
+                bsonDocuments,
+                cancellationToken: cancellationToken
+            );
+
+        Logger
+            .LogInformation
+            (
+                "Finished Running MongoDb Insert on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nDocuments Inserted: {DocumentsInserted}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                bsonDocuments.Length
+            );
+    }
+
+    public async IAsyncEnumerable<TDocument> Find<TDocument>
+    (
+        string collectionName,
+        FilterDefinition<BsonDocument> filter,
+        ProjectionDefinition<BsonDocument, TDocument> projection,
+        SortDefinition<BsonDocument>? sort,
+        int? skip,
+        int? limit,
+        MongoDbQueryOptions? options,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    )
+    {
+        var find = MongoDatabase
+            .GetCollection<BsonDocument>(collectionName)
+            .WithReadPreference(GetReadPreference())
+            .WithReadConcern(GetReadConcern())
+            .Find(ClientSessionHandle, filter, options?.FindOptions)
+            .Project(projection);
+
+        if (sort is not null)
         {
-#if DEBUG
-            //TODO: CannotCommitInTestModeException
-            await Task.FromException(new CannotWriteInReadOnlyModeException());
-#else
-            AssertNotReadOnly();
-
-            await ClientSessionHandle.CommitTransactionAsync();
-#endif
+            find = find.Sort(sort);
         }
 
-        public async Task AbortTransaction()
+        if (skip is not null)
         {
-            AssertNotReadOnly();
-
-            await ClientSessionHandle.AbortTransactionAsync();
+            find = find.Skip(skip);
         }
 
-        public ValueTask DisposeAsync()
+        if (limit is not null)
         {
-            ClientSessionHandle.Dispose();
-
-            return ValueTask.CompletedTask;
+            find = find.Limit(limit);
         }
+
+        var query = find.ToString();
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
+
+        Logger
+            .LogInformation
+            (
+                "Started Enumerating MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                query
+            );
+
+        ulong documentCount = 0;
+
+        using var cursor = await find.ToCursorAsync(cancellationToken);
+
+        while (await cursor.MoveNextAsync(cancellationToken))
+        {
+            foreach (var document in cursor.Current)
+            {
+                documentCount += 1;
+
+                yield return document;
+            }
+        }
+
+        Logger
+            .LogInformation
+            (
+                "Finished Enumerating MongoDb Query on `{DatabaseNamespace}.{CollectionName}`\n\nServer Session Id: {ServerSessionId}\n\nQuery: {Query}\n\nDocuments Returned: {DocumentsReturned}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                query,
+                documentCount
+            );
+    }
+
+
+
+    public async Task Delete<TDocument>(string collectionName,
+        FilterDefinition<TDocument> filterDefinition, CancellationToken cancellationToken)
+    {
+        AssertNotReadOnly();
+
+        var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
+        var command =
+            MongoDatabase.GetCollection<TDocument>(collectionName).Find(filterDefinition).ToString()!.Replace("find",
+                "deleteMany");
+
+        Logger
+            .LogInformation
+            (
+                "Started Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                command
+            );
+
+        var deleteResult = await MongoDatabase
+            .GetCollection<TDocument>(collectionName)
+            .DeleteManyAsync
+            (
+                ClientSessionHandle,
+                filterDefinition,
+                cancellationToken: cancellationToken
+            );
+
+        Logger
+            .LogInformation(
+                "Finished Running MongoDb Delete on `{DatabaseNamespace}.{CollectionName}`\n\nServer SessionId: {ServerSessionId}\n\nCommand: {Command}\n\nDocuments Deleted: {DocumentsDeleted}",
+                MongoDatabase.DatabaseNamespace,
+                collectionName,
+                serverSessionId,
+                command,
+                deleteResult.IsAcknowledged ? "(Not Available)" : deleteResult.DeletedCount
+            );
+    }
+
+    public IMongoSession WithTransactionSessionOptions(MongoDbTransactionSessionOptions options)
+    {
+        return this with { Options = options };
+    }
+
+    public void StartTransaction()
+    {
+        AssertNotReadOnly();
+        
+        ClientSessionHandle.StartTransaction(new TransactionOptions
+        (
+            writeConcern: WriteConcern,
+            maxCommitTime: Options.WriteTimeout
+        ));
+
+        Logger
+            .LogInformation
+            (
+                "Started MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
+                MongoDatabase.DatabaseNamespace,
+                ClientSessionHandle.ServerSession.Id.ToString()
+            );
+    }
+
+    [ExcludeFromCodeCoverage(Justification =
+        "Tests should run with the Debug configuration, and should not execute this method.")]
+    public async Task CommitTransaction(CancellationToken cancellationToken)
+    {
+        AssertNotReadOnly();
+
+        await ClientSessionHandle.CommitTransactionAsync(cancellationToken);
+
+        Logger
+            .LogInformation
+            (
+                "Committed MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
+                MongoDatabase.DatabaseNamespace,
+                ClientSessionHandle.ServerSession.Id.ToString()
+            );
+    }
+
+    public async Task AbortTransaction()
+    {
+        AssertNotReadOnly();
+
+        await ClientSessionHandle.AbortTransactionAsync();
+
+        Logger
+            .LogInformation
+            (
+                "Aborted MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
+                MongoDatabase.DatabaseNamespace,
+                ClientSessionHandle.ServerSession.Id.ToString()
+            );
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        ClientSessionHandle.Dispose();
+
+        return base.DisposeAsync();
+    }
+
+    private ReadPreference GetReadPreference()
+    {
+        if (!Options.ReadOnly)
+        {
+            return ReadPreference.Primary;
+        }
+
+        return Options.SecondaryPreferred
+            ? ReadPreference.SecondaryPreferred
+            : ReadPreference.PrimaryPreferred;
+    }
+
+    [ExcludeFromCodeCoverage(Justification = "Tests should always run in a transaction.")]
+    private ReadConcern GetReadConcern()
+    {
+        return ClientSessionHandle.IsInTransaction
+            ? ReadConcern.Snapshot
+            : ReadConcern.Majority;
+    }
+
+    private void AssertNotReadOnly()
+    {
+        if (Options.ReadOnly)
+        {
+            throw new CannotWriteInReadOnlyModeException();
+        }
+    }
+
+    public static IMongoSession Create
+    (
+        IServiceProvider serviceProvider,
+        IMongoDatabase mongoDatabase,
+        IClientSessionHandle clientSessionHandle,
+        MongoDbTransactionSessionOptions options
+    )
+    {
+        return ActivatorUtilities.CreateInstance<MongoSession>(serviceProvider, mongoDatabase, clientSessionHandle,
+            options);
     }
 }

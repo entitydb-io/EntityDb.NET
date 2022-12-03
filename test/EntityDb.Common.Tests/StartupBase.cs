@@ -1,78 +1,23 @@
-﻿using EntityDb.Common.Extensions;
-using EntityDb.Common.Snapshots;
-using EntityDb.Common.Tests.Implementations.Agents;
-using EntityDb.Common.Tests.Implementations.Entities;
-using EntityDb.Common.Transactions;
+﻿using EntityDb.Common.Agents;
+using EntityDb.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
-namespace EntityDb.Common.Tests
+namespace EntityDb.Common.Tests;
+
+public abstract class StartupBase : IStartup
 {
-    public abstract class StartupBase : IStartup
+    public virtual void AddServices(IServiceCollection serviceCollection)
     {
+        // Resolving
 
-        public virtual void AddServices(IServiceCollection serviceCollection)
-        {
-            // Logging
+        serviceCollection.AddLifoTypeResolver();
 
-            serviceCollection.AddDefaultLogger();
+        serviceCollection.AddMemberInfoNamePartialTypeResolver(Array.Empty<Type>());
 
-            // Resolving
+        serviceCollection.AddDefaultPartialTypeResolver();
 
-            serviceCollection.AddLifoTypeResolver();
+        // Agent Accessor
 
-            serviceCollection.AddMemberInfoNamePartialTypeResolver(Array.Empty<Type>());
-
-            serviceCollection.AddDefaultPartialTypeResolver();
-
-            // Agent
-
-            serviceCollection.AddAgentAccessor<NoAgentAccessor>();
-
-            // Transaction Entity
-
-            serviceCollection.AddEntity<TransactionEntity>();
-
-            // Snapshot Session Options
-
-            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
-
-            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = false;
-            });
-
-            serviceCollection.Configure<SnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-            });
-
-            // Transaction Session Options
-
-            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-                options.WriteTimeout = TimeSpan.FromSeconds(1);
-            });
-
-            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = false;
-                options.ReadTimeout = TimeSpan.FromSeconds(1);
-            });
-
-            serviceCollection.Configure<TransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-                options.ReadTimeout = TimeSpan.FromSeconds(1);
-            });
-        }
+        serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
     }
 }
