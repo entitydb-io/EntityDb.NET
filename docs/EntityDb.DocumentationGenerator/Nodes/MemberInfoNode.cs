@@ -20,11 +20,6 @@ public abstract class MemberInfoNode : Node
         return MemberInfoHelper.GetXmlDocCommentName(memberInfo);
     }
 
-    public override void AddChild(string path, Node node)
-    {
-        throw new InvalidOperationException();
-    }
-
     public override void AddDocumentation(XPathNavigator documentation)
     {
         switch (documentation.Name)

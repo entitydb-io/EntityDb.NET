@@ -4,13 +4,9 @@ namespace EntityDb.DocumentationGenerator.Nodes;
 
 public abstract class Node
 {
-    public Dictionary<string, Node> ChildNodes { get; init; } = new();
-
     public string? Summary { get; set; }
     public string? Remarks { get; set; }
     public string? InheritDoc { get; set; }
-
-    public abstract void AddChild(string path, Node node);
 
     public virtual void AddDocumentation(XPathNavigator documentation)
     {

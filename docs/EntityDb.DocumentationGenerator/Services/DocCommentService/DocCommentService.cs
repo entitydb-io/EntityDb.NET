@@ -43,11 +43,11 @@ public class DocCommentService : IDocCommentService
     {
         var flatNodeDictionary = new Dictionary<string, Node>();
 
-        BuildFlatNodeDictionary(namespaceNode.ChildNodes);
+        BuildFlatNodeDictionary(namespaceNode.GetAllChildren());
 
         return flatNodeDictionary;
 
-        void BuildFlatNodeDictionary(IDictionary<string, Node> childNodes, string parentName = "")
+        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> childNodes, string parentName = "")
         {
             foreach (var (name, node) in childNodes)
             {
@@ -64,7 +64,10 @@ public class DocCommentService : IDocCommentService
                     flatNodeDictionary.Add($"{xmlDocCommentNamePrefix}:{parentName}{name}", node);
                 }
 
-                BuildFlatNodeDictionary(node.ChildNodes, $"{parentName}{name}.");
+                if (node is INestableNode nestableNode)
+                {
+                    BuildFlatNodeDictionary(nestableNode.GetAllChildren(), $"{parentName}{name}.");
+                }
             }
         }
     }

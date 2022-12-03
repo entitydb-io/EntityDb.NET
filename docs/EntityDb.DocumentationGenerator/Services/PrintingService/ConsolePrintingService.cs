@@ -9,66 +9,107 @@ public class ConsolePrintingService : IPrintingService
 {
     public void Print(NamespaceNode namespaceNode)
     {
-        Print(0, "", namespaceNode);
+        Console.WriteLine("Namespaces:");
+
+        PrintNamespaceNode("", namespaceNode);
     }
 
-    private void Print(int depth, string path, Node node)
+    private static string GetPadding(int depth)
     {
-        var nodeName = GetNodeName(path, node);
-        var prefix = string.Join("", Enumerable.Repeat(" ", depth));
+        return $"\n{string.Join("", Enumerable.Repeat("  ", depth))}";
+    }
 
-        Console.WriteLine($"{prefix}{nodeName}");
+    private static void PrintNamespaceNode(string fullPath, NamespaceNode namespaceNode)
+    {
+        foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
+        {
+            PrintNamespaceNode($"{fullPath}.{childPath}", childNamespaceNode);
+        }
+
+        if (namespaceNode.TypeNodeCount > 0)
+        {
+            Console.WriteLine("");
+            Console.WriteLine($"- {fullPath[1..]}");
+        }
+
+        PrintNodes(1, "Classes", namespaceNode.ClassNodes);
+        PrintNodes(1, "Structs", namespaceNode.StructNodes);
+        PrintNodes(1, "Interfaces", namespaceNode.InterfaceNodes);
+    }
+
+    private static void PrintNodes<TNode>(int depth, string groupName, IDictionary<string, TNode> typeNodes)
+        where TNode : Node
+    {
+        if (typeNodes.Count > 0)
+        {
+            var padding = GetPadding(depth);
+
+            Console.WriteLine($"{padding}- {groupName}:");
+        }
+
+        foreach (var (_, typeNode) in typeNodes)
+        {
+            PrintNode(depth + 1, typeNode);
+        }
+    }
+
+    private static void PrintNode(int depth, Node node)
+    {
+        var padding1 = GetPadding(depth);
+        var padding2 = GetPadding(depth + 1);
+        var padding3 = GetPadding(depth + 2);
+
+        var nodeName = GetNodeName(node);
+
+        Console.WriteLine($"{padding1}- {nodeName}");
 
         if (node.Summary != null)
         {
-            Console.WriteLine($"{prefix}- Summary: {node.Summary}");
+            Console.WriteLine($"{padding2}- Summary: {node.Summary}");
         }
 
         if (node.Remarks != null)
         {
-            Console.WriteLine($"{prefix}- Remarks: {node.Remarks}");
+            Console.WriteLine($"{padding2}- Remarks: {node.Remarks}");
         }
 
-        if (node is MethodNode methodNode)
+        if (node is TypeNode typeNode)
         {
-            if (methodNode.Returns != null)
-            {
-                Console.WriteLine($"{prefix}- Returns: {methodNode.Returns}");
-            }
+            PrintNodes(depth + 1, "Constructors", typeNode.ConstructorNodes);
+            PrintNodes(depth + 1, "Properties", typeNode.PropertyNodes);
+            PrintNodes(depth + 1, "Methods", typeNode.MethodNodes);
+        }
+
+        if (node is MethodNode methodNode && !string.IsNullOrWhiteSpace(methodNode.Returns))
+        {
+            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns}");
         }
 
         if (node is MemberInfoNode memberInfoNode)
         {
             if (memberInfoNode.TypeParams.Count > 0)
             {
-                Console.WriteLine($"{prefix}- TypeParams");
+                Console.WriteLine($"{padding2}- TypeParams");
 
                 foreach (var (typeParamName, typeParamDesc) in memberInfoNode.TypeParams)
                 {
-                    Console.WriteLine($"{prefix}  - {typeParamName}: {typeParamDesc}");
+                    Console.WriteLine($"{padding3}- {typeParamName}: {typeParamDesc}");
                 }
             }
 
             if (memberInfoNode.Params.Count > 0)
             {
-                Console.WriteLine($"{prefix}- Params");
+                Console.WriteLine($"{padding2}- Params");
 
                 foreach (var (paramName, paramDesc) in memberInfoNode.Params)
                 {
-                    Console.WriteLine($"{prefix}  - {paramName}: {paramDesc}");
+                    Console.WriteLine($"{padding3}- {paramName}: {paramDesc}");
                 }
             }
         }
-
-        Console.WriteLine("");
-
-        foreach (var (childPath, childNode) in node.ChildNodes)
-        {
-            Print(depth + 1, childPath, childNode);
-        }
     }
 
-    private static string GetNodeName(string path, Node node)
+    private static string GetNodeName(Node node)
     {
         return node switch
         {
@@ -76,8 +117,7 @@ public class ConsolePrintingService : IPrintingService
             MethodNode methodNode => GetMethodBaseName(methodNode.MethodInfo),
             TypeNode typeNode => GetTypeName(typeNode.Type),
             PropertyNode propertyNode => propertyNode.PropertyInfo.Name,
-            NamespaceNode => path,
-            _ => throw new UnreachableException(),
+            _ => throw new NotImplementedException(),
         };
     }
 
@@ -88,11 +128,18 @@ public class ConsolePrintingService : IPrintingService
         var parameterTypeNames = methodBase.GetParameters()
             .Select(parameterInfo => GetTypeName(parameterInfo.ParameterType));
 
-        return $"{declaringTypeName}({string.Join(",", parameterTypeNames)})";
+        var methodName = $"{declaringTypeName}({string.Join(", ", parameterTypeNames)})";
+
+        return methodName;
     }
 
     private static string GetTypeName(Type type)
     {
+        if (type.IsByRef)
+        {
+            return GetTypeName(type.GetElementType()!);
+        }
+
         if (!type.IsGenericType)
         {
             return type.Name;
@@ -105,6 +152,8 @@ public class ConsolePrintingService : IPrintingService
         var genericArgumentNames = type.GetGenericArguments()
             .Select(genericArgument => genericArgument.Name);
 
-        return $"{typeNamePrefix}<{string.Join(",", genericArgumentNames)}>";
+        var typeName = $"{typeNamePrefix}<{string.Join(",", genericArgumentNames)}>";
+
+        return typeName;
     }
 }
