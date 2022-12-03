@@ -2,7 +2,6 @@
 
 public class NamespaceNode : Node, INestableNode
 {
-    public AssemblyNode? AssemblyNode { get; set; }
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
     public Dictionary<string, TypeNode> ClassNodes { get; init; } = new();
     public Dictionary<string, TypeNode> StructNodes { get; init; } = new();
@@ -13,16 +12,6 @@ public class NamespaceNode : Node, INestableNode
     {
         switch (node)
         {
-            case AssemblyNode assemblyNode:
-                if (path != "")
-                {
-                    DrillDownToAddChild(path, node);
-                    return;
-                }
-
-                AssemblyNode = assemblyNode;
-                break;
-
             case TypeNode typeNode:
                 if (path.Contains('.'))
                 {
@@ -58,11 +47,6 @@ public class NamespaceNode : Node, INestableNode
 
     public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
-        if (AssemblyNode != null)
-        {
-            yield return new("", AssemblyNode);
-        }
-
         foreach (var (path, node) in NamespaceNodes)
         {
             yield return new(path, node);

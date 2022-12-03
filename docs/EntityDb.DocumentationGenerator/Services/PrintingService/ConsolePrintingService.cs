@@ -19,14 +19,9 @@ public class ConsolePrintingService : IPrintingService
 
     private static void PrintNamespaceNode(int depth, string fullPath, NamespaceNode namespaceNode)
     {
-        if (namespaceNode.AssemblyNode != null || namespaceNode.TypeNodeCount > 0)
+        if (namespaceNode.TypeNodeCount > 0)
         {
             Console.WriteLine($"{GetPadding(depth)}- {fullPath[1..]}");
-        }
-
-        if (namespaceNode.AssemblyNode != null)
-        {
-            PrintNode(depth + 1, namespaceNode.AssemblyNode);
         }
 
         PrintNodes(depth + 1, "Classes", namespaceNode.ClassNodes);
@@ -61,16 +56,9 @@ public class ConsolePrintingService : IPrintingService
         var padding2 = GetPadding(depth + 1);
         var padding3 = GetPadding(depth + 2);
 
-        if (node is AssemblyNode assemblyNode)
-        {
-            Console.WriteLine($"{padding1}- Description: {assemblyNode.GetDescription()}");
-        }
-        else
-        {
-            var nodeName = GetNodeName(node);
+        var nodeName = GetNodeName(node);
 
-            Console.WriteLine($"{padding1}- {nodeName}");
-        }
+        Console.WriteLine($"{padding1}- {nodeName}");
 
         if (node is MemberInfoNode memberInfoNode)
         {

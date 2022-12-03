@@ -122,8 +122,6 @@ internal class NodeService : INodeService
 
         foreach (var assembly in assemblies)
         {
-            namespaceNode.AddChild(assembly.GetName().Name!, new AssemblyNode(assembly));
-
             var types = assembly.GetTypes()
                 .Where(type => type.IsPublic)
                 .OrderBy(type => type.Namespace);
