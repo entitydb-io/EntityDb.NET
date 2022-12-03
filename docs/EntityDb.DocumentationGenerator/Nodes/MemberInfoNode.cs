@@ -1,26 +1,16 @@
-﻿using System.Reflection;
-using System.Xml.XPath;
-using EntityDb.DocumentationGenerator.Helpers;
+﻿using System.Xml.XPath;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
 public abstract class MemberInfoNode : Node
 {
-    private readonly MemberInfo memberInfo;
     public Dictionary<string, string> TypeParams { get; init; } = new();
     public Dictionary<string, string> Params { get; init; } = new();
+    public string? Summary { get; set; }
+    public string? Remarks { get; set; }
+    public string? InheritDoc { get; set; }
 
-    protected MemberInfoNode(MemberInfo memberInfo)
-    {
-        this.memberInfo = memberInfo;
-    }
-
-    public virtual string GetXmlDocCommentName()
-    {
-        return MemberInfoHelper.GetXmlDocCommentName(memberInfo);
-    }
-
-    public override void AddDocumentation(XPathNavigator documentation)
+    public virtual void AddDocumentation(XPathNavigator documentation)
     {
         switch (documentation.Name)
         {
@@ -38,9 +28,20 @@ public abstract class MemberInfoNode : Node
                 Params.Add(paramName, paramDesc);
                 break;
 
-            default:
-                base.AddDocumentation(documentation);
+            case "summary":
+                Summary = documentation.InnerXml.Trim();
                 break;
+
+            case "remarks":
+                Remarks = documentation.InnerXml.Trim();
+                break;
+
+            case "inheritdoc":
+                InheritDoc = documentation.GetAttribute("cref", "");
+                break;
+
+            default:
+                throw new NotImplementedException();
         }
     }
 }

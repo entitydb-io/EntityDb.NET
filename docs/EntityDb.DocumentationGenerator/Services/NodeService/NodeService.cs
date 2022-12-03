@@ -1,75 +1,102 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using EntityDb.DocumentationGenerator.Nodes;
+using EntityDb.DocumentationGenerator.Services.AssemblyService;
+using EntityDb.DocumentationGenerator.Services.DocCommentService;
 
 namespace EntityDb.DocumentationGenerator.Services.NodeService;
 
 internal class NodeService : INodeService
 {
-    public NamespaceNode GetNamespaceNode(IEnumerable<Type> types)
+    private readonly IAssemblyService _assemblyService;
+    private readonly IDocCommentService _docCommentService;
+
+    public NodeService(IAssemblyService assemblyService, IDocCommentService docCommentService)
+    {
+        _assemblyService = assemblyService;
+        _docCommentService = docCommentService;
+    }
+
+    public NamespaceNode GetNamespaceNode(DirectoryInfo directory)
     {
         var namespaceNode = new NamespaceNode();
 
-        foreach (var type in types)
+        var assemblies = _assemblyService.GetAssemblies(directory);
+
+        foreach (var assembly in assemblies)
         {
-            var typeNode = new TypeNode(type);
+            namespaceNode.AddChild(assembly.GetName().Name!, new AssemblyNode(assembly));
 
-            namespaceNode.AddChild(type.FullName!, typeNode);
+            var types = assembly.GetTypes()
+                .Where(type => type.IsPublic)
+                .OrderBy(type => type.Namespace);
 
-            var bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-
-            var constructorInfos = typeNode.Type
-                .GetConstructors(bindingFlags)
-                .Where(constructorInfo => constructorInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
-
-            var propertyInfos = typeNode.Type
-                .GetProperties(bindingFlags)
-                .Where(propertyInfo => propertyInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
-
-            var methodInfos = typeNode.Type
-                .GetMethods(bindingFlags)
-                .Where(methodInfo => methodInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null)
-                .Except(propertyInfos
-                    .SelectMany(propertyInfo => propertyInfo.GetAccessors()));
-
-            foreach (var constructorInfo in constructorInfos)
+            foreach (var type in types)
             {
-                if (constructorInfo.IsPrivate || constructorInfo.IsAssembly)
+                var typeNode = new TypeNode(type);
+
+                namespaceNode.AddChild(type.FullName!, typeNode);
+
+                var bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+                var constructorInfos = type
+                    .GetConstructors(bindingFlags)
+                    .Where(constructorInfo => constructorInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
+
+                var propertyInfos = type
+                    .GetProperties(bindingFlags)
+                    .Where(propertyInfo => propertyInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null);
+
+                var methodInfos = type
+                    .GetMethods(bindingFlags)
+                    .Where(methodInfo => methodInfo.GetCustomAttribute<CompilerGeneratedAttribute>() == null)
+                    .Except(propertyInfos
+                        .SelectMany(propertyInfo => propertyInfo.GetAccessors()));
+
+                foreach (var constructorInfo in constructorInfos)
                 {
-                    continue;
+                    if (constructorInfo.IsPrivate || constructorInfo.IsAssembly)
+                    {
+                        continue;
+                    }
+
+                    var node = new ConstructorNode(constructorInfo);
+                    var nodeDocCommentName = _docCommentService.GetNodeName(node);
+
+                    typeNode.AddChild(nodeDocCommentName, node);
                 }
 
-                var constructorNode = new ConstructorNode(constructorInfo);
-
-                typeNode.AddChild(constructorNode.GetXmlDocCommentName(), constructorNode);
-            }
-
-            foreach (var propertyInfo in propertyInfos)
-            {
-                var accessors = propertyInfo.GetAccessors();
-
-                if (accessors.All(methodInfo => methodInfo.IsPrivate || methodInfo.IsAssembly))
+                foreach (var propertyInfo in propertyInfos)
                 {
-                    continue;
+                    var accessors = propertyInfo.GetAccessors();
+
+                    if (accessors.All(methodInfo => methodInfo.IsPrivate || methodInfo.IsAssembly))
+                    {
+                        continue;
+                    }
+
+                    var node = new PropertyNode(propertyInfo);
+                    var nodeDocCommentName = _docCommentService.GetNodeName(node);
+
+                    typeNode.AddChild(nodeDocCommentName, node);
                 }
 
-                var propertyNode = new PropertyNode(propertyInfo);
-
-                typeNode.AddChild(propertyNode.GetXmlDocCommentName(), propertyNode);
-            }
-
-            foreach (var methodInfo in methodInfos)
-            {
-                if (methodInfo.IsPrivate || methodInfo.IsAssembly)
+                foreach (var methodInfo in methodInfos)
                 {
-                    continue;
+                    if (methodInfo.IsPrivate || methodInfo.IsAssembly)
+                    {
+                        continue;
+                    }
+
+                    var node = new MethodNode(methodInfo);
+                    var nodeDocCommentName = _docCommentService.GetNodeName(node);
+
+                    typeNode.AddChild(nodeDocCommentName, node);
                 }
-
-                var methodNode = new MethodNode(methodInfo);
-
-                typeNode.AddChild(methodNode.GetXmlDocCommentName(), methodNode);
             }
         }
+
+        _docCommentService.LoadInto(directory, namespaceNode);
 
         return namespaceNode;
     }

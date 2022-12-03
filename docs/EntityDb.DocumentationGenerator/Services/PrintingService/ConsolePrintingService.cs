@@ -9,9 +9,7 @@ public class ConsolePrintingService : IPrintingService
 {
     public void Print(NamespaceNode namespaceNode)
     {
-        Console.WriteLine("Namespaces:");
-
-        PrintNamespaceNode("", namespaceNode);
+        PrintNamespaceNode(0, "", namespaceNode);
     }
 
     private static string GetPadding(int depth)
@@ -19,22 +17,39 @@ public class ConsolePrintingService : IPrintingService
         return $"\n{string.Join("", Enumerable.Repeat("  ", depth))}";
     }
 
-    private static void PrintNamespaceNode(string fullPath, NamespaceNode namespaceNode)
+    private static void PrintNamespaceNode(int depth, string fullPath, NamespaceNode namespaceNode)
     {
+        int nextNamespaceNodeDepth;
+
+        if (namespaceNode.AssemblyNode != null || namespaceNode.TypeNodeCount > 0)
+        {
+            Console.WriteLine($"{GetPadding(depth)}- {fullPath[1..]}");
+
+            nextNamespaceNodeDepth = depth + 2;
+        }
+        else
+        {
+            nextNamespaceNodeDepth = depth;
+        }
+
+        if (namespaceNode.AssemblyNode != null)
+        {
+            PrintNode(depth + 1, namespaceNode.AssemblyNode);
+        }
+
+        PrintNodes(depth + 1, "Classes", namespaceNode.ClassNodes);
+        PrintNodes(depth + 1, "Structs", namespaceNode.StructNodes);
+        PrintNodes(depth + 1, "Interfaces", namespaceNode.InterfaceNodes);
+
+        if (depth != nextNamespaceNodeDepth)
+        {
+            Console.WriteLine($"{GetPadding(depth + 1)}- Namespaces:");
+        }
+
         foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
         {
-            PrintNamespaceNode($"{fullPath}.{childPath}", childNamespaceNode);
+            PrintNamespaceNode(nextNamespaceNodeDepth, $"{fullPath}.{childPath}", childNamespaceNode);
         }
-
-        if (namespaceNode.TypeNodeCount > 0)
-        {
-            Console.WriteLine("");
-            Console.WriteLine($"- {fullPath[1..]}");
-        }
-
-        PrintNodes(1, "Classes", namespaceNode.ClassNodes);
-        PrintNodes(1, "Structs", namespaceNode.StructNodes);
-        PrintNodes(1, "Interfaces", namespaceNode.InterfaceNodes);
     }
 
     private static void PrintNodes<TNode>(int depth, string groupName, IDictionary<string, TNode> typeNodes)
@@ -59,30 +74,15 @@ public class ConsolePrintingService : IPrintingService
         var padding2 = GetPadding(depth + 1);
         var padding3 = GetPadding(depth + 2);
 
-        var nodeName = GetNodeName(node);
-
-        Console.WriteLine($"{padding1}- {nodeName}");
-
-        if (node.Summary != null)
+        if (node is AssemblyNode assemblyNode)
         {
-            Console.WriteLine($"{padding2}- Summary: {node.Summary}");
+            Console.WriteLine($"{padding1}- Description: {assemblyNode.GetDescription()}");
         }
-
-        if (node.Remarks != null)
+        else
         {
-            Console.WriteLine($"{padding2}- Remarks: {node.Remarks}");
-        }
+            var nodeName = GetNodeName(node);
 
-        if (node is TypeNode typeNode)
-        {
-            PrintNodes(depth + 1, "Constructors", typeNode.ConstructorNodes);
-            PrintNodes(depth + 1, "Properties", typeNode.PropertyNodes);
-            PrintNodes(depth + 1, "Methods", typeNode.MethodNodes);
-        }
-
-        if (node is MethodNode methodNode && !string.IsNullOrWhiteSpace(methodNode.Returns))
-        {
-            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns}");
+            Console.WriteLine($"{padding1}- {nodeName}");
         }
 
         if (node is MemberInfoNode memberInfoNode)
@@ -106,6 +106,28 @@ public class ConsolePrintingService : IPrintingService
                     Console.WriteLine($"{padding3}- {paramName}: {paramDesc}");
                 }
             }
+
+            if (memberInfoNode.Summary != null)
+            {
+                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.Summary}");
+            }
+
+            if (memberInfoNode.Remarks != null)
+            {
+                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.Remarks}");
+            }
+        }
+
+        if (node is MethodNode methodNode && !string.IsNullOrWhiteSpace(methodNode.Returns))
+        {
+            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns}");
+        }
+
+        if (node is TypeNode typeNode)
+        {
+            PrintNodes(depth + 1, "Constructors", typeNode.ConstructorNodes);
+            PrintNodes(depth + 1, "Properties", typeNode.PropertyNodes);
+            PrintNodes(depth + 1, "Methods", typeNode.MethodNodes);
         }
     }
 

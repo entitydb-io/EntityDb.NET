@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Xml.XPath;
-using EntityDb.DocumentationGenerator.Helpers;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
@@ -8,14 +7,9 @@ public class ConstructorNode : MemberInfoNode
 {
     public ConstructorInfo ConstructorInfo { get; }
 
-    public ConstructorNode(ConstructorInfo constructorInfo) : base(constructorInfo)
+    public ConstructorNode(ConstructorInfo constructorInfo)
     {
         ConstructorInfo = constructorInfo;
-    }
-
-    public override string GetXmlDocCommentName()
-    {
-        return ConstructorInfoHelper.GetXmlDocCommentName(ConstructorInfo);
     }
 
     public override void AddDocumentation(XPathNavigator documentation)

@@ -4,5 +4,6 @@ namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 
 internal interface IDocCommentService
 {
+    string GetNodeName(Node node);
     void LoadInto(DirectoryInfo directory, NamespaceNode namespaceNode);
 }

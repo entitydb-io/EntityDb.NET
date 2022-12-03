@@ -2,6 +2,7 @@
 
 public class NamespaceNode : Node, INestableNode
 {
+    public AssemblyNode? AssemblyNode { get; set; }
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
     public Dictionary<string, TypeNode> ClassNodes { get; init; } = new();
     public Dictionary<string, TypeNode> StructNodes { get; init; } = new();
@@ -10,15 +11,24 @@ public class NamespaceNode : Node, INestableNode
 
     public void AddChild(string path, Node node)
     {
-        if (path.Contains('.'))
-        {
-            DrillDownToAddChild(path, node);
-            return;
-        }
-
         switch (node)
         {
+            case AssemblyNode assemblyNode:
+                if (path != "")
+                {
+                    DrillDownToAddChild(path, node);
+                    return;
+                }
+
+                AssemblyNode = assemblyNode;
+                break;
+
             case TypeNode typeNode:
+                if (path.Contains('.'))
+                {
+                    DrillDownToAddChild(path, node);
+                    return;
+                }
 
                 TypeNodeCount += 1;
 
@@ -46,8 +56,13 @@ public class NamespaceNode : Node, INestableNode
         }
     }
 
-    public IEnumerable<KeyValuePair<string, Node>> GetAllChildren()
+    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
+        if (AssemblyNode != null)
+        {
+            yield return new("", AssemblyNode);
+        }
+
         foreach (var (path, node) in NamespaceNodes)
         {
             yield return new(path, node);
@@ -73,8 +88,8 @@ public class NamespaceNode : Node, INestableNode
     {
         var pathComponents = path.Split('.', 2);
 
-        var topPath = pathComponents[0];
-        var subPath = pathComponents[1];
+        var topPath = pathComponents.ElementAt(0);
+        var subPath = pathComponents.ElementAtOrDefault(1) ?? "";
 
         if (ClassNodes.TryGetValue(topPath, out var classNode))
         {

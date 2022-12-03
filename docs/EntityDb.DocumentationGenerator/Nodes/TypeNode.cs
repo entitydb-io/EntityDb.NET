@@ -7,7 +7,7 @@ public class TypeNode : MemberInfoNode, INestableNode
     public Dictionary<string, PropertyNode> PropertyNodes { get; init; } = new();
     public Dictionary<string, MethodNode> MethodNodes { get; init; } = new();
 
-    public TypeNode(Type type) : base(type)
+    public TypeNode(Type type)
     {
         Type = type;
     }
@@ -33,7 +33,7 @@ public class TypeNode : MemberInfoNode, INestableNode
         }
     }
 
-    public IEnumerable<KeyValuePair<string, Node>> GetAllChildren()
+    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
         foreach (var (path, node) in ConstructorNodes)
         {

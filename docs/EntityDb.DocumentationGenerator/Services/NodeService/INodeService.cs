@@ -4,5 +4,5 @@ namespace EntityDb.DocumentationGenerator.Services.NodeService;
 
 internal interface INodeService
 {
-    NamespaceNode GetNamespaceNode(IEnumerable<Type> types);
+    NamespaceNode GetNamespaceNode(DirectoryInfo directory);
 }
