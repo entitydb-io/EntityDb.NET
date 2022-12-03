@@ -114,15 +114,13 @@ foreach (var documentationFile in documentationFiles)
 
         var name = member.GetAttribute("name", "");
 
-        var node = xmlDocCommentTree[name];
-
-        node.HasXmlDocComment = true;
+        if (xmlDocCommentTree.TryGetValue(name, out var node))
+        {
+            node.HasXmlDocComment = true;
+        }
     }
 }
 
 foreach (var (x, n) in xmlDocCommentTree)
 {
-    if (!n.HasXmlDocComment && !x.Contains("#ctor") && !x.Contains(".Tags.") && !x.Contains(".Leases.") && !x.Contains(".HttpContextAgentSignature."))
-    {
-    }
 }
