@@ -1,5 +1,5 @@
 ﻿namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public class MemberIgnoreDoc
+public class RemarksDoc : DocWithMixedText
 {
 }

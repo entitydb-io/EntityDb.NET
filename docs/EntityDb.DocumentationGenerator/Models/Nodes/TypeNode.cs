@@ -3,10 +3,10 @@ using System.Reflection;
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class TypeNode : MemberInfoNode, INestableNode, INodeWithTypeParams
+public class TypeNode : Node, INestableNode, INodeWithTypeParams
 {
     public Type Type { get; }
-    public Dictionary<string, MemberTypeParamDoc> TypeParamDocs { get; init; } = new();
+    public Dictionary<string, TypeParamDoc> TypeParamDocs { get; init; } = new();
     public NestedTypesNode NestedTypesNode { get; init; } = new(false);
     public Dictionary<string, FieldNode> FieldNodes { get; init; } = new();
     public Dictionary<string, ConstructorNode> ConstructorNodes { get; init; } = new();
@@ -23,12 +23,12 @@ public class TypeNode : MemberInfoNode, INestableNode, INodeWithTypeParams
         return Type.GetGenericArguments();
     }
 
-    public MemberTypeParamDoc? GetTypeParamDoc(string typeParamName)
+    public TypeParamDoc? GetTypeParamDoc(string typeParamName)
     {
         return TypeParamDocs.GetValueOrDefault(typeParamName);
     }
 
-    public void AddChild(string path, INode node)
+    public void AddChild(string path, Node node)
     {
         switch (node)
         {
@@ -61,11 +61,11 @@ public class TypeNode : MemberInfoNode, INestableNode, INodeWithTypeParams
     {
         switch (docCommentMemberItem)
         {
-            case MemberTypeParamDoc typeParamDoc:
+            case TypeParamDoc typeParamDoc:
                 TypeParamDocs.Add(typeParamDoc.Name, typeParamDoc);
                 break;
 
-            case MemberParamDoc:
+            case ParamDoc:
                 //TODO: Figure out how to display these. It appears to be the primary constructor params.
                 break;
 
@@ -75,7 +75,7 @@ public class TypeNode : MemberInfoNode, INestableNode, INodeWithTypeParams
         }
     }
 
-    public IEnumerable<KeyValuePair<string, INode>> GetChildNodes()
+    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
         foreach (var childNode in NestedTypesNode.GetChildNodes())
         {

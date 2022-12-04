@@ -3,11 +3,11 @@ using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class ConstructorNode : MemberInfoNode, INodeWithParams
+public class ConstructorNode : Node, INodeWithParams
 {
     public ConstructorInfo ConstructorInfo { get; }
-    public Dictionary<string, MemberTypeParamDoc> TypeParamDocs { get; init; } = new();
-    public Dictionary<string, MemberParamDoc> ParamDocs { get; init; } = new();
+    public Dictionary<string, TypeParamDoc> TypeParamDocs { get; init; } = new();
+    public Dictionary<string, ParamDoc> ParamDocs { get; init; } = new();
 
     public ConstructorNode(ConstructorInfo constructorInfo)
     {
@@ -19,7 +19,7 @@ public class ConstructorNode : MemberInfoNode, INodeWithParams
         return ConstructorInfo.GetParameters();
     }
 
-    public MemberParamDoc? GetParamDoc(string paramName)
+    public ParamDoc? GetParamDoc(string paramName)
     {
         return ParamDocs.GetValueOrDefault(paramName);
     }
@@ -28,16 +28,11 @@ public class ConstructorNode : MemberInfoNode, INodeWithParams
     {
         switch (docCommentMemberItem)
         {
-            case MemberIgnoreDoc:
-                // Used to make the Warning go away for public constructors on public classes
-                //TODO: Consider making these classes internal, provide another way to use them.
-                break;
-
-            case MemberTypeParamDoc:
+            case TypeParamDoc:
                 // These are redundant. The type has these type params.
                 break;
 
-            case MemberParamDoc paramDoc:
+            case ParamDoc paramDoc:
                 ParamDocs.Add(paramDoc.Name, paramDoc);
                 break;
 

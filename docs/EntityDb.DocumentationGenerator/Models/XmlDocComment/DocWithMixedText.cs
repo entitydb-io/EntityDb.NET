@@ -5,7 +5,7 @@ using EntityDb.DocumentationGenerator.Services.PrintingService;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public abstract class DocWithMixedInnerXml
+public abstract class DocWithMixedText
 {
     [XmlText(typeof(XmlText))]
     [XmlElement("see", typeof(SeeDoc))]

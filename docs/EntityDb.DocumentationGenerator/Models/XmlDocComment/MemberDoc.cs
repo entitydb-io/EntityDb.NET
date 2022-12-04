@@ -5,13 +5,13 @@ namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 public class MemberDoc
 {
-    [XmlElement("param", typeof(MemberParamDoc))]
-    [XmlElement("remarks", typeof(MemberRemarksDoc))]
-    [XmlElement("returns", typeof(MemberReturnsDoc))]
-    [XmlElement("summary", typeof(MemberSummaryDoc))]
-    [XmlElement("typeparam", typeof(MemberTypeParamDoc))]
-    [XmlElement("inheritdoc", typeof(MemberInheritDoc))]
-    [XmlElement("ignore", typeof(MemberIgnoreDoc))]
+    [XmlElement("param", typeof(ParamDoc))]
+    [XmlElement("remarks", typeof(RemarksDoc))]
+    [XmlElement("returns", typeof(ReturnsDoc))]
+    [XmlElement("summary", typeof(SummaryDoc))]
+    [XmlElement("typeparam", typeof(TypeParamDoc))]
+    [XmlElement("inheritdoc", typeof(InheritDoc))]
+    [XmlElement("ignore", typeof(IgnoreDoc))]
     public required object[] Items { get; init; }
 
     [XmlAttribute("name")]

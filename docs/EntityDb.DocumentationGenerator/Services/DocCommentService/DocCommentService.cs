@@ -7,7 +7,7 @@ namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 
 public class DocCommentService : IDocCommentService
 {
-    public string GetNodeName(INode node)
+    public string GetNodeName(Node node)
     {
         return node switch
         {
@@ -149,11 +149,11 @@ public class DocCommentService : IDocCommentService
             {
                 var name = member.Name;
 
-                if (flatNodeDictionary.TryGetValue(name, out var node) && node is MemberInfoNode memberInfoNode)
+                if (flatNodeDictionary.TryGetValue(name, out var node))
                 {
                     foreach (var item in member.Items)
                     {
-                        memberInfoNode.AddDocumentation(item);
+                        node.AddDocumentation(item);
                     }
                 }
                 else
@@ -164,15 +164,15 @@ public class DocCommentService : IDocCommentService
         }
     }
 
-    private static Dictionary<string, INode> GetFlatNodeDictionary(NamespaceNode namespaceNode)
+    private static Dictionary<string, Node> GetFlatNodeDictionary(NamespaceNode namespaceNode)
     {
-        var flatNodeDictionary = new Dictionary<string, INode>();
+        var flatNodeDictionary = new Dictionary<string, Node>();
 
         BuildFlatNodeDictionary(namespaceNode.GetChildNodes());
 
         return flatNodeDictionary;
 
-        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, INode>> nodes, string parentName = "")
+        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> nodes, string parentName = "")
         {
             foreach (var (name, node) in nodes)
             {

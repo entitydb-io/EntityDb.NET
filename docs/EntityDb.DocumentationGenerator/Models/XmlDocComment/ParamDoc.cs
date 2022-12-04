@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public class MemberTypeParamDoc : DocWithMixedInnerXml
+public class ParamDoc : DocWithMixedText
 {
     [XmlAttribute("name")]
     public required string Name { get; init; }

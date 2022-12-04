@@ -2,7 +2,7 @@
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class NestedTypesNode : INode
+public class NestedTypesNode : Node
 {
     public bool IsNamespace { get; }
     public int Count { get; private set; }
@@ -61,7 +61,7 @@ public class NestedTypesNode : INode
         return false;
     }
 
-    public IEnumerable<KeyValuePair<string, INode>> GetChildNodes()
+    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
         foreach (var childNode in GetChildNodesOf(ClassNodes))
         {
@@ -79,7 +79,7 @@ public class NestedTypesNode : INode
         }
     }
 
-    private static IEnumerable<KeyValuePair<string, INode>> GetChildNodesOf(IDictionary<string, TypeNode> typeNodes)
+    private static IEnumerable<KeyValuePair<string, Node>> GetChildNodesOf(IDictionary<string, TypeNode> typeNodes)
     {
         foreach (var (path, node) in typeNodes)
         {

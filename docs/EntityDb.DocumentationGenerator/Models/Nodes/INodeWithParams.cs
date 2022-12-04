@@ -6,5 +6,5 @@ namespace EntityDb.DocumentationGenerator.Models.Nodes;
 public interface INodeWithParams
 {
     public ParameterInfo[] GetParams();
-    public MemberParamDoc? GetParamDoc(string paramName);
+    public ParamDoc? GetParamDoc(string paramName);
 }

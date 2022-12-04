@@ -68,6 +68,8 @@ public static class HttpContextAgentSignature
     /// <summary>
     ///     Represents the headers used by agent.
     /// </summary>
+    /// <param name="Name">The name of the pair.</param>
+    /// <param name="Values">The values of the pair.</param>
     public sealed record NameValuesPairSnapshot
     (
         string Name,
@@ -77,6 +79,13 @@ public static class HttpContextAgentSignature
     /// <summary>
     ///     Represents the request sent by the agent.
     /// </summary>
+    /// <param name="Method">The request method (e.g., GET, POST, etc.)</param>
+    /// <param name="Scheme">The request scheme (e.g., HTTP, HTTPS)</param>
+    /// <param name="Host">The request server host (e.g., entitydb.io)</param>
+    /// <param name="Path">The request server path (e.g., /)</param>
+    /// <param name="Protocol">The request protocol (e.g., HTTP/1.1, HTTP/2)</param>
+    /// <param name="Headers">The request headers</param>
+    /// <param name="QueryStringParams">The request query string parameters.</param>
     public sealed record RequestSnapshot
     (
         string Method,
@@ -91,6 +100,11 @@ public static class HttpContextAgentSignature
     /// <summary>
     ///     Represents the connection used by agent.
     /// </summary>
+    /// <param name="ConnectionId">The id of the connection.</param>
+    /// <param name="RemoteIpAddress">The IP Address of the client.</param>
+    /// <param name="RemotePort">The Port of the client.</param>
+    /// <param name="LocalIpAddress">The IP Address of the server.</param>
+    /// <param name="LocalPort">The Port of the server.</param>
     public sealed record ConnectionSnapshot
     (
         string ConnectionId,
@@ -103,6 +117,9 @@ public static class HttpContextAgentSignature
     /// <summary>
     ///     Represents the signature of the agent.
     /// </summary>
+    /// <param name="Request">A snapshot of the request</param>
+    /// <param name="Connection">A snapshot of the connection</param>
+    /// <param name="ApplicationInfo">A snapshot of the application information</param>
     public sealed record Snapshot
     (
         RequestSnapshot Request,

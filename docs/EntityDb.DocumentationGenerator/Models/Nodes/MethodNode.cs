@@ -3,13 +3,13 @@ using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class MethodNode : MemberInfoNode, INodeWithTypeParams, INodeWithParams
+public class MethodNode : Node, INodeWithTypeParams, INodeWithParams
 {
     public MethodInfo MethodInfo { get; }
-    public Dictionary<string, MemberTypeParamDoc> TypeParamDocs { get; init; } = new();
-    public Dictionary<string, MemberParamDoc> ParamDocs { get; init; } = new();
+    public Dictionary<string, TypeParamDoc> TypeParamDocs { get; init; } = new();
+    public Dictionary<string, ParamDoc> ParamDocs { get; init; } = new();
 
-    public MemberReturnsDoc? Returns { get; set; }
+    public ReturnsDoc? Returns { get; set; }
 
     public MethodNode(MethodInfo methodInfo)
     {
@@ -21,7 +21,7 @@ public class MethodNode : MemberInfoNode, INodeWithTypeParams, INodeWithParams
         return MethodInfo.GetGenericArguments();
     }
 
-    public MemberTypeParamDoc? GetTypeParamDoc(string typeParamName)
+    public TypeParamDoc? GetTypeParamDoc(string typeParamName)
     {
         return TypeParamDocs.GetValueOrDefault(typeParamName);
     }
@@ -31,7 +31,7 @@ public class MethodNode : MemberInfoNode, INodeWithTypeParams, INodeWithParams
         return MethodInfo.GetParameters();
     }
 
-    public MemberParamDoc? GetParamDoc(string paramName)
+    public ParamDoc? GetParamDoc(string paramName)
     {
         return ParamDocs.GetValueOrDefault(paramName);
     }
@@ -40,15 +40,15 @@ public class MethodNode : MemberInfoNode, INodeWithTypeParams, INodeWithParams
     {
         switch (docCommentMemberItem)
         {
-            case MemberReturnsDoc returnsDoc:
+            case ReturnsDoc returnsDoc:
                 Returns = returnsDoc;
                 break;
 
-            case MemberTypeParamDoc typeParamDoc:
+            case TypeParamDoc typeParamDoc:
                 TypeParamDocs.Add(typeParamDoc.Name, typeParamDoc);
                 break;
 
-            case MemberParamDoc paramDoc:
+            case ParamDoc paramDoc:
                 ParamDocs.Add(paramDoc.Name, paramDoc);
                 break;
 

@@ -1,11 +1,11 @@
 ﻿namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class NamespaceNode : INode, INestableNode
+public class NamespaceNode : Node, INestableNode
 {
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
     public NestedTypesNode NestedTypesNode { get; init; } = new(true);
 
-    public void AddChild(string path, INode node)
+    public void AddChild(string path, Node node)
     {
         switch (node)
         {
@@ -25,7 +25,7 @@ public class NamespaceNode : INode, INestableNode
         }
     }
 
-    public IEnumerable<KeyValuePair<string, INode>> GetChildNodes()
+    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
     {
         foreach (var (path, node) in NamespaceNodes)
         {
@@ -38,7 +38,7 @@ public class NamespaceNode : INode, INestableNode
         }
     }
 
-    private void DrillDownToAddChild(string path, INode node)
+    private void DrillDownToAddChild(string path, Node node)
     {
         var pathComponents = path.Split('.', 2);
 

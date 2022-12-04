@@ -34,7 +34,7 @@ public class ConsolePrintingService : IPrintingService
     }
 
     private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
-        where TNode : INode
+        where TNode : Node
     {
         if (typeNodes.Count > 0)
         {
@@ -49,7 +49,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private void PrintNode(int depth, string parentPath, INode node)
+    private void PrintNode(int depth, string parentPath, Node node)
     {
         if (node is NamespaceNode namespaceNode)
         {
@@ -85,6 +85,21 @@ public class ConsolePrintingService : IPrintingService
             Console.WriteLine($"{padding1}- {nodeName}");
         }
 
+        if (node.SummaryDoc != null)
+        {
+            Console.WriteLine($"{padding2}- Summary: {node.SummaryDoc.GetText(this)}");
+        }
+
+        if (node.RemarksDoc != null)
+        {
+            Console.WriteLine($"{padding2}- Remarks: {node.RemarksDoc.GetText(this)}");
+        }
+
+        if (node is MethodNode methodNode && methodNode.Returns != null)
+        {
+            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns.GetText(this)}");
+        }
+
         if (node is INodeWithTypeParams nodeWithTypeParams)
         {
             var typeParams = nodeWithTypeParams.GetTypeParams();
@@ -97,7 +112,13 @@ public class ConsolePrintingService : IPrintingService
                 {
                     var typeParamDoc = nodeWithTypeParams.GetTypeParamDoc(typeParam.Name);
 
-                    Console.WriteLine($"{padding3}- {typeParam.Name}: {typeParamDoc?.GetText(this) ?? "Missing TypeParam Doc!"}");
+                    var typeParamDescription = typeParamDoc?.GetText(this) ?? (node.InheritDoc != null
+                        ? "Inherit Doc"
+                        : (node.Ignore
+                            ? "Ignore Doc"
+                            : "Missing TypeParam Doc!"));
+
+                    Console.WriteLine($"{padding3}- {typeParam.Name}: {typeParamDescription}");
                 }
             }
         }
@@ -114,27 +135,15 @@ public class ConsolePrintingService : IPrintingService
                 {
                     var paramDoc = nodeWithParams.GetParamDoc(param.Name!);
 
-                    Console.WriteLine($"{padding3}- {param.Name}: {paramDoc?.GetText(this) ?? "Missing Param Doc!"}");
+                    var paramDescription = paramDoc?.GetText(this) ?? (node.InheritDoc != null
+                        ? "Inherit Doc"
+                        : (node.Ignore
+                            ? "Ignore Doc"
+                            : "Missing Param Doc!"));
+
+                    Console.WriteLine($"{padding3}- {param.Name}: {paramDescription}");
                 }
             }
-        }
-
-        if (node is MemberInfoNode memberInfoNode)
-        {
-            if (memberInfoNode.SummaryDoc != null)
-            {
-                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.SummaryDoc.GetText(this)}");
-            }
-
-            if (memberInfoNode.RemarksDoc != null)
-            {
-                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.RemarksDoc.GetText(this)}");
-            }
-        }
-
-        if (node is MethodNode methodNode && methodNode.Returns != null)
-        {
-            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns.GetText(this)}");
         }
 
         if (node is TypeNode typeNode)
@@ -147,7 +156,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private string GetNodeName(INode node)
+    private string GetNodeName(Node node)
     {
         return node switch
         {

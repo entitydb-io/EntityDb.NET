@@ -2,7 +2,7 @@
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public class PropertyNode : MemberInfoNode
+public class PropertyNode : Node
 {
     public PropertyInfo PropertyInfo { get; }
 

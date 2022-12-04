@@ -1,5 +1,5 @@
 ﻿namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public class MemberReturnsDoc : DocWithMixedInnerXml
+public class ReturnsDoc : DocWithMixedText
 {
 }

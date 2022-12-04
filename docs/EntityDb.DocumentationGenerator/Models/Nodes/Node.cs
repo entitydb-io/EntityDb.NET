@@ -2,26 +2,31 @@
 
 namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
-public abstract class MemberInfoNode : INode
+public abstract class Node
 {
-    public MemberSummaryDoc? SummaryDoc { get; set; }
-    public MemberRemarksDoc? RemarksDoc { get; set; }
-    public MemberInheritDoc? InheritDoc { get; set; }
+    public SummaryDoc? SummaryDoc { get; set; }
+    public RemarksDoc? RemarksDoc { get; set; }
+    public InheritDoc? InheritDoc { get; set; }
+    public bool Ignore { get; set; }
 
     public virtual void AddDocumentation(object docCommentMemberItem)
     {
         switch (docCommentMemberItem)
         {
-            case MemberSummaryDoc summaryDoc:
+            case SummaryDoc summaryDoc:
                 SummaryDoc = summaryDoc;
                 break;
 
-            case MemberRemarksDoc remarksDoc:
+            case RemarksDoc remarksDoc:
                 RemarksDoc = remarksDoc;
                 break;
 
-            case MemberInheritDoc inheritDoc:
+            case InheritDoc inheritDoc:
                 InheritDoc = inheritDoc;
+                break;
+
+            case IgnoreDoc:
+                Ignore = true;
                 break;
 
             default:
