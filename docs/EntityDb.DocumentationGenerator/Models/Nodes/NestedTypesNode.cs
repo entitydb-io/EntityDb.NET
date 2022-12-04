@@ -4,16 +4,10 @@ namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
 public class NestedTypesNode : Node
 {
-    public bool IsNamespace { get; }
     public int Count { get; private set; }
     public Dictionary<string, TypeNode> ClassNodes { get; init; } = new();
     public Dictionary<string, TypeNode> StructNodes { get; init; } = new();
     public Dictionary<string, TypeNode> InterfaceNodes { get; init; } = new();
-
-    public NestedTypesNode(bool isNamespace)
-    {
-        IsNamespace = isNamespace;
-    }
 
     public void AddChild(string path, TypeNode typeNode)
     {

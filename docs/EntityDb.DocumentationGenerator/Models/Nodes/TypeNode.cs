@@ -6,7 +6,7 @@ public class TypeNode : Node, INestableNode, INodeWithTypeParams
 {
     public Type Type { get; }
     public Dictionary<string, TypeParamDoc> TypeParamDocs { get; init; } = new();
-    public NestedTypesNode NestedTypesNode { get; init; } = new(false);
+    public NestedTypesNode NestedTypesNode { get; init; } = new();
     public Dictionary<string, FieldNode> FieldNodes { get; init; } = new();
     public Dictionary<string, ConstructorNode> ConstructorNodes { get; init; } = new();
     public Dictionary<string, PropertyNode> PropertyNodes { get; init; } = new();

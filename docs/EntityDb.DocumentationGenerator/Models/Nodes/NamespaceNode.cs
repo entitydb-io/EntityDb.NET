@@ -5,7 +5,7 @@ namespace EntityDb.DocumentationGenerator.Models.Nodes;
 public class NamespaceNode : Node, INestableNode
 {
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
-    public NestedTypesNode NestedTypesNode { get; init; } = new(true);
+    public NestedTypesNode NestedTypesNode { get; init; } = new();
 
     public void AddChild(string path, Node node)
     {
@@ -85,5 +85,40 @@ public class NamespaceNode : Node, INestableNode
         }
 
         namespaceNode.AddChild(subPath, node);
+    }
+
+    public Dictionary<string, Node> ToXmlDocCommentMemberDictionary()
+    {
+        var flatNodeDictionary = new Dictionary<string, Node>();
+
+        BuildFlatNodeDictionary(GetChildNodes());
+
+        return flatNodeDictionary;
+
+        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> nodes, string parentName = "")
+        {
+            foreach (var (name, node) in nodes)
+            {
+                var xmlDocCommentNamePrefix = node switch
+                {
+                    NamespaceNode => "N",
+                    TypeNode => "T",
+                    PropertyNode => "P",
+                    MethodNode or ConstructorNode => "M",
+                    FieldNode => "F",
+                    _ => null
+                };
+
+                if (xmlDocCommentNamePrefix != null)
+                {
+                    flatNodeDictionary.Add($"{xmlDocCommentNamePrefix}:{parentName}{name}", node);
+                }
+
+                if (node is INestableNode nestableNode)
+                {
+                    BuildFlatNodeDictionary(nestableNode.GetChildNodes(), $"{parentName}{name}.");
+                }
+            }
+        }
     }
 }

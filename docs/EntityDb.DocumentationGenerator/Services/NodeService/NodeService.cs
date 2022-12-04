@@ -141,13 +141,15 @@ internal class NodeService : INodeService
             AddTypeNode(namespaceNode, type);
         }
 
-        docFile.LoadInto(namespaceNode);
+        var xmlDocCommentMemberDictionary = namespaceNode.ToXmlDocCommentMemberDictionary();
+
+        docFile.LoadInto(xmlDocCommentMemberDictionary);
 
         var assemblyDocFile = _docCommentService.GetDocFileOrDefault(directory, $"{docFile.Assembly.Name}.xml");
 
         if (assemblyDocFile != default)
         {
-            assemblyDocFile.LoadInto(namespaceNode);
+            assemblyDocFile.LoadInto(xmlDocCommentMemberDictionary);
         }
 
         return namespaceNode;

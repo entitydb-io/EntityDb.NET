@@ -9,5 +9,80 @@
 				Encapsulates data about actors (the person or system that can execute commands).
 			</summary>
 		</member>
+		<member name="N:EntityDb.Abstractions.Annotations">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Disposables">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Entities">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Leases">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Projections">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Queries">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Queries.FilterBuilders">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Queries.SortBuilders">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Reducers">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Snapshots">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Tags">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Transactions">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Transactions.Builders">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.Transactions.Steps">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
+		<member name="N:EntityDb.Abstractions.ValueObjects">
+			<summary>
+				TODO: Add Namespace Description
+			</summary>
+		</member>
 	</members>
 </doc>

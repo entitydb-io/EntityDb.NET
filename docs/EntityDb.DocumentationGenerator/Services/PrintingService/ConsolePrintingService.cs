@@ -51,6 +51,12 @@ public class ConsolePrintingService : IPrintingService
     {
         if (node is NamespaceNode namespaceNode)
         {
+            if (namespaceNode.NestedTypesNode.Count > 0)
+            {
+                Console.WriteLine($"\n{parentPath[1..]}");
+                Console.WriteLine(namespaceNode.SummaryDoc?.GetText(this) ?? "Missing Summary Doc!");
+            }
+
             PrintNode(depth, parentPath, namespaceNode.NestedTypesNode);
 
             foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
@@ -67,11 +73,6 @@ public class ConsolePrintingService : IPrintingService
 
         if (node is NestedTypesNode nestedTypesNode)
         {
-            if (nestedTypesNode.Count > 0 && nestedTypesNode.IsNamespace)
-            {
-                Console.WriteLine($"\n{parentPath[1..]}");
-            }
-
             PrintNodes(depth + 1, parentPath, "Classes", nestedTypesNode.ClassNodes);
             PrintNodes(depth + 1, parentPath, "Structs", nestedTypesNode.StructNodes);
             PrintNodes(depth + 1, parentPath, "Interfaces", nestedTypesNode.InterfaceNodes);
