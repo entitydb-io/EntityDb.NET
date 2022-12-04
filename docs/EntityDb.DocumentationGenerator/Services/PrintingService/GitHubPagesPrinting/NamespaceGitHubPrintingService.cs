@@ -10,14 +10,16 @@ namespace EntityDb.DocumentationGenerator.Services.PrintingService.MarkdownPrint
 internal class NamespaceGitHubPrintingService : IPrintingService
 {
     private readonly Nodes _nodes;
-    private readonly string _linkPrefix;
+    private readonly string _fileNamePrefix;
     private readonly DirectoryInfo _directory;
+    private readonly string _primaryCategory;
 
-    public NamespaceGitHubPrintingService(Nodes nodes, string linkPrefix, DirectoryInfo directory)
+    public NamespaceGitHubPrintingService(Nodes nodes, string fileNamePrefix, DirectoryInfo directory, string primaryCategory)
     {
         _nodes = nodes;
-        _linkPrefix = linkPrefix;
+        _fileNamePrefix = fileNamePrefix;
         _directory = directory;
+        this._primaryCategory = primaryCategory;
     }
 
     public string ConvertCodeDoc(CodeDoc codeDoc)
@@ -57,7 +59,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
 
     public void Print()
     {
-        var fileName = Path.Combine(_directory.FullName!, $"index.md");
+        var fileName = Path.Combine(_directory.FullName!, $"2022-12-04-{_fileNamePrefix}.md");
 
         if (File.Exists(fileName))
         {
@@ -67,17 +69,28 @@ internal class NamespaceGitHubPrintingService : IPrintingService
         using var file = File.OpenWrite(fileName);
         using var fileWriter = new StreamWriter(file);
 
-        fileWriter.WriteLine($"# Assemblies");
+        PrintHeader(fileWriter, "Assemblies");
 
         PrintNode(fileWriter, "", _nodes.Root);
+    }
+
+    private void PrintHeader(StreamWriter fileWriter, string title)
+    {
+        fileWriter.WriteLine("---");
+        fileWriter.WriteLine($"title: {title}");
+        fileWriter.WriteLine($"date: {DateTime.UtcNow:yyyy-MM-dd hh:mm:ss zzz}");
+        fileWriter.WriteLine($"categories: [{_primaryCategory}]");
+        fileWriter.WriteLine($"tags: []");
+        fileWriter.WriteLine("---");
+        fileWriter.WriteLine();
     }
 
     private void PrintAssembliesList(StreamWriter fileWriter, string parentPath)
     {
         var assemblyLabel = parentPath[1..];
-        var assemblyKey = assemblyLabel.ToLowerInvariant();
+        var assemblyKey = assemblyLabel.ToLowerInvariant().Replace(".", "-");
 
-        fileWriter.WriteLine($"- [{assemblyLabel}]({_linkPrefix}/{assemblyKey})");
+        fileWriter.WriteLine($"- [{assemblyLabel}](/posts/{_fileNamePrefix}-{assemblyKey})");
     }
 
     private void PrintNamespacesTable(StreamWriter fileWriter, string parentPath, NamespaceNode namespaceNode)
@@ -85,11 +98,11 @@ internal class NamespaceGitHubPrintingService : IPrintingService
         if (namespaceNode.NestedTypesNode.Count > 0)
         {
             var namespaceLabel = parentPath[1..];
-            var namespaceKey = namespaceLabel.ToLowerInvariant();
+            var namespaceKey = namespaceLabel.ToLowerInvariant().Replace(".", "-");
 
             fileWriter.Write("<tr>");
 
-            fileWriter.Write($"<td><a href='{_linkPrefix}/{namespaceKey}'>{namespaceLabel}</a></td>");
+            fileWriter.Write($"<td><a href='/posts/{_fileNamePrefix}-{namespaceKey}'>{namespaceLabel}</a></td>");
 
             fileWriter.Write($"<td>{ConvertSummaryDoc(namespaceNode.SummaryDoc)}</td>");
 
@@ -140,7 +153,10 @@ internal class NamespaceGitHubPrintingService : IPrintingService
         {
             if (namespaceNode.NestedTypesNode.Count > 0)
             {
-                var fileName = Path.Combine(_directory.FullName!, $"{parentPath[1..].ToLowerInvariant()}.md");
+                var namespaceLabel = parentPath[1..];
+                var namespaceKey = namespaceLabel.ToLowerInvariant().Replace(".", "-");
+
+                var fileName = Path.Combine(_directory.FullName!, $"2022-12-04-{_fileNamePrefix}-{namespaceKey}.md");
 
                 if (File.Exists(fileName))
                 {
@@ -150,7 +166,8 @@ internal class NamespaceGitHubPrintingService : IPrintingService
                 using var file = File.OpenWrite(fileName);
                 using var fileWriter = new StreamWriter(file);
 
-                fileWriter.WriteLine($"# {parentPath[1..]} Namespace");
+                PrintHeader(fileWriter, $"{namespaceLabel} Namespace");
+
                 fileWriter.WriteLine(ConvertSummaryDoc(namespaceNode.SummaryDoc));
 
                 PrintTypeNodesTable(fileWriter, "Classes", namespaceNode.NestedTypesNode.ClassNodes);
@@ -163,9 +180,9 @@ internal class NamespaceGitHubPrintingService : IPrintingService
                 PrintAssembliesList(assembliesFileWriter, parentPath);
 
                 var assemblyLabel = parentPath[1..];
-                var assemblyKey = assemblyLabel.ToLowerInvariant();
+                var assemblyKey = assemblyLabel.ToLowerInvariant().Replace(".", "-");
 
-                var fileName = Path.Combine(_directory.FullName!, $"{assemblyKey}.md");
+                var fileName = Path.Combine(_directory.FullName!, $"2022-12-04-{_fileNamePrefix}-{assemblyKey}.md");
 
                 if (File.Exists(fileName))
                 {
@@ -175,7 +192,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
                 using var file = File.OpenWrite(fileName);
                 using var fileWriter = new StreamWriter(file);
 
-                fileWriter.WriteLine($"# {assemblyLabel} Assembly");
+                PrintHeader(fileWriter, $"{assemblyLabel} Assembly");
 
                 fileWriter.WriteLine("## Installation");
 
@@ -214,7 +231,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
 
     private string GetNodeKey(Node node)
     {
-        return node switch
+        return (node switch
         {
             ConstructorNode constructorNode => $"{constructorNode.ConstructorInfo.DeclaringType!.FullName!}-.ctor#...",
             MethodNode methodNode => $"{methodNode.MethodInfo.DeclaringType!.FullName!}.{methodNode.MethodInfo.Name}",
@@ -222,7 +239,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
             PropertyNode propertyNode => $"{propertyNode.PropertyInfo.DeclaringType!.FullName!}.{propertyNode.PropertyInfo.Name}",
             FieldNode fieldNode => $"{fieldNode.FieldInfo.DeclaringType!.FullName!}.{fieldNode.FieldInfo.Name}",
             _ => throw new NotImplementedException(),
-        };
+        }).ToLowerInvariant().Replace(".", "-");
     }
 
     private string GetNodeLink(Node node)
@@ -230,7 +247,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
         var nodeName = GetNodeName(node);
         var nodeKey = GetNodeKey(node);
 
-        return $"<a href='{_linkPrefix}/{nodeKey.ToLowerInvariant()}'>{nodeName}</a>";
+        return $"<!--/posts/{_fileNamePrefix}-{nodeKey}--><a href='#'>{nodeName}</a>";
     }
 
     private string GetTypesName(IEnumerable<Type> types)

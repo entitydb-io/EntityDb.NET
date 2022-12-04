@@ -16,16 +16,18 @@ var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
 var nodes = nodeService.Load(directory, "DocConfig.xml", "EntityDb.*.xml");
 
-var directoryPath = @"C:\Users\theav\Documents\GitHub\entitydb-io.github.io\dotnet";
+var directoryPath = @"C:\Users\theav\Documents\GitHub\entitydb-io.github.io\_posts";
 
-if (!Directory.Exists(directoryPath))
+if (Directory.Exists(directoryPath))
 {
-    Directory.CreateDirectory(directoryPath);
+    Directory.Delete(directoryPath, true);
 }
+
+Directory.CreateDirectory(directoryPath);
 
 var writeDirectory = new DirectoryInfo(directoryPath);
 
 //IPrintingService printingService = new ConsolePrintingService(nodes);
-IPrintingService printingService = new NamespaceGitHubPrintingService(nodes, "/dotnet", writeDirectory);
+IPrintingService printingService = new NamespaceGitHubPrintingService(nodes, "dotnet", writeDirectory, "dotnet");
 
 printingService.Print();
