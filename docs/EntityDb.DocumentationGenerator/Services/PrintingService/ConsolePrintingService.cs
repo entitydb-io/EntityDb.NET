@@ -7,14 +7,14 @@ public class ConsolePrintingService : IPrintingService
 {
     public void Print(NamespaceNode namespaceNode)
     {
-        Console.WriteLine($"Namespaces:");
+        Console.WriteLine($"Namespaces");
 
         PrintNode(0, "", namespaceNode);
     }
 
     private static string GetPadding(int depth)
     {
-        return $"{string.Join("", Enumerable.Repeat(" ", depth))}";
+        return $"{string.Join("", Enumerable.Repeat("  ", depth))}";
     }
 
     private static void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
@@ -24,7 +24,7 @@ public class ConsolePrintingService : IPrintingService
         {
             var padding = GetPadding(depth);
 
-            Console.WriteLine($"{padding}- {groupName}:");
+            Console.WriteLine($"{padding}- {groupName}");
         }
 
         foreach (var (_, typeNode) in typeNodes)
