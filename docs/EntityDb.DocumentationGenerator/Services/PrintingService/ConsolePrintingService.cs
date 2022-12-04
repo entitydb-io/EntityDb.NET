@@ -9,12 +9,12 @@ public class ConsolePrintingService : IPrintingService
     {
         Console.WriteLine($"Namespaces:");
 
-        PrintNode(1, "", namespaceNode);
+        PrintNode(0, "", namespaceNode);
     }
 
     private static string GetPadding(int depth)
     {
-        return $"\n{string.Join("", Enumerable.Repeat("  ", depth))}";
+        return $"{string.Join("", Enumerable.Repeat(" ", depth))}";
     }
 
     private static void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
@@ -35,36 +35,32 @@ public class ConsolePrintingService : IPrintingService
 
     private static void PrintNode(int depth, string parentPath, INode node)
     {
-        var padding1 = GetPadding(depth);
-
         if (node is NamespaceNode namespaceNode)
         {
             PrintNode(depth + 1, parentPath, namespaceNode.NestedTypesNode);
 
             foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
             {
-                PrintNode(1, $"{parentPath}.{childPath}", childNamespaceNode);
+                PrintNode(0, $"{parentPath}.{childPath}", childNamespaceNode);
             }
 
             return;
         }
 
+        var padding1 = GetPadding(depth);
         var padding2 = GetPadding(depth + 1);
         var padding3 = GetPadding(depth + 2);
 
         if (node is NestedTypesNode nestedTypesNode)
         {
-            if (nestedTypesNode.Count > 0)
+            if (nestedTypesNode.Count > 0 && nestedTypesNode.IsNamespace)
             {
-                if (nestedTypesNode.IsNamespace)
-                {
-                    Console.WriteLine($"{padding1}- {parentPath[1..]}");
-                }
-
-                PrintNodes(depth + 1, parentPath, "Classes", nestedTypesNode.ClassNodes);
-                PrintNodes(depth + 1, parentPath, "Structs", nestedTypesNode.StructNodes);
-                PrintNodes(depth + 1, parentPath, "Interfaces", nestedTypesNode.InterfaceNodes);
+                Console.WriteLine($"{padding1}- {parentPath[1..]}");
             }
+
+            PrintNodes(depth + 1, parentPath, "Classes", nestedTypesNode.ClassNodes);
+            PrintNodes(depth + 1, parentPath, "Structs", nestedTypesNode.StructNodes);
+            PrintNodes(depth + 1, parentPath, "Interfaces", nestedTypesNode.InterfaceNodes);
         }
         else
         {
