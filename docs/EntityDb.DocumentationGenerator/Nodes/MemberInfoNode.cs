@@ -2,7 +2,7 @@
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
-public abstract class MemberInfoNode : Node
+public abstract class MemberInfoNode : INode
 {
     public Dictionary<string, string> TypeParams { get; init; } = new();
     public Dictionary<string, string> Params { get; init; } = new();

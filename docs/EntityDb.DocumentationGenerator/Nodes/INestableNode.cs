@@ -2,7 +2,7 @@
 
 public interface INestableNode
 {
-    public abstract void AddChild(string path, Node node);
+    public abstract void AddChild(string path, INode node);
 
-    public abstract IEnumerable<KeyValuePair<string, Node>> GetChildNodes();
+    public abstract IEnumerable<KeyValuePair<string, INode>> GetChildNodes();
 }

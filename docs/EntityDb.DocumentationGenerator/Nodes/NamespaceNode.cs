@@ -1,6 +1,6 @@
 ﻿namespace EntityDb.DocumentationGenerator.Nodes;
 
-public class NamespaceNode : Node, INestableNode
+public class NamespaceNode : INode, INestableNode
 {
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
     public Dictionary<string, TypeNode> ClassNodes { get; init; } = new();
@@ -8,7 +8,7 @@ public class NamespaceNode : Node, INestableNode
     public Dictionary<string, TypeNode> InterfaceNodes { get; init; } = new();
     public int TypeNodeCount { get; set; }
 
-    public void AddChild(string path, Node node)
+    public void AddChild(string path, INode node)
     {
         switch (node)
         {
@@ -45,7 +45,7 @@ public class NamespaceNode : Node, INestableNode
         }
     }
 
-    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
+    public IEnumerable<KeyValuePair<string, INode>> GetChildNodes()
     {
         foreach (var (path, node) in NamespaceNodes)
         {
@@ -68,7 +68,7 @@ public class NamespaceNode : Node, INestableNode
         }
     }
 
-    private void DrillDownToAddChild(string path, Node node)
+    private void DrillDownToAddChild(string path, INode node)
     {
         var pathComponents = path.Split('.', 2);
 

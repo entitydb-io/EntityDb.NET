@@ -35,7 +35,7 @@ public class ConsolePrintingService : IPrintingService
     }
 
     private static void PrintNodes<TNode>(int depth, string groupName, IDictionary<string, TNode> typeNodes)
-        where TNode : Node
+        where TNode : INode
     {
         if (typeNodes.Count > 0)
         {
@@ -50,7 +50,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private static void PrintNode(int depth, Node node)
+    private static void PrintNode(int depth, INode node)
     {
         var padding1 = GetPadding(depth);
         var padding2 = GetPadding(depth + 1);
@@ -107,7 +107,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private static string GetNodeName(Node node)
+    private static string GetNodeName(INode node)
     {
         return node switch
         {

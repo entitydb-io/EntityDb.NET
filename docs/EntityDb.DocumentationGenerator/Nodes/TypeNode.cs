@@ -14,7 +14,7 @@ public class TypeNode : MemberInfoNode, INestableNode
         Type = type;
     }
 
-    public void AddChild(string path, Node node)
+    public void AddChild(string path, INode node)
     {
         switch (node)
         {
@@ -43,7 +43,7 @@ public class TypeNode : MemberInfoNode, INestableNode
         }
     }
 
-    public IEnumerable<KeyValuePair<string, Node>> GetChildNodes()
+    public IEnumerable<KeyValuePair<string, INode>> GetChildNodes()
     {
         foreach (var (path, node) in NestedTypeNodes)
         {
