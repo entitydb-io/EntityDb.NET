@@ -23,7 +23,7 @@ public abstract class MemberInfoNode : INode
                 break;
 
             case MemberSummaryDoc summary:
-                Summary = string.Join("", summary.Text.Select(x => x.OuterXml));
+                Summary = summary.GetText();
                 break;
 
             case MemberRemarksDoc remarks:
