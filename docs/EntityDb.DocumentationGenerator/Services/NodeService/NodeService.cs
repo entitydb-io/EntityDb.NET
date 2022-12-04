@@ -121,6 +121,7 @@ internal class NodeService : INodeService
             .ToArray();
 
         var assemblies = docFiles
+            .Where(docFile => docFile.Assembly != null)
             .Select(docFile => docFile.Assembly.Name)
             .Distinct()
             .Select(assemblyName => _assemblyService.GetAssembly(directory, $"{assemblyName}.dll"));

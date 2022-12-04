@@ -5,11 +5,5 @@
         <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
         <Description>An abstraction layer for the EntityDb suite of packages.</Description>
     </PropertyGroup>
-	
-    <ItemGroup>
-      <None Update="DocConfig.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
 
 </Project>

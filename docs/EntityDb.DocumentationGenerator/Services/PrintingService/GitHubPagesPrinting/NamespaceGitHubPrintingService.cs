@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using System.IO.Pipelines;
 using System.Reflection;
 using EntityDb.DocumentationGenerator.Extensions;
 using EntityDb.DocumentationGenerator.Models.Nodes;
@@ -57,7 +57,27 @@ internal class NamespaceGitHubPrintingService : IPrintingService
 
     public void Print()
     {
-        PrintNode("", _nodes.Root);
+        var fileName = Path.Combine(_directory.FullName!, $"index.md");
+
+        if (File.Exists(fileName))
+        {
+            File.Delete(fileName);
+        }
+
+        using var file = File.OpenWrite(fileName);
+        using var fileWriter = new StreamWriter(file);
+
+        fileWriter.WriteLine($"# Assemblies");
+
+        PrintNode(fileWriter, "", _nodes.Root);
+    }
+
+    private void PrintAssembliesList(StreamWriter fileWriter, string parentPath)
+    {
+        var assemblyLabel = parentPath[1..];
+        var assemblyKey = assemblyLabel.ToLowerInvariant();
+
+        fileWriter.WriteLine($"- [{assemblyLabel}]({_linkPrefix}/{assemblyKey})");
     }
 
     private void PrintNamespacesTable(StreamWriter fileWriter, string parentPath, NamespaceNode namespaceNode)
@@ -109,8 +129,13 @@ internal class NamespaceGitHubPrintingService : IPrintingService
         streamWriter.WriteLine("</table>");
     }
 
-    private void PrintNode(string parentPath, Node node)
+    private void PrintNode(StreamWriter assembliesFileWriter, string parentPath, Node node)
     {
+        if (node.Ignore)
+        {
+            return;
+        }
+
         if (node is NamespaceNode namespaceNode)
         {
             if (namespaceNode.NestedTypesNode.Count > 0)
@@ -135,7 +160,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
             
             if (namespaceNode.AssemblyNode != null)
             {
-                var assembly = namespaceNode.AssemblyNode.Assembly;
+                PrintAssembliesList(assembliesFileWriter, parentPath);
 
                 var assemblyLabel = parentPath[1..];
                 var assemblyKey = assemblyLabel.ToLowerInvariant();
@@ -169,7 +194,7 @@ internal class NamespaceGitHubPrintingService : IPrintingService
 
             foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
             {
-                PrintNode($"{parentPath}.{childPath}", childNamespaceNode);
+                PrintNode(assembliesFileWriter, $"{parentPath}.{childPath}", childNamespaceNode);
             }
         }
     }

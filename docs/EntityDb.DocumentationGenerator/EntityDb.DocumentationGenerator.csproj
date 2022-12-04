@@ -17,4 +17,10 @@
     <ProjectReference Include="..\..\src\EntityDb.Void\EntityDb.Void.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DocConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
