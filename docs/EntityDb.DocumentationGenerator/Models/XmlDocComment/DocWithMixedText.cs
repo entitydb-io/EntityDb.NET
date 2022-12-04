@@ -15,11 +15,16 @@ public abstract class DocWithMixedText
     [XmlAnyElement]
     public required object[] Elements { get; init; }
 
+    public virtual string DefaultText()
+    {
+        return string.Empty;
+    }
+
     public string GetText(IPrintingService printingService)
     {
         if (Elements == null)
         {
-            return string.Empty;
+            return DefaultText();
         }
 
         var stringBuilder = new StringBuilder();

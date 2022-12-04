@@ -6,5 +6,5 @@ namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 public class InheritDoc
 {
     [XmlAttribute("cref")]
-    public required string SeeRef { get; init; }
+    public string? SeeRef { get; init; }
 }

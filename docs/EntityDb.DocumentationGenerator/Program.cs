@@ -12,7 +12,7 @@ INodeService nodeService = new NodeService
 
 var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
-var nodes = nodeService.Load(directory, "DocConfig.xml", "EntityDb.Abstractions.xml");
+var nodes = nodeService.Load(directory, "EntityDb.Common.xml");
 
 IPrintingService printingService = new ConsolePrintingService(nodes);
 

@@ -18,26 +18,39 @@ public class ConsolePrintingService : IPrintingService
         PrintNode(0, "", _nodes.Root);
     }
 
-    public string ConvertSeeDoc(SeeDoc see)
+    public string ConvertSeeDoc(SeeDoc seeDoc)
     {
-        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(see.SeeRef, out var seeNode))
+        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(seeDoc.SeeRef, out var seeNode))
         {
             return GetNodeName(seeNode);
         }
 
-        return $"<<unknown:{see.SeeRef}>>";
+        return $"<<see external:{seeDoc.SeeRef}>>";
+    }
+
+    public string ConvertInheritDoc(InheritDoc inheritDoc)
+    {
+        if (inheritDoc.SeeRef == null)
+        {
+            return "<<inherit doc of ancestor>>";
+        }
+
+        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(inheritDoc.SeeRef, out var seeNode))
+        {
+            return GetNodeName(seeNode);
+        }
+
+        return $"<<inherit external:{inheritDoc.SeeRef}>>";
     }
 
     public string ConvertParamRefDoc(ParamRefDoc paramRefDoc)
     {
-        //TODO: It looks like inner XML is okay.. support that?
-        return paramRefDoc.Name;
+        return paramRefDoc.GetText(this);
     }
 
     public string ConvertTypeParamRefDoc(TypeParamRefDoc typeParamRefDoc)
     {
-        //TODO: It looks like inner XML is okay.. support that?
-        return typeParamRefDoc.Name;
+        return typeParamRefDoc.GetText(this);
     }
 
     public string ConvertCodeDoc(CodeDoc codeDoc)
@@ -48,14 +61,16 @@ public class ConsolePrintingService : IPrintingService
     private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
         where TNode : Node
     {
-        if (typeNodes.Count > 0)
+        var nonIgnoredTypeNodes = typeNodes.Where(pair => !pair.Value.Ignore).ToArray();
+
+        if (nonIgnoredTypeNodes.Length > 0)
         {
             var padding = GetPadding(depth);
 
             Console.WriteLine($"{padding}- {groupName}");
         }
 
-        foreach (var (_, typeNode) in typeNodes)
+        foreach (var (_, typeNode) in nonIgnoredTypeNodes)
         {
             PrintNode(depth + 1, parentPath, typeNode);
         }
@@ -63,6 +78,11 @@ public class ConsolePrintingService : IPrintingService
 
     private void PrintNode(int depth, string parentPath, Node node)
     {
+        if (node.Ignore)
+        {
+            return;
+        }
+
         if (node is NamespaceNode namespaceNode)
         {
             if (namespaceNode.NestedTypesNode.Count > 0)
@@ -126,10 +146,8 @@ public class ConsolePrintingService : IPrintingService
                     var typeParamDoc = nodeWithTypeParams.GetTypeParamDoc(typeParam.Name);
 
                     var typeParamDescription = typeParamDoc?.GetText(this) ?? (node.InheritDoc != null
-                        ? "Inherit Doc"
-                        : (node.Ignore
-                            ? "Ignore Doc"
-                            : "Missing TypeParam Doc!"));
+                        ? ConvertInheritDoc(node.InheritDoc)
+                        : "Missing TypeParam Doc!");
 
                     Console.WriteLine($"{padding3}- {typeParam.Name}: {typeParamDescription}");
                 }
@@ -149,10 +167,8 @@ public class ConsolePrintingService : IPrintingService
                     var paramDoc = nodeWithParams.GetParamDoc(param.Name!);
 
                     var paramDescription = paramDoc?.GetText(this) ?? (node.InheritDoc != null
-                        ? "Inherit Doc"
-                        : (node.Ignore
-                            ? "Ignore Doc"
-                            : "Missing Param Doc!"));
+                        ? ConvertInheritDoc(node.InheritDoc)
+                        : "Missing Param Doc!");
 
                     Console.WriteLine($"{padding3}- {param.Name}: {paramDescription}");
                 }
