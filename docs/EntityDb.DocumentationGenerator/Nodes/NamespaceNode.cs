@@ -3,10 +3,7 @@
 public class NamespaceNode : INode, INestableNode
 {
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
-    public Dictionary<string, TypeNode> ClassNodes { get; init; } = new();
-    public Dictionary<string, TypeNode> StructNodes { get; init; } = new();
-    public Dictionary<string, TypeNode> InterfaceNodes { get; init; } = new();
-    public int TypeNodeCount { get; set; }
+    public NestedTypesNode NestedTypesNode { get; init; } = new(true);
 
     public void AddChild(string path, INode node)
     {
@@ -19,24 +16,7 @@ public class NamespaceNode : INode, INestableNode
                     return;
                 }
 
-                TypeNodeCount += 1;
-
-                if (typeNode.Type.IsClass)
-                {
-                    ClassNodes.Add(path, typeNode);
-                }
-                else if (typeNode.Type.IsValueType)
-                {
-                    StructNodes.Add(path, typeNode);
-                }
-                else if (typeNode.Type.IsInterface)
-                {
-                    InterfaceNodes.Add(path, typeNode);
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                NestedTypesNode.AddChild(path, typeNode);
 
                 break;
 
@@ -52,19 +32,9 @@ public class NamespaceNode : INode, INestableNode
             yield return new(path, node);
         }
 
-        foreach (var (path, node) in ClassNodes)
+        foreach (var childNode in NestedTypesNode.GetChildNodes())
         {
-            yield return new(path, node);
-        }
-
-        foreach (var (path, node) in StructNodes)
-        {
-            yield return new(path, node);
-        }
-
-        foreach (var (path, node) in InterfaceNodes)
-        {
-            yield return new(path, node);
+            yield return childNode;
         }
     }
 
@@ -75,19 +45,9 @@ public class NamespaceNode : INode, INestableNode
         var topPath = pathComponents.ElementAt(0);
         var subPath = pathComponents.ElementAtOrDefault(1) ?? "";
 
-        if (ClassNodes.TryGetValue(topPath, out var classNode))
+        if (NestedTypesNode.TryGetChild(topPath, out var typeNode))
         {
-            classNode.AddChild(subPath, node);
-        }
-
-        if (StructNodes.TryGetValue(topPath, out var structNode))
-        {
-            structNode.AddChild(subPath, node);
-        }
-
-        if (InterfaceNodes.TryGetValue(topPath, out var interfaceNode))
-        {
-            interfaceNode.AddChild(subPath, node);
+            typeNode.AddChild(subPath, node);
         }
 
         if (!NamespaceNodes.TryGetValue(topPath, out var namespaceNode))

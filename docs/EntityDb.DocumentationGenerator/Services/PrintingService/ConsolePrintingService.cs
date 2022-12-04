@@ -9,7 +9,7 @@ public class ConsolePrintingService : IPrintingService
     {
         Console.WriteLine($"Namespaces:");
 
-        PrintNamespaceNode(1, "", namespaceNode);
+        PrintNode(1, "", namespaceNode);
     }
 
     private static string GetPadding(int depth)
@@ -17,24 +17,7 @@ public class ConsolePrintingService : IPrintingService
         return $"\n{string.Join("", Enumerable.Repeat("  ", depth))}";
     }
 
-    private static void PrintNamespaceNode(int depth, string fullPath, NamespaceNode namespaceNode)
-    {
-        if (namespaceNode.TypeNodeCount > 0)
-        {
-            Console.WriteLine($"{GetPadding(depth)}- {fullPath[1..]}");
-        }
-
-        PrintNodes(depth + 1, "Classes", namespaceNode.ClassNodes);
-        PrintNodes(depth + 1, "Structs", namespaceNode.StructNodes);
-        PrintNodes(depth + 1, "Interfaces", namespaceNode.InterfaceNodes);
-
-        foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
-        {
-            PrintNamespaceNode(1, $"{fullPath}.{childPath}", childNamespaceNode);
-        }
-    }
-
-    private static void PrintNodes<TNode>(int depth, string groupName, IDictionary<string, TNode> typeNodes)
+    private static void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
         where TNode : INode
     {
         if (typeNodes.Count > 0)
@@ -46,19 +29,49 @@ public class ConsolePrintingService : IPrintingService
 
         foreach (var (_, typeNode) in typeNodes)
         {
-            PrintNode(depth + 1, typeNode);
+            PrintNode(depth + 1, parentPath, typeNode);
         }
     }
 
-    private static void PrintNode(int depth, INode node)
+    private static void PrintNode(int depth, string parentPath, INode node)
     {
         var padding1 = GetPadding(depth);
+
+        if (node is NamespaceNode namespaceNode)
+        {
+            PrintNode(depth + 1, parentPath, namespaceNode.NestedTypesNode);
+
+            foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
+            {
+                PrintNode(1, $"{parentPath}.{childPath}", childNamespaceNode);
+            }
+
+            return;
+        }
+
         var padding2 = GetPadding(depth + 1);
         var padding3 = GetPadding(depth + 2);
 
-        var nodeName = GetNodeName(node);
+        if (node is NestedTypesNode nestedTypesNode)
+        {
+            if (nestedTypesNode.Count > 0)
+            {
+                if (nestedTypesNode.IsNamespace)
+                {
+                    Console.WriteLine($"{padding1}- {parentPath[1..]}");
+                }
 
-        Console.WriteLine($"{padding1}- {nodeName}");
+                PrintNodes(depth + 1, parentPath, "Classes", nestedTypesNode.ClassNodes);
+                PrintNodes(depth + 1, parentPath, "Structs", nestedTypesNode.StructNodes);
+                PrintNodes(depth + 1, parentPath, "Interfaces", nestedTypesNode.InterfaceNodes);
+            }
+        }
+        else
+        {
+            var nodeName = GetNodeName(node);
+
+            Console.WriteLine($"{padding1}- {nodeName}");
+        }
 
         if (node is MemberInfoNode memberInfoNode)
         {
@@ -100,10 +113,11 @@ public class ConsolePrintingService : IPrintingService
 
         if (node is TypeNode typeNode)
         {
-            PrintNodes(depth + 1, "Fields", typeNode.FieldNodes);
-            PrintNodes(depth + 1, "Constructors", typeNode.ConstructorNodes);
-            PrintNodes(depth + 1, "Properties", typeNode.PropertyNodes);
-            PrintNodes(depth + 1, "Methods", typeNode.MethodNodes);
+            PrintNode(depth, parentPath, typeNode.NestedTypesNode);
+            PrintNodes(depth + 1, parentPath, "Fields", typeNode.FieldNodes);
+            PrintNodes(depth + 1, parentPath, "Constructors", typeNode.ConstructorNodes);
+            PrintNodes(depth + 1, parentPath, "Properties", typeNode.PropertyNodes);
+            PrintNodes(depth + 1, parentPath, "Methods", typeNode.MethodNodes);
         }
     }
 
