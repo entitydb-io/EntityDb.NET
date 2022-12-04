@@ -10,7 +10,7 @@ public class MemberDoc
     [XmlElement("returns", typeof(MemberReturnsDoc))]
     [XmlElement("summary", typeof(MemberSummaryDoc))]
     [XmlElement("typeparam", typeof(MemberTypeParamDoc))]
-    [XmlElement("inheritdoc", typeof(MemberInheridDoc))]
+    [XmlElement("inheritdoc", typeof(MemberInheritDoc))]
     [XmlElement("ignore", typeof(MemberIgnoreDoc))]
     public required object[] Items { get; init; }
 

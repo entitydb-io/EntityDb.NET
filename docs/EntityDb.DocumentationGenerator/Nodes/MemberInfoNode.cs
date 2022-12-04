@@ -8,7 +8,9 @@ public abstract class MemberInfoNode : INode
     public Dictionary<string, MemberParamDoc> ParamDocs { get; init; } = new();
     public MemberSummaryDoc? SummaryDoc { get; set; }
     public MemberRemarksDoc? RemarksDoc { get; set; }
-    public string? InheritDoc { get; set; }
+
+    //TODO: Do something with this?
+    public MemberInheritDoc? InheritDoc { get; set; }
 
     public virtual void AddDocumentation(object docCommentMemberItem)
     {
@@ -30,8 +32,8 @@ public abstract class MemberInfoNode : INode
                 RemarksDoc = remarksDoc;
                 break;
 
-            case MemberInheridDoc inheritDoc:
-                InheritDoc = inheritDoc.SeeRef;
+            case MemberInheritDoc inheritDoc:
+                InheritDoc = inheritDoc;
                 break;
 
             default:

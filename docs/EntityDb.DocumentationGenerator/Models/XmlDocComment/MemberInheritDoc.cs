@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public class MemberInheridDoc
+public class MemberInheritDoc
 {
     [XmlAttribute("cref")]
     public required string SeeRef { get; init; }
