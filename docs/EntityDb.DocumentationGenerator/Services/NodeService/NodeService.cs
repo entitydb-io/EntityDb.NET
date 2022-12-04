@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using EntityDb.DocumentationGenerator.Nodes;
+using EntityDb.DocumentationGenerator.Models.Nodes;
 using EntityDb.DocumentationGenerator.Services.AssemblyService;
 using EntityDb.DocumentationGenerator.Services.DocCommentService;
 

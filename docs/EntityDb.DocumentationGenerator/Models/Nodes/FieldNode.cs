@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace EntityDb.DocumentationGenerator.Nodes;
+namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
 public class FieldNode : MemberInfoNode
 {

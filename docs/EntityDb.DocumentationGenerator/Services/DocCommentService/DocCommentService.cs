@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Xml.Serialization;
+using EntityDb.DocumentationGenerator.Models.Nodes;
 using EntityDb.DocumentationGenerator.Models.XmlDocComment;
-using EntityDb.DocumentationGenerator.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace EntityDb.DocumentationGenerator.Nodes;
+namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
 public class NestedTypesNode : INode
 {

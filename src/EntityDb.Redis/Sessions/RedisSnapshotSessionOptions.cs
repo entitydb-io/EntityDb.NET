@@ -6,6 +6,7 @@ namespace EntityDb.Redis.Sessions;
 /// <summary>
 ///     Configuration options for the Redis implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
+/// <typeparam name="TSnapshot">The type of the snapshot</typeparam>
 public class RedisSnapshotSessionOptions<TSnapshot>
 {
     /// <summary>

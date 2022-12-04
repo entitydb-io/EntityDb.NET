@@ -1,8 +1,12 @@
-﻿namespace EntityDb.DocumentationGenerator.Nodes;
+﻿using EntityDb.DocumentationGenerator.Models.XmlDocComment;
+using System.Reflection;
 
-public class TypeNode : MemberInfoNode, INestableNode
+namespace EntityDb.DocumentationGenerator.Models.Nodes;
+
+public class TypeNode : MemberInfoNode, INestableNode, INodeWithTypeParams
 {
     public Type Type { get; }
+    public Dictionary<string, MemberTypeParamDoc> TypeParamDocs { get; init; } = new();
     public NestedTypesNode NestedTypesNode { get; init; } = new(false);
     public Dictionary<string, FieldNode> FieldNodes { get; init; } = new();
     public Dictionary<string, ConstructorNode> ConstructorNodes { get; init; } = new();
@@ -12,6 +16,16 @@ public class TypeNode : MemberInfoNode, INestableNode
     public TypeNode(Type type)
     {
         Type = type;
+    }
+
+    public Type[] GetTypeParams()
+    {
+        return Type.GetGenericArguments();
+    }
+
+    public MemberTypeParamDoc? GetTypeParamDoc(string typeParamName)
+    {
+        return TypeParamDocs.GetValueOrDefault(typeParamName);
     }
 
     public void AddChild(string path, INode node)
@@ -40,6 +54,24 @@ public class TypeNode : MemberInfoNode, INestableNode
 
             default:
                 throw new NotImplementedException();
+        }
+    }
+
+    public override void AddDocumentation(object docCommentMemberItem)
+    {
+        switch (docCommentMemberItem)
+        {
+            case MemberTypeParamDoc typeParamDoc:
+                TypeParamDocs.Add(typeParamDoc.Name, typeParamDoc);
+                break;
+
+            case MemberParamDoc:
+                //TODO: Figure out how to display these. It appears to be the primary constructor params.
+                break;
+
+            default:
+                base.AddDocumentation(docCommentMemberItem);
+                break;
         }
     }
 

@@ -1,5 +1,5 @@
-﻿using EntityDb.DocumentationGenerator.Models.XmlDocComment;
-using EntityDb.DocumentationGenerator.Nodes;
+﻿using EntityDb.DocumentationGenerator.Models.Nodes;
+using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Services.PrintingService;
 

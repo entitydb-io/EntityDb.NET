@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
+using EntityDb.DocumentationGenerator.Models.Nodes;
 using EntityDb.DocumentationGenerator.Models.XmlDocComment;
-using EntityDb.DocumentationGenerator.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.PrintingService;
 
@@ -85,28 +85,42 @@ public class ConsolePrintingService : IPrintingService
             Console.WriteLine($"{padding1}- {nodeName}");
         }
 
-        if (node is MemberInfoNode memberInfoNode)
+        if (node is INodeWithTypeParams nodeWithTypeParams)
         {
-            if (memberInfoNode.TypeParamDocs.Count > 0)
+            var typeParams = nodeWithTypeParams.GetTypeParams();
+
+            if (typeParams.Length > 0)
             {
                 Console.WriteLine($"{padding2}- TypeParams");
 
-                foreach (var (typeParamName, typeParamDoc) in memberInfoNode.TypeParamDocs)
+                foreach (var typeParam in typeParams)
                 {
-                    Console.WriteLine($"{padding3}- {typeParamName}: {typeParamDoc.GetText(this)}");
+                    var typeParamDoc = nodeWithTypeParams.GetTypeParamDoc(typeParam.Name);
+
+                    Console.WriteLine($"{padding3}- {typeParam.Name}: {typeParamDoc?.GetText(this) ?? "Missing TypeParam Doc!"}");
                 }
             }
+        }
 
-            if (memberInfoNode.ParamDocs.Count > 0)
+        if (node is INodeWithParams nodeWithParams)
+        {
+            var @params = nodeWithParams.GetParams();
+
+            if (@params.Length > 0)
             {
                 Console.WriteLine($"{padding2}- Params");
 
-                foreach (var (paramName, paramDoc) in memberInfoNode.ParamDocs)
+                foreach (var param in @params)
                 {
-                    Console.WriteLine($"{padding3}- {paramName}: {paramDoc.GetText(this)}");
+                    var paramDoc = nodeWithParams.GetParamDoc(param.Name!);
+
+                    Console.WriteLine($"{padding3}- {param.Name}: {paramDoc?.GetText(this) ?? "Missing Param Doc!"}");
                 }
             }
+        }
 
+        if (node is MemberInfoNode memberInfoNode)
+        {
             if (memberInfoNode.SummaryDoc != null)
             {
                 Console.WriteLine($"{padding2}- Summary: {memberInfoNode.SummaryDoc.GetText(this)}");

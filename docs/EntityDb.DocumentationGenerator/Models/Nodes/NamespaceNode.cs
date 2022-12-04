@@ -1,4 +1,4 @@
-﻿namespace EntityDb.DocumentationGenerator.Nodes;
+﻿namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
 public class NamespaceNode : INode, INestableNode
 {

@@ -1,4 +1,4 @@
-﻿using EntityDb.DocumentationGenerator.Nodes;
+﻿using EntityDb.DocumentationGenerator.Models.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 
