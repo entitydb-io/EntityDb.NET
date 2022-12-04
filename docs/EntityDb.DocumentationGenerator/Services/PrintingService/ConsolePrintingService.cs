@@ -8,8 +8,6 @@ public class ConsolePrintingService : IPrintingService
 {
     public void Print(NamespaceNode namespaceNode)
     {
-        Console.WriteLine($"Namespaces");
-
         PrintNode(0, "", namespaceNode);
     }
 
@@ -53,7 +51,7 @@ public class ConsolePrintingService : IPrintingService
     {
         if (node is NamespaceNode namespaceNode)
         {
-            PrintNode(depth + 1, parentPath, namespaceNode.NestedTypesNode);
+            PrintNode(depth, parentPath, namespaceNode.NestedTypesNode);
 
             foreach (var (childPath, childNamespaceNode) in namespaceNode.NamespaceNodes)
             {
@@ -71,7 +69,7 @@ public class ConsolePrintingService : IPrintingService
         {
             if (nestedTypesNode.Count > 0 && nestedTypesNode.IsNamespace)
             {
-                Console.WriteLine($"{padding1}- {parentPath[1..]}");
+                Console.WriteLine($"\n{parentPath[1..]}");
             }
 
             PrintNodes(depth + 1, parentPath, "Classes", nestedTypesNode.ClassNodes);

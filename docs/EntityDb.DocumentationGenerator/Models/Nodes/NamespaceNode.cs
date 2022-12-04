@@ -1,4 +1,6 @@
-﻿namespace EntityDb.DocumentationGenerator.Models.Nodes;
+﻿using EntityDb.DocumentationGenerator.Models.XmlDocComment;
+
+namespace EntityDb.DocumentationGenerator.Models.Nodes;
 
 public class NamespaceNode : Node, INestableNode
 {
@@ -18,6 +20,31 @@ public class NamespaceNode : Node, INestableNode
 
                 NestedTypesNode.AddChild(path, typeNode);
 
+                break;
+
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    public override void AddDocumentation(object docCommentMemberItem)
+    {
+        switch (docCommentMemberItem)
+        {
+            case SummaryDoc summaryDoc:
+                SummaryDoc = summaryDoc;
+                break;
+
+            case RemarksDoc remarksDoc:
+                RemarksDoc = remarksDoc;
+                break;
+
+            case InheritDoc inheritDoc:
+                InheritDoc = inheritDoc;
+                break;
+
+            case IgnoreDoc:
+                Ignore = true;
                 break;
 
             default:

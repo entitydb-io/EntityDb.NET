@@ -5,8 +5,10 @@ using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 
-public class DocCommentService : IDocCommentService
+public class XmlDocCommentService : IXmlDocCommentService
 {
+    private static readonly XmlSerializer _xmlSerializer = new(typeof(DocFile));
+
     public string GetNodeName(Node node)
     {
         return node switch
@@ -129,72 +131,21 @@ public class DocCommentService : IDocCommentService
         return $"{type.Namespace}.{GetMemberInfoName(type)}";
     }
 
-    public void LoadInto(DirectoryInfo directory, NamespaceNode namespaceNode)
+    public DocFile? GetDocFileOrDefault(DirectoryInfo directory, string fileName)
     {
-        var xmlSerializer = new XmlSerializer(typeof(DocFile));
+        var fileInfo = directory.GetFiles(fileName)
+            .SingleOrDefault();
 
-        var docCommentFiles = directory.GetFiles("EntityDb.*.xml")
-            .Select(documentationFile =>
-            {
-                var docCommentDocument = (DocFile)xmlSerializer.Deserialize(documentationFile.OpenRead())!;
-
-                return docCommentDocument;
-            });
-
-        var flatNodeDictionary = GetFlatNodeDictionary(namespaceNode);
-
-        foreach (var docCommentFile in docCommentFiles)
+        if (fileInfo == default)
         {
-            foreach (var member in docCommentFile.Members)
-            {
-                var name = member.Name;
-
-                if (flatNodeDictionary.TryGetValue(name, out var node))
-                {
-                    foreach (var item in member.Items)
-                    {
-                        node.AddDocumentation(item);
-                    }
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
+            return default;
         }
+
+        return GetDocFile(fileInfo);
     }
 
-    private static Dictionary<string, Node> GetFlatNodeDictionary(NamespaceNode namespaceNode)
+    private static DocFile GetDocFile(FileInfo fileInfo)
     {
-        var flatNodeDictionary = new Dictionary<string, Node>();
-
-        BuildFlatNodeDictionary(namespaceNode.GetChildNodes());
-
-        return flatNodeDictionary;
-
-        void BuildFlatNodeDictionary(IEnumerable<KeyValuePair<string, Node>> nodes, string parentName = "")
-        {
-            foreach (var (name, node) in nodes)
-            {
-                var xmlDocCommentNamePrefix = node switch
-                {
-                    TypeNode => "T",
-                    PropertyNode => "P",
-                    MethodNode or ConstructorNode => "M",
-                    FieldNode => "F",
-                    _ => null
-                };
-
-                if (xmlDocCommentNamePrefix != null)
-                {
-                    flatNodeDictionary.Add($"{xmlDocCommentNamePrefix}:{parentName}{name}", node);
-                }
-
-                if (node is INestableNode nestableNode)
-                {
-                    BuildFlatNodeDictionary(nestableNode.GetChildNodes(), $"{parentName}{name}.");
-                }
-            }
-        }
+        return (DocFile)_xmlSerializer.Deserialize(fileInfo.OpenRead())!;
     }
 }

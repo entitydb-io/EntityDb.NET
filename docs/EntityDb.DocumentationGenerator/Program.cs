@@ -6,7 +6,7 @@ using EntityDb.DocumentationGenerator.Services.PrintingService;
 INodeService nodeService = new NodeService
 (
     new AssemblyService(),
-    new DocCommentService()
+    new XmlDocCommentService()
 );
 
 IPrintingService printingService = new ConsolePrintingService();

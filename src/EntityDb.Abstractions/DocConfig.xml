@@ -1,0 +1,13 @@
+﻿<?xml version="1.0"?>
+<doc>
+	<assembly>
+		<name>EntityDb.Abstractions</name>
+	</assembly>
+	<members>
+		<member name="N:EntityDb.Abstractions.Agents">
+			<summary>
+				Encapsulates data about actors (the person or system that can execute commands).
+			</summary>
+		</member>
+	</members>
+</doc>

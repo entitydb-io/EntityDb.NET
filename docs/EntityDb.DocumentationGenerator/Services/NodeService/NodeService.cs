@@ -9,9 +9,9 @@ namespace EntityDb.DocumentationGenerator.Services.NodeService;
 internal class NodeService : INodeService
 {
     private readonly IAssemblyService _assemblyService;
-    private readonly IDocCommentService _docCommentService;
+    private readonly IXmlDocCommentService _docCommentService;
 
-    public NodeService(IAssemblyService assemblyService, IDocCommentService docCommentService)
+    public NodeService(IAssemblyService assemblyService, IXmlDocCommentService docCommentService)
     {
         _assemblyService = assemblyService;
         _docCommentService = docCommentService;
@@ -118,21 +118,37 @@ internal class NodeService : INodeService
     {
         var namespaceNode = new NamespaceNode();
 
-        var assemblies = _assemblyService.GetAssemblies(directory);
+        var docFile = _docCommentService.GetDocFileOrDefault(directory, "DocConfig.xml");
 
-        foreach (var assembly in assemblies)
+        if (docFile == default)
         {
-            var types = assembly.GetTypes()
-                .Where(type => type.IsPublic)
-                .OrderBy(type => type.Namespace);
-
-            foreach (var type in types)
-            {
-                AddTypeNode(namespaceNode, type);
-            }
+            return namespaceNode;
         }
 
-        _docCommentService.LoadInto(directory, namespaceNode);
+        var assembly = _assemblyService.GetAssemblyOrDefault(directory, $"{docFile.Assembly.Name}.dll");
+
+        if (assembly == default)
+        {
+            return namespaceNode;
+        }
+
+        var types = assembly.GetTypes()
+            .Where(type => type.IsPublic)
+            .OrderBy(type => type.Namespace);
+
+        foreach (var type in types)
+        {
+            AddTypeNode(namespaceNode, type);
+        }
+
+        docFile.LoadInto(namespaceNode);
+
+        var assemblyDocFile = _docCommentService.GetDocFileOrDefault(directory, $"{docFile.Assembly.Name}.xml");
+
+        if (assemblyDocFile != default)
+        {
+            assemblyDocFile.LoadInto(namespaceNode);
+        }
 
         return namespaceNode;
     }

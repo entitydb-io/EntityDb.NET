@@ -4,5 +4,5 @@ namespace EntityDb.DocumentationGenerator.Services.AssemblyService;
 
 internal interface IAssemblyService
 {
-    IEnumerable<Assembly> GetAssemblies(DirectoryInfo directory);
+    Assembly? GetAssemblyOrDefault(DirectoryInfo directory, string fileName);
 }

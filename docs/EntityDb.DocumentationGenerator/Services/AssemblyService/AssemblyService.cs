@@ -4,13 +4,16 @@ namespace EntityDb.DocumentationGenerator.Services.AssemblyService;
 
 public class AssemblyService : IAssemblyService
 {
-    public IEnumerable<Assembly> GetAssemblies(DirectoryInfo directory)
+    public Assembly? GetAssemblyOrDefault(DirectoryInfo directory, string fileName)
     {
-        var executingAssembly = Assembly.GetExecutingAssembly();
+        var assemblyFile = directory.GetFiles(fileName)
+            .SingleOrDefault();
 
-        return directory.GetFiles($"EntityDb.*.dll")
-            .Where(assemblyFile => !assemblyFile.Name.Contains(executingAssembly.GetName().Name!))
-            .Select(assemblyFile => Assembly.LoadFrom(assemblyFile.FullName))
-            .OrderBy(assembly => assembly.GetName().Name);
+        if (assemblyFile == default)
+        {
+            return default;
+        }
+
+        return Assembly.LoadFrom(assemblyFile.FullName);
     }
 }
