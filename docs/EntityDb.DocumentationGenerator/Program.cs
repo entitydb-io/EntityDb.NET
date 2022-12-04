@@ -9,10 +9,11 @@ INodeService nodeService = new NodeService
     new XmlDocCommentService()
 );
 
-IPrintingService printingService = new ConsolePrintingService();
 
 var directory = new DirectoryInfo(AppContext.BaseDirectory);
 
-var namespaceNode = nodeService.GetNamespaceNode(directory);
+var nodes = nodeService.Load(directory, "DocConfig.xml", "EntityDb.Abstractions.xml");
 
-printingService.Print(namespaceNode);
+IPrintingService printingService = new ConsolePrintingService(nodes);
+
+printingService.Print();

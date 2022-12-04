@@ -9,12 +9,12 @@ namespace EntityDb.DocumentationGenerator.Services.NodeService;
 internal class NodeService : INodeService
 {
     private readonly IAssemblyService _assemblyService;
-    private readonly IXmlDocCommentService _docCommentService;
+    private readonly IXmlDocCommentService _xmlDocCommentService;
 
     public NodeService(IAssemblyService assemblyService, IXmlDocCommentService docCommentService)
     {
         _assemblyService = assemblyService;
-        _docCommentService = docCommentService;
+        _xmlDocCommentService = docCommentService;
     }
 
     private void AddTypeNode(INestableNode parentNode, Type type)
@@ -67,7 +67,7 @@ internal class NodeService : INodeService
             }
 
             var node = new FieldNode(fieldInfo);
-            var nodeDocCommentName = _docCommentService.GetNodeName(node);
+            var nodeDocCommentName = _xmlDocCommentService.GetNodeName(node);
 
             typeNode.AddChild(nodeDocCommentName, node);
         }
@@ -80,7 +80,7 @@ internal class NodeService : INodeService
             }
 
             var node = new ConstructorNode(constructorInfo);
-            var nodeDocCommentName = _docCommentService.GetNodeName(node);
+            var nodeDocCommentName = _xmlDocCommentService.GetNodeName(node);
 
             typeNode.AddChild(nodeDocCommentName, node);
         }
@@ -95,7 +95,7 @@ internal class NodeService : INodeService
             }
 
             var node = new PropertyNode(propertyInfo);
-            var nodeDocCommentName = _docCommentService.GetNodeName(node);
+            var nodeDocCommentName = _xmlDocCommentService.GetNodeName(node);
 
             typeNode.AddChild(nodeDocCommentName, node);
         }
@@ -108,50 +108,47 @@ internal class NodeService : INodeService
             }
 
             var node = new MethodNode(methodInfo);
-            var nodeDocCommentName = _docCommentService.GetNodeName(node);
+            var nodeDocCommentName = _xmlDocCommentService.GetNodeName(node);
 
             typeNode.AddChild(nodeDocCommentName, node);
         }
     }
 
-    public NamespaceNode GetNamespaceNode(DirectoryInfo directory)
+    public Nodes Load(DirectoryInfo directory, params string[] xmlDocCommentFileNames)
     {
+        var docFiles = xmlDocCommentFileNames
+            .Select(xmlDocCommentFileName => _xmlDocCommentService.GetDocFile(directory, xmlDocCommentFileName));
+
+        var assemblies = docFiles
+            .Select(docFile => docFile.Assembly.Name)
+            .Distinct()
+            .Select(assemblyName => _assemblyService.GetAssembly(directory, $"{assemblyName}.dll"));
+
         var namespaceNode = new NamespaceNode();
 
-        var docFile = _docCommentService.GetDocFileOrDefault(directory, "DocConfig.xml");
-
-        if (docFile == default)
+        foreach (var assembly in assemblies)
         {
-            return namespaceNode;
-        }
+            var types = assembly.GetTypes()
+                .Where(type => type.IsPublic)
+                .OrderBy(type => type.Namespace);
 
-        var assembly = _assemblyService.GetAssemblyOrDefault(directory, $"{docFile.Assembly.Name}.dll");
-
-        if (assembly == default)
-        {
-            return namespaceNode;
-        }
-
-        var types = assembly.GetTypes()
-            .Where(type => type.IsPublic)
-            .OrderBy(type => type.Namespace);
-
-        foreach (var type in types)
-        {
-            AddTypeNode(namespaceNode, type);
+            foreach (var type in types)
+            {
+                AddTypeNode(namespaceNode, type);
+            }
         }
 
         var xmlDocCommentMemberDictionary = namespaceNode.ToXmlDocCommentMemberDictionary();
 
-        docFile.LoadInto(xmlDocCommentMemberDictionary);
-
-        var assemblyDocFile = _docCommentService.GetDocFileOrDefault(directory, $"{docFile.Assembly.Name}.xml");
-
-        if (assemblyDocFile != default)
+        foreach (var docFile in docFiles)
         {
-            assemblyDocFile.LoadInto(xmlDocCommentMemberDictionary);
+            docFile.LoadInto(xmlDocCommentMemberDictionary);
         }
 
-        return namespaceNode;
+        return new Nodes
+        {
+            XmlDocCommentMemberDictionary = xmlDocCommentMemberDictionary,
+            Root = namespaceNode,
+        };
     }
 }

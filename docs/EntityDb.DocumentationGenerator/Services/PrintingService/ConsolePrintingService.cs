@@ -6,29 +6,43 @@ namespace EntityDb.DocumentationGenerator.Services.PrintingService;
 
 public class ConsolePrintingService : IPrintingService
 {
-    public void Print(NamespaceNode namespaceNode)
+    private readonly Nodes _nodes;
+
+    public ConsolePrintingService(Nodes nodes)
     {
-        PrintNode(0, "", namespaceNode);
+        _nodes = nodes;
+    }
+
+    public void Print()
+    {
+        PrintNode(0, "", _nodes.Root);
     }
 
     public string ConvertSeeDoc(SeeDoc see)
     {
-        return $"<<see:{see.SeeRef}>>";
+        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(see.SeeRef, out var seeNode))
+        {
+            return GetNodeName(seeNode);
+        }
+
+        return $"<<unknown:{see.SeeRef}>>";
     }
 
     public string ConvertParamRefDoc(ParamRefDoc paramRefDoc)
     {
-        return $"<<paramRef:{paramRefDoc.Name}>>";
+        //TODO: It looks like inner XML is okay.. support that?
+        return paramRefDoc.Name;
     }
 
     public string ConvertTypeParamRefDoc(TypeParamRefDoc typeParamRefDoc)
     {
-        return $"<<paramRef:{typeParamRefDoc.Name}>>";
+        //TODO: It looks like inner XML is okay.. support that?
+        return typeParamRefDoc.Name;
     }
 
     public string ConvertCodeDoc(CodeDoc codeDoc)
     {
-        return $"<<code:{codeDoc.GetText(this)}>>";
+        return $"`{codeDoc.GetText(this)}`";
     }
 
     private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
