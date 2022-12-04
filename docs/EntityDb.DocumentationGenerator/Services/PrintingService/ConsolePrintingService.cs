@@ -87,34 +87,34 @@ public class ConsolePrintingService : IPrintingService
 
         if (node is MemberInfoNode memberInfoNode)
         {
-            if (memberInfoNode.TypeParams.Count > 0)
+            if (memberInfoNode.TypeParamDocs.Count > 0)
             {
                 Console.WriteLine($"{padding2}- TypeParams");
 
-                foreach (var (typeParamName, typeParamDoc) in memberInfoNode.TypeParams)
+                foreach (var (typeParamName, typeParamDoc) in memberInfoNode.TypeParamDocs)
                 {
                     Console.WriteLine($"{padding3}- {typeParamName}: {typeParamDoc.GetText(this)}");
                 }
             }
 
-            if (memberInfoNode.Params.Count > 0)
+            if (memberInfoNode.ParamDocs.Count > 0)
             {
                 Console.WriteLine($"{padding2}- Params");
 
-                foreach (var (paramName, paramDoc) in memberInfoNode.Params)
+                foreach (var (paramName, paramDoc) in memberInfoNode.ParamDocs)
                 {
                     Console.WriteLine($"{padding3}- {paramName}: {paramDoc.GetText(this)}");
                 }
             }
 
-            if (memberInfoNode.Summary != null)
+            if (memberInfoNode.SummaryDoc != null)
             {
-                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.Summary.GetText(this)}");
+                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.SummaryDoc.GetText(this)}");
             }
 
-            if (memberInfoNode.Remarks != null)
+            if (memberInfoNode.RemarksDoc != null)
             {
-                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.Remarks.GetText(this)}");
+                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.RemarksDoc.GetText(this)}");
             }
         }
 

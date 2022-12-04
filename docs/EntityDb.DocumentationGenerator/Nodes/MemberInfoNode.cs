@@ -4,10 +4,10 @@ namespace EntityDb.DocumentationGenerator.Nodes;
 
 public abstract class MemberInfoNode : INode
 {
-    public Dictionary<string, MemberTypeParamDoc> TypeParams { get; init; } = new();
-    public Dictionary<string, MemberParamDoc> Params { get; init; } = new();
-    public MemberSummaryDoc? Summary { get; set; }
-    public MemberRemarksDoc? Remarks { get; set; }
+    public Dictionary<string, MemberTypeParamDoc> TypeParamDocs { get; init; } = new();
+    public Dictionary<string, MemberParamDoc> ParamDocs { get; init; } = new();
+    public MemberSummaryDoc? SummaryDoc { get; set; }
+    public MemberRemarksDoc? RemarksDoc { get; set; }
     public string? InheritDoc { get; set; }
 
     public virtual void AddDocumentation(object docCommentMemberItem)
@@ -15,19 +15,19 @@ public abstract class MemberInfoNode : INode
         switch (docCommentMemberItem)
         {
             case MemberTypeParamDoc typeParamDoc:
-                TypeParams.Add(typeParamDoc.Name, typeParamDoc);
+                TypeParamDocs.Add(typeParamDoc.Name, typeParamDoc);
                 break;
 
             case MemberParamDoc paramDoc:
-                Params.Add(paramDoc.Name, paramDoc);
+                ParamDocs.Add(paramDoc.Name, paramDoc);
                 break;
 
             case MemberSummaryDoc summaryDoc:
-                Summary = summaryDoc;
+                SummaryDoc = summaryDoc;
                 break;
 
             case MemberRemarksDoc remarksDoc:
-                Remarks = remarksDoc;
+                RemarksDoc = remarksDoc;
                 break;
 
             case MemberInheridDoc inheritDoc:
