@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using static EntityDb.DocumentationGenerator.Services.DocCommentService.DocCommentService;
+using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
@@ -18,7 +18,7 @@ public class MethodNode : MemberInfoNode
     {
         switch (docCommentMemberItem)
         {
-            case DocCommentMemberReturns returns:
+            case MemberReturnsDoc returns:
                 Returns = returns.Text;
                 break;
 

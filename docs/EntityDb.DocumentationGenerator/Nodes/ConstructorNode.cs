@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using static EntityDb.DocumentationGenerator.Services.DocCommentService.DocCommentService;
+using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
@@ -16,7 +16,7 @@ public class ConstructorNode : MemberInfoNode
     {
         switch (docCommentMemberItem)
         {
-            case DocCommentMemberIgnore:
+            case MemberIgnoreDoc:
                 // Used to make the Warning go away for public constructors on public classes
                 //TODO: Consider making these classes internal, provide another way to use them.
                 break;

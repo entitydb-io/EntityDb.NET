@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
-using System.Xml;
 using System.Xml.Serialization;
-using System.Xml.XPath;
+using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 using EntityDb.DocumentationGenerator.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
@@ -130,93 +129,14 @@ public class DocCommentService : IDocCommentService
         return $"{type.Namespace}.{GetMemberInfoName(type)}";
     }
 
-    [XmlRoot("doc")]
-    public class DocCommentFile
-    {
-        [XmlElement("assembly")]
-        public required DocCommentAssembly Assembly { get; init; }
-
-        [XmlArray("members")]
-        [XmlArrayItem("member")]
-        public required DocCommentMember[] Members { get; init; }
-    }
-
-    public class DocCommentAssembly
-    {
-        [XmlElement("name")]
-        public required string Name { get; init; }
-    }
-
-    public class DocCommentMember
-    {
-        [XmlElement("param", typeof(DocCommentMemberParam))]
-        [XmlElement("remarks", typeof(DocCommentMemberRemarks))]
-        [XmlElement("returns", typeof(DocCommentMemberReturns))]
-        [XmlElement("summary", typeof(DocCommentMemberSummary))]
-        [XmlElement("typeparam", typeof(DocCommentMemberTypeParam))]
-        [XmlElement("inheritdoc", typeof(DocCommentMemberInheritDoc))]
-        [XmlElement("ignore", typeof(DocCommentMemberIgnore))]
-        public required object[] Items { get; init; }
-
-        [XmlAttribute("name")]
-        public required string Name { get; init; }
-    }
-
-    public class DocCommentMemberParam
-    {
-        [XmlText]
-        public required string Text { get; init; }
-
-        [XmlAttribute("name")]
-        public required string Name { get; init; }
-    }
-
-    public class DocCommentMemberRemarks
-    {
-        [XmlText]
-        public required string Text { get; init; }
-    }
-
-    public class DocCommentMemberReturns
-    {
-        [XmlText]
-        public required string Text { get; init; }
-    }
-
-    public class DocCommentMemberSummary
-    {
-        [XmlText(typeof(XmlText))]
-        [XmlAnyElement]
-        public required XmlNode[] Text { get; init; }
-    }
-
-    public class DocCommentMemberTypeParam
-    {
-        [XmlText]
-        public required string Text { get; init; }
-
-        [XmlAttribute("name")]
-        public required string Name { get; init; }
-    }
-
-    public class DocCommentMemberIgnore
-    {
-    }
-
-    public class DocCommentMemberInheritDoc
-    {
-        [XmlAttribute("cref")]
-        public required string SeeRef { get; init; }
-    }
-
     public void LoadInto(DirectoryInfo directory, NamespaceNode namespaceNode)
     {
-        var xmlSerializer = new XmlSerializer(typeof(DocCommentFile));
+        var xmlSerializer = new XmlSerializer(typeof(DocFile));
 
         var docCommentFiles = directory.GetFiles("EntityDb.*.xml")
             .Select(documentationFile =>
             {
-                var docCommentDocument = (DocCommentFile)xmlSerializer.Deserialize(documentationFile.OpenRead())!;
+                var docCommentDocument = (DocFile)xmlSerializer.Deserialize(documentationFile.OpenRead())!;
 
                 return docCommentDocument;
             });
