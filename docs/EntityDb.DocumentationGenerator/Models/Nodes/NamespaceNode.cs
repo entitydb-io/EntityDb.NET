@@ -5,12 +5,23 @@ namespace EntityDb.DocumentationGenerator.Models.Nodes;
 public class NamespaceNode : Node, INestableNode
 {
     public Dictionary<string, NamespaceNode> NamespaceNodes { get; init; } = new();
+    public AssemblyNode? AssemblyNode { get; private set; }
     public NestedTypesNode NestedTypesNode { get; init; } = new();
 
     public void AddChild(string path, Node node)
     {
         switch (node)
         {
+            case AssemblyNode assemblyNode:
+                if (path != "")
+                {
+                    DrillDownToAddChild(path, node);
+                    return;
+                }
+
+                AssemblyNode = assemblyNode;
+                break;
+
             case TypeNode typeNode:
                 if (path.Contains('.'))
                 {

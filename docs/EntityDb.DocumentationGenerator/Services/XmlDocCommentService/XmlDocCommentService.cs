@@ -131,17 +131,10 @@ public class XmlDocCommentService : IXmlDocCommentService
         return $"{type.Namespace}.{GetMemberInfoName(type)}";
     }
 
-    public DocFile GetDocFile(DirectoryInfo directory, string fileName)
+    public IEnumerable<DocFile> GetDocFiles(DirectoryInfo directory, string fileName)
     {
-        var fileInfo = directory.GetFiles(fileName)
-            .SingleOrDefault();
-
-        if (fileInfo == default)
-        {
-            throw new Exception($"Cannot locate {fileName} in {directory}");
-        }
-
-        return GetDocFile(fileInfo);
+        return directory.GetFiles(fileName)
+            .Select(GetDocFile);
     }
 
     private static DocFile GetDocFile(FileInfo fileInfo)

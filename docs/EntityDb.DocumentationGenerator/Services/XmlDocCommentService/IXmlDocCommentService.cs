@@ -5,6 +5,6 @@ namespace EntityDb.DocumentationGenerator.Services.DocCommentService;
 
 internal interface IXmlDocCommentService
 {
-    DocFile GetDocFile(DirectoryInfo directoryInfo, string fileName);
+    IEnumerable<DocFile> GetDocFiles(DirectoryInfo directoryInfo, string fileName);
     string GetNodeName(Node node);
 }

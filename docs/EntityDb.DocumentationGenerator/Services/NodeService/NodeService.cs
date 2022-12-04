@@ -117,7 +117,8 @@ internal class NodeService : INodeService
     public Nodes Load(DirectoryInfo directory, params string[] xmlDocCommentFileNames)
     {
         var docFiles = xmlDocCommentFileNames
-            .Select(xmlDocCommentFileName => _xmlDocCommentService.GetDocFile(directory, xmlDocCommentFileName));
+            .SelectMany(xmlDocCommentFileName => _xmlDocCommentService.GetDocFiles(directory, xmlDocCommentFileName))
+            .ToArray();
 
         var assemblies = docFiles
             .Select(docFile => docFile.Assembly.Name)
@@ -128,6 +129,8 @@ internal class NodeService : INodeService
 
         foreach (var assembly in assemblies)
         {
+            namespaceNode.AddChild(assembly.GetName().Name!, new AssemblyNode(assembly));
+
             var types = assembly.GetTypes()
                 .Where(type => type.IsPublic)
                 .OrderBy(type => type.Namespace);
