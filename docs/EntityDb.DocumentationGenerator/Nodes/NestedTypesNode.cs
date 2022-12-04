@@ -67,7 +67,7 @@ public class NestedTypesNode : INode
         {
             yield return childNode;
         }
-        
+
         foreach (var childNode in GetChildNodesOf(StructNodes))
         {
             yield return childNode;

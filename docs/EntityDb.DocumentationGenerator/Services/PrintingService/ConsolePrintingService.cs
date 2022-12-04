@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.Intrinsics.X86;
 using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 using EntityDb.DocumentationGenerator.Nodes;
 

@@ -1,6 +1,6 @@
-﻿using System.Xml.Serialization;
+﻿using System.Text;
 using System.Xml;
-using System.Text;
+using System.Xml.Serialization;
 using EntityDb.DocumentationGenerator.Services.PrintingService;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
