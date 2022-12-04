@@ -25,22 +25,7 @@ public class ConsolePrintingService : IPrintingService
             return GetNodeName(seeNode);
         }
 
-        return $"<<see external:{seeDoc.SeeRef}>>";
-    }
-
-    public string ConvertInheritDoc(InheritDoc inheritDoc)
-    {
-        if (inheritDoc.SeeRef == null)
-        {
-            return "<<inherit doc of ancestor>>";
-        }
-
-        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(inheritDoc.SeeRef, out var seeNode))
-        {
-            return GetNodeName(seeNode);
-        }
-
-        return $"<<inherit external:{inheritDoc.SeeRef}>>";
+        return $"[see external:{seeDoc.SeeRef}]";
     }
 
     public string ConvertParamRefDoc(ParamRefDoc paramRefDoc)
@@ -56,6 +41,41 @@ public class ConsolePrintingService : IPrintingService
     public string ConvertCodeDoc(CodeDoc codeDoc)
     {
         return $"`{codeDoc.GetText(this)}`";
+    }
+
+    public string ConvertSummaryDoc(SummaryDoc? summaryDoc)
+    {
+        return summaryDoc?.GetText(this) ?? "Missing Summary Doc!";
+    }
+
+    public string ConvertTypeParamDoc(TypeParamDoc? typeParamDoc)
+    {
+        return typeParamDoc?.GetText(this) ?? "Missing TypeParam Doc!";
+    }
+
+    public string ConvertParamDoc(ParamDoc? paramDoc)
+    {
+        return paramDoc?.GetText(this) ?? "Missing Param Doc!";
+    }
+
+    public string? ConvertInheritDoc(InheritDoc? inheritDoc)
+    {
+        if (inheritDoc == null)
+        {
+            return null;
+        }
+
+        if (inheritDoc.SeeRef == null)
+        {
+            return "[inherit doc of ancestor]";
+        }
+
+        if (_nodes.XmlDocCommentMemberDictionary.TryGetValue(inheritDoc.SeeRef, out var seeNode))
+        {
+            return GetNodeName(seeNode);
+        }
+
+        return $"[inherit external:{inheritDoc.SeeRef}]";
     }
 
     private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
@@ -88,7 +108,7 @@ public class ConsolePrintingService : IPrintingService
             if (namespaceNode.NestedTypesNode.Count > 0)
             {
                 Console.WriteLine($"\n{parentPath[1..]}");
-                Console.WriteLine(namespaceNode.SummaryDoc?.GetText(this) ?? "Missing Summary Doc!");
+                Console.WriteLine(ConvertSummaryDoc(namespaceNode.SummaryDoc));
             }
 
             PrintNode(depth, parentPath, namespaceNode.NestedTypesNode);
@@ -145,9 +165,7 @@ public class ConsolePrintingService : IPrintingService
                 {
                     var typeParamDoc = nodeWithTypeParams.GetTypeParamDoc(typeParam.Name);
 
-                    var typeParamDescription = typeParamDoc?.GetText(this) ?? (node.InheritDoc != null
-                        ? ConvertInheritDoc(node.InheritDoc)
-                        : "Missing TypeParam Doc!");
+                    var typeParamDescription = ConvertInheritDoc(node.InheritDoc) ?? ConvertTypeParamDoc(typeParamDoc);
 
                     Console.WriteLine($"{padding3}- {typeParam.Name}: {typeParamDescription}");
                 }
@@ -166,9 +184,7 @@ public class ConsolePrintingService : IPrintingService
                 {
                     var paramDoc = nodeWithParams.GetParamDoc(param.Name!);
 
-                    var paramDescription = paramDoc?.GetText(this) ?? (node.InheritDoc != null
-                        ? ConvertInheritDoc(node.InheritDoc)
-                        : "Missing Param Doc!");
+                    var paramDescription = ConvertInheritDoc(node.InheritDoc) ?? ConvertParamDoc(paramDoc);
 
                     Console.WriteLine($"{padding3}- {param.Name}: {paramDescription}");
                 }
@@ -201,7 +217,7 @@ public class ConsolePrintingService : IPrintingService
     private string GetTypesName(IEnumerable<Type> types)
     {
         var typeNames = types
-            .Select(type => GetTypeName(type));
+            .Select(GetTypeName);
 
         return $"<{string.Join(",", typeNames)}>";
     }
