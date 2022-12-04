@@ -6,8 +6,8 @@ public abstract class MemberInfoNode : INode
 {
     public Dictionary<string, string> TypeParams { get; init; } = new();
     public Dictionary<string, string> Params { get; init; } = new();
-    public string? Summary { get; set; }
-    public string? Remarks { get; set; }
+    public MemberSummaryDoc? Summary { get; set; }
+    public MemberRemarksDoc? Remarks { get; set; }
     public string? InheritDoc { get; set; }
 
     public virtual void AddDocumentation(object docCommentMemberItem)
@@ -22,12 +22,12 @@ public abstract class MemberInfoNode : INode
                 TypeParams.Add(param.Name, param.Text);
                 break;
 
-            case MemberSummaryDoc summary:
-                Summary = summary.GetText();
+            case MemberSummaryDoc summaryDoc:
+                Summary = summaryDoc;
                 break;
 
-            case MemberRemarksDoc remarks:
-                Remarks = remarks.Text;
+            case MemberRemarksDoc remarksDoc:
+                Remarks = remarksDoc;
                 break;
 
             case MemberInheridDoc inheritDoc:

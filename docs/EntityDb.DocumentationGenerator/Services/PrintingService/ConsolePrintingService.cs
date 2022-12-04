@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Runtime.Intrinsics.X86;
+using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 using EntityDb.DocumentationGenerator.Nodes;
 
 namespace EntityDb.DocumentationGenerator.Services.PrintingService;
@@ -12,12 +14,32 @@ public class ConsolePrintingService : IPrintingService
         PrintNode(0, "", namespaceNode);
     }
 
-    private static string GetPadding(int depth)
+    public string ConvertSeeDoc(SeeDoc see)
+    {
+        return $"<<see:{see.SeeRef}>>";
+    }
+
+    public string ConvertParamRefDoc(ParamRefDoc paramRefDoc)
+    {
+        return $"<<paramRef:{paramRefDoc.Name}>>";
+    }
+
+    public string ConvertTypeParamRefDoc(TypeParamRefDoc typeParamRefDoc)
+    {
+        return $"<<paramRef:{typeParamRefDoc.Name}>>";
+    }
+
+    public string ConvertCodeDoc(CodeDoc codeDoc)
+    {
+        return $"<<code:{codeDoc.GetText(this)}>>";
+    }
+
+    private string GetPadding(int depth)
     {
         return $"{string.Join("", Enumerable.Repeat("  ", depth))}";
     }
 
-    private static void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
+    private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
         where TNode : INode
     {
         if (typeNodes.Count > 0)
@@ -33,7 +55,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private static void PrintNode(int depth, string parentPath, INode node)
+    private void PrintNode(int depth, string parentPath, INode node)
     {
         if (node is NamespaceNode namespaceNode)
         {
@@ -93,12 +115,12 @@ public class ConsolePrintingService : IPrintingService
 
             if (memberInfoNode.Summary != null)
             {
-                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.Summary}");
+                Console.WriteLine($"{padding2}- Summary: {memberInfoNode.Summary.GetText(this)}");
             }
 
             if (memberInfoNode.Remarks != null)
             {
-                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.Remarks}");
+                Console.WriteLine($"{padding2}- Remarks: {memberInfoNode.Remarks.GetText(this)}");
             }
         }
 
@@ -117,7 +139,7 @@ public class ConsolePrintingService : IPrintingService
         }
     }
 
-    private static string GetNodeName(INode node)
+    private string GetNodeName(INode node)
     {
         return node switch
         {
@@ -130,7 +152,7 @@ public class ConsolePrintingService : IPrintingService
         };
     }
 
-    private static string GetTypesName(IEnumerable<Type> types)
+    private string GetTypesName(IEnumerable<Type> types)
     {
         var typeNames = types
             .Select(type => GetTypeName(type));
@@ -138,7 +160,7 @@ public class ConsolePrintingService : IPrintingService
         return $"<{string.Join(",", typeNames)}>";
     }
 
-    private static string GetParameterInfosName(IEnumerable<ParameterInfo> parameterInfos)
+    private string GetParameterInfosName(IEnumerable<ParameterInfo> parameterInfos)
     {
         var parameterTypeNames = parameterInfos
             .Select(parameterInfo => GetTypeName(parameterInfo.ParameterType));
@@ -146,27 +168,27 @@ public class ConsolePrintingService : IPrintingService
         return $"({string.Join(", ", parameterTypeNames)})";
     }
 
-    private static string GetConstructorInfoName(ConstructorInfo constructorInfo)
+    private string GetConstructorInfoName(ConstructorInfo constructorInfo)
     {
         return $"{GetTypeName(constructorInfo.DeclaringType!)}{GetParameterInfosName(constructorInfo.GetParameters())}";
     }
 
-    private static string GetMethodInfoName(MethodInfo methodInfo)
+    private string GetMethodInfoName(MethodInfo methodInfo)
     {
         return $"{GetTypeName(methodInfo.ReturnType)} {methodInfo.Name}{GetParameterInfosName(methodInfo.GetParameters())}";
     }
 
-    private static string GetPropertyInfoName(PropertyInfo propertyInfo)
+    private string GetPropertyInfoName(PropertyInfo propertyInfo)
     {
         return $"{GetTypeName(propertyInfo.PropertyType)} {propertyInfo.Name}";
     }
 
-    private static string GetFieldInfoName(FieldInfo fieldInfo)
+    private string GetFieldInfoName(FieldInfo fieldInfo)
     {
         return $"{GetTypeName(fieldInfo.FieldType)} {fieldInfo.Name}";
     }
 
-    private static string GetTypeName(Type type)
+    private string GetTypeName(Type type)
     {
         if (type.IsByRef)
         {

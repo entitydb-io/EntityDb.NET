@@ -1,10 +1,5 @@
-﻿using System.Xml.Serialization;
-using System.Xml;
+﻿namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
-
-public class MemberRemarksDoc
+public class MemberRemarksDoc : DocWithMixedInnerXml
 {
-    [XmlText]
-    public required string Text { get; init; }
 }

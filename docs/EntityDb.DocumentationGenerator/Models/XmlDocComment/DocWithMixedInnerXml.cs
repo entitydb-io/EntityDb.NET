@@ -1,6 +1,7 @@
 ﻿using System.Xml.Serialization;
 using System.Xml;
 using System.Text;
+using EntityDb.DocumentationGenerator.Services.PrintingService;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
@@ -14,8 +15,7 @@ public abstract class DocWithMixedInnerXml
     [XmlAnyElement]
     public required object[] Elements { get; init; }
 
-    //TODO: Need to pass some interface that can format the objects
-    public string GetText()
+    public string GetText(IPrintingService printingService)
     {
         var stringBuilder = new StringBuilder();
 
@@ -28,19 +28,19 @@ public abstract class DocWithMixedInnerXml
                     break;
 
                 case SeeDoc see:
-                    stringBuilder.Append($"<<see:{see.SeeRef}>>");
+                    stringBuilder.Append(printingService.ConvertSeeDoc(see));
                     break;
 
                 case CodeDoc code:
-                    stringBuilder.Append($"<<code:{code.GetText()}>>");
+                    stringBuilder.Append(printingService.ConvertCodeDoc(code));
                     break;
 
                 case ParamRefDoc paramRef:
-                    stringBuilder.Append($"<<paramref:{paramRef.Name}>>");
+                    stringBuilder.Append(printingService.ConvertParamRefDoc(paramRef));
                     break;
 
                 case TypeParamRefDoc typeParamRef:
-                    stringBuilder.Append($"<<typeparamref:{typeParamRef.Name}>>");
+                    stringBuilder.Append(printingService.ConvertTypeParamRefDoc(typeParamRef));
                     break;
 
                 default:
