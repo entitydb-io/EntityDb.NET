@@ -33,11 +33,6 @@ public class ConsolePrintingService : IPrintingService
         return $"<<code:{codeDoc.GetText(this)}>>";
     }
 
-    private string GetPadding(int depth)
-    {
-        return $"{string.Join("", Enumerable.Repeat("  ", depth))}";
-    }
-
     private void PrintNodes<TNode>(int depth, string parentPath, string groupName, IDictionary<string, TNode> typeNodes)
         where TNode : INode
     {
@@ -96,9 +91,9 @@ public class ConsolePrintingService : IPrintingService
             {
                 Console.WriteLine($"{padding2}- TypeParams");
 
-                foreach (var (typeParamName, typeParamDesc) in memberInfoNode.TypeParams)
+                foreach (var (typeParamName, typeParamDoc) in memberInfoNode.TypeParams)
                 {
-                    Console.WriteLine($"{padding3}- {typeParamName}: {typeParamDesc}");
+                    Console.WriteLine($"{padding3}- {typeParamName}: {typeParamDoc.GetText(this)}");
                 }
             }
 
@@ -106,9 +101,9 @@ public class ConsolePrintingService : IPrintingService
             {
                 Console.WriteLine($"{padding2}- Params");
 
-                foreach (var (paramName, paramDesc) in memberInfoNode.Params)
+                foreach (var (paramName, paramDoc) in memberInfoNode.Params)
                 {
-                    Console.WriteLine($"{padding3}- {paramName}: {paramDesc}");
+                    Console.WriteLine($"{padding3}- {paramName}: {paramDoc.GetText(this)}");
                 }
             }
 
@@ -123,9 +118,9 @@ public class ConsolePrintingService : IPrintingService
             }
         }
 
-        if (node is MethodNode methodNode && !string.IsNullOrWhiteSpace(methodNode.Returns))
+        if (node is MethodNode methodNode && methodNode.Returns != null)
         {
-            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns}");
+            Console.WriteLine($"{padding2}- Returns: {methodNode.Returns.GetText(this)}");
         }
 
         if (node is TypeNode typeNode)
@@ -202,5 +197,10 @@ public class ConsolePrintingService : IPrintingService
         var typeNamePrefix = type.Name.Split('`', 2)[0];
 
         return $"{typeNamePrefix}{GetTypesName(type.GetGenericArguments())}";
+    }
+
+    private static string GetPadding(int depth)
+    {
+        return $"{string.Join("", Enumerable.Repeat("  ", depth))}";
     }
 }

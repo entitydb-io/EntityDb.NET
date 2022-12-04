@@ -7,7 +7,7 @@ public class MethodNode : MemberInfoNode
 {
     public MethodInfo MethodInfo { get; }
 
-    public string? Returns { get; set; }
+    public MemberReturnsDoc? Returns { get; set; }
 
     public MethodNode(MethodInfo methodInfo)
     {
@@ -18,8 +18,8 @@ public class MethodNode : MemberInfoNode
     {
         switch (docCommentMemberItem)
         {
-            case MemberReturnsDoc returns:
-                Returns = returns.Text;
+            case MemberReturnsDoc returnsDoc:
+                Returns = returnsDoc;
                 break;
 
             default:

@@ -3,8 +3,6 @@ using System.Xml.Serialization;
 
 namespace EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-public class MemberReturnsDoc
+public class MemberReturnsDoc : DocWithMixedInnerXml
 {
-    [XmlText]
-    public required string Text { get; init; }
 }

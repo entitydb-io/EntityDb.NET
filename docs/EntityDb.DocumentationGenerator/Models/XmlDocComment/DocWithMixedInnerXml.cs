@@ -17,6 +17,11 @@ public abstract class DocWithMixedInnerXml
 
     public string GetText(IPrintingService printingService)
     {
+        if (Elements == null)
+        {
+            return string.Empty;
+        }
+
         var stringBuilder = new StringBuilder();
 
         foreach (var element in Elements)
