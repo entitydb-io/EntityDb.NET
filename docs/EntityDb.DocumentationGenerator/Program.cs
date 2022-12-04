@@ -2,6 +2,7 @@
 using EntityDb.DocumentationGenerator.Services.DocCommentService;
 using EntityDb.DocumentationGenerator.Services.NodeService;
 using EntityDb.DocumentationGenerator.Services.PrintingService;
+using EntityDb.DocumentationGenerator.Services.PrintingService.ConsolePrinting;
 
 INodeService nodeService = new NodeService
 (

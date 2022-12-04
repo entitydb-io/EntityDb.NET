@@ -2,7 +2,7 @@
 using EntityDb.DocumentationGenerator.Models.Nodes;
 using EntityDb.DocumentationGenerator.Models.XmlDocComment;
 
-namespace EntityDb.DocumentationGenerator.Services.PrintingService;
+namespace EntityDb.DocumentationGenerator.Services.PrintingService.ConsolePrinting;
 
 public class ConsolePrintingService : IPrintingService
 {
