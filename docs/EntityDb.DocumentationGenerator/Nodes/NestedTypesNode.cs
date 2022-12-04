@@ -84,11 +84,6 @@ public class NestedTypesNode : INode
         foreach (var (path, node) in typeNodes)
         {
             yield return new(path, node);
-
-            //foreach (var nestedNodes in node.GetChildNodes())
-            //{
-            //    yield return nestedNodes;
-            //}
         }
     }
 }
