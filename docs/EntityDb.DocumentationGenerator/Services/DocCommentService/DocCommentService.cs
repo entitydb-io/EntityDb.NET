@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Xml;
+using System.Xml.Serialization;
 using System.Xml.XPath;
 using EntityDb.DocumentationGenerator.Nodes;
 
@@ -129,33 +130,110 @@ public class DocCommentService : IDocCommentService
         return $"{type.Namespace}.{GetMemberInfoName(type)}";
     }
 
+    [XmlRoot("doc")]
+    public class DocCommentFile
+    {
+        [XmlElement("assembly")]
+        public required DocCommentAssembly Assembly { get; init; }
+
+        [XmlArray("members")]
+        [XmlArrayItem("member")]
+        public required DocCommentMember[] Members { get; init; }
+    }
+
+    public class DocCommentAssembly
+    {
+        [XmlElement("name")]
+        public required string Name { get; init; }
+    }
+
+    public class DocCommentMember
+    {
+        [XmlElement("param", typeof(DocCommentMemberParam))]
+        [XmlElement("remarks", typeof(DocCommentMemberRemarks))]
+        [XmlElement("returns", typeof(DocCommentMemberReturns))]
+        [XmlElement("summary", typeof(DocCommentMemberSummary))]
+        [XmlElement("typeparam", typeof(DocCommentMemberTypeParam))]
+        [XmlElement("inheritdoc", typeof(DocCommentMemberInheritDoc))]
+        [XmlElement("ignore", typeof(DocCommentMemberIgnore))]
+        public required object[] Items { get; init; }
+
+        [XmlAttribute("name")]
+        public required string Name { get; init; }
+    }
+
+    public class DocCommentMemberParam
+    {
+        [XmlText]
+        public required string Text { get; init; }
+
+        [XmlAttribute("name")]
+        public required string Name { get; init; }
+    }
+
+    public class DocCommentMemberRemarks
+    {
+        [XmlText]
+        public required string Text { get; init; }
+    }
+
+    public class DocCommentMemberReturns
+    {
+        [XmlText]
+        public required string Text { get; init; }
+    }
+
+    public class DocCommentMemberSummary
+    {
+        [XmlText(typeof(XmlText))]
+        [XmlAnyElement]
+        public required XmlNode[] Text { get; init; }
+    }
+
+    public class DocCommentMemberTypeParam
+    {
+        [XmlText]
+        public required string Text { get; init; }
+
+        [XmlAttribute("name")]
+        public required string Name { get; init; }
+    }
+
+    public class DocCommentMemberIgnore
+    {
+    }
+
+    public class DocCommentMemberInheritDoc
+    {
+        [XmlAttribute("cref")]
+        public required string SeeRef { get; init; }
+    }
+
     public void LoadInto(DirectoryInfo directory, NamespaceNode namespaceNode)
     {
-        var documentationFiles = directory.GetFiles("EntityDb.*.xml")
+        var xmlSerializer = new XmlSerializer(typeof(DocCommentFile));
+
+        var docCommentFiles = directory.GetFiles("EntityDb.*.xml")
             .Select(documentationFile =>
             {
-                var document = new XmlDocument();
+                var docCommentDocument = (DocCommentFile)xmlSerializer.Deserialize(documentationFile.OpenRead())!;
 
-                using var xmlFile = documentationFile.OpenRead();
-
-                return new XPathDocument(xmlFile).CreateNavigator();
+                return docCommentDocument;
             });
 
         var flatNodeDictionary = GetFlatNodeDictionary(namespaceNode);
 
-        foreach (var documentationFile in documentationFiles)
+        foreach (var docCommentFile in docCommentFiles)
         {
-            var members = documentationFile.Select("doc/members/member");
-
-            foreach (XPathNavigator member in members)
+            foreach (var member in docCommentFile.Members)
             {
-                var name = member.GetAttribute("name", "");
+                var name = member.Name;
 
                 if (flatNodeDictionary.TryGetValue(name, out var node) && node is MemberInfoNode memberInfoNode)
                 {
-                    foreach (XPathNavigator child in member.Select("*"))
+                    foreach (var item in member.Items)
                     {
-                        memberInfoNode.AddDocumentation(child);
+                        memberInfoNode.AddDocumentation(item);
                     }
                 }
                 else

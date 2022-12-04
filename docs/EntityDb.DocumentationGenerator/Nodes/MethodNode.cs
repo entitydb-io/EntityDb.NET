@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using System.Xml.XPath;
+using static EntityDb.DocumentationGenerator.Services.DocCommentService.DocCommentService;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
@@ -14,16 +14,16 @@ public class MethodNode : MemberInfoNode
         MethodInfo = methodInfo;
     }
 
-    public override void AddDocumentation(XPathNavigator documentation)
+    public override void AddDocumentation(object docCommentMemberItem)
     {
-        switch (documentation.Name)
+        switch (docCommentMemberItem)
         {
-            case "returns":
-                Returns = documentation.InnerXml.Trim();
+            case DocCommentMemberReturns returns:
+                Returns = returns.Text;
                 break;
 
             default:
-                base.AddDocumentation(documentation);
+                base.AddDocumentation(docCommentMemberItem);
                 break;
         }
     }

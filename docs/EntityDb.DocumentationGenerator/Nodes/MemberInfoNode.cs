@@ -1,4 +1,5 @@
-﻿using System.Xml.XPath;
+﻿using System.Xml;
+using static EntityDb.DocumentationGenerator.Services.DocCommentService.DocCommentService;
 
 namespace EntityDb.DocumentationGenerator.Nodes;
 
@@ -10,34 +11,28 @@ public abstract class MemberInfoNode : INode
     public string? Remarks { get; set; }
     public string? InheritDoc { get; set; }
 
-    public virtual void AddDocumentation(XPathNavigator documentation)
+    public virtual void AddDocumentation(object docCommentMemberItem)
     {
-        switch (documentation.Name)
+        switch (docCommentMemberItem)
         {
-            case "typeparam":
-                var typeParamName = documentation.GetAttribute("name", "");
-                var typeParamDesc = documentation.InnerXml.Trim();
-
-                TypeParams.Add(typeParamName, typeParamDesc);
+            case DocCommentMemberTypeParam typeParam:
+                TypeParams.Add(typeParam.Name, typeParam.Text);
                 break;
 
-            case "param":
-                var paramName = documentation.GetAttribute("name", "");
-                var paramDesc = documentation.InnerXml.Trim();
-
-                Params.Add(paramName, paramDesc);
+            case DocCommentMemberParam param:
+                TypeParams.Add(param.Name, param.Text);
                 break;
 
-            case "summary":
-                Summary = documentation.InnerXml.Trim();
+            case DocCommentMemberSummary summary:
+                Summary = string.Join("", summary.Text.Select(x => x.OuterXml));
                 break;
 
-            case "remarks":
-                Remarks = documentation.InnerXml.Trim();
+            case DocCommentMemberRemarks remarks:
+                Remarks = remarks.Text;
                 break;
 
-            case "inheritdoc":
-                InheritDoc = documentation.GetAttribute("cref", "");
+            case DocCommentMemberInheritDoc inheritDoc:
+                InheritDoc = inheritDoc.SeeRef;
                 break;
 
             default:
