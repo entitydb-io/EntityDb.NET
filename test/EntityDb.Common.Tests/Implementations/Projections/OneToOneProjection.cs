@@ -71,7 +71,7 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
     }
 
-    public Task<ICommandQuery> GetReducersQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken)
+    public Task<ICommandQuery> GetCommandQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken)
     {
         return Task.FromResult<ICommandQuery>(new GetEntityCommandsQuery(projectionPointer, VersionNumber));
     }

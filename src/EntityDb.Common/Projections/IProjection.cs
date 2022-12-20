@@ -29,7 +29,7 @@ public interface IProjection<TProjection> : ISnapshot<TProjection>
     /// <remarks>
     ///     I would only recommend using the transaction repository to locate leases or tags, not commands or agent signatures.
     /// </remarks>
-    Task<ICommandQuery> GetReducersQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken);
+    Task<ICommandQuery> GetCommandQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Maps an entity to a projection id, or default if the entity does not map to this projection.

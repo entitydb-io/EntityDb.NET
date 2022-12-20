@@ -43,7 +43,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
               TProjection.Construct(projectionPointer.Id)
             : TProjection.Construct(projectionPointer.Id);
 
-        var newTransactionIdsQuery = await projection.GetReducersQuery(projectionPointer, TransactionRepository, cancellationToken);
+        var newTransactionIdsQuery = await projection.GetCommandQuery(projectionPointer, TransactionRepository, cancellationToken);
 
         var transactions = EnumerateTransactions(newTransactionIdsQuery, cancellationToken);
 
