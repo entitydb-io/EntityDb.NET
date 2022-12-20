@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
@@ -29,12 +28,7 @@ internal sealed class ProjectionSnapshotTransactionCommandProcessor<TProjection>
         CancellationToken cancellationToken
     )
     {
-        if (transactionCommand is not ITransactionCommandWithSnapshot transactionCommandWithSnapshot)
-        {
-            return null;
-        }
-
-        var projectionId = _projectionRepository.GetProjectionIdOrDefault(transactionCommandWithSnapshot.Snapshot);
+        var projectionId = _projectionRepository.GetProjectionIdOrDefault(transaction, transactionCommand);
 
         if (projectionId is null)
         {
@@ -52,17 +46,8 @@ internal sealed class ProjectionSnapshotTransactionCommandProcessor<TProjection>
                                          cancellationToken);
         }
 
-        var annotatedCommand = EntityAnnotation<object>.CreateFromBoxedData
-        (
-            transaction.Id,
-            transaction.TimeStamp,
-            transactionCommand.EntityId,
-            transactionCommand.EntityVersionNumber,
-            transactionCommand.Command
-        );
-
         var nextSnapshot =
-            (previousLatestSnapshot ?? TProjection.Construct(projectionId.Value)).Reduce(annotatedCommand);
+            (previousLatestSnapshot ?? TProjection.Construct(projectionId.Value)).Reduce(transaction, transactionCommand);
 
         return (previousLatestSnapshot, nextSnapshot);
     }

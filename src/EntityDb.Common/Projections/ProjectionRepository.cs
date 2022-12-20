@@ -1,10 +1,15 @@
 using EntityDb.Abstractions.Projections;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
+using EntityDb.Common.Queries;
+using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 namespace EntityDb.Common.Projections;
 
@@ -26,9 +31,9 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
     public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
 
-    public Id? GetProjectionIdOrDefault(object entity)
+    public Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand)
     {
-        return TProjection.GetProjectionIdOrDefault(entity);
+        return TProjection.GetProjectionIdOrDefault(transaction, transactionCommand);
     }
 
     public async Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default)
@@ -38,13 +43,16 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
               TProjection.Construct(projectionPointer.Id)
             : TProjection.Construct(projectionPointer.Id);
 
-        var commandQuery = projection.GetCommandQuery(projectionPointer);
+        var newTransactionIdsQuery = await projection.GetReducersQuery(projectionPointer, TransactionRepository, cancellationToken);
 
-        var annotatedCommands = TransactionRepository.EnumerateAnnotatedCommands(commandQuery, cancellationToken);
+        var transactions = EnumerateTransactions(newTransactionIdsQuery, cancellationToken);
 
-        await foreach (var annotatedCommand in annotatedCommands)
+        await foreach (var transaction in transactions)
         {
-            projection = projection.Reduce(annotatedCommand);
+            foreach (var transactionCommand in transaction.Commands)
+            {
+                projection = projection.Reduce(transaction, transactionCommand);
+            }
         }
 
         if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
@@ -67,5 +75,43 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
         return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
             transactionRepository, snapshotRepository);
+    }
+
+    private async IAsyncEnumerable<ITransaction> EnumerateTransactions(ICommandQuery commandQuery, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var allAnnotatedCommands = await TransactionRepository
+            .EnumerateAnnotatedCommands(commandQuery, cancellationToken)
+            .ToLookupAsync(annotatedCommand => annotatedCommand.TransactionId, cancellationToken);
+
+        var transactionIds = allAnnotatedCommands
+            .SelectMany(annotatedCommands => annotatedCommands
+                .Select(annotatedCommand => annotatedCommand.TransactionId))
+            .Distinct()
+            .ToArray();
+
+        var agentSignatureQuery = new GetAgentSignatures(transactionIds);
+
+        var annotatedAgentSignatures = TransactionRepository
+            .EnumerateAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken);
+
+        await foreach (var annotatedAgentSignature in annotatedAgentSignatures)
+        {
+            var annotatedCommands = allAnnotatedCommands[annotatedAgentSignature.TransactionId];
+
+            yield return new Transaction
+            {
+                Id = annotatedAgentSignature.TransactionId,
+                TimeStamp = annotatedAgentSignature.TransactionTimeStamp,
+                AgentSignature = annotatedAgentSignature.Data,
+                Commands = annotatedCommands
+                    .Select(annotatedCommand => new TransactionCommand
+                    {
+                        EntityId = annotatedCommand.EntityId,
+                        EntityVersionNumber = annotatedCommand.EntityVersionNumber,
+                        Command = annotatedCommand.Data
+                    })
+                    .ToImmutableArray<ITransactionCommand>()
+            };
+        }
     }
 }

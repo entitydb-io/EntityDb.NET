@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Transactions;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Tests.Implementations.Entities;
@@ -47,16 +47,17 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         return VersionNumber;
     }
 
-    public OneToOneProjection Reduce(IEntityAnnotation<object> annotatedCommand)
+    public OneToOneProjection Reduce(ITransaction transaction, ITransactionCommand transactionCommand)
     {
-        return annotatedCommand switch
+        if (transactionCommand.Command is not IReducer<OneToOneProjection> reducer)
         {
-            IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(this) with
-            {
-                LastEventAt = reducer.TransactionTimeStamp,
-                VersionNumber = reducer.EntityVersionNumber
-            },
-            _ => throw new NotSupportedException()
+            throw new NotSupportedException();
+        }
+
+        return reducer.Reduce(this) with
+        {
+            LastEventAt = transaction.TimeStamp,
+            VersionNumber = transactionCommand.EntityVersionNumber
         };
     }
 
@@ -70,16 +71,19 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
     }
 
-    public ICommandQuery GetCommandQuery(Pointer projectionPointer)
+    public Task<ICommandQuery> GetReducersQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken)
     {
-        return new GetEntityCommandsQuery(projectionPointer, VersionNumber);
+        return Task.FromResult<ICommandQuery>(new GetEntityCommandsQuery(projectionPointer, VersionNumber));
     }
 
-    public static Id? GetProjectionIdOrDefault(object entity)
+    public static Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand)
     {
-        if (entity is TestEntity testEntity) return testEntity.Id;
+        if (transactionCommand is not ITransactionCommandWithSnapshot transactionCommandWithSnapshot || transactionCommandWithSnapshot.Snapshot is not TestEntity testEntity)
+        {
+            return null;
+        }
 
-        return null;
+        return testEntity.Id;
     }
 
     public static string RedisKeyNamespace => "one-to-one-projection";
