@@ -1,14 +1,13 @@
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Exceptions;
 
 /// <summary>
 ///     The exception that is thrown when an actor passes an <see cref="ITransaction" /> to
-///     <see cref="ITransactionRepository.PutTransaction(ITransaction, CancellationToken)" /> with on a
-///     <see cref="ITransactionStep" /> that implements <see cref="IAppendCommandTransactionStep" />
-///     and the value of <see cref="ITransactionStep.EntityVersionNumber" /> is equal to <c>0</c>.
+///     <see cref="ITransactionRepository.PutTransaction(ITransaction, CancellationToken)" /> with any
+///     <see cref="ITransactionCommand" /> where the value of <see cref="ITransactionCommand.EntityVersionNumber" />
+///     is equal to <c>0</c>.
 /// </summary>
 /// <remarks>
 ///     Version Zero is reserved for an entity that has not yet been created/persisted.

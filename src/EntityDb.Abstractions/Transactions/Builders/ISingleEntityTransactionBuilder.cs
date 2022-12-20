@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Tags;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Transactions.Builders;
 
@@ -39,39 +37,11 @@ public interface ISingleEntityTransactionBuilder<TEntity>
     ISingleEntityTransactionBuilder<TEntity> Load(TEntity entity);
 
     /// <summary>
-    ///     Adds a transaction step that appends a single command.
+    ///     Adds a single command to the transaction.
     /// </summary>
     /// <param name="command">The new command that modifies the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ISingleEntityTransactionBuilder<TEntity> Append(object command);
-
-    /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ILease" />s.
-    /// </summary>
-    /// <param name="leases">The leases to be added to the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ISingleEntityTransactionBuilder<TEntity> Add(params ILease[] leases);
-
-    /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ITag" />s.
-    /// </summary>
-    /// <param name="tags">The tags to be added to the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ISingleEntityTransactionBuilder<TEntity> Add(params ITag[] tags);
-
-    /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ILease" />s.
-    /// </summary>
-    /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ISingleEntityTransactionBuilder<TEntity> Delete(params ILease[] leases);
-
-    /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ITag" />s.
-    /// </summary>
-    /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ISingleEntityTransactionBuilder<TEntity> Delete(params ITag[] tags);
 
     /// <summary>
     ///     Returns a new instance of <see cref="ITransaction" />.

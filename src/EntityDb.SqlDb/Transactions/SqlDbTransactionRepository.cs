@@ -1,9 +1,9 @@
 ﻿using EntityDb.Abstractions.Annotations;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
@@ -153,24 +153,19 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
 
             await PutAgentSignature(transaction, cancellationToken);
 
-            foreach (var transactionStep in transaction.Steps)
+            foreach (var transactionCommand in transaction.Commands)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await (transactionStep switch
-                {
-                    IAppendCommandTransactionStep appendCommandTransactionStep
-                        => PutCommand(transaction, appendCommandTransactionStep, cancellationToken),
-                    IAddLeasesTransactionStep addLeasesTransactionStep
-                        => PutLeases(transaction, addLeasesTransactionStep, cancellationToken),
-                    IAddTagsTransactionStep addTagsTransactionStep
-                        => PutTags(transaction, addTagsTransactionStep, cancellationToken),
-                    IDeleteLeasesTransactionStep deleteLeasesTransactionStep
-                        => DeleteLeases(deleteLeasesTransactionStep, cancellationToken),
-                    IDeleteTagsTransactionStep deleteTagsTransactionStep
-                        => DeleteTags(deleteTagsTransactionStep, cancellationToken),
-                    _ => throw new NotSupportedException()
-                });
+                VersionZeroReservedException.ThrowIfZero(transactionCommand.EntityVersionNumber);
+
+                var previousVersionNumber = await CommandDocument
+                    .GetLastEntityVersionNumber(_sqlDbSession, transactionCommand.EntityId, cancellationToken);
+
+                OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber.Next(),
+                    transactionCommand.EntityVersionNumber);
+
+                await PutCommand(transaction, transactionCommand, cancellationToken);
             }
 
             await _sqlDbSession.CommitTransaction(cancellationToken);
@@ -197,51 +192,40 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
             .Execute(_sqlDbSession, cancellationToken);
     }
 
-    private async Task PutCommand(ITransaction transaction, IAppendCommandTransactionStep appendCommandTransactionStep,
+    private async Task PutCommand(ITransaction transaction, ITransactionCommand transactionCommand,
         CancellationToken cancellationToken)
     {
-        VersionZeroReservedException.ThrowIfZero(appendCommandTransactionStep.EntityVersionNumber);
-
-        var previousVersionNumber = await CommandDocument
-            .GetLastEntityVersionNumber(_sqlDbSession, appendCommandTransactionStep.EntityId, cancellationToken);
-
-        OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber,
-            appendCommandTransactionStep.PreviousEntityVersionNumber);
-
         await CommandDocument
-            .GetInsert(_envelopeService, transaction, appendCommandTransactionStep)
+            .GetInsertCommand(_envelopeService, transaction, transactionCommand)
             .Execute(_sqlDbSession, cancellationToken);
-    }
 
-    private async Task PutLeases(ITransaction transaction, IAddLeasesTransactionStep addLeasesTransactionStep,
-        CancellationToken cancellationToken)
-    {
-        await LeaseDocument
-            .GetInsert(_envelopeService, transaction, addLeasesTransactionStep)
-            .Execute(_sqlDbSession, cancellationToken);
-    }
 
-    private async Task PutTags(ITransaction transaction, IAddTagsTransactionStep addTagsTransactionStep,
-        CancellationToken cancellationToken)
-    {
-        await TagDocument
-            .GetInsert(_envelopeService, transaction, addTagsTransactionStep)
-            .Execute(_sqlDbSession, cancellationToken);
-    }
+        if (transactionCommand.Command is IAddLeasesCommand addLeasesCommand)
+        {
+            await LeaseDocument
+                .GetInsertCommand(_envelopeService, transaction, transactionCommand, addLeasesCommand)
+                .Execute(_sqlDbSession, cancellationToken);
+        }
 
-    private async Task DeleteLeases(IDeleteLeasesTransactionStep deleteLeasesTransactionStep,
-        CancellationToken cancellationToken)
-    {
-        await LeaseDocument
-            .GetDeleteCommand(deleteLeasesTransactionStep)
-            .Execute(_sqlDbSession, cancellationToken);
-    }
+        if (transactionCommand.Command is IAddTagsCommand addTagsCommand)
+        {
+            await TagDocument
+                .GetInsertCommand(_envelopeService, transaction, transactionCommand, addTagsCommand)
+                .Execute(_sqlDbSession, cancellationToken);
+        }
 
-    private async Task DeleteTags(IDeleteTagsTransactionStep deleteTagsTransactionStep,
-        CancellationToken cancellationToken)
-    {
-        await TagDocument
-            .GetDeleteCommand(deleteTagsTransactionStep)
-            .Execute(_sqlDbSession, cancellationToken);
+        if (transactionCommand.Command is IDeleteLeasesCommand deleteLeasesCommand)
+        {
+            await LeaseDocument
+                .GetDeleteCommand(transactionCommand, deleteLeasesCommand)
+                .Execute(_sqlDbSession, cancellationToken);
+        }
+
+        if (transactionCommand.Command is IDeleteTagsCommand deleteTagsCommand)
+        {
+            await TagDocument
+                .GetDeleteCommand(transactionCommand, deleteTagsCommand)
+                .Execute(_sqlDbSession, cancellationToken);
+        }
     }
 }

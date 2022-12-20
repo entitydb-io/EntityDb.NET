@@ -10,20 +10,20 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
 {
     public abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
-    protected static async Task ProcessTransactionSteps
+    protected static async Task ProcessTransactionCommands
     (
         ISnapshotRepository<TSnapshot> snapshotRepository,
-        SnapshotTransactionStepProcessorCache<TSnapshot> snapshotTransactionStepProcessorCache,
+        SnapshotTransactionCommandProcessorCache<TSnapshot> snapshotTransactionCommandProcessorCache,
         ITransaction transaction,
-        ISnapshotTransactionStepProcessor<TSnapshot> snapshotTransactionStepProcessor,
+        ISnapshotTransactionCommandProcessor<TSnapshot> snapshotTransactionCommandProcessor,
         CancellationToken cancellationToken
     )
     {
         var putQueue = new Dictionary<Pointer, TSnapshot>();
 
-        foreach (var transactionStep in transaction.Steps)
+        foreach (var transactionCommand in transaction.Commands)
         {
-            var snapshots = await snapshotTransactionStepProcessor.GetSnapshots(transaction, transactionStep, cancellationToken);
+            var snapshots = await snapshotTransactionCommandProcessor.GetSnapshots(transaction, transactionCommand, cancellationToken);
 
             if (snapshots is not var (previousLatestSnapshot, nextSnapshot))
             {
@@ -38,7 +38,7 @@ internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransacti
             }
             else
             {
-                snapshotTransactionStepProcessorCache.PutSnapshot(snapshotId, nextSnapshot);
+                snapshotTransactionCommandProcessorCache.PutSnapshot(snapshotId, nextSnapshot);
             }
 
             if (nextSnapshot.ShouldRecord())

@@ -35,20 +35,20 @@ internal sealed class
             return;
         }
 
-        var snapshotTransactionStepProcessorCache = new SnapshotTransactionStepProcessorCache<TProjection>();
+        var snapshotTransactionCommandProcessorCache = new SnapshotTransactionCommandProcessorCache<TProjection>();
 
-        var projectionSnapshotTransactionStepProcessor = new ProjectionSnapshotTransactionStepProcessor<TProjection>
+        var projectionSnapshotTransactionCommandProcessor = new ProjectionSnapshotTransactionCommandProcessor<TProjection>
         (
             projectionRepository,
-            snapshotTransactionStepProcessorCache
+            snapshotTransactionCommandProcessorCache
         );
 
-        await ProcessTransactionSteps
+        await ProcessTransactionCommands
         (
             projectionRepository.SnapshotRepository,
-            snapshotTransactionStepProcessorCache,
+            snapshotTransactionCommandProcessorCache,
             transaction,
-            projectionSnapshotTransactionStepProcessor,
+            projectionSnapshotTransactionCommandProcessor,
             cancellationToken
         );
     }

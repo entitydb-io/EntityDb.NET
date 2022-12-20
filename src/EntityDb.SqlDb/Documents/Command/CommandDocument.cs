@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -33,11 +32,11 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDo
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
 
-    public static InsertDocumentsCommand<CommandDocument> GetInsert
+    public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
     (
         IEnvelopeService<string> envelopeService,
         ITransaction transaction,
-        IAppendCommandTransactionStep appendCommandTransactionStep
+        ITransactionCommand transactionCommand
     )
     {
         return new InsertDocumentsCommand<CommandDocument>
@@ -49,10 +48,10 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDo
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = appendCommandTransactionStep.EntityId,
-                    EntityVersionNumber = appendCommandTransactionStep.EntityVersionNumber,
-                    DataType = appendCommandTransactionStep.Command.GetType().Name,
-                    Data = envelopeService.Serialize(appendCommandTransactionStep.Command)
+                    EntityId = transactionCommand.EntityId,
+                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                    DataType = transactionCommand.Command.GetType().Name,
+                    Data = envelopeService.Serialize(transactionCommand.Command)
                 }
             }
         );

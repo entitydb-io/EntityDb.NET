@@ -1,54 +1,53 @@
 ﻿using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Annotations;
 using EntityDb.Common.Projections;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 
-internal sealed class ProjectionSnapshotTransactionStepProcessor<TProjection> : ISnapshotTransactionStepProcessor<TProjection>
+internal sealed class ProjectionSnapshotTransactionCommandProcessor<TProjection> : ISnapshotTransactionCommandProcessor<TProjection>
     where TProjection : IProjection<TProjection>
 {
     private readonly IProjectionRepository<TProjection> _projectionRepository;
-    private readonly SnapshotTransactionStepProcessorCache<TProjection> _snapshotTransactionStepProcessorCache;
+    private readonly SnapshotTransactionCommandProcessorCache<TProjection> _snapshotTransactionCommandProcessorCache;
 
-    public ProjectionSnapshotTransactionStepProcessor
+    public ProjectionSnapshotTransactionCommandProcessor
     (
         IProjectionRepository<TProjection> projectionRepository,
-        SnapshotTransactionStepProcessorCache<TProjection> snapshotTransactionStepProcessorCache
+        SnapshotTransactionCommandProcessorCache<TProjection> snapshotTransactionCommandProcessorCache
     )
     {
         _projectionRepository = projectionRepository;
-        _snapshotTransactionStepProcessorCache = snapshotTransactionStepProcessorCache;
+        _snapshotTransactionCommandProcessorCache = snapshotTransactionCommandProcessorCache;
     }
 
     public async Task<(TProjection?, TProjection)?> GetSnapshots
     (
         ITransaction transaction,
-        ITransactionStep transactionStep,
+        ITransactionCommand transactionCommand,
         CancellationToken cancellationToken
     )
     {
-        if (transactionStep is not IAppendCommandTransactionStep appendCommandTransactionStep)
+        if (transactionCommand is not ITransactionCommandWithSnapshot transactionCommandWithSnapshot)
         {
             return null;
         }
 
-        var projectionId = _projectionRepository.GetProjectionIdOrDefault(appendCommandTransactionStep.Entity);
+        var projectionId = _projectionRepository.GetProjectionIdOrDefault(transactionCommandWithSnapshot.Snapshot);
 
         if (projectionId is null)
         {
             return null;
         }
 
-        var previousLatestPointer = projectionId.Value + appendCommandTransactionStep.PreviousEntityVersionNumber;
+        var previousLatestPointer = projectionId.Value + transactionCommand.EntityVersionNumber.Previous();
 
         TProjection? previousLatestSnapshot = default;
 
         if (previousLatestPointer.VersionNumber != VersionNumber.MinValue)
         {
-            previousLatestSnapshot = _snapshotTransactionStepProcessorCache.GetSnapshotOrDefault(previousLatestPointer) ??
+            previousLatestSnapshot = _snapshotTransactionCommandProcessorCache.GetSnapshotOrDefault(previousLatestPointer) ??
                                      await _projectionRepository.GetSnapshot(previousLatestPointer,
                                          cancellationToken);
         }
@@ -57,9 +56,9 @@ internal sealed class ProjectionSnapshotTransactionStepProcessor<TProjection> : 
         (
             transaction.Id,
             transaction.TimeStamp,
-            appendCommandTransactionStep.EntityId,
-            appendCommandTransactionStep.EntityVersionNumber,
-            appendCommandTransactionStep.Command
+            transactionCommand.EntityId,
+            transactionCommand.EntityVersionNumber,
+            transactionCommand.Command
         );
 
         var nextSnapshot =

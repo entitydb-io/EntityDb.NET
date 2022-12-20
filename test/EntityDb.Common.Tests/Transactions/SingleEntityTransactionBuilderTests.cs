@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Transactions.Builders;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
@@ -95,17 +95,17 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         // ACT
 
         var transaction = transactionBuilder
-            .Add(new Lease(default!, default!, default!))
+            .Append(new AddLease(new Lease(default!, default!, default!)))
             .Build(default);
 
         // ASSERT
 
-        transaction.Steps.Length.ShouldBe(1);
+        transaction.Commands.Length.ShouldBe(1);
 
-        var leaseTransactionStep =
-            transaction.Steps[0].ShouldBeAssignableTo<IAddLeasesTransactionStep>().ShouldNotBeNull();
+        var addLeasesCommand =
+            transaction.Commands[0].Command.ShouldBeAssignableTo<IAddLeasesCommand>().ShouldNotBeNull();
 
-        leaseTransactionStep.Leases.ShouldNotBeEmpty();
+        addLeasesCommand.GetLeases().ShouldNotBeEmpty();
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
@@ -178,10 +178,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         {
             var index = (int)(v.Value - 1);
 
-            var commandTransactionStep = transaction.Steps[index].ShouldBeAssignableTo<IAppendCommandTransactionStep>()
-                .ShouldNotBeNull();
-
-            commandTransactionStep.EntityVersionNumber.ShouldBe(v);
+            transaction.Commands[index].EntityVersionNumber.ShouldBe(v);
         }
     }
 
@@ -220,12 +217,9 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         // ASSERT
 
-        transaction.Steps.Length.ShouldBe(1);
+        transaction.Commands.Length.ShouldBe(1);
 
-        var commandTransactionStep =
-            transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-
-        commandTransactionStep.Command.ShouldBeEquivalentTo(new DoNothing());
+        transaction.Commands[0].Command.ShouldBeEquivalentTo(new DoNothing());
     }
 
     [Theory]

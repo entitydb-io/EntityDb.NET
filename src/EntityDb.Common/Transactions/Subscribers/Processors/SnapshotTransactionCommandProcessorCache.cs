@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 
-internal class SnapshotTransactionStepProcessorCache<TSnapshot>
+internal class SnapshotTransactionCommandProcessorCache<TSnapshot>
 {
     private readonly Dictionary<Pointer, TSnapshot> _cache = new();
 

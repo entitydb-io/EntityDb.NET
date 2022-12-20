@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -30,16 +30,17 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     (
         IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
-        IAddLeasesTransactionStep addLeasesTransactionStep
+        ITransactionCommand transactionCommand,
+        IAddLeasesCommand addLeasesCommand
     )
     {
-        var leaseDocuments = addLeasesTransactionStep.Leases
+        var leaseDocuments = addLeasesCommand.GetLeases()
             .Select(insertLease => new LeaseDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = addLeasesTransactionStep.EntityId,
-                EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
+                EntityId = transactionCommand.EntityId,
+                EntityVersionNumber = transactionCommand.EntityVersionNumber,
                 DataType = insertLease.GetType().Name,
                 Data = envelopeService.Serialize(insertLease),
                 Scope = insertLease.Scope,
@@ -73,11 +74,12 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IDeleteLeasesTransactionStep deleteLeasesTransactionStep
+        ITransactionCommand transactionCommand,
+        IDeleteLeasesCommand deleteLeasesCommand
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(deleteLeasesTransactionStep.EntityId, deleteLeasesTransactionStep.Leases);
+            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases().ToArray());
 
         return new DeleteDocumentsCommand
         (

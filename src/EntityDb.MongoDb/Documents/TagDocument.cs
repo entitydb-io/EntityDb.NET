@@ -1,6 +1,6 @@
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -29,16 +29,17 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
     (
         IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
-        IAddTagsTransactionStep addTagsTransactionStep
+        ITransactionCommand transactionCommand,
+        IAddTagsCommand addTagsCommand
     )
     {
-        var tagDocuments = addTagsTransactionStep.Tags
+        var tagDocuments = addTagsCommand.GetTags()
             .Select(insertTag => new TagDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = addTagsTransactionStep.EntityId,
-                EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
+                EntityId = transactionCommand.EntityId,
+                EntityVersionNumber = transactionCommand.EntityVersionNumber,
                 DataType = insertTag.GetType().Name,
                 Data = envelopeService.Serialize(insertTag),
                 Label = insertTag.Label,
@@ -71,10 +72,11 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IDeleteTagsTransactionStep deleteTagsTransactionStep
+        ITransactionCommand transactionCommand,
+        IDeleteTagsCommand deleteTagsCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(deleteTagsTransactionStep.EntityId, deleteTagsTransactionStep.Tags);
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags().ToArray());
 
         return new DeleteDocumentsCommand
         (

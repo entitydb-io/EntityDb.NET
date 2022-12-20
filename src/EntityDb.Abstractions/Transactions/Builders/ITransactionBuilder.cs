@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Tags;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Transactions.Builders;
 
@@ -41,44 +39,12 @@ public interface ITransactionBuilder<TEntity>
     ITransactionBuilder<TEntity> Load(Id entityId, TEntity entity);
 
     /// <summary>
-    ///     Adds a transaction step that appends a single command associated with a given entity id.
+    ///     Adds a single command to the transaction with a given entity id.
     /// </summary>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
     /// <param name="command">The new command that modifies the <typeparamref name="TEntity" />.</param>
     /// <returns>The transaction builder.</returns>
     ITransactionBuilder<TEntity> Append(Id entityId, object command);
-
-    /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ILease" />s associated with a given entity id.
-    /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
-    /// <param name="leases">The leases to be added to the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ITransactionBuilder<TEntity> Add(Id entityId, params ILease[] leases);
-
-    /// <summary>
-    ///     Adds a transaction step that adds a set of <see cref="ITag" />s associated with a given entity id.
-    /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
-    /// <param name="tags">The tags to be added to the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ITransactionBuilder<TEntity> Add(Id entityId, params ITag[] tags);
-
-    /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ILease" />s associated with a given entity id.
-    /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
-    /// <param name="leases">The leases to be deleted from the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ITransactionBuilder<TEntity> Delete(Id entityId, params ILease[] leases);
-
-    /// <summary>
-    ///     Adds a transaction step that deletes a set of <see cref="ITag" />s associated with a given entity id.
-    /// </summary>
-    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
-    /// <param name="tags">The tags to be deleted from the <typeparamref name="TEntity" />.</param>
-    /// <returns>The transaction builder.</returns>
-    ITransactionBuilder<TEntity> Delete(Id entityId, params ITag[] tags);
 
     /// <summary>
     ///     Returns a new instance of <see cref="ITransaction" />.

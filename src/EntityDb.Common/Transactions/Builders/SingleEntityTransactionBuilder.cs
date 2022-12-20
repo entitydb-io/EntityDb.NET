@@ -44,34 +44,6 @@ internal sealed class SingleEntityTransactionBuilder<TEntity> : ISingleEntityTra
         return this;
     }
 
-    public ISingleEntityTransactionBuilder<TEntity> Add(params ILease[] leases)
-    {
-        _transactionBuilder.Add(EntityId, leases);
-
-        return this;
-    }
-
-    public ISingleEntityTransactionBuilder<TEntity> Add(params ITag[] tags)
-    {
-        _transactionBuilder.Add(EntityId, tags);
-
-        return this;
-    }
-
-    public ISingleEntityTransactionBuilder<TEntity> Delete(params ILease[] leases)
-    {
-        _transactionBuilder.Delete(EntityId, leases);
-
-        return this;
-    }
-
-    public ISingleEntityTransactionBuilder<TEntity> Delete(params ITag[] tags)
-    {
-        _transactionBuilder.Delete(EntityId, tags);
-
-        return this;
-    }
-
     public ITransaction Build(Id transactionId)
     {
         return _transactionBuilder.Build(transactionId);

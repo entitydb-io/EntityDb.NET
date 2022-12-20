@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -29,7 +28,7 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
     (
         IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
-        IAppendCommandTransactionStep appendCommandTransactionStep
+        ITransactionCommand transactionCommand
     )
     {
         var documents = new[]
@@ -38,10 +37,10 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
-                EntityId = appendCommandTransactionStep.EntityId,
-                EntityVersionNumber = appendCommandTransactionStep.EntityVersionNumber,
-                DataType = appendCommandTransactionStep.Command.GetType().Name,
-                Data = envelopeService.Serialize(appendCommandTransactionStep.Command)
+                EntityId = transactionCommand.EntityId,
+                EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                DataType = transactionCommand.Command.GetType().Name,
+                Data = envelopeService.Serialize(transactionCommand.Command)
             }
         };
 

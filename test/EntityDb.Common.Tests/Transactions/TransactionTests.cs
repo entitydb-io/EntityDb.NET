@@ -4,7 +4,6 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Agents;
 using EntityDb.Common.Entities;
@@ -435,8 +434,6 @@ public sealed class TransactionTests : TestsBase<Startup>
         foreach (var count in counts)
         {
             transactionBuilder.Append(new StoreNumber(count));
-            transactionBuilder.Add(new CountLease(count));
-            transactionBuilder.Add(new CountTag(count));
         }
 
         var transaction = (transactionBuilder.Build(transactionId) as Transaction).ShouldNotBeNull();
@@ -576,9 +573,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         transaction = transaction with
         {
-            Steps = Enumerable
-                .Repeat(transaction.Steps, repeatCount)
-                .SelectMany(steps => steps)
+            Commands = Enumerable
+                .Repeat(transaction.Commands, repeatCount)
+                .SelectMany(commands => commands)
                 .ToImmutableArray()
         };
 
@@ -619,21 +616,21 @@ public sealed class TransactionTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var transactionStepMock = new Mock<IAppendCommandTransactionStep>(MockBehavior.Strict);
+        var transactionCommandMock = new Mock<ITransactionCommand>(MockBehavior.Strict);
 
-        transactionStepMock
-            .SetupGet(step => step.EntityId)
+        transactionCommandMock
+            .SetupGet(command => command.EntityId)
             .Returns(default(Id));
 
-        transactionStepMock
-            .SetupGet(step => step.PreviousEntityVersionNumber)
+        transactionCommandMock
+            .SetupGet(command => command.EntityVersionNumber)
+            .Returns(versionNumber.Next());
+
+        transactionCommandMock
+            .SetupGet(command => command.EntityVersionNumber)
             .Returns(versionNumber);
 
-        transactionStepMock
-            .SetupGet(step => step.EntityVersionNumber)
-            .Returns(versionNumber);
-
-        var transaction = TransactionSeeder.Create(transactionStepMock.Object, transactionStepMock.Object);
+        var transaction = TransactionSeeder.Create(transactionCommandMock.Object, transactionCommandMock.Object);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ITransactionRepositoryFactory>()
@@ -701,18 +698,13 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         // ASSERT
 
-        firstTransaction.Steps.Length.ShouldBe(1);
-        secondTransaction.Steps.Length.ShouldBe(1);
+        firstTransaction.Commands.Length.ShouldBe(1);
+        secondTransaction.Commands.Length.ShouldBe(1);
 
-        firstTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
-        secondTransaction.Steps.ShouldAllBe(step => step.EntityId == entityId);
+        firstTransaction.Commands.ShouldAllBe(command => command.EntityId == entityId);
+        secondTransaction.Commands.ShouldAllBe(command => command.EntityId == entityId);
 
-        var firstCommandTransactionStep = firstTransaction.Steps[0]
-            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-        var secondCommandTransactionStep = secondTransaction.Steps[0]
-            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-
-        firstCommandTransactionStep.EntityVersionNumber.ShouldBe(secondCommandTransactionStep.EntityVersionNumber);
+        firstTransaction.Commands[0].EntityVersionNumber.ShouldBe(secondTransaction.Commands[0].EntityVersionNumber);
 
         firstTransactionInserted.ShouldBeTrue();
         secondTransactionInserted.ShouldBeFalse();
@@ -739,8 +731,8 @@ public sealed class TransactionTests : TestsBase<Startup>
             .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
-            .Add(tag)
-            .Add(tag)
+            .Append(new AddTag(tag))
+            .Append(new AddTag(tag))
             .Build(default);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
@@ -774,8 +766,8 @@ public sealed class TransactionTests : TestsBase<Startup>
             .CreateForSingleEntity(default!, default);
 
         var transaction = transactionBuilder
-            .Add(lease)
-            .Add(lease)
+            .Append(new AddLease(lease))
+            .Append(new AddLease(lease))
             .Build(default);
 
         await using var transactionRepository = await serviceScope.ServiceProvider
@@ -958,7 +950,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             .CreateRepository(TestSessionOptions.Write);
 
         var initialTransaction = transactionBuilder
-            .Add(tag)
+            .Append(new AddTag(tag))
             .Build(Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -974,7 +966,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var actualInitialTags = await transactionRepository.EnumerateTags(tagQuery).ToArrayAsync();
 
         var finalTransaction = transactionBuilder
-            .Delete(tag)
+            .Append(new DeleteTag(tag))
             .Build(Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
@@ -1017,7 +1009,7 @@ public sealed class TransactionTests : TestsBase<Startup>
             .CreateRepository(TestSessionOptions.Write);
 
         var initialTransaction = transactionBuilder
-            .Add(lease)
+            .Append(new AddLease(lease))
             .Build(Id.NewId());
 
         var initialTransactionInserted = await transactionRepository.PutTransaction(initialTransaction);
@@ -1033,7 +1025,7 @@ public sealed class TransactionTests : TestsBase<Startup>
         var actualInitialLeases = await transactionRepository.EnumerateLeases(leaseQuery).ToArrayAsync();
 
         var finalTransaction = transactionBuilder
-            .Delete(lease)
+            .Append(new DeleteLease(lease))
             .Build(Id.NewId());
 
         var finalTransactionInserted = await transactionRepository.PutTransaction(finalTransaction);
@@ -1088,12 +1080,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         transactionInserted.ShouldBeTrue();
 
-        transaction.Steps.Length.ShouldBe(1);
+        transaction.Commands.Length.ShouldBe(1);
 
-        var commandTransactionStep =
-            transaction.Steps[0].ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-
-        commandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(1));
+        transaction.Commands[0].EntityVersionNumber.ShouldBe(new VersionNumber(1));
 
         newCommands.Length.ShouldBe(1);
 
@@ -1148,12 +1137,9 @@ public sealed class TransactionTests : TestsBase<Startup>
 
         secondTransactionInserted.ShouldBeTrue();
 
-        secondTransaction.Steps.Length.ShouldBe(1);
+        secondTransaction.Commands.Length.ShouldBe(1);
 
-        var secondCommandTransactionStep = secondTransaction.Steps[0]
-            .ShouldBeAssignableTo<IAppendCommandTransactionStep>().ShouldNotBeNull();
-
-        secondCommandTransactionStep.EntityVersionNumber.ShouldBe(new VersionNumber(2));
+        secondTransaction.Commands[0].EntityVersionNumber.ShouldBe(new VersionNumber(2));
 
         newCommands.Length.ShouldBe(1);
 

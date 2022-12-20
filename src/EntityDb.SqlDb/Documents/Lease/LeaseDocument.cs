@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -33,25 +33,26 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
 
     public static IDocumentReader<LeaseDocument> EntityIdDocumentReader { get; } = new LeaseEntityIdDocumentReader();
 
-    public static InsertDocumentsCommand<LeaseDocument> GetInsert
+    public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (
         IEnvelopeService<string> envelopeService,
         ITransaction transaction,
-        IAddLeasesTransactionStep addLeasesTransactionStep
+        ITransactionCommand transactionCommand,
+        IAddLeasesCommand addLeasesCommand
     )
     {
         return new InsertDocumentsCommand<LeaseDocument>
         (
             TableName,
-            addLeasesTransactionStep.Leases
+            addLeasesCommand.GetLeases()
                 .Select(insertLease =>
                 {
                     return new LeaseDocument
                     {
                         TransactionTimeStamp = transaction.TimeStamp,
                         TransactionId = transaction.Id,
-                        EntityId = addLeasesTransactionStep.EntityId,
-                        EntityVersionNumber = addLeasesTransactionStep.EntityVersionNumber,
+                        EntityId = transactionCommand.EntityId,
+                        EntityVersionNumber = transactionCommand.EntityVersionNumber,
                         Scope = insertLease.Scope,
                         Label = insertLease.Label,
                         Value = insertLease.Value,
@@ -80,11 +81,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IDeleteLeasesTransactionStep deleteLeasesTransactionStep
+        ITransactionCommand transactionCommand, IDeleteLeasesCommand deleteLeasesCommand
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(deleteLeasesTransactionStep.EntityId, deleteLeasesTransactionStep.Leases);
+            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases().ToArray());
 
         return new DeleteDocumentsCommand
         (

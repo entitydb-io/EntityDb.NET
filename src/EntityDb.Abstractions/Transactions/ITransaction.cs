@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.ValueObjects;
 using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions;
@@ -29,8 +28,5 @@ public interface ITransaction
     /// <summary>
     ///     A series of sets of modifiers for a set of entities.
     /// </summary>
-    /// <remarks>
-    ///     <see cref="Steps" /> must be handled in the order they are given.
-    /// </remarks>
-    ImmutableArray<ITransactionStep> Steps { get; }
+    ImmutableArray<ITransactionCommand> Commands { get; }
 }

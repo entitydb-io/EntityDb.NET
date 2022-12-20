@@ -27,6 +27,15 @@ public readonly record struct VersionNumber(ulong Value)
     }
 
     /// <summary>
+    ///     Gets the previous version number.
+    /// </summary>
+    /// <returns>The previous version number.</returns>
+    public VersionNumber Previous()
+    {
+        return new VersionNumber(Value - 1);
+    }
+
+    /// <summary>
     ///     Converts the numeric value of this instance to its equivalent string
     ///     representation.
     /// </summary>

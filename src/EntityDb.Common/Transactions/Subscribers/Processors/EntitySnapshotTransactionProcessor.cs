@@ -34,20 +34,20 @@ internal class EntitySnapshotTransactionProcessor<TEntity> : SnapshotTransaction
             return;
         }
 
-        var snapshotTransactionStepProcessorCache = new SnapshotTransactionStepProcessorCache<TEntity>();
+        var snapshotTransactionCommandProcessorCache = new SnapshotTransactionCommandProcessorCache<TEntity>();
 
-        var snapshotStepProcessor = new EntitySnapshotTransactionStepProcessor<TEntity>
+        var snapshotCommandProcessor = new EntitySnapshotTransactionCommandProcessor<TEntity>
         (
             entityRepository,
-            snapshotTransactionStepProcessorCache
+            snapshotTransactionCommandProcessorCache
         );
 
-        await ProcessTransactionSteps
+        await ProcessTransactionCommands
         (
             entityRepository.SnapshotRepository,
-            snapshotTransactionStepProcessorCache,
+            snapshotTransactionCommandProcessorCache,
             transaction,
-            snapshotStepProcessor,
+            snapshotCommandProcessor,
             cancellationToken
         );
     }

@@ -1,10 +1,15 @@
-﻿using EntityDb.Abstractions.Reducers;
+﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Reducers;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Common.Tests.Implementations.Entities;
+using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Projections;
+using EntityDb.Common.Tests.Implementations.Tags;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record StoreNumber(ulong Number) : IReducer<TestEntity>, IReducer<OneToOneProjection>
+public record StoreNumber(ulong Number) : IReducer<TestEntity>, IReducer<OneToOneProjection>, IAddLeasesCommand, IAddTagsCommand
 {
     public OneToOneProjection Reduce(OneToOneProjection projection)
     {
@@ -20,5 +25,15 @@ public record StoreNumber(ulong Number) : IReducer<TestEntity>, IReducer<OneToOn
         {
             VersionNumber = entity.VersionNumber.Next()
         };
+    }
+
+    public IEnumerable<ILease> GetLeases()
+    {
+        yield return new CountLease(Number);
+    }
+
+    public IEnumerable<ITag> GetTags()
+    {
+        yield return new CountTag(Number);
     }
 }

@@ -1,6 +1,6 @@
+using EntityDb.Abstractions.Commands;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Queries;
@@ -32,25 +32,26 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
 
     public static IDocumentReader<TagDocument> EntityIdDocumentReader { get; } = new TagEntityIdDocumentReader();
 
-    public static InsertDocumentsCommand<TagDocument> GetInsert
+    public static InsertDocumentsCommand<TagDocument> GetInsertCommand
     (
         IEnvelopeService<string> envelopeService,
         ITransaction transaction,
-        IAddTagsTransactionStep addTagsTransactionStep
+        ITransactionCommand transactionCommand,
+        IAddTagsCommand addTagsCommand
     )
     {
         return new InsertDocumentsCommand<TagDocument>
         (
             TableName,
-            addTagsTransactionStep.Tags
+            addTagsCommand.GetTags()
                 .Select(insertTag =>
                 {
                     return new TagDocument
                     {
                         TransactionTimeStamp = transaction.TimeStamp,
                         TransactionId = transaction.Id,
-                        EntityId = addTagsTransactionStep.EntityId,
-                        EntityVersionNumber = addTagsTransactionStep.EntityVersionNumber,
+                        EntityId = transactionCommand.EntityId,
+                        EntityVersionNumber = transactionCommand.EntityVersionNumber,
                         Label = insertTag.Label,
                         Value = insertTag.Value,
                         DataType = insertTag.GetType().Name,
@@ -78,10 +79,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        IDeleteTagsTransactionStep deleteTagsTransactionStep
+        ITransactionCommand transactionCommand, IDeleteTagsCommand deleteTagsCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(deleteTagsTransactionStep.EntityId, deleteTagsTransactionStep.Tags);
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags().ToArray());
 
         return new DeleteDocumentsCommand
         (

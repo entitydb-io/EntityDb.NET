@@ -3,7 +3,6 @@ using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
-using EntityDb.Abstractions.Transactions.Steps;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
@@ -113,9 +112,10 @@ public class EntityTests : TestsBase<Startup>
             .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ITransaction transaction, CancellationToken _) =>
             {
-                foreach (var transactionStep in transaction.Steps)
-                    if (transactionStep is IAppendCommandTransactionStep commandTransactionStep)
-                        commands.Add(commandTransactionStep.Command);
+                foreach (var transactionCommand in transaction.Commands)
+                {
+                    commands.Add(transactionCommand.Command);
+                }
 
                 return true;
             });
