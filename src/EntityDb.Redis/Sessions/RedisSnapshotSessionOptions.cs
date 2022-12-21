@@ -7,7 +7,7 @@ namespace EntityDb.Redis.Sessions;
 /// <summary>
 ///     Configuration options for the Redis implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
-public class RedisSnapshotSessionOptions<TSnapshot>
+public class RedisSnapshotSessionOptions
 {
     /// <summary>
     ///     A connection string that is compatible with <see cref="ConfigurationOptions.Parse(string)"/>
@@ -34,6 +34,6 @@ public class RedisSnapshotSessionOptions<TSnapshot>
     [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
-        return $"{nameof(RedisSnapshotSessionOptions<TSnapshot>)}<{typeof(TSnapshot).Name}";
+        return $"{nameof(RedisSnapshotSessionOptions)}";
     }
 }

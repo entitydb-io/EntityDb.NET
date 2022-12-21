@@ -14,14 +14,14 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
 {
     private readonly ConnectionMultiplexerFactory _connectionMultiplexerFactory;
     private readonly IEnvelopeService<byte[]> _envelopeService;
-    private readonly IOptionsFactory<RedisSnapshotSessionOptions<TSnapshot>> _optionsFactory;
+    private readonly IOptionsFactory<RedisSnapshotSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
     public RedisSnapshotRepositoryFactory
     (
         IServiceProvider serviceProvider,
         ConnectionMultiplexerFactory connectionMultiplexerFactory,
-        IOptionsFactory<RedisSnapshotSessionOptions<TSnapshot>> optionsFactory,
+        IOptionsFactory<RedisSnapshotSessionOptions> optionsFactory,
         IEnvelopeService<byte[]> envelopeService
     )
     {
@@ -48,13 +48,13 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
     }
 
 
-    private async Task<IRedisSession> CreateSession(RedisSnapshotSessionOptions<TSnapshot> options,
+    private async Task<IRedisSession> CreateSession(RedisSnapshotSessionOptions options,
         CancellationToken cancellationToken)
     {
         var connectionMultiplexer =
             await _connectionMultiplexerFactory.CreateConnectionMultiplexer(options.ConnectionString, cancellationToken);
 
-        return RedisSession<TSnapshot>.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), options);
+        return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), options);
     }
 
     public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,

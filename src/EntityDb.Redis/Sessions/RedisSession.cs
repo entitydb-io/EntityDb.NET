@@ -7,11 +7,11 @@ using StackExchange.Redis;
 
 namespace EntityDb.Redis.Sessions;
 
-internal sealed record RedisSession<TSnapshot>
+internal sealed record RedisSession
 (
-    ILogger<RedisSession<TSnapshot>> Logger,
+    ILogger<RedisSession> Logger,
     IDatabase Database,
-    RedisSnapshotSessionOptions<TSnapshot> Options
+    RedisSnapshotSessionOptions Options
 ) : DisposableResourceBaseRecord, IRedisSession
 {
     public async Task<bool> Insert(Pointer snapshotPointer, RedisValue redisValue)
@@ -139,9 +139,9 @@ internal sealed record RedisSession<TSnapshot>
     (
         IServiceProvider serviceProvider,
         IDatabase database,
-        RedisSnapshotSessionOptions<TSnapshot> options
+        RedisSnapshotSessionOptions options
     )
     {
-        return ActivatorUtilities.CreateInstance<RedisSession<TSnapshot>>(serviceProvider, database, options);
+        return ActivatorUtilities.CreateInstance<RedisSession>(serviceProvider, database, options);
     }
 }

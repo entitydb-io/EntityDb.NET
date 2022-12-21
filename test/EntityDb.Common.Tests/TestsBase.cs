@@ -197,24 +197,24 @@ public class TestsBase<TStartup>
 
             serviceCollection.AddRedisSnapshots<TSnapshot>(true);
 
-            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions<TSnapshot>>(options =>
+            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions>(options =>
             {
                 options.ConnectionString = databaseContainerFixture!.RedisContainer.ConnectionString;
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.Write, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnly, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions<TSnapshot>>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = true;
