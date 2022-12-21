@@ -9,6 +9,13 @@ namespace EntityDb.EntityFramework.Sessions;
 public class EntityFrameworkSnapshotSessionOptions
 {
     /// <summary>
+    ///     This property is not used by the package. It only provides a convenient way to access
+    ///     the connection string using IOptions, which does not appear to be a convienent thing
+    ///     to do in vanilla Enitity Framework.
+    /// </summary>
+    public string ConnectionString { get; set; } = default!;
+
+    /// <summary>
     ///     If <c>true</c>, indicates the agent only intends to execute queries.
     /// </summary>
     public bool ReadOnly { get; set; }
