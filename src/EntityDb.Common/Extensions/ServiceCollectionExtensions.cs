@@ -59,7 +59,7 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddSingleton(transactionProcessorFactory.Invoke);
 
-        serviceCollection.AddSingleton<ITransactionProcessor, TTransactionProcessor>();
+        serviceCollection.AddSingleton<ITransactionProcessor>(serviceProvider => serviceProvider.GetRequiredService<TTransactionProcessor>());
 
         serviceCollection.AddSingleton<TransactionProcessorSubscriber<TTransactionProcessor>>();
 
