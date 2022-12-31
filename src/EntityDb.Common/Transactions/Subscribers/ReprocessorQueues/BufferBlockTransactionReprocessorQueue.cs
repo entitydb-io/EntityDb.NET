@@ -33,20 +33,7 @@ internal class BufferBlockTransactionReprocessorQueue : TransactionReprocessorQu
         {
             var reprocessTransactionsRequest = await _bufferBlock.ReceiveAsync(stoppingToken);
 
-            using var _ = _logger.BeginScope(reprocessTransactionsRequest.ToLogScopeState());
-
-            try
-            {
-                _logger.LogDebug("Started reprocessing transactions");
-
-                await Process(reprocessTransactionsRequest, stoppingToken);
-
-                _logger.LogDebug("Finished reprocessing transactions");
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "Failed to reprocess transactions");
-            }
+            await Process(reprocessTransactionsRequest, stoppingToken);
         }
     }
 }
