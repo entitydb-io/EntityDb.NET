@@ -18,7 +18,7 @@ internal sealed class
         IProjectionRepositoryFactory<TProjection> projectionRepositoryFactory,
         string transactionSessionOptionsName,
         string snapshotSessionOptionsName
-    )
+    ) : base($"ProjectionSnapshot<{typeof(TProjection).Name}>")
     {
         _projectionRepositoryFactory = projectionRepositoryFactory;
         _transactionSessionOptionsName = transactionSessionOptionsName;

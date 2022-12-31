@@ -3,12 +3,12 @@ using EntityDb.Common.Transactions.Subscribers.Processors;
 
 namespace EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
 
-internal class TestModeTransactionQueue<TTransactionProcessor> : ITransactionProcessorQueue<TTransactionProcessor>
+internal class TestModeTransactionProcessorQueue<TTransactionProcessor> : ITransactionProcessorQueue<TTransactionProcessor>
     where TTransactionProcessor : ITransactionProcessor
 {
     private readonly TTransactionProcessor _transactionProcessor;
 
-    public TestModeTransactionQueue(TTransactionProcessor transactionProcessor)
+    public TestModeTransactionProcessorQueue(TTransactionProcessor transactionProcessor)
     {
         _transactionProcessor = transactionProcessor;
     }

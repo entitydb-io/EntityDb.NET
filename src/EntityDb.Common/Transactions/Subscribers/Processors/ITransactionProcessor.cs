@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Transactions;
+using EntityDb.Common.Transactions.Subscribers.Reprocessors;
 
 namespace EntityDb.Common.Transactions.Subscribers.Processors;
 
@@ -7,6 +8,11 @@ namespace EntityDb.Common.Transactions.Subscribers.Processors;
 /// </summary>
 public interface ITransactionProcessor
 {
+    /// <summary>
+    ///     Used for targeted reprocessing with <see cref="IReprocessTransactionsRequest"/>.
+    /// </summary>
+    string Identifier { get; }
+
     /// <summary>
     ///     Defines the procedure for processing a given transaction.
     /// </summary>

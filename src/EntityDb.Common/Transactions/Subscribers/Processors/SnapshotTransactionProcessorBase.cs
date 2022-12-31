@@ -8,6 +8,13 @@ namespace EntityDb.Common.Transactions.Subscribers.Processors;
 internal abstract class SnapshotTransactionProcessorBase<TSnapshot> : ITransactionProcessor
     where TSnapshot : ISnapshot<TSnapshot>
 {
+    public string Identifier { get; }
+
+    protected SnapshotTransactionProcessorBase(string identifier)
+    {
+        Identifier = identifier;
+    }
+
     public abstract Task ProcessTransaction(ITransaction transaction, CancellationToken cancellationToken);
 
     protected static async Task ProcessTransactionCommands

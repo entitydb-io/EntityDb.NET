@@ -17,7 +17,7 @@ internal class EntitySnapshotTransactionProcessor<TEntity> : SnapshotTransaction
         IEntityRepositoryFactory<TEntity> entityRepositoryFactory,
         string transactionSessionOptionsName,
         string snapshotSessionOptionsName
-    )
+    ) : base($"EntitySnapshot<{typeof(TEntity).Name}>")
     {
         _entityRepositoryFactory = entityRepositoryFactory;
         _transactionSessionOptionsName = transactionSessionOptionsName;
