@@ -8,17 +8,14 @@ public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfigur
     where TSnapshot : class
 {
     private readonly string _snapshotReferencesTableName;
-    private readonly string _snapshotsTableName;
 
     /// <summary>
     ///     Configure the napshot Reference Type.
     /// </summary>
     /// <param name="snapshotReferencesTableName">The name of the table for snapshot references.</param>
-    /// <param name="snapshotsTableName">The name of the table for snapshots.</param>
-    public SnapshotReferenceTypeConfiguration(string snapshotReferencesTableName, string snapshotsTableName)
+    public SnapshotReferenceTypeConfiguration(string snapshotReferencesTableName)
     {
         _snapshotReferencesTableName = snapshotReferencesTableName;
-        _snapshotsTableName = snapshotsTableName;
     }
 
     /// <inheritdoc />
@@ -36,18 +33,13 @@ public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfigur
                 snapshotReference.PointerVersionNumber
             });
 
-        var snapshotBuilder = snapshotReferenceBuilder
-            .OwnsOne(snapshotReference => snapshotReference.Snapshot);
-
-        Configure(snapshotBuilder);
-    }
-
-    /// <summary>
-    ///     Configures the snapshot of type <typeparamref name="TSnapshot" />.
-    /// </summary>
-    /// <param name="snapshotBuilder">The builder to be used to configure the snapshot type.</param>
-    protected virtual void Configure(OwnedNavigationBuilder<SnapshotReference<TSnapshot>, TSnapshot> snapshotBuilder)
-    {
-        snapshotBuilder.ToTable(_snapshotsTableName);
+        snapshotReferenceBuilder
+            .HasOne(snapshotReference => snapshotReference.Snapshot)
+            .WithMany()
+            .HasForeignKey(snapshotReference => new
+            {
+                snapshotReference.SnapshotId,
+                snapshotReference.SnapshotVersionNumber,
+            });
     }
 }

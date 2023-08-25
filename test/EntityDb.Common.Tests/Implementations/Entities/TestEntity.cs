@@ -1,8 +1,8 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using System.Linq.Expressions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
@@ -20,7 +20,7 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
         };
     }
 
-    public static void Configure(OwnedNavigationBuilder<SnapshotReference<TestEntity>, TestEntity> testEntityBuilder)
+    public static void Configure(EntityTypeBuilder<TestEntity> testEntityBuilder)
     {
         testEntityBuilder
             .HasKey(testEntity => new
@@ -70,4 +70,9 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
     public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
 
     public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
+
+    public Expression<Func<TestEntity, bool>> GetKeyPredicate()
+    {
+        return (testEntity) => testEntity.Id == Id && testEntity.VersionNumber == VersionNumber;
+    }
 }

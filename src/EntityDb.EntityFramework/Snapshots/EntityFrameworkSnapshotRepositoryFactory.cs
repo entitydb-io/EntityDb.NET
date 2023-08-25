@@ -3,14 +3,13 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Snapshots;
 using EntityDb.EntityFramework.Sessions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace EntityDb.EntityFramework.Snapshots;
 
 internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> : DisposableResourceBaseClass,
     IEntityFrameworkSnapshotRepositoryFactory<TSnapshot>
-    where TSnapshot : class
+    where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
     where TDbContext : SnapshotReferenceDbContext
 {
     private readonly IServiceProvider _serviceProvider;

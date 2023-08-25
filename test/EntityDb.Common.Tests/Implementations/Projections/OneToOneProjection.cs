@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;
@@ -7,7 +7,6 @@ using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
@@ -27,7 +26,7 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         };
     }
 
-    public static void Configure(OwnedNavigationBuilder<SnapshotReference<OneToOneProjection>, OneToOneProjection> oneToOneProjectionBuilder)
+    public static void Configure(EntityTypeBuilder<OneToOneProjection> oneToOneProjectionBuilder)
     {
         oneToOneProjectionBuilder
             .HasKey(oneToOneProjection => new
@@ -93,4 +92,9 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
 
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
         new();
+
+    public Expression<Func<OneToOneProjection, bool>> GetKeyPredicate()
+    {
+        return (oneToOneProjection) => oneToOneProjection.Id == Id && oneToOneProjection.VersionNumber == VersionNumber;
+    }
 }
