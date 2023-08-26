@@ -1,27 +1,31 @@
 ﻿using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.EntityFramework.Sessions;
 using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EntityDb.Common.Tests.Implementations.DbContexts;
 
-internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext
+internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext, ISnapshotReferenceDbContext<GenericDbContext<TSnapshot>>
     where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
 {
-    public GenericDbContext(DbContextOptions<GenericDbContext<TSnapshot>> options) : base(options)
-    {
-        try
-        {
-            var databaseCreator = (RelationalDatabaseCreator)Database.GetService<IDatabaseCreator>();
+    private readonly EntityFrameworkSnapshotSessionOptions _options;
 
-            databaseCreator.CreateTables();
-        }
-        catch
-        {
-            // One of the tests has already created the tables.
-        }
+    public GenericDbContext(EntityFrameworkSnapshotSessionOptions options)
+    {
+        _options = options;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder
+            .UseNpgsql($"{_options.ConnectionString};Include Error Detail=true")
+            .EnableSensitiveDataLogging();
+    }
+
+    public static Task<GenericDbContext<TSnapshot>> ConstructAsync(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions)
+    {
+        return Task.FromResult(new GenericDbContext<TSnapshot>(entityFrameworkSnapshotSessionOptions));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

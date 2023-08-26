@@ -1,10 +1,13 @@
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace EntityDb.EntityFramework.Sessions;
 
 internal interface IEntityFrameworkSession<TSnapshot> : IDisposableResource
 {
+    internal DbContext DbContext { get; }
+
     IEntityFrameworkSession<TSnapshot> WithSnapshotSessionOptions(EntityFrameworkSnapshotSessionOptions snapshotSessionOptions);
 
     Task StartTransaction(CancellationToken cancellationToken);

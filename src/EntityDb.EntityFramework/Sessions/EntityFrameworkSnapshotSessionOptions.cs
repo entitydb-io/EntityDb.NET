@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace EntityDb.EntityFramework.Sessions;
 
 /// <summary>
-///     Configuration options for the Redis implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
+///     Configuration options for the EntityFramework implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
 public class EntityFrameworkSnapshotSessionOptions
 {
