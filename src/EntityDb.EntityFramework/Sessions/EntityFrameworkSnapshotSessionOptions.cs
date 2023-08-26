@@ -1,4 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.EntityFramework.Snapshots;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.EntityFramework.Sessions;
@@ -19,6 +20,15 @@ public class EntityFrameworkSnapshotSessionOptions
     ///     If <c>true</c>, indicates the agent only intends to execute queries.
     /// </summary>
     public bool ReadOnly { get; set; }
+
+    /// <summary>
+    ///     If <c>false</c>, a snapshot will be deleted if there are no <see cref="SnapshotReference{TSnapshot}"/>
+    ///     records pointing to the snapshot record.
+    /// </summary>
+    /// <remarks>
+    ///     You may consider setting this to <c>true</c> if there are other records which reference a specific snapshot.
+    /// </remarks>
+    public bool KeepSnapshotsWithoutSnapshotReferences { get; set; }
 
     /// <inheritdoc/>
     [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
