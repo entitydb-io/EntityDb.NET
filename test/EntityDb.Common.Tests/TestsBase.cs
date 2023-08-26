@@ -357,9 +357,14 @@ public class TestsBase<TStartup>
 
         serviceCollection.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor, (_,_) => true));
             loggingBuilder.AddDebug();
             loggingBuilder.AddSimpleConsole(options => { options.IncludeScopes = true; });
+        });
+
+        serviceCollection.Configure<LoggerFilterOptions>(x =>
+        {
+            x.MinLevel = LogLevel.Debug;
         });
 
         startup.AddServices(serviceCollection);

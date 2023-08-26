@@ -24,6 +24,16 @@ public class SnapshotReference<TSnapshot>
     public required VersionNumber PointerVersionNumber { get; init; }
 
     /// <summary>
+    ///     The Id of the Snapshot.
+    /// </summary>
+    public required Id SnapshotId { get; set; }
+
+    /// <summary>
+    ///     The VersionNumber of the Snapshot.
+    /// </summary>
+    public required VersionNumber SnapshotVersionNumber { get; set; }
+
+    /// <summary>
     ///     The Snapshot.
     /// </summary>
     public required TSnapshot Snapshot { get; set; }
