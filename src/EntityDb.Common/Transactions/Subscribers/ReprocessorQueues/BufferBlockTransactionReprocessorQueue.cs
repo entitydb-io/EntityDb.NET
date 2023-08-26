@@ -11,15 +11,9 @@ namespace EntityDb.Common.Transactions.Subscribers.ReprocessorQueues;
 internal class BufferBlockTransactionReprocessorQueue : TransactionReprocessorQueueBase, ITransactionReprocessorQueue
 {
     private readonly BufferBlock<IReprocessTransactionsRequest> _bufferBlock = new();
-    private readonly ILogger<BufferBlockTransactionReprocessorQueue> _logger;
-    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
-    private readonly IEnumerable<ITransactionProcessor> _transactionProcessors;
 
     public BufferBlockTransactionReprocessorQueue(ILogger<BufferBlockTransactionReprocessorQueue> logger, ITransactionRepositoryFactory transactionRepositoryFactory, IEnumerable<ITransactionProcessor> transactionProcessors) : base(logger, transactionRepositoryFactory, transactionProcessors)
     {
-        _logger = logger;
-        _transactionRepositoryFactory = transactionRepositoryFactory;
-        _transactionProcessors = transactionProcessors;
     }
 
     public void Enqueue(IReprocessTransactionsRequest reprocessTransactionsRequest)

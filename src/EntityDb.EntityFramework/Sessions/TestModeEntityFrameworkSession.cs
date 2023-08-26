@@ -1,10 +1,13 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
+using Microsoft.EntityFrameworkCore;
 
 namespace EntityDb.EntityFramework.Sessions;
 
 internal record TestModeEntityFrameworkSession<TSnapshot>(IEntityFrameworkSession<TSnapshot> EntityFrameworkSession) : DisposableResourceBaseRecord, IEntityFrameworkSession<TSnapshot>
 {
+    DbContext IEntityFrameworkSession<TSnapshot>.DbContext => EntityFrameworkSession.DbContext;
+
     public Task StartTransaction(CancellationToken cancellationToken)
     {
         // Test Mode Transactions are started in the Test Mode Repository Factory

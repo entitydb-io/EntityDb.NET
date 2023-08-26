@@ -163,11 +163,12 @@ public class TestsBase<TStartup>
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
 
-            serviceCollection.AddDbContextFactory<GenericDbContext<TSnapshot>>(options => options
-                    .UseNpgsql($"{databaseContainerFixture!.PostgreSqlContainer.ConnectionString};Include Error Detail=true")
-                    .EnableSensitiveDataLogging());
-
             serviceCollection.AddEntityFrameworkSnapshots<TSnapshot, GenericDbContext<TSnapshot>>(testMode: true);
+
+            serviceCollection.ConfigureAll<EntityFrameworkSnapshotSessionOptions>(options =>
+            {
+                options.ConnectionString = databaseContainerFixture!.PostgreSqlContainer.ConnectionString;
+            });
 
             serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.Write, options =>
             {

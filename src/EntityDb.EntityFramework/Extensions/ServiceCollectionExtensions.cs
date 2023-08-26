@@ -1,7 +1,5 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Snapshots;
-using EntityDb.EntityFramework.Sessions;
 using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +24,7 @@ public static class ServiceCollectionExtensions
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
     public static void AddEntityFrameworkSnapshots<TSnapshot, TDbContext>(this IServiceCollection serviceCollection, bool testMode = false)
         where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
-        where TDbContext : SnapshotReferenceDbContext
+        where TDbContext : DbContext, ISnapshotReferenceDbContext<TDbContext>
     {
         serviceCollection.Add<EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext>>
         (
@@ -38,7 +36,7 @@ public static class ServiceCollectionExtensions
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
             serviceProvider => serviceProvider
                 .GetRequiredService<EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext>>()
-                .UseTestMode(testMode)
+                .UseTestMode(serviceProvider, testMode)
         );
     }
 }

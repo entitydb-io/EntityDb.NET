@@ -10,21 +10,18 @@ namespace EntityDb.EntityFramework.Snapshots;
 internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> : DisposableResourceBaseClass,
     IEntityFrameworkSnapshotRepositoryFactory<TSnapshot>
     where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
-    where TDbContext : SnapshotReferenceDbContext
+    where TDbContext : DbContext, ISnapshotReferenceDbContext<TDbContext>
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IDbContextFactory<TDbContext> _dbContextFactory;
     private readonly IOptionsFactory<EntityFrameworkSnapshotSessionOptions> _optionsFactory;
 
     public EntityFrameworkSnapshotRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        IDbContextFactory<TDbContext> dbContextFactory,
         IOptionsFactory<EntityFrameworkSnapshotSessionOptions> optionsFactory
     )
     {
         _serviceProvider = serviceProvider;
-        _dbContextFactory = dbContextFactory;
         _optionsFactory = optionsFactory;
     }
 
@@ -40,12 +37,12 @@ internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> :
 
     public async Task<IEntityFrameworkSession<TSnapshot>> CreateSession(EntityFrameworkSnapshotSessionOptions options, CancellationToken cancellationToken)
     {
-        var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var dbContext = await TDbContext.ConstructAsync(options);
 
         return EntityFrameworkSession<TSnapshot, TDbContext>.Create(_serviceProvider, dbContext, options);
     }
 
-    public EntityFrameworkSnapshotSessionOptions GetTransactionSessionOptions(string snapshotSessionOptionsName)
+    public EntityFrameworkSnapshotSessionOptions GetSessionOptions(string snapshotSessionOptionsName)
     {
         return _optionsFactory.Create(snapshotSessionOptionsName);
     }

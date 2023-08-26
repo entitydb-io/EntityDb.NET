@@ -8,14 +8,14 @@ internal interface IEntityFrameworkSnapshotRepositoryFactory<TSnapshot> : ISnaps
     async Task<ISnapshotRepository<TSnapshot>> ISnapshotRepositoryFactory<TSnapshot>.CreateRepository(
         string snapshotSessionOptionsName, CancellationToken cancellationToken)
     {
-        var options = GetTransactionSessionOptions(snapshotSessionOptionsName);
+        var options = GetSessionOptions(snapshotSessionOptionsName);
 
         var entityFrameworkSession = await CreateSession(options, cancellationToken);
 
         return CreateRepository(entityFrameworkSession);
     }
 
-    EntityFrameworkSnapshotSessionOptions GetTransactionSessionOptions(string snapshotSessionOptionsName);
+    EntityFrameworkSnapshotSessionOptions GetSessionOptions(string snapshotSessionOptionsName);
 
     Task<IEntityFrameworkSession<TSnapshot>> CreateSession(EntityFrameworkSnapshotSessionOptions options,
         CancellationToken cancellationToken);

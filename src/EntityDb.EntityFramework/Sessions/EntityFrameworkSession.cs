@@ -13,13 +13,14 @@ namespace EntityDb.EntityFramework.Sessions;
 
 internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourceBaseClass, IEntityFrameworkSession<TSnapshot>
     where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
-    where TDbContext : SnapshotReferenceDbContext
+    where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
     private readonly DbSet<SnapshotReference<TSnapshot>> _snapshotReferences;
     private readonly DbSet<TSnapshot> _snapshots;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
 
+    DbContext IEntityFrameworkSession<TSnapshot>.DbContext => _dbContext;
     private IDbContextTransaction? Transaction { get; set; }
 
     public EntityFrameworkSession(TDbContext dbContext, EntityFrameworkSnapshotSessionOptions options)
@@ -185,5 +186,10 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     public IEntityFrameworkSession<TSnapshot> WithSnapshotSessionOptions(EntityFrameworkSnapshotSessionOptions snapshotSessionOptions)
     {
         return new EntityFrameworkSession<TSnapshot, TDbContext>(_dbContext, snapshotSessionOptions);
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        return _dbContext.DisposeAsync();
     }
 }
