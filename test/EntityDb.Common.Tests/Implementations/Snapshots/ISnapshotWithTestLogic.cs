@@ -1,6 +1,6 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
-using EntityDb.EntityFramework.Sessions;
+using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EntityDb.Common.Tests.Implementations.Snapshots;
