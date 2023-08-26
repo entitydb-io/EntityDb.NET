@@ -1,6 +1,5 @@
 ﻿using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Snapshots;
 using EntityDb.EntityFramework.Predicates;
 using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +16,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     where TDbContext : SnapshotReferenceDbContext
 {
     private readonly TDbContext _dbContext;
+    private readonly DbSet<SnapshotReference<TSnapshot>> _snapshotReferences;
+    private readonly DbSet<TSnapshot> _snapshots;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
 
     private IDbContextTransaction? Transaction { get; set; }
@@ -24,6 +25,8 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     public EntityFrameworkSession(TDbContext dbContext, EntityFrameworkSnapshotSessionOptions options)
     {
         _dbContext = dbContext;
+        _snapshotReferences = dbContext.Set<SnapshotReference<TSnapshot>>();
+        _snapshots = dbContext.Set<TSnapshot>();
         _options = options;
     }
 
@@ -34,36 +37,43 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
             snapshotReference.PointerVersionNumber == snapshotPointer.VersionNumber;
     }
 
+    private async Task<bool> ShouldDeleteSnapshot(SnapshotReference<TSnapshot> snapshotReference, CancellationToken cancellationToken)
+    {
+        if (_options.KeepSnapshotsWithoutSnapshotReferences)
+        {
+            return false;
+        }
+
+        var otherSnapshotReferences = await _snapshotReferences
+            .Where
+            (
+                relatedSnapshotReference =>
+                    relatedSnapshotReference.Id != snapshotReference.Id &&
+                    relatedSnapshotReference.SnapshotId == snapshotReference.SnapshotId &&
+                    relatedSnapshotReference.SnapshotVersionNumber == snapshotReference.SnapshotVersionNumber
+            )
+            .AnyAsync(cancellationToken);
+
+        return !otherSnapshotReferences;
+    }
+
     public async Task Delete(IEnumerable<Pointer> snapshotPointers, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
-        var snapshotReferenceSet = _dbContext.Set<SnapshotReference<TSnapshot>>();
-        var snapshotSet = _dbContext.Set<TSnapshot>();
-
-        var snapshotReferences = await snapshotReferenceSet
+        var snapshotReferences = await _snapshotReferences
             .Include(snapshotReference => snapshotReference.Snapshot)
             .Where(PredicateExpressionBuilder.Or(snapshotPointers, SnapshotPointerPredicate))
             .ToArrayAsync(cancellationToken);
 
         foreach (var snapshotReference in snapshotReferences)
         {
-            snapshotReferenceSet.Remove(snapshotReference);
-
-            var anyRelatedSnapshotReferences = await snapshotReferenceSet
-                .Where
-                (
-                    relatedSnapshotReference =>
-                        relatedSnapshotReference.Id != snapshotReference.Id &&
-                        relatedSnapshotReference.SnapshotId == snapshotReference.SnapshotId &&
-                        relatedSnapshotReference.SnapshotVersionNumber == snapshotReference.SnapshotVersionNumber
-                )
-                .AnyAsync(cancellationToken);
-
-            if (!anyRelatedSnapshotReferences)
+            if (await ShouldDeleteSnapshot(snapshotReference, cancellationToken))
             {
-                snapshotSet.Remove(snapshotReference.Snapshot);
+                _snapshots.Remove(snapshotReference.Snapshot);
             }
+
+            _snapshotReferences.Remove(snapshotReference);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -71,7 +81,7 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
 
     public async Task<TSnapshot?> Get(Pointer snapshotPointer, CancellationToken cancellationToken)
     {
-        var snapshotReference = await _dbContext.Set<SnapshotReference<TSnapshot>>()
+        var snapshotReference = await _snapshotReferences
             .Include(reference => reference.Snapshot)
             .AsNoTracking()
             .Where(SnapshotPointerPredicate(snapshotPointer))
@@ -84,32 +94,34 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
     {
         AssertNotReadOnly();
 
-        var snapshotSet = _dbContext.Set<TSnapshot>();
-
-        var sapshotExists = await snapshotSet
+        var sapshotExists = await _snapshots
             .Where(snapshot.GetKeyPredicate())
             .AnyAsync(cancellationToken);
 
         if (!sapshotExists)
         {
-            snapshotSet.Add(snapshot);
+            _snapshots.Add(snapshot);
         }
 
-        var snapshotReferenceSet = _dbContext.Set<SnapshotReference<TSnapshot>>();
-
-        var previousSnapshotReference = await snapshotReferenceSet
+        var previousSnapshotReference = await _snapshotReferences
+            .Include(snapshotReference => snapshotReference.Snapshot)
             .Where(SnapshotPointerPredicate(snapshotPointer))
             .SingleOrDefaultAsync(cancellationToken);
 
         if (previousSnapshotReference != null)
         {
+            if (await ShouldDeleteSnapshot(previousSnapshotReference, cancellationToken))
+            {
+                _snapshots.Remove(previousSnapshotReference.Snapshot);
+            }
+
             previousSnapshotReference.SnapshotId = snapshot.GetId();
             previousSnapshotReference.SnapshotVersionNumber = snapshot.GetVersionNumber();
             previousSnapshotReference.Snapshot = snapshot;
         }
         else
         {
-            var snapshotReference = new SnapshotReference<TSnapshot>
+            _snapshotReferences.Add(new SnapshotReference<TSnapshot>
             {
                 Id = Guid.NewGuid(),
                 PointerId = snapshotPointer.Id,
@@ -117,9 +129,7 @@ internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourc
                 SnapshotId = snapshot.GetId(),
                 SnapshotVersionNumber = snapshot.GetVersionNumber(),
                 Snapshot = snapshot,
-            };
-
-            snapshotReferenceSet.Add(snapshotReference);
+            });
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
