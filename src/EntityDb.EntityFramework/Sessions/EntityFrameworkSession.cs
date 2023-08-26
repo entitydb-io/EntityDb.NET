@@ -12,11 +12,6 @@ using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.EntityFramework.Sessions;
 
-public interface IEntityFrameworkSnapshot<TSnapshot> : ISnapshot<TSnapshot>
-{
-    Expression<Func<TSnapshot, bool>> GetKeyPredicate();
-}
-
 internal class EntityFrameworkSession<TSnapshot, TDbContext> : DisposableResourceBaseClass, IEntityFrameworkSession<TSnapshot>
     where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
     where TDbContext : SnapshotReferenceDbContext

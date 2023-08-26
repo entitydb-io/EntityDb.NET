@@ -40,6 +40,7 @@ public class SnapshotReferenceTypeConfiguration<TSnapshot> : IEntityTypeConfigur
             {
                 snapshotReference.SnapshotId,
                 snapshotReference.SnapshotVersionNumber,
-            });
+            })
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
