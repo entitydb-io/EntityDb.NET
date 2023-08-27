@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Snapshots;
+using EntityDb.EntityFramework.DbContexts;
 using EntityDb.EntityFramework.Sessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -10,7 +11,7 @@ namespace EntityDb.EntityFramework.Snapshots;
 internal class EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext> : DisposableResourceBaseClass,
     IEntityFrameworkSnapshotRepositoryFactory<TSnapshot>
     where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
-    where TDbContext : DbContext, ISnapshotReferenceDbContext<TDbContext>
+    where TDbContext : DbContext, IEntityDbContext<TDbContext>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IOptionsFactory<EntityFrameworkSnapshotSessionOptions> _optionsFactory;

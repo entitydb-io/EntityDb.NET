@@ -1,19 +1,13 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
 using EntityDb.EntityFramework.Converters;
-using EntityDb.EntityFramework.Sessions;
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityDb.EntityFramework.Snapshots;
-
-public interface ISnapshotReferenceDbContext<TDbContext> where TDbContext : ISnapshotReferenceDbContext<TDbContext>
-{
-    static abstract Task<TDbContext> ConstructAsync(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions);
-}
+namespace EntityDb.EntityFramework.DbContexts;
 
 /// <summary>
-///     A DbContext that adds basic converters for types defined in <see cref="EntityDb.Abstractions.ValueObjects"/>
+///     A DbContext that adds basic converters for types defined in <see cref="Abstractions.ValueObjects"/>
 /// </summary>
-public class SnapshotReferenceDbContext : DbContext
+public abstract class EntityDbContextBase : DbContext
 {
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
