@@ -15,5 +15,5 @@ public interface IEntityDbContext<TDbContext>
     /// </summary>
     /// <param name="entityFrameworkSnapshotSessionOptions">The options for the database</param>
     /// <returns>A new <typeparamref name="TDbContext"/> that will be configured using <paramref name="entityFrameworkSnapshotSessionOptions"/>.</returns>
-    static abstract Task<TDbContext> ConstructAsync(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions);
+    static abstract TDbContext Construct(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions);
 }

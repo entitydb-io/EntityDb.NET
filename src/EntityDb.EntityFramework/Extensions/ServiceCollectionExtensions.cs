@@ -27,6 +27,11 @@ public static class ServiceCollectionExtensions
         where TSnapshot : class, IEntityFrameworkSnapshot<TSnapshot>
         where TDbContext : DbContext, IEntityDbContext<TDbContext>
     {
+        serviceCollection.Add<IEntityDbContextFactory<TDbContext>, EntityDbContextFactory<TDbContext>>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
+        );
+
         serviceCollection.Add<EntityFrameworkSnapshotRepositoryFactory<TSnapshot, TDbContext>>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
