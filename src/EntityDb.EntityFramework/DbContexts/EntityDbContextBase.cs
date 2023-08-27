@@ -3,7 +3,7 @@ using EntityDb.EntityFramework.Converters;
 using EntityDb.EntityFramework.Sessions;
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityDb.EntityFramework.Snapshots;
+namespace EntityDb.EntityFramework.DbContexts;
 
 public interface ISnapshotReferenceDbContext<TDbContext> where TDbContext : ISnapshotReferenceDbContext<TDbContext>
 {
@@ -11,9 +11,9 @@ public interface ISnapshotReferenceDbContext<TDbContext> where TDbContext : ISna
 }
 
 /// <summary>
-///     A DbContext that adds basic converters for types defined in <see cref="EntityDb.Abstractions.ValueObjects"/>
+///     A DbContext that adds basic converters for types defined in <see cref="Abstractions.ValueObjects"/>
 /// </summary>
-public class SnapshotReferenceDbContext : DbContext
+public abstract class EntityDbContextBase : DbContext
 {
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

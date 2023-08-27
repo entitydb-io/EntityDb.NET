@@ -1,12 +1,12 @@
 ﻿using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.EntityFramework.DbContexts;
 using EntityDb.EntityFramework.Sessions;
-using EntityDb.EntityFramework.Snapshots;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EntityDb.Common.Tests.Implementations.DbContexts;
 
-internal class GenericDbContext<TSnapshot> : SnapshotReferenceDbContext, ISnapshotReferenceDbContext<GenericDbContext<TSnapshot>>
+internal class GenericDbContext<TSnapshot> : EntityDbContextBase, IEntityDbContext<GenericDbContext<TSnapshot>>
     where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
 {
     private readonly EntityFrameworkSnapshotSessionOptions _options;
