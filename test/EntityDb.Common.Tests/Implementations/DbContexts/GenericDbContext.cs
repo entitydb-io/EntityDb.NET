@@ -23,9 +23,9 @@ internal class GenericDbContext<TSnapshot> : EntityDbContextBase, IEntityDbConte
             .EnableSensitiveDataLogging();
     }
 
-    public static Task<GenericDbContext<TSnapshot>> ConstructAsync(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions)
+    public static GenericDbContext<TSnapshot> Construct(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions)
     {
-        return Task.FromResult(new GenericDbContext<TSnapshot>(entityFrameworkSnapshotSessionOptions));
+        return new GenericDbContext<TSnapshot>(entityFrameworkSnapshotSessionOptions);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
