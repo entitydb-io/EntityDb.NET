@@ -1,9 +1,7 @@
 ﻿using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.MongoDb.Documents;
-using EntityDb.MongoDb.Queries.SortDefinitions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;
 
@@ -41,16 +39,5 @@ internal abstract class SortBuilderBase : BuilderBase, ISortBuilder<SortDefiniti
     protected virtual string[] GetHoistedFieldNames()
     {
         return Array.Empty<string>();
-    }
-
-    protected SortDefinition<BsonDocument> SortDataValue<TData>(bool ascending,
-        Expression<Func<TData, object>> dataExpression)
-    {
-        var dataSort = ascending
-            ? Builders<TData>.Sort.Ascending(dataExpression)
-            : Builders<TData>.Sort.Descending(dataExpression);
-
-        return new EmbeddedSortDefinition<BsonDocument, TData>(DataValueFieldName, dataSort,
-            GetHoistedFieldNames());
     }
 }

@@ -1,7 +1,5 @@
 ﻿using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.ValueObjects;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace EntityDb.Abstractions.Queries.FilterBuilders;
 
@@ -11,12 +9,6 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface ILeaseFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
-    /// <ignore/>
-    [Obsolete("This method will be removed in the future.")]
-    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
-    TFilter LeaseMatches<TLease>(Expression<Func<TLease, bool>> leaseExpression)
-        => throw new NotSupportedException();
-
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes leases with an entity id which is contained in a set
     ///     of entity ids.
