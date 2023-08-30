@@ -1,55 +1,50 @@
 ﻿using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Transactions;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace EntityDb.Common.Extensions
+namespace EntityDb.Common.Extensions;
+
+internal static class TransactionRepositoryExtensions
 {
-    internal static class TransactionRepositoryExtensions
+    public static IAsyncEnumerable<Id> EnumerateTransactionIds(this ITransactionRepository transactionRepository, IQuery query, CancellationToken cancellationToken = default)
     {
-        public static async IAsyncEnumerable<ITransaction> EnumerateTransactions(this ITransactionRepository transactionRepository, ICommandQuery commandQuery, [EnumeratorCancellation] CancellationToken cancellationToken)
+        return query switch
         {
-            var allAnnotatedCommands = await transactionRepository
-                .EnumerateAnnotatedCommands(commandQuery, cancellationToken)
-                .ToLookupAsync(annotatedCommand => annotatedCommand.TransactionId, cancellationToken);
+            IAgentSignatureQuery agentSignatureQuery => transactionRepository.EnumerateTransactionIds(agentSignatureQuery, cancellationToken),
+            ICommandQuery commandQuery => transactionRepository.EnumerateTransactionIds(commandQuery, cancellationToken),
+            ILeaseQuery leaseQuery => transactionRepository.EnumerateTransactionIds(leaseQuery, cancellationToken),
+            ITagQuery tagQuery => transactionRepository.EnumerateTransactionIds(tagQuery, cancellationToken),
+            _ => AsyncEnumerable.Empty<Id>(),
+        };
+    }
 
-            var transactionIds = allAnnotatedCommands
-                .SelectMany(annotatedCommands => annotatedCommands
-                    .Select(annotatedCommand => annotatedCommand.TransactionId))
-                .Distinct()
-                .ToArray();
+    public static async Task<ITransaction> GetTransaction(this ITransactionRepository transactionRepository, Id transactionId, CancellationToken cancellationToken)
+    {
+        var query = new GetTransactionCommandsQuery(transactionId);
 
-            var agentSignatureQuery = new GetAgentSignatures(transactionIds);
+        var annotatedAgentSignature = await transactionRepository
+            .EnumerateAnnotatedAgentSignatures(query, cancellationToken)
+            .SingleAsync(cancellationToken);
 
-            var annotatedAgentSignatures = transactionRepository
-                .EnumerateAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken);
-
-            await foreach (var annotatedAgentSignature in annotatedAgentSignatures)
+        var annotatedCommands = await transactionRepository
+            .EnumerateAnnotatedCommands(query, cancellationToken)
+            .Select(annotatedCommand => new TransactionCommand
             {
-                var annotatedCommands = allAnnotatedCommands[annotatedAgentSignature.TransactionId];
+                EntityId = annotatedCommand.EntityId,
+                EntityVersionNumber = annotatedCommand.EntityVersionNumber,
+                Data = annotatedCommand.Data
+            })
+            .ToArrayAsync(cancellationToken);
 
-                yield return new Transaction
-                {
-                    Id = annotatedAgentSignature.TransactionId,
-                    TimeStamp = annotatedAgentSignature.TransactionTimeStamp,
-                    AgentSignature = annotatedAgentSignature.Data,
-                    Commands = annotatedCommands
-                        .Select(annotatedCommand => new TransactionCommand
-                        {
-                            EntityId = annotatedCommand.EntityId,
-                            EntityVersionNumber = annotatedCommand.EntityVersionNumber,
-                            Command = annotatedCommand.Data
-                        })
-                        .ToImmutableArray<ITransactionCommand>()
-                };
-            }
-        }
+        return new Transaction
+        {
+            Id = annotatedAgentSignature.TransactionId,
+            TimeStamp = annotatedAgentSignature.TransactionTimeStamp,
+            AgentSignature = annotatedAgentSignature.Data,
+            Commands = annotatedCommands.ToImmutableArray<ITransactionCommand>(),
+        };
     }
 }

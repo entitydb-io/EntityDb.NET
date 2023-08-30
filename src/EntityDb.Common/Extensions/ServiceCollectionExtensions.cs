@@ -1,20 +1,19 @@
 ﻿using EntityDb.Abstractions.Agents;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
+using EntityDb.Common.Sources.Processors;
+using EntityDb.Common.Sources.Processors.Queues;
+using EntityDb.Common.Sources.ReprocessorQueues;
+using EntityDb.Common.Sources.Subscribers;
 using EntityDb.Common.Transactions.Builders;
-using EntityDb.Common.Transactions.Subscribers;
-using EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
-using EntityDb.Common.Transactions.Subscribers.Processors;
-using EntityDb.Common.Transactions.Subscribers.ReprocessorQueues;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Threading.Tasks.Dataflow;
 
 namespace EntityDb.Common.Extensions;
 
@@ -43,51 +42,51 @@ public static class ServiceCollectionExtensions
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TService), serviceLifetime));
     }
 
-    /// <summary>
-    ///     Registers the transaction processor provided, along with a transaction processor subscriber,
-    ///     and a transaction processor queue. For test mode, the queue is not actually a queue and will
-    ///     immediately process the transaction. For non-test mode, the queue uses a <see cref="BufferBlock{ITransaction}"/>.
-    /// </summary>
-    /// <typeparam name="TTransactionProcessor">The type of the transaction processor.</typeparam>
-    /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="testMode">Wether or not to run in test mode.</param>
-    /// <param name="transactionProcessorFactory">A factory for creating the transaction processor.</param>
-    [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
+    /// <ignore />
+    [Obsolete("Please register your TTransactionProcessor yourself. You may use any scope you want. You will need to call services.AddSourceProcessorQueue(), and you may enqueue source processing by injecting ISourceProcessorQueue and calling Enqueue. There is a generci extension method available if you don't want to implement ISourceProcessorQueueItem.", true)]
     public static void AddTransactionProcessorSubscriber<TTransactionProcessor>(this IServiceCollection serviceCollection,
         bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
-        where TTransactionProcessor : class, ITransactionProcessor
     {
-        serviceCollection.AddSingleton(transactionProcessorFactory.Invoke);
+        throw new NotImplementedException();
+    }
 
-        serviceCollection.AddSingleton<ITransactionProcessor>(serviceProvider => serviceProvider.GetRequiredService<TTransactionProcessor>());
-
-        serviceCollection.AddSingleton<TransactionProcessorSubscriber<TTransactionProcessor>>();
-
-        serviceCollection.AddSingleton<ITransactionSubscriber, TransactionProcessorSubscriber<TTransactionProcessor>>();
-
+    /// <summary>
+    ///     Registers a queue for processing sources (e.g., transactions) as they are committed.
+    ///     For test mode, the queue is not actually a queue and will immediately process the source.
+    ///     For non-test mode, the queue uses a buffer block.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="testMode">Wether or not to run in test mode.</param>
+    [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
+    public static void AddSourceProcessorQueue(this IServiceCollection serviceCollection,
+        bool testMode)
+    {
         if (testMode)
         {
-            serviceCollection.AddSingleton<ITransactionProcessorQueue<TTransactionProcessor>, TestModeTransactionProcessorQueue<TTransactionProcessor>>();
+            serviceCollection.AddSingleton<ISourceProcessorQueue, TestModeSourceProcessorQueue>();
         }
         else
         {
-            serviceCollection.AddSingleton<BufferBlockTransactionProcessorQueue<TTransactionProcessor>>();
+            serviceCollection.AddSingleton<BufferBlockSourceProcessorQueue>();
 
-            serviceCollection.AddSingleton<ITransactionProcessorQueue<TTransactionProcessor>>(serviceProvider => serviceProvider.GetRequiredService<BufferBlockTransactionProcessorQueue<TTransactionProcessor>>());
+            serviceCollection.AddSingleton<ISourceProcessorQueue>(serviceProvider =>
+                serviceProvider.GetRequiredService<BufferBlockSourceProcessorQueue>());
 
             serviceCollection.AddHostedService(serviceProvider =>
-              serviceProvider.GetRequiredService<BufferBlockTransactionProcessorQueue<TTransactionProcessor>>());
+                serviceProvider.GetRequiredService<BufferBlockSourceProcessorQueue>());
         }
     }
 
     /// <summary>
-    ///     Registers a transaction reprocessor queue. For test mode, the queue is not actually a queue and will
-    ///     immediately reprocess transactions. For non-test mode, the queue used a <see cref="BufferBlock{IReprocessTransactionsRequest}"/>.
+    ///     Registers a queue for re-processing sources (e.g., transactions) after they have
+    ///     already been commited (and potentially processed before). For test mode, the queue is
+    ///     not actually a queue and will immediately reprocess sources. For non-test mode, the
+    ///     queue uses a buffer block.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="testMode">Wether or not to run in test mode.</param>
     [ExcludeFromCodeCoverage(Justification = "Tests are only meant to run in test mode.")]
-    public static void AddTransactionReprocessorQueue(this IServiceCollection serviceCollection, bool testMode = false)
+    public static void AddSourceReprocessorQueue(this IServiceCollection serviceCollection, bool testMode = false)
     {
         if (testMode)
         {
@@ -166,23 +165,28 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
     }
 
+    /// <ignore />
+    [Obsolete("Please use AddEntitySnapshotSourceSubscriber instead. This will be removed in a future version.")]
+    public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
+        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        where TEntity : IEntity<TEntity>
+    {
+        serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(transactionSessionOptionsName, snapshotSessionOptionsName);
+    }
+
     /// <summary>
-    ///     Adds a transaction subscriber that records snapshots of entities.
+    ///     Adds a source subscriber that records snapshots of entities.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
-    /// <param name="testMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <remarks>
-    ///     Under the hood, this registers an <see cref="ITransactionProcessor"/> with <see cref="ITransactionProcessor.Identifier"/> equal to <c>EntitySnapshot&lt;<typeparamref name="TEntity"/>&gt;</c>
-    /// </remarks>
-    public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
+    public static void AddEntitySnapshotSourceSubscriber<TEntity>(this IServiceCollection serviceCollection,
+        string transactionSessionOptionsName, string snapshotSessionOptionsName)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddTransactionProcessorSubscriber(testMode, serviceProvider => EntitySnapshotTransactionProcessor<TEntity>.Create(
-            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
+        serviceCollection.AddSingleton<ISourceSubscriber, EntitySnapshotSourceSubscriber<TEntity>>();
+        serviceCollection.AddScoped(serviceProvider => EntitySnapshotSourceProcessor<TEntity>.Create(serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 
     /// <summary>
@@ -198,23 +202,30 @@ public static class ServiceCollectionExtensions
             .AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TProjection>>();
     }
 
+    /// <ignore />
+    [Obsolete("Please use AddProjectionSnapshotSourceSubscriber instead. This will be removed in a future version.")]
+    public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
+        this IServiceCollection serviceCollection,
+        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        where TProjection : IProjection<TProjection>
+    {
+        serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(transactionSessionOptionsName, snapshotSessionOptionsName);
+    }
+
     /// <summary>
     ///     Adds a transaction subscriber that records snapshots of projections.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
-    /// <param name="testMode">If <c>true</c> then snapshots will be synchronously recorded.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
-    /// <remarks>
-    ///     Under the hood, this registers an <see cref="ITransactionProcessor"/> with <see cref="ITransactionProcessor.Identifier"/> equal to <c>ProjectionSnapshot&lt;<typeparamref name="TProjection"/>&gt;</c>
-    /// </remarks>
-    public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
+    public static void AddProjectionSnapshotSourceSubscriber<TProjection>(
         this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName, bool testMode = false)
+        string transactionSessionOptionsName, string snapshotSessionOptionsName)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddTransactionProcessorSubscriber(testMode, serviceProvider => ProjectionSnapshotTransactionProcessor<TProjection>.Create(
-            serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
+
+        serviceCollection.AddSingleton<ISourceSubscriber, ProjectionSnapshotSourceSubscriber<TProjection>>();
+        serviceCollection.AddScoped(serviceProvider => ProjectionSnapshotSourceProcessor<TProjection>.Create(serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
     }
 }

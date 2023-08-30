@@ -10,11 +10,11 @@ namespace EntityDb.Common.Sources.Subscribers;
 internal class EntitySnapshotSourceSubscriber<TEntity> : ISourceSubscriber
     where TEntity : IEntity<TEntity>
 {
-    private readonly ISourceProcessorQueue _transactionProcessorQueue;
+    private readonly ISourceProcessorQueue _sourceProcessorQueue;
 
-    public EntitySnapshotSourceSubscriber(ISourceProcessorQueue transactionProcessorQueue)
+    public EntitySnapshotSourceSubscriber(ISourceProcessorQueue sourceProcessorQueue)
     {
-        _transactionProcessorQueue = transactionProcessorQueue;
+        _sourceProcessorQueue = sourceProcessorQueue;
     }
 
     public void Notify(ISource source)
@@ -24,6 +24,6 @@ internal class EntitySnapshotSourceSubscriber<TEntity> : ISourceSubscriber
             return;
         }
 
-        _transactionProcessorQueue.Enqueue<EntitySnapshotSourceProcessor<TEntity>>(source);
+        _sourceProcessorQueue.Enqueue<EntitySnapshotSourceProcessor<TEntity>>(source);
     }
 }

@@ -9,11 +9,11 @@ namespace EntityDb.Common.Sources.Subscribers;
 internal class ProjectionSnapshotSourceSubscriber<TProjection> : ISourceSubscriber
     where TProjection : IProjection<TProjection>
 {
-    private readonly ISourceProcessorQueue _transactionProcessorQueue;
+    private readonly ISourceProcessorQueue _sourceProcessorQueue;
 
-    public ProjectionSnapshotSourceSubscriber(ISourceProcessorQueue transactionProcessorQueue)
+    public ProjectionSnapshotSourceSubscriber(ISourceProcessorQueue sourceProcessorQueue)
     {
-        _transactionProcessorQueue = transactionProcessorQueue;
+        _sourceProcessorQueue = sourceProcessorQueue;
     }
 
     public void Notify(ISource source)
@@ -23,6 +23,6 @@ internal class ProjectionSnapshotSourceSubscriber<TProjection> : ISourceSubscrib
             return;
         }
 
-        _transactionProcessorQueue.Enqueue<ProjectionSnapshotSourceProcessor<TProjection>>(source);
+        _sourceProcessorQueue.Enqueue<ProjectionSnapshotSourceProcessor<TProjection>>(source);
     }
 }

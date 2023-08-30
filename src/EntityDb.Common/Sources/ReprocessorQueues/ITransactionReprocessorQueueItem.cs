@@ -18,7 +18,7 @@ public interface ITransactionReprocessorQueueItem
     ///     The type of the transaction process, which *must*
     ///     implement <see cref="ISourceProcessor"/>.
     /// </summary>
-    Type TransactionProcessorType { get; }
+    Type SourceProcessorType { get; }
 
     /// <summary>
     ///     Determines which transactions need to be reprocessed.

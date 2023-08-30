@@ -7,6 +7,7 @@ using EntityDb.MongoDb.Sessions;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Transactions;
@@ -16,13 +17,6 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
     private readonly IOptionsFactory<MongoDbTransactionSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
-
-    static MongoDbTransactionRepositoryFactory()
-    {
-        BsonSerializer.RegisterSerializer(new IdSerializer());
-        BsonSerializer.RegisterSerializer(new TimeStampSerializer());
-        BsonSerializer.RegisterSerializer(new VersionNumberSerializer());
-    }
 
     public MongoDbTransactionRepositoryFactory
     (

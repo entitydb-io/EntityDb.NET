@@ -14,13 +14,13 @@ internal class BufferBlockTransactionReprocessorQueue : BackgroundService, ITran
     private readonly BufferBlock<ITransactionReprocessorQueueItem> _bufferBlock = new();
     private readonly ILogger<BufferBlockTransactionReprocessorQueue> _logger;
     private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
-    private readonly ISourceProcessorQueue _transactionProcessorQueue;
+    private readonly ISourceProcessorQueue _sourceProcessorQueue;
 
-    public BufferBlockTransactionReprocessorQueue(ILogger<BufferBlockTransactionReprocessorQueue> logger, ITransactionRepositoryFactory transactionRepositoryFactory, ISourceProcessorQueue transactionProcessorQueue)
+    public BufferBlockTransactionReprocessorQueue(ILogger<BufferBlockTransactionReprocessorQueue> logger, ITransactionRepositoryFactory transactionRepositoryFactory, ISourceProcessorQueue sourceProcessorQueue)
     {
         _logger = logger;
         _transactionRepositoryFactory = transactionRepositoryFactory;
-        _transactionProcessorQueue = transactionProcessorQueue;
+        _sourceProcessorQueue = sourceProcessorQueue;
     }
 
     public void Enqueue(ITransactionReprocessorQueueItem reprocessTransactionsRequest)
@@ -42,7 +42,7 @@ internal class BufferBlockTransactionReprocessorQueue : BackgroundService, ITran
     {
         try
         {
-            _logger.LogDebug("Started reprocessing transactions");
+            _logger.LogDebug("Started reprocessing sources");
 
             await using var transactionRepository = await _transactionRepositoryFactory.CreateRepository(item.TransactionSessionOptionsName, cancellationToken);
 
@@ -57,18 +57,18 @@ internal class BufferBlockTransactionReprocessorQueue : BackgroundService, ITran
                 var transaction = await transactionRepository
                     .GetTransaction(transactionId, cancellationToken);
 
-                _transactionProcessorQueue.Enqueue(new SourceProcessorQueueItem
+                _sourceProcessorQueue.Enqueue(new SourceProcessorQueueItem
                 {
-                    SourceProcessorType = item.TransactionProcessorType,
+                    SourceProcessorType = item.SourceProcessorType,
                     Source = transaction,
                 });
             }
 
-            _logger.LogDebug("Finished reprocessing transactions");
+            _logger.LogDebug("Finished reprocessing sources");
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Failed to reprocess transactions");
+            _logger.LogError(exception, "Failed to reprocess sources");
         }
     }
 }

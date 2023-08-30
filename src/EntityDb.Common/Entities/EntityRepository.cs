@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
@@ -12,16 +13,16 @@ namespace EntityDb.Common.Entities;
 internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly IEnumerable<ITransactionSubscriber> _transactionSubscribers;
+    private readonly IEnumerable<ISourceSubscriber> _sourceSubscribers;
 
     public EntityRepository
     (
-        IEnumerable<ITransactionSubscriber> transactionSubscribers,
+        IEnumerable<ISourceSubscriber> sourceSubscribers,
         ITransactionRepository transactionRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
-        _transactionSubscribers = transactionSubscribers;
+        _sourceSubscribers = sourceSubscribers;
         TransactionRepository = transactionRepository;
         SnapshotRepository = snapshotRepository;
     }
@@ -79,9 +80,9 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
     private void Publish(ITransaction transaction)
     {
-        foreach (var transactionSubscriber in _transactionSubscribers)
+        foreach (var sourceSubscriber in _sourceSubscribers)
         {
-            transactionSubscriber.Notify(transaction);
+            sourceSubscriber.Notify(transaction);
         }
     }
 
