@@ -3,6 +3,7 @@
 // src
 [assembly: InternalsVisibleTo("EntityDb.SqlDb")]
 [assembly: InternalsVisibleTo("EntityDb.Npgsql")]
+[assembly: InternalsVisibleTo("EntityDb.EntityFramework")]
 [assembly: InternalsVisibleTo("EntityDb.InMemory")]
 [assembly: InternalsVisibleTo("EntityDb.MongoDb")]
 [assembly: InternalsVisibleTo("EntityDb.Provisioner")]

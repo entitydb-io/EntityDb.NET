@@ -47,8 +47,8 @@ public class ProjectionsTests : TestsBase<Startup>
         Generic_GivenTransactionCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(
             TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder,
             SnapshotAdder projectionSnapshotAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
-        where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
         // ARRANGE
 

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using MongoDB.Driver;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.MongoDb.Sessions;
 
@@ -34,6 +35,7 @@ public class MongoDbTransactionSessionOptions
     public TimeSpan? WriteTimeout { get; set; }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
         return $"{nameof(MongoDbTransactionSessionOptions)}";

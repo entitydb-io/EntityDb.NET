@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using EntityDb.Abstractions.Annotations;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Reducers;
@@ -6,19 +7,33 @@ using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
-public record OneToOneProjection
-(
-    Id Id,
-    VersionNumber VersionNumber = default,
-    VersionNumber EntityVersionNumber = default
-) : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
+public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
+    public required Id Id { get; init; }
+    public TimeStamp LastEventAt { get; init; }
+    public VersionNumber VersionNumber { get; init; }
+
     public static OneToOneProjection Construct(Id projectionId)
     {
-        return new OneToOneProjection(projectionId);
+        return new OneToOneProjection
+        { 
+            Id = projectionId,
+        };
+    }
+
+    public static void Configure(EntityTypeBuilder<OneToOneProjection> oneToOneProjectionBuilder)
+    {
+        oneToOneProjectionBuilder
+            .HasKey(oneToOneProjection => new
+            {
+                oneToOneProjection.Id,
+                oneToOneProjection.VersionNumber,
+            });
     }
 
     public Id GetId()
@@ -37,7 +52,8 @@ public record OneToOneProjection
         {
             IEntityAnnotation<IReducer<OneToOneProjection>> reducer => reducer.Data.Reduce(this) with
             {
-                EntityVersionNumber = reducer.EntityVersionNumber
+                LastEventAt = reducer.TransactionTimeStamp,
+                VersionNumber = reducer.EntityVersionNumber
             },
             _ => throw new NotSupportedException()
         };
@@ -55,7 +71,7 @@ public record OneToOneProjection
 
     public ICommandQuery GetCommandQuery(Pointer projectionPointer)
     {
-        return new GetEntityCommandsQuery(projectionPointer, EntityVersionNumber);
+        return new GetEntityCommandsQuery(projectionPointer, VersionNumber);
     }
 
     public static Id? GetProjectionIdOrDefault(object entity)
@@ -76,4 +92,9 @@ public record OneToOneProjection
 
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
         new();
+
+    public Expression<Func<OneToOneProjection, bool>> GetKeyPredicate()
+    {
+        return (oneToOneProjection) => oneToOneProjection.Id == Id && oneToOneProjection.VersionNumber == VersionNumber;
+    }
 }

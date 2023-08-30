@@ -21,7 +21,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     private async Task
         Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(
             SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -68,7 +68,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     private async Task
         Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<
             TSnapshot>(SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
@@ -114,9 +114,62 @@ public sealed class SnapshotTests : TestsBase<Startup>
         );
     }
 
+    private async Task
+        Generic_GivenInsertedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot<TSnapshot>(
+        SnapshotAdder snapshotAdder)
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    {
+        // ARRANGE
+
+        Pointer latestSnapshotPointer = Id.NewId();
+
+        var snapshot = TSnapshot.Construct(latestSnapshotPointer.Id).WithVersionNumber(new VersionNumber(5000));
+
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            snapshotAdder.AddDependencies.Invoke(serviceCollection);
+
+            TSnapshot.ShouldRecordAsLatestLogic.Value = (_, _) => true;
+        });
+
+        await using var writeSnapshotRepository = await serviceScope.ServiceProvider
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
+            .CreateRepository(TestSessionOptions.Write);
+
+        var inserted = await writeSnapshotRepository.PutSnapshot(latestSnapshotPointer, snapshot);
+
+        // ARRANGE ASSERTIONS
+
+        inserted.ShouldBeTrue();
+
+        // ACT
+
+        var deleted = await writeSnapshotRepository.DeleteSnapshots(new[] { latestSnapshotPointer });
+
+        var finalSnapshot = await writeSnapshotRepository.GetSnapshotOrDefault(latestSnapshotPointer);
+
+        // ASSERT
+
+        deleted.ShouldBeTrue();
+
+        finalSnapshot.ShouldBe(default);
+    }
+
+    [Theory]
+    [MemberData(nameof(AddEntitySnapshots))]
+    [MemberData(nameof(AddProjectionSnapshots))]
+    public Task GivenInsertedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot(SnapshotAdder snapshotAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { snapshotAdder.SnapshotType },
+            new object?[] { snapshotAdder }
+        );
+    }
+
     private async Task Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(
         SnapshotAdder snapshotAdder)
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 

@@ -1,20 +1,33 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using System.Linq.Expressions;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
-public record TestEntity
-    (
-        Id Id,
-        VersionNumber VersionNumber = default
-    )
-    : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
+public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
+    public required Id Id { get; init; }
+    public VersionNumber VersionNumber { get; init; }
+
     public static TestEntity Construct(Id entityId)
     {
-        return new TestEntity(entityId);
+        return new TestEntity
+        {
+            Id = entityId,
+        };
+    }
+
+    public static void Configure(EntityTypeBuilder<TestEntity> testEntityBuilder)
+    {
+        testEntityBuilder
+            .HasKey(testEntity => new
+            {
+                testEntity.Id,
+                testEntity.VersionNumber,
+            });
     }
 
     public Id GetId()
@@ -57,4 +70,9 @@ public record TestEntity
     public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
 
     public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
+
+    public Expression<Func<TestEntity, bool>> GetKeyPredicate()
+    {
+        return (testEntity) => testEntity.Id == Id && testEntity.VersionNumber == VersionNumber;
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.SqlDb.Sessions;
 
@@ -39,6 +40,7 @@ public class SqlDbTransactionSessionOptions
     public TimeSpan? ReadTimeout { get; set; }
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
         return $"{nameof(SqlDbTransactionSessionOptions)}";

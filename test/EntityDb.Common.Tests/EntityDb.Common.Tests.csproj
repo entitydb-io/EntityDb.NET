@@ -2,12 +2,14 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\EntityDb.Common\EntityDb.Common.csproj" />
+        <ProjectReference Include="..\..\src\EntityDb.EntityFramework\EntityDb.EntityFramework.csproj" />
         <ProjectReference Include="..\..\src\EntityDb.InMemory\EntityDb.InMemory.csproj" />
         <ProjectReference Include="..\..\src\EntityDb.Provisioner\EntityDb.Provisioner.csproj" />
         <ProjectReference Include="..\..\src\EntityDb.Redis\EntityDb.Redis.csproj" />
     </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
 		<PackageReference Include="Testcontainers" Version="2.2.0" />
 	</ItemGroup>
 

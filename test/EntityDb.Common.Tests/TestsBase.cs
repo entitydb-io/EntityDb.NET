@@ -8,9 +8,12 @@ using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.Common.Projections;
+using EntityDb.Common.Tests.Implementations.DbContexts;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.EntityFramework.Extensions;
+using EntityDb.EntityFramework.Sessions;
 using EntityDb.InMemory.Extensions;
 using EntityDb.InMemory.Sessions;
 using EntityDb.MongoDb.Extensions;
@@ -21,6 +24,7 @@ using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
 using EntityDb.SqlDb.Sessions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -150,8 +154,41 @@ public class TestsBase<TStartup>
             .ShouldNotBeNull();
     }
 
+    private static SnapshotAdder EntityFrameworkSnapshotAdder<TSnapshot>()
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    {
+        return new SnapshotAdder($"EntityFramework<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
+        {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
+            serviceCollection.AddEntityFrameworkSnapshots<TSnapshot, GenericDbContext<TSnapshot>>(testMode: true);
+
+            serviceCollection.ConfigureAll<EntityFrameworkSnapshotSessionOptions>(options =>
+            {
+                options.ConnectionString = databaseContainerFixture!.PostgreSqlContainer.ConnectionString;
+            });
+
+            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+            });
+
+            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+            });
+        });
+    }
+
     private static SnapshotAdder RedisSnapshotAdder<TSnapshot>()
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
@@ -187,7 +224,7 @@ public class TestsBase<TStartup>
     }
 
     private static SnapshotAdder InMemorySnapshotAdder<TSnapshot>()
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         return new SnapshotAdder($"InMemory<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
@@ -211,8 +248,9 @@ public class TestsBase<TStartup>
     }
 
     private static IEnumerable<SnapshotAdder> AllSnapshotAdders<TSnapshot>()
-        where TSnapshot : ISnapshotWithTestLogic<TSnapshot>
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
+        yield return EntityFrameworkSnapshotAdder<TSnapshot>();
         yield return RedisSnapshotAdder<TSnapshot>();
         yield return InMemorySnapshotAdder<TSnapshot>();
     }
@@ -225,7 +263,7 @@ public class TestsBase<TStartup>
     }
 
     private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders<TEntity>()
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         return
             from snapshotAdder in AllSnapshotAdders<TEntity>()
@@ -250,7 +288,7 @@ public class TestsBase<TStartup>
     }
 
     private static IEnumerable<SnapshotAdder> AllProjectionAdders<TProjection>()
-        where TProjection : IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+        where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
         return AllSnapshotAdders<TProjection>()
             .Select(snapshotAdder => new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
@@ -320,9 +358,14 @@ public class TestsBase<TStartup>
 
         serviceCollection.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor));
+            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor, (_,_) => true));
             loggingBuilder.AddDebug();
             loggingBuilder.AddSimpleConsole(options => { options.IncludeScopes = true; });
+        });
+
+        serviceCollection.Configure<LoggerFilterOptions>(x =>
+        {
+            x.MinLevel = LogLevel.Debug;
         });
 
         startup.AddServices(serviceCollection);
@@ -362,17 +405,21 @@ public class TestsBase<TStartup>
                 It.IsAny<LogLevel>(),
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
-                It.IsAny<TException>(),
+                It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ));
 
         loggerMock
+            .Setup(logger => logger.IsEnabled(It.IsAny<LogLevel>()))
+            .Returns((LogLevel logLevel) => logLevel == LogLevel.Error);
+
+        loggerMock
             .Setup(logger => logger.Log
             (
-                LogLevel.Error,
+                It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
                 It.IsAny<EventId>(),
                 It.IsAny<It.IsAnyType>(),
-                It.IsAny<TException>(),
+                It.Is<Exception>(exception => exception is TException),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ))
             .Verifiable();
@@ -393,10 +440,10 @@ public class TestsBase<TStartup>
                 (
                     logger => logger.Log
                     (
-                        LogLevel.Error,
+                        It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
                         It.IsAny<EventId>(),
                         It.IsAny<It.IsAnyType>(),
-                        It.IsAny<TException>(),
+                        It.Is<Exception>(exception => exception is TException),
                         It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                     ),
                     times

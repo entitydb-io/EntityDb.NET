@@ -894,7 +894,7 @@ public sealed class TransactionTests : TestsBase<Startup>
 
     private async Task Generic_GivenEntityInserted_WhenGettingEntity_ThenReturnEntity<TEntity>(
         TransactionsAdder transactionsAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
 
