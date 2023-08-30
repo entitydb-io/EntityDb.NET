@@ -1,4 +1,5 @@
 ﻿using EntityDb.Common.Envelopes;
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -6,6 +7,23 @@ namespace EntityDb.Common.TypeResolvers;
 
 internal class DefaultPartialTypeResolver : IPartialTypeResolver
 {
+    private readonly IOptions<DefaultPartialTypeResolverOptions> _options;
+
+    public DefaultPartialTypeResolver(IOptions<DefaultPartialTypeResolverOptions> options)
+    {
+        _options = options;
+    }
+    
+    private Assembly AssemblyResolver(AssemblyName assemblyName)
+    {
+        if (_options.Value.IgnoreVersion)
+        {
+            assemblyName.Version = null;
+        }
+        
+        return Assembly.Load(assemblyName);
+    }
+    
     public bool TryResolveType(EnvelopeHeaders envelopeHeaders, [NotNullWhen(true)] out Type? resolvedType)
     {
         if (EnvelopeHelper.NotThisPlatform(envelopeHeaders) ||
@@ -19,7 +37,7 @@ internal class DefaultPartialTypeResolver : IPartialTypeResolver
         resolvedType = Type.GetType
         (
             Assembly.CreateQualifiedName(assemblyFullName, typeFullName),
-            Assembly.Load,
+            AssemblyResolver,
             (assembly, typeName, ignoreCase) => assembly!.GetType(typeName, true, ignoreCase),
             true,
             false

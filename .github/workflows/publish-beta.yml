@@ -46,7 +46,7 @@ jobs:
       - name: Pack Projects into Nuget Packages
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ needs.milestone.outputs.version }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
-        run: dotnet nuget push ./**/*.nupkg -s ${{ secrets.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./**/*.nupkg -s ${{ vars.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Packages & Symbols Artifact
         uses: actions/upload-artifact@v3.1.1
         with:
