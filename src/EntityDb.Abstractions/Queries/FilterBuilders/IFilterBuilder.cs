@@ -4,44 +4,55 @@ namespace EntityDb.Abstractions.Queries.FilterBuilders;
 
 /// <summary>
 ///     Builds a <typeparamref name="TFilter" /> for an object repository. Possible objects include: agentSignatures,
-///     commands,
-///     facts, and leases.
+///     commands, facts, tags, and events.
 /// </summary>
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface IFilterBuilder<TFilter>
 {
-    /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a transaction timestamp greater than or
-    ///     equal to a transaction timestamp.
-    /// </summary>
-    /// <param name="transactionTimeStamp">The transaction timestamp.</param>
-    /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction timestamp greater than or
-    ///     equal to <paramref name="transactionTimeStamp" />.
-    /// </returns>
-    TFilter TransactionTimeStampGte(TimeStamp transactionTimeStamp);
+    /// <ignore />
+    [Obsolete("Please use SourceTimeStampGte instead. This will be removed in a future version.")]
+    TFilter TransactionTimeStampGte(TimeStamp transactionTimeStamp) => SourceTimeStampGte(transactionTimeStamp);
+
+    /// <ignore />
+    [Obsolete("Please use SourceTimeStampLte instead. This will be removed in a future version.")]
+    TFilter TransactionTimeStampLte(TimeStamp transactionTimeStamp) => SourceTimeStampLte(transactionTimeStamp);
+
+    /// <ignore />
+    [Obsolete("Please use SourceIdIn instead. This will be removed in a future version.")]
+    TFilter TransactionIdIn(params Id[] transactionIds) => SourceIdIn(transactionIds);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a transaction timestamp less than or
-    ///     equal to a transaction timestamp.
+    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a source timestamp greater than or
+    ///     equal to a source timestamp.
     /// </summary>
-    /// <param name="transactionTimeStamp">The transaction timestamp.</param>
+    /// <param name="sourceTimeStamp">The source timestamp.</param>
     /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction timestamp less than or equal
-    ///     to <paramref name="transactionTimeStamp" />.
+    ///     A <typeparamref name="TFilter" /> that only includes objects with an source timestamp greater than or
+    ///     equal to <paramref name="sourceTimeStamp" />.
     /// </returns>
-    TFilter TransactionTimeStampLte(TimeStamp transactionTimeStamp);
+    TFilter SourceTimeStampGte(TimeStamp sourceTimeStamp);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an transaction id which is contained in a
-    ///     set of transaction ids.
+    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a source timestamp less than or
+    ///     equal to a source timestamp.
     /// </summary>
-    /// <param name="transactionIds">The set of transaction ids.</param>
+    /// <param name="sourceTimeStamp">The source timestamp.</param>
     /// <returns>
-    ///     A <typeparamref name="TFilter" /> that only includes objects with an transaction id which is contained in
-    ///     <paramref name="transactionIds" />.
+    ///     A <typeparamref name="TFilter" /> that only includes objects with an source timestamp less than or equal
+    ///     to <paramref name="sourceTimeStamp" />.
     /// </returns>
-    TFilter TransactionIdIn(params Id[] transactionIds);
+    TFilter SourceTimeStampLte(TimeStamp sourceTimeStamp);
+
+    /// <summary>
+    ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an source id which is contained in a
+    ///     set of source ids.
+    /// </summary>
+    /// <param name="sourceIds">The set of source ids.</param>
+    /// <returns>
+    ///     A <typeparamref name="TFilter" /> that only includes objects with an source id which is contained in
+    ///     <paramref name="sourceIds" />.
+    /// </returns>
+    TFilter SourceIdIn(params Id[] sourceIds);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that excludes objects which do match a filter.

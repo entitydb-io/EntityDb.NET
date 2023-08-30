@@ -7,9 +7,9 @@ namespace EntityDb.SqlDb.Queries.FilterBuilders;
 
 internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase, IAgentSignatureFilterBuilder<IFilterDefinition>
 {
-    public IFilterDefinition EntityIdsIn(params Id[] entityIds)
+    public IFilterDefinition SubjectIdsIn(params Id[] subjectIds)
     {
-        return AnyIn(nameof(AgentSignatureDocument.EntityIds), entityIds);
+        return AnyIn(nameof(AgentSignatureDocument.EntityIds), subjectIds);
     }
 
     public IFilterDefinition AgentSignatureTypeIn(params Type[] agentSignatureTypes)

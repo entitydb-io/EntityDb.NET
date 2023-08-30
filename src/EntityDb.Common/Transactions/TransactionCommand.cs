@@ -7,5 +7,5 @@ internal record TransactionCommand : ITransactionCommand
 {
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
-    public object Command { get; init; } = default!;
+    public object Data { get; init; } = default!;
 }

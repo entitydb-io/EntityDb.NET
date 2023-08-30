@@ -114,7 +114,7 @@ public class EntityTests : TestsBase<Startup>
             {
                 foreach (var transactionCommand in transaction.Commands)
                 {
-                    commands.Add(transactionCommand.Command);
+                    commands.Add(transactionCommand.Data);
                 }
 
                 return true;

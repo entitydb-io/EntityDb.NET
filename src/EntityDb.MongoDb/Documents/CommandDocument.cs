@@ -39,8 +39,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument
                 TransactionId = transaction.Id,
                 EntityId = transactionCommand.EntityId,
                 EntityVersionNumber = transactionCommand.EntityVersionNumber,
-                DataType = transactionCommand.Command.GetType().Name,
-                Data = envelopeService.Serialize(transactionCommand.Command)
+                DataType = transactionCommand.Data.GetType().Name,
+                Data = envelopeService.Serialize(transactionCommand.Data)
             }
         };
 

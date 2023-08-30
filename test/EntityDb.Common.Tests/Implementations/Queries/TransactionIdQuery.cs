@@ -10,7 +10,7 @@ public record TransactionIdQuery(Id TransactionId, object? Options = null) : IAg
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
     {
-        return builder.TransactionIdIn(TransactionId);
+        return builder.SourceIdIn(TransactionId);
     }
 
     public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
@@ -27,7 +27,7 @@ public record TransactionIdQuery(Id TransactionId, object? Options = null) : IAg
 
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
-        return builder.TransactionIdIn(TransactionId);
+        return builder.SourceIdIn(TransactionId);
     }
 
     public TSort GetSort<TSort>(ICommandSortBuilder<TSort> builder)
@@ -42,7 +42,7 @@ public record TransactionIdQuery(Id TransactionId, object? Options = null) : IAg
 
     public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
     {
-        return builder.TransactionIdIn(TransactionId);
+        return builder.SourceIdIn(TransactionId);
     }
 
     public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
@@ -57,7 +57,7 @@ public record TransactionIdQuery(Id TransactionId, object? Options = null) : IAg
 
     public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
     {
-        return builder.TransactionIdIn(TransactionId);
+        return builder.SourceIdIn(TransactionId);
     }
 
     public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)

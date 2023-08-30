@@ -8,17 +8,17 @@ namespace EntityDb.SqlDb.Queries.FilterBuilders;
 
 internal abstract class FilterBuilderBase : IFilterBuilder<IFilterDefinition>
 {
-    public IFilterDefinition TransactionTimeStampGte(TimeStamp timeStamp)
+    public IFilterDefinition SourceTimeStampGte(TimeStamp timeStamp)
     {
         return Gte(nameof(ITransactionDocument.TransactionTimeStamp), timeStamp);
     }
 
-    public IFilterDefinition TransactionTimeStampLte(TimeStamp timeStamp)
+    public IFilterDefinition SourceTimeStampLte(TimeStamp timeStamp)
     {
         return Lte(nameof(ITransactionDocument.TransactionTimeStamp), timeStamp);
     }
 
-    public IFilterDefinition TransactionIdIn(params Id[] transactionIds)
+    public IFilterDefinition SourceIdIn(params Id[] transactionIds)
     {
         return In(nameof(ITransactionDocument.TransactionId), transactionIds);
     }

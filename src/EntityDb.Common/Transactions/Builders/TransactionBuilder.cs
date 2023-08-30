@@ -1,10 +1,7 @@
 ﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Leases;
-using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Abstractions.Commands;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Exceptions;
 using System.Collections.Immutable;
@@ -52,12 +49,11 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
         var entity = _knownEntities[entityId].Reduce(command);
         var entityVersionNumber = entity.GetVersionNumber();
 
-        _transactionCommands.Add(new TransactionCommandWithSnapshot
+        _transactionCommands.Add(new TransactionCommand
         {
             EntityId = entityId,
-            Snapshot = entity,
             EntityVersionNumber = entityVersionNumber,
-            Command = command,
+            Data = command,
         });
 
         _knownEntities[entityId] = entity;

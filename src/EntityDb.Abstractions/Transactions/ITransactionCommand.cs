@@ -18,7 +18,11 @@ public interface ITransactionCommand
     VersionNumber EntityVersionNumber { get; }
 
     /// <summary>
-    ///     The command that needs to be appended.
+    ///     The command data.
     /// </summary>
-    object Command { get; }
+    object Data { get; }
+
+    /// <ignore />
+    [Obsolete("Please use Data instead. This will be removed in a future version.")]
+    object Command => Data;
 }

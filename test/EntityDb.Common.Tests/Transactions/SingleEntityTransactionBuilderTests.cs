@@ -103,7 +103,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         transaction.Commands.Length.ShouldBe(1);
 
         var addLeasesCommand =
-            transaction.Commands[0].Command.ShouldBeAssignableTo<IAddLeasesCommand>().ShouldNotBeNull();
+            transaction.Commands[0].Data.ShouldBeAssignableTo<IAddLeasesCommand>().ShouldNotBeNull();
 
         addLeasesCommand.GetLeases().ShouldNotBeEmpty();
     }
@@ -219,7 +219,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
 
         transaction.Commands.Length.ShouldBe(1);
 
-        transaction.Commands[0].Command.ShouldBeEquivalentTo(new DoNothing());
+        transaction.Commands[0].Data.ShouldBeEquivalentTo(new DoNothing());
     }
 
     [Theory]

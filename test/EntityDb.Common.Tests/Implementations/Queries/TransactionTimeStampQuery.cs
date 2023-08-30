@@ -12,8 +12,8 @@ public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Op
     {
         return builder.And
         (
-            builder.TransactionTimeStampGte(Gte),
-            builder.TransactionTimeStampLte(Lte)
+            builder.SourceTimeStampGte(Gte),
+            builder.SourceTimeStampLte(Lte)
         );
     }
 
@@ -33,8 +33,8 @@ public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Op
     {
         return builder.And
         (
-            builder.TransactionTimeStampGte(Gte),
-            builder.TransactionTimeStampLte(Lte)
+            builder.SourceTimeStampGte(Gte),
+            builder.SourceTimeStampLte(Lte)
         );
     }
 
@@ -52,8 +52,8 @@ public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Op
     {
         return builder.And
         (
-            builder.TransactionTimeStampGte(Gte),
-            builder.TransactionTimeStampLte(Lte)
+            builder.SourceTimeStampGte(Gte),
+            builder.SourceTimeStampLte(Lte)
         );
     }
 
@@ -71,8 +71,8 @@ public record TransactionTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Op
     {
         return builder.And
         (
-            builder.TransactionTimeStampGte(Gte),
-            builder.TransactionTimeStampLte(Lte)
+            builder.SourceTimeStampGte(Gte),
+            builder.SourceTimeStampLte(Lte)
         );
     }
 

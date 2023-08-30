@@ -11,17 +11,17 @@ internal abstract class FilterBuilderBase : BuilderBase, IFilterBuilder<FilterDe
 {
     private static readonly FilterDefinitionBuilder<BsonDocument> FilterBuilder = Builders<BsonDocument>.Filter;
 
-    public FilterDefinition<BsonDocument> TransactionTimeStampGte(TimeStamp timeStamp)
+    public FilterDefinition<BsonDocument> SourceTimeStampGte(TimeStamp timeStamp)
     {
         return Gte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
     }
 
-    public FilterDefinition<BsonDocument> TransactionTimeStampLte(TimeStamp timeStamp)
+    public FilterDefinition<BsonDocument> SourceTimeStampLte(TimeStamp timeStamp)
     {
         return Lte(nameof(DocumentBase.TransactionTimeStamp), timeStamp);
     }
 
-    public FilterDefinition<BsonDocument> TransactionIdIn(params Id[] transactionIds)
+    public FilterDefinition<BsonDocument> SourceIdIn(params Id[] transactionIds)
     {
         return In(nameof(DocumentBase.TransactionId), transactionIds);
     }

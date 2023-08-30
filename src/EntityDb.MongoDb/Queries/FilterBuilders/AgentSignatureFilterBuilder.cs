@@ -9,9 +9,9 @@ namespace EntityDb.MongoDb.Queries.FilterBuilders;
 internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase,
     IAgentSignatureFilterBuilder<FilterDefinition<BsonDocument>>
 {
-    public FilterDefinition<BsonDocument> EntityIdsIn(params Id[] entityIds)
+    public FilterDefinition<BsonDocument> SubjectIdsIn(params Id[] subjectIds)
     {
-        return AnyIn(nameof(AgentSignatureDocument.EntityIds), entityIds);
+        return AnyIn(nameof(AgentSignatureDocument.EntityIds), subjectIds);
     }
 
     public FilterDefinition<BsonDocument> AgentSignatureTypeIn(params Type[] agentSignatureTypes)

@@ -9,7 +9,7 @@ internal sealed record GetAgentSignatures(Id[] TransactionIds) : IAgentSignature
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
     {
-        return builder.TransactionIdIn(TransactionIds);
+        return builder.SourceIdIn(TransactionIds);
     }
 
     public TSort? GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)

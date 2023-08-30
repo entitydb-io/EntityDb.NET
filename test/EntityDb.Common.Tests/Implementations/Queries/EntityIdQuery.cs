@@ -9,17 +9,13 @@ public record EntityIdQuery(Id EntityId, object? Options = null) : IAgentSignatu
 {
     public TFilter GetFilter<TFilter>(IAgentSignatureFilterBuilder<TFilter> builder)
     {
-        return builder.EntityIdsIn(EntityId);
+        return builder.SubjectIdsIn(EntityId);
     }
 
     public TSort GetSort<TSort>(IAgentSignatureSortBuilder<TSort> builder)
     {
         return builder.EntityIds(true);
     }
-
-    public int? Skip => null;
-
-    public int? Take => null;
 
     public TFilter GetFilter<TFilter>(ICommandFilterBuilder<TFilter> builder)
     {
@@ -62,4 +58,8 @@ public record EntityIdQuery(Id EntityId, object? Options = null) : IAgentSignatu
             builder.EntityVersionNumber(true)
         );
     }
+
+    public int? Skip => null;
+
+    public int? Take => null;
 }
