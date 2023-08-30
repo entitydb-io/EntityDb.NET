@@ -1,5 +1,7 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.TypeResolvers;
+using Microsoft.Extensions.Options;
+using Moq;
 using Shouldly;
 using Xunit;
 
@@ -14,7 +16,13 @@ public class DefaultTypeResolverTests
 
         var headers = new EnvelopeHeaders(new Dictionary<string, string>());
 
-        var typeResolver = new DefaultPartialTypeResolver();
+        var optionsMock = new Mock<IOptions<DefaultPartialTypeResolverOptions>>();
+
+        optionsMock
+            .SetupGet(x => x.Value)
+            .Returns(new DefaultPartialTypeResolverOptions());
+
+        var typeResolver = new DefaultPartialTypeResolver(optionsMock.Object);
 
         // ACT
 
@@ -37,7 +45,13 @@ public class DefaultTypeResolverTests
 
         var headers = EnvelopeHelper.GetEnvelopeHeaders(expectedType, true, false);
 
-        var typeResolver = new DefaultPartialTypeResolver();
+        var optionsMock = new Mock<IOptions<DefaultPartialTypeResolverOptions>>();
+
+        optionsMock
+            .SetupGet(x => x.Value)
+            .Returns(new DefaultPartialTypeResolverOptions());
+
+        var typeResolver = new DefaultPartialTypeResolver(optionsMock.Object);
 
         // ACT
 
@@ -56,7 +70,13 @@ public class DefaultTypeResolverTests
 
         var headers = EnvelopeHelper.GetEnvelopeHeaders(typeof(object), false);
 
-        var typeResolver = new DefaultPartialTypeResolver();
+        var optionsMock = new Mock<IOptions<DefaultPartialTypeResolverOptions>>();
+
+        optionsMock
+            .SetupGet(x => x.Value)
+            .Returns(new DefaultPartialTypeResolverOptions());
+
+        var typeResolver = new DefaultPartialTypeResolver(optionsMock.Object);
 
         // ACT
 
@@ -73,7 +93,13 @@ public class DefaultTypeResolverTests
     {
         // ARRANGE
 
-        var typeResolver = new DefaultPartialTypeResolver();
+        var optionsMock = new Mock<IOptions<DefaultPartialTypeResolverOptions>>();
+
+        optionsMock
+            .SetupGet(x => x.Value)
+            .Returns(new DefaultPartialTypeResolverOptions());
+
+        var typeResolver = new DefaultPartialTypeResolver(optionsMock.Object);
 
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
@@ -95,7 +121,13 @@ public class DefaultTypeResolverTests
     {
         // ARRANGE
 
-        var typeResolver = new DefaultPartialTypeResolver();
+        var optionsMock = new Mock<IOptions<DefaultPartialTypeResolverOptions>>();
+
+        optionsMock
+            .SetupGet(x => x.Value)
+            .Returns(new DefaultPartialTypeResolverOptions());
+
+        var typeResolver = new DefaultPartialTypeResolver(optionsMock.Object);
 
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {

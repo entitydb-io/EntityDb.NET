@@ -57,14 +57,14 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
     public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await TransactionRepository.PutTransaction(transaction, cancellationToken);
-        }
-        finally
+        var success = await TransactionRepository.PutTransaction(transaction, cancellationToken);
+
+        if (success)
         {
             Publish(transaction);
         }
+
+        return success;
     }
 
     public override async ValueTask DisposeAsync()
