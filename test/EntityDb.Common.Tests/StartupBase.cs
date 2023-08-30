@@ -19,5 +19,9 @@ public abstract class StartupBase : IStartup
         // Agent Accessor
 
         serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
+
+        // Transaction Processor Queue
+
+        serviceCollection.AddSourceProcessorQueue(true);
     }
 }

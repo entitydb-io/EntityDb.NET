@@ -21,10 +21,10 @@ public static class TransactionSeeder
         };
     }
 
-    public static ITransaction Create<TEntity>(Id entityId, uint numCommands)
+    public static ITransaction Create<TEntity>(Id entityId, uint numCommands, ulong previousVersionNumberValue = 0)
         where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        var transactionCommands = TransactionCommandSeeder.CreateFromCommands<TEntity>(entityId, numCommands).ToArray();
+        var transactionCommands = TransactionCommandSeeder.CreateFromCommands<TEntity>(entityId, numCommands, previousVersionNumberValue).ToArray();
 
         return Create(transactionCommands);
     }

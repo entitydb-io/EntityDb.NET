@@ -59,7 +59,8 @@ public class ProjectionsTests : TestsBase<Startup>
             projection.GetVersionNumber() == new VersionNumber(replaceAtVersionNumber);
 
         var projectionId = Id.NewId();
-        var transaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers);
+        var firstTransaction = TransactionSeeder.Create<TEntity>(projectionId, replaceAtVersionNumber);
+        var secondTransaction = TransactionSeeder.Create<TEntity>(projectionId, numberOfVersionNumbers - replaceAtVersionNumber, replaceAtVersionNumber);
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -76,13 +77,15 @@ public class ProjectionsTests : TestsBase<Startup>
             .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
             .CreateRepository(TestSessionOptions.Write, TestSessionOptions.Write);
 
-        var transactionInserted = await entityRepository.PutTransaction(transaction);
+        var firstTransactionInserted = await entityRepository.PutTransaction(firstTransaction);
+        var secondTransactionInserted = await entityRepository.PutTransaction(secondTransaction);
 
         // ARRANGE ASSERTIONS
 
         numberOfVersionNumbers.ShouldBeGreaterThan(replaceAtVersionNumber);
 
-        transactionInserted.ShouldBeTrue();
+        firstTransactionInserted.ShouldBeTrue();
+        secondTransactionInserted.ShouldBeTrue();
 
         projectionRepository.SnapshotRepository.ShouldNotBeNull();
 
