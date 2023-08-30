@@ -28,8 +28,17 @@ public static class ServiceCollectionExtensions
             _ => new InMemorySession<TSnapshot>()
         );
 
-        serviceCollection.AddScoped(serviceProvider => ActivatorUtilities
-            .CreateInstance<InMemorySnapshotRepositoryFactory<TSnapshot>>(serviceProvider)
-            .UseTestMode(testMode));
+        serviceCollection.Add<InMemorySnapshotRepositoryFactory<TSnapshot>>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
+        );
+
+        serviceCollection.Add
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
+            serviceProvider => serviceProvider
+                .GetRequiredService<InMemorySnapshotRepositoryFactory<TSnapshot>>()
+                .UseTestMode(testMode)
+        );
     }
 }
