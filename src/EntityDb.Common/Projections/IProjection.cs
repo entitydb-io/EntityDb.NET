@@ -1,5 +1,5 @@
 using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Snapshots;
 
@@ -14,28 +14,23 @@ public interface IProjection<TProjection> : ISnapshot<TProjection>
     /// <summary>
     ///     Returns a new <typeparamref name="TProjection" /> that incorporates the transaction command.
     /// </summary>
-    /// <param name="transaction"></param>
-    /// <param name="transactionCommand"></param>
+    /// <param name="source"></param>
     /// <returns></returns>
-    TProjection Reduce(ITransaction transaction, ITransactionCommand transactionCommand);
+    TProjection Reduce(ISource source);
 
     /// <summary>
-    ///     Returns a <see cref="ICommandQuery" /> that finds transaction commands that need to be passed to the reducer.
+    ///     Returns a <see cref="IAgentSignatureQuery" /> that finds transactions that need to be passed to the reducer.
     /// </summary>
+    /// <param name="sourceRepository">The source repository, which can be used to locate new information</param>
     /// <param name="projectionPointer">A pointer to the desired projection state</param>
-    /// <param name="transactionRepository">The transaction repository, which can be used to locate new information</param>
     /// <param name="cancellationToken">A cancellation token</param>
-    /// <returns>A <see cref="ICommandQuery" /> that is used to load the rest of the transaction commands for the given projection pointer.</returns>
-    /// <remarks>
-    ///     I would only recommend using the transaction repository to locate leases or tags, not commands or agent signatures.
-    /// </remarks>
-    Task<ICommandQuery> GetCommandQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken);
+    /// <returns>A <see cref="IQuery" /> that is used to load the rest of the transaction commands for the given projection pointer.</returns>
+    IAsyncEnumerable<ISource> EnumerateSources(ISourceRepository sourceRepository, Pointer projectionPointer, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Maps an entity to a projection id, or default if the entity does not map to this projection.
+    ///     Maps a source to a projection id, or default if the entity does not map to this projection.
     /// </summary>
-    /// <param name="transaction">The transaction that could trigger a projection</param>
-    /// <param name="transactionCommand">The transaction command that could trigger a projection</param>
+    /// <param name="source">The source that could trigger a projection</param>
     /// <returns>The projection id for the entity, or default if none.</returns>
-    static abstract Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand);
+    static abstract IEnumerable<Id> EnumerateProjectionIds(ISource source);
 }

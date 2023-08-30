@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using EntityDb.Abstractions.Reducers;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Commands;
@@ -40,14 +41,19 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
         return VersionNumber;
     }
 
+    public static bool CanReduce(object command)
+    {
+        return command is IReducer<TestEntity>;
+    }
+
     public TestEntity Reduce(object command)
     {
-        return command switch
+        if (command is IReducer<TestEntity> reducer)
         {
-            DoNothing doNothing => doNothing.Reduce(this),
-            StoreNumber storeNumber => storeNumber.Reduce(this),
-            _ => throw new NotSupportedException()
-        };
+            return reducer.Reduce(this);
+        }
+
+        throw new NotSupportedException();
     }
 
     public bool ShouldRecord()

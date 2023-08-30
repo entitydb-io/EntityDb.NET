@@ -1,13 +1,13 @@
 using System.Linq.Expressions;
-using EntityDb.Abstractions.Queries;
+using System.Runtime.CompilerServices;
 using EntityDb.Abstractions.Reducers;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Extensions;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Queries;
-using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using EntityDb.Common.Transactions;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
@@ -16,7 +16,7 @@ namespace EntityDb.Common.Tests.Implementations.Projections;
 public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
     public required Id Id { get; init; }
-    public TimeStamp LastEventAt { get; init; }
+    public TimeStamp LastTransactionAt { get; init; }
     public VersionNumber VersionNumber { get; init; }
 
     public static OneToOneProjection Construct(Id projectionId)
@@ -47,18 +47,32 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         return VersionNumber;
     }
 
-    public OneToOneProjection Reduce(ITransaction transaction, ITransactionCommand transactionCommand)
+    public OneToOneProjection Reduce(ISource source)
     {
-        if (transactionCommand.Command is not IReducer<OneToOneProjection> reducer)
+        if (source is ITransaction transaction)
         {
-            throw new NotSupportedException();
+            var projection = this with
+            {
+                LastTransactionAt = transaction.TimeStamp,
+            };
+
+            foreach (var command in transaction.Commands)
+            {
+                if (command.Data is not IReducer<OneToOneProjection> reducer)
+                {
+                    continue;
+                }
+
+                projection = reducer.Reduce(projection) with
+                {
+                    VersionNumber = command.EntityVersionNumber,
+                };
+            }
+
+            return projection;
         }
 
-        return reducer.Reduce(this) with
-        {
-            LastEventAt = transaction.TimeStamp,
-            VersionNumber = transactionCommand.EntityVersionNumber
-        };
+        throw new NotSupportedException();
     }
 
     public bool ShouldRecord()
@@ -71,19 +85,44 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
         return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
     }
 
-    public Task<ICommandQuery> GetCommandQuery(Pointer projectionPointer, ITransactionRepository transactionRepository, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<ISource> EnumerateSources
+    (
+        ISourceRepository sourceRepository,
+        Pointer projectionPointer,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    )
     {
-        return Task.FromResult<ICommandQuery>(new GetEntityCommandsQuery(projectionPointer, VersionNumber));
+        var query = new GetEntityCommandsQuery(projectionPointer, VersionNumber);
+
+        var transactionIds = await sourceRepository.TransactionRepository
+            .EnumerateTransactionIds(query, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+
+        foreach (var transactionId in transactionIds)
+        {
+            yield return await sourceRepository.TransactionRepository
+                .GetTransaction(transactionId, cancellationToken);
+        }
     }
 
-    public static Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand)
+    public static IEnumerable<Id> EnumerateProjectionIds(ISource source)
     {
-        if (transactionCommand is not ITransactionCommandWithSnapshot transactionCommandWithSnapshot || transactionCommandWithSnapshot.Snapshot is not TestEntity testEntity)
+        var projectionIds = new HashSet<Id>();
+
+        if (source is ITransaction transaction)
         {
-            return null;
+            foreach (var command in transaction.Commands)
+            {
+                if (command.Data is not IReducer<OneToOneProjection>)
+                {
+                    continue;
+                }
+
+                projectionIds.Add(command.EntityId);
+            }
         }
 
-        return testEntity.Id;
+        return projectionIds;
     }
 
     public static string RedisKeyNamespace => "one-to-one-projection";

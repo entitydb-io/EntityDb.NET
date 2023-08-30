@@ -9,6 +9,13 @@ namespace EntityDb.Common.Entities;
 public interface IEntity<TEntity> : ISnapshot<TEntity>
 {
     /// <summary>
+    ///     Returns <c>true</c> if <see cref="Reduce(object)"/> is not expected to throw an exception.
+    /// </summary>
+    /// <param name="command">The command</param>
+    /// <returns><c>true</c> if <see cref="Reduce(object)"/> is not expected to throw an exception.</returns>
+    static abstract bool CanReduce(object command);
+
+    /// <summary>
     ///     Returns a new <typeparamref name="TEntity" /> that incorporates the commands.
     /// </summary>
     /// <param name="command">The command</param>

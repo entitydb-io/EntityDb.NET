@@ -1,21 +1,15 @@
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Extensions;
-using EntityDb.Common.Queries;
-using EntityDb.Common.Transactions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 namespace EntityDb.Common.Projections;
 
-internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass,
-    IProjectionRepository<TProjection>
+internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass, IProjectionRepository<TProjection>, ISourceRepository
     where TProjection : IProjection<TProjection>
 {
     public ProjectionRepository
@@ -32,11 +26,6 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
     public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
 
-    public Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand)
-    {
-        return TProjection.GetProjectionIdOrDefault(transaction, transactionCommand);
-    }
-
     public async Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default)
     {
         var projection = SnapshotRepository is not null
@@ -44,16 +33,11 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
               TProjection.Construct(projectionPointer.Id)
             : TProjection.Construct(projectionPointer.Id);
 
-        var newTransactionIdsQuery = await projection.GetCommandQuery(projectionPointer, TransactionRepository, cancellationToken);
+        var sources = projection.EnumerateSources(this, projectionPointer, cancellationToken);
 
-        var transactions = TransactionRepository.EnumerateTransactions(newTransactionIdsQuery, cancellationToken);
-
-        await foreach (var transaction in transactions)
+        await foreach (var source in sources)
         {
-            foreach (var transactionCommand in transaction.Commands)
-            {
-                projection = projection.Reduce(transaction, transactionCommand);
-            }
+            projection = projection.Reduce(source);
         }
 
         if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))

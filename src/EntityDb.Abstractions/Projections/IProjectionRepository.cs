@@ -1,6 +1,6 @@
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Projections;
@@ -9,13 +9,8 @@ namespace EntityDb.Abstractions.Projections;
 ///     Encapsulates the snapshot repository for a projection.
 /// </summary>
 /// <typeparam name="TProjection">The type of the projection.</typeparam>
-public interface IProjectionRepository<TProjection> : IDisposableResource
+public interface IProjectionRepository<TProjection> : ISourceRepository, IDisposableResource
 {
-    /// <summary>
-    ///     The backing transaction repository.
-    /// </summary>
-    ITransactionRepository TransactionRepository { get; }
-
     /// <summary>
     ///     The backing snapshot repository.
     /// </summary>
@@ -28,12 +23,4 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
     Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Maps a transaction and transaction step to a projection id, or default if the entity does not map to this projection.
-    /// </summary>
-    /// <param name="transaction">The transaction</param>
-    /// <param name="transactionCommand">A command in the transaction</param>
-    /// <returns>The projection id for the entity, or default if none.</returns>
-    Id? GetProjectionIdOrDefault(ITransaction transaction, ITransactionCommand transactionCommand);
 }
