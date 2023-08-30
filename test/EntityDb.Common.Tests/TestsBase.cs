@@ -31,6 +31,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Moq;
 using Shouldly;
+using Testcontainers.MongoDb;
 using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
@@ -64,8 +65,11 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
             {
-                options.ConnectionString = databaseContainerFixture!.MongoDbContainer.ConnectionString.Replace("mongodb://:@", "mongodb://");
-                options.DatabaseName = databaseContainerFixture.MongoDbConfiguration.Database;
+                var host = databaseContainerFixture!.MongoDbContainer.Hostname;
+                var port = databaseContainerFixture!.MongoDbContainer.GetMappedPublicPort(27017);
+
+                options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
+                options.DatabaseName = DatabaseContainerFixture.OmniParameter;
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
@@ -103,7 +107,7 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
             {
-                options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.ConnectionString};Include Error Detail=true";
+                options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.GetConnectionString()};Include Error Detail=true";
             });
 
             serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
@@ -167,7 +171,7 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<EntityFrameworkSnapshotSessionOptions>(options =>
             {
-                options.ConnectionString = databaseContainerFixture!.PostgreSqlContainer.ConnectionString;
+                options.ConnectionString = databaseContainerFixture!.PostgreSqlContainer.GetConnectionString();
             });
 
             serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.Write, options =>
@@ -200,7 +204,7 @@ public class TestsBase<TStartup>
 
             serviceCollection.ConfigureAll<RedisSnapshotSessionOptions>(options =>
             {
-                options.ConnectionString = databaseContainerFixture!.RedisContainer.ConnectionString;
+                options.ConnectionString = databaseContainerFixture!.RedisContainer.GetConnectionString();
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
@@ -271,8 +275,8 @@ public class TestsBase<TStartup>
             select new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
             snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
             {
-                serviceCollection.AddEntitySnapshotTransactionSubscriber<TEntity>(TestSessionOptions.ReadOnly,
-                    TestSessionOptions.Write, true);
+                serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(TestSessionOptions.ReadOnly,
+                    TestSessionOptions.Write);
             }));
     }
 
@@ -295,8 +299,8 @@ public class TestsBase<TStartup>
                 snapshotAdder.AddDependencies + (serviceCollection =>
                 {
                     serviceCollection.AddProjection<TProjection>();
-                    serviceCollection.AddProjectionSnapshotTransactionSubscriber<TProjection>(
-                        TestSessionOptions.ReadOnly, TestSessionOptions.Write, true);
+                    serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(
+                        TestSessionOptions.ReadOnly, TestSessionOptions.Write);
                 }))
             );
     }
@@ -355,10 +359,11 @@ public class TestsBase<TStartup>
 
         serviceCollection.AddSingleton(_configuration);
         serviceCollection.AddSingleton(_test);
+        serviceCollection.AddSingleton(_testOutputHelperAccessor);
 
         serviceCollection.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor, (_,_) => true));
+            loggingBuilder.AddXunitOutput(options => { options.IncludeScopes = true; });
             loggingBuilder.AddDebug();
             loggingBuilder.AddSimpleConsole(options => { options.IncludeScopes = true; });
         });

@@ -9,24 +9,16 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
-		<PackageReference Include="Testcontainers" Version="2.2.0" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+		<PackageReference Include="Testcontainers.MongoDb" Version="3.0.0" />
+		<PackageReference Include="Testcontainers.PostgreSql" Version="3.0.0" />
+		<PackageReference Include="Testcontainers.Redis" Version="3.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Update="DockerVolumes\**\*">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="coverlet.collector" Version="3.2.0">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-	  <PackageReference Update="Shouldly" Version="4.1.0" />
-	  <PackageReference Update="Xunit.DependencyInjection" Version="8.6.1" />
 	</ItemGroup>
 
 </Project>

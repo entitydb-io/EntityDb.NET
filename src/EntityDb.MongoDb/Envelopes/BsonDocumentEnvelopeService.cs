@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace EntityDb.MongoDb.Envelopes;
 
@@ -19,7 +20,11 @@ internal class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
 
     static MongoDbEnvelopeService()
     {
+        BsonSerializer.RegisterSerializer(new ObjectSerializer(ObjectSerializer.AllAllowedTypes));
         BsonSerializer.RegisterSerializer(new EnvelopeSerializer());
+        BsonSerializer.RegisterSerializer(new IdSerializer());
+        BsonSerializer.RegisterSerializer(new TimeStampSerializer());
+        BsonSerializer.RegisterSerializer(new VersionNumberSerializer());
     }
 
     public MongoDbEnvelopeService
