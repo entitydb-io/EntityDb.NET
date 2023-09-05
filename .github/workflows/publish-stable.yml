@@ -14,7 +14,7 @@ jobs:
       version: ${{ steps.get_release.outputs.tag_name }}
     steps:
       - id: get_release
-        uses: bruceadams/get-release@v1.2.3
+        uses: bruceadams/get-release@v1.3.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - id: parse
@@ -31,9 +31,9 @@ jobs:
           semantic_version_pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
 
           if [[ ${GITHUB_TAG} =~ $semantic_version_pattern ]]; then
-            echo ::set-output name=is_semantic_version::'true'
+            echo "is_semantic_version=true" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=is_semantic_version::'false'
+            echo "is_semantic_version=false" >> $GITHUB_OUTPUT
           fi
 
   stable:
@@ -46,7 +46,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
@@ -56,7 +56,7 @@ jobs:
       - name: Publish to Stable
         run: dotnet nuget push ./**/*.nupkg -s ${{ vars.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Packages & Symbols Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: Packages & Symbols
           path: |

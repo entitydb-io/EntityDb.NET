@@ -24,9 +24,9 @@ jobs:
           semantic_version_pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$'
 
           if [[ ${GITHUB_MILESTONE} =~ $semantic_version_pattern ]]; then
-            echo ::set-output name=is_semantic_version::'true'
+            echo "is_semantic_version=true" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=is_semantic_version::'false'
+            echo "is_semantic_version=false" >> $GITHUB_OUTPUT
           fi
   beta:
     needs: milestone
@@ -38,17 +38,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Pack Projects into Nuget Packages
         run: dotnet pack EntityDb.sln --no-restore -c Release /p:Version='${{ needs.milestone.outputs.version }}-beta.${{ github.event.number }}.${{ github.run_number }}.${{ github.run_attempt }}'
       - name: Publish to Beta
         run: dotnet nuget push ./**/*.nupkg -s ${{ vars.NUGET_SOURCE }} -k ${{ secrets.NUGET_API_KEY }}
       - name: Packages & Symbols Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: Packages & Symbols
           path: |
@@ -60,7 +60,7 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./TestResults/**/*.xml
       - name: Generate Coverage Report
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.9
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.1.12
         with:
           reports: './TestResults/**/coverage.opencover.xml'
           targetdir: 'CoverageReport'
@@ -68,7 +68,7 @@ jobs:
           license: ${{ secrets.REPORTGENERATOR_LICENSE }}
           toolpath: 'reportgeneratortool'
       - name: Coverage Report Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: CoverageReport
           path: CoverageReport
