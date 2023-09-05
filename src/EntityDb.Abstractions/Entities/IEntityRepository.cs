@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Abstractions.Entities;
 
@@ -20,6 +21,23 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     ///     The backing snapshot repository (if snapshot is available).
     /// </summary>
     ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    public Task<TEntity> GetCurrent(Id entityId, CancellationToken cancellationToken = default)
+    {
+        return GetSnapshot(entityId, cancellationToken);
+    }
+
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    Task<TEntity> GetAtVersion(Id entityId, VersionNumber lteVersionNumber,
+        CancellationToken cancellationToken = default)
+    {
+        return GetSnapshot(entityId + lteVersionNumber, cancellationToken);
+    }
 
     /// <summary>
     ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Pointer" />.

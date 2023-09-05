@@ -1,12 +1,14 @@
 <Project>
     <Import Project="../Directory.Build.props"/>
 
+    <!--Build-->
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
+    <!--Pack-->
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <IncludeSymbols>true</IncludeSymbols>

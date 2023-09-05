@@ -180,20 +180,12 @@ internal record MongoSession
     public void StartTransaction()
     {
         AssertNotReadOnly();
-        
+
         ClientSessionHandle.StartTransaction(new TransactionOptions
         (
             writeConcern: WriteConcern,
             maxCommitTime: Options.WriteTimeout
         ));
-
-        Logger
-            .LogInformation
-            (
-                "Started MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
-                MongoDatabase.DatabaseNamespace,
-                ClientSessionHandle.ServerSession.Id.ToString()
-            );
     }
 
     [ExcludeFromCodeCoverage(Justification =
@@ -203,14 +195,6 @@ internal record MongoSession
         AssertNotReadOnly();
 
         await ClientSessionHandle.CommitTransactionAsync(cancellationToken);
-
-        Logger
-            .LogInformation
-            (
-                "Committed MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
-                MongoDatabase.DatabaseNamespace,
-                ClientSessionHandle.ServerSession.Id.ToString()
-            );
     }
 
     public async Task AbortTransaction()
@@ -218,14 +202,6 @@ internal record MongoSession
         AssertNotReadOnly();
 
         await ClientSessionHandle.AbortTransactionAsync();
-
-        Logger
-            .LogInformation
-            (
-                "Aborted MongoDb Transaction on `{DatabaseNamespace}`\n\nServer SessionId: {ServerSessionId}",
-                MongoDatabase.DatabaseNamespace,
-                ClientSessionHandle.ServerSession.Id.ToString()
-            );
     }
 
     public override ValueTask DisposeAsync()

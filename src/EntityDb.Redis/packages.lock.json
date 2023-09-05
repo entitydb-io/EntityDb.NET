@@ -1,12 +1,12 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net6.0": {
       "StackExchange.Redis": {
         "type": "Direct",
-        "requested": "[2.6.70, )",
-        "resolved": "2.6.70",
-        "contentHash": "O1QpPNrcGZXXClqdNe69/ySwRPINTwSnZQr0qxKfBMUPqemmJ5UXVwCznVIwMEYhoBlZtIgC+ZYywhNb8oXaKg==",
+        "requested": "[2.6.48, )",
+        "resolved": "2.6.48",
+        "contentHash": "T0rLGogyT6Zny+IMrDx1Z8r4nA3B0C7EVo5SHNjzT4ndOn9aGKe5K7KTVx0y41WaWmfSWpaX7HrPl0tfZ4zuUw==",
         "dependencies": {
           "Pipelines.Sockets.Unofficial": "2.2.2",
           "System.Diagnostics.PerformanceCounter": "5.0.0"
@@ -128,21 +128,21 @@
       "entitydb.abstractions": {
         "type": "Project",
         "dependencies": {
-          "System.Linq.Async": "[6.0.1, )"
+          "System.Linq.Async": "6.0.1"
         }
       },
       "entitydb.common": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Abstractions": "[1.0.0, )",
-          "System.Linq.Async": "[6.0.1, )"
+          "EntityDb.Abstractions": "1.0.0",
+          "System.Linq.Async": "6.0.1"
         }
       },
       "entitydb.json": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Common": "[1.0.0, )",
-          "System.Linq.Async": "[6.0.1, )"
+          "EntityDb.Common": "1.0.0",
+          "System.Linq.Async": "6.0.1"
         }
       }
     }

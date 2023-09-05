@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Abstractions.Projections;
 
@@ -20,6 +21,14 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     ///     The backing snapshot repository.
     /// </summary>
     ISnapshotRepository<TProjection>? SnapshotRepository { get; }
+
+    /// <ignore />
+    [Obsolete("Please use GetSnapshot(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    public Task<TProjection> GetCurrent(Id projectionId, CancellationToken cancellationToken = default)
+    {
+        return GetSnapshot(projectionId, cancellationToken);
+    }
 
     /// <summary>
     ///     Returns the snapshot of a <typeparamref name="TProjection" /> for a given <see cref="Pointer" />.

@@ -4,6 +4,7 @@ using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.Queries;
 using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Abstractions.Transactions;
 
@@ -12,6 +13,159 @@ namespace EntityDb.Abstractions.Transactions;
 /// </summary>
 public interface ITransactionRepository : IDisposableResource
 {
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateTransactionIds instead! This method will be removed at a future date.")]
+    Task<Id[]> GetTransactionIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateTransactionIds(agentSignatureQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateTransactionIds instead! This method will be removed at a future date.")]
+    Task<Id[]> GetTransactionIds(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateTransactionIds(commandQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateTransactionIds instead! This method will be removed at a future date.")]
+    Task<Id[]> GetTransactionIds(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateTransactionIds(leaseQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateTransactionIds instead! This method will be removed at a future date.")]
+    Task<Id[]> GetTransactionIds(ITagQuery tagQuery, CancellationToken cancellationToken = default)
+    {
+        return EnumerateTransactionIds(tagQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateEntityIds instead! This method will be removed at a future date.")]
+    public Task<Id[]> GetEntityIds(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateEntityIds(agentSignatureQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateEntityIds instead! This method will be removed at a future date.")]
+    public Task<Id[]> GetEntityIds(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateEntityIds(commandQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateEntityIds instead! This method will be removed at a future date.")]
+    public Task<Id[]> GetEntityIds(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateEntityIds(leaseQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateEntityIds instead! This method will be removed at a future date.")]
+    public Task<Id[]> GetEntityIds(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateEntityIds(tagQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateAgentSignatures instead! This method will be removed at a future date.")]
+    Task<object[]> GetAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateAgentSignatures(agentSignatureQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateCommands instead! This method will be removed at a future date.")]
+    Task<object[]> GetCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateCommands(commandQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateLeases instead! This method will be removed at a future date.")]
+    Task<ILease[]> GetLeases(ILeaseQuery leaseQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateLeases(leaseQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateTags instead! This method will be removed at a future date.")]
+    Task<ITag[]> GetTags(ITagQuery tagQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateTags(tagQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateAnnotatedAgentSignatures instead! This method will be removed at a future date.")]
+    Task<IEntitiesAnnotation<object>[]> GetAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateAnnotatedAgentSignatures(agentSignatureQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
+    /// <ignore />
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    [Obsolete("Please use EnumerateAnnotatedCommands instead! This method will be removed at a future date.")]
+    Task<IEntityAnnotation<object>[]> GetAnnotatedCommands(ICommandQuery commandQuery,
+        CancellationToken cancellationToken = default)
+    {
+        return EnumerateAnnotatedCommands(commandQuery, cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .AsTask();
+    }
+
     /// <summary>
     ///     Returns the transaction ids which are found by a agentSignature query.
     /// </summary>

@@ -2,6 +2,7 @@ using EntityDb.Abstractions.Queries.SortBuilders;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace EntityDb.MongoDb.Queries.SortBuilders;
 
@@ -22,6 +23,12 @@ internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefi
         return SortDataType(ascending);
     }
 
+    public SortDefinition<BsonDocument> TagProperty<TTag>(bool ascending,
+        Expression<Func<TTag, object>> leaseExpression)
+    {
+        return SortDataValue(ascending, leaseExpression);
+    }
+
     public SortDefinition<BsonDocument> TagLabel(bool ascending)
     {
         return Sort(ascending, nameof(TagDocument.Label));
@@ -30,5 +37,10 @@ internal sealed class TagSortBuilder : SortBuilderBase, ITagSortBuilder<SortDefi
     public SortDefinition<BsonDocument> TagValue(bool ascending)
     {
         return Sort(ascending, nameof(TagDocument.Value));
+    }
+
+    protected override string[] GetHoistedFieldNames()
+    {
+        return TagDocument.HoistedFieldNames;
     }
 }

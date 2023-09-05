@@ -1,4 +1,7 @@
-﻿namespace EntityDb.Abstractions.Queries.SortBuilders;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+
+namespace EntityDb.Abstractions.Queries.SortBuilders;
 
 /// <summary>
 ///     Builds a <typeparamref name="TSort" /> for a command query.
@@ -6,6 +9,12 @@
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface ICommandSortBuilder<TSort> : ISortBuilder<TSort>
 {
+    /// <ignore/>
+    [Obsolete("This method will be removed in the future, and may not be supported for all implementations.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    TSort CommandProperty<TCommand>(bool ascending, Expression<Func<TCommand, object>> commandExpression)
+        => throw new NotSupportedException();
+
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders commands by entity id.
     /// </summary>

@@ -22,11 +22,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Install .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v2
       - name: Restore Dependencies
         run: dotnet restore EntityDb.sln --locked-mode
       - name: Run Project Tests
-        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: dotnet test EntityDb.sln --no-restore -c Debug --collect:"XPlat Code Coverage" -r ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Publish Coverage Results
         uses: codacy/codacy-coverage-reporter-action@v1
         with:

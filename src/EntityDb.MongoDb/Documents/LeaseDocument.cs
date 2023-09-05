@@ -20,6 +20,8 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     private static readonly LeaseSortBuilder SortBuilder = new();
 
+    public static readonly string[] HoistedFieldNames = { nameof(Scope), nameof(Label), nameof(Value) };
+
     public string Scope { get; init; } = default!;
     public string Label { get; init; } = default!;
     public string Value { get; init; } = default!;

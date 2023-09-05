@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net6.0": {
       "System.Linq.Async": {
         "type": "Direct",
         "requested": "[6.0.1, )",
@@ -19,21 +19,21 @@
       "entitydb.abstractions": {
         "type": "Project",
         "dependencies": {
-          "System.Linq.Async": "[6.0.1, )"
+          "System.Linq.Async": "6.0.1"
         }
       },
       "entitydb.common": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Abstractions": "[1.0.0, )",
-          "System.Linq.Async": "[6.0.1, )"
+          "EntityDb.Abstractions": "1.0.0",
+          "System.Linq.Async": "6.0.1"
         }
       },
       "entitydb.json": {
         "type": "Project",
         "dependencies": {
-          "EntityDb.Common": "[1.0.0, )",
-          "System.Linq.Async": "[6.0.1, )"
+          "EntityDb.Common": "1.0.0",
+          "System.Linq.Async": "6.0.1"
         }
       }
     }

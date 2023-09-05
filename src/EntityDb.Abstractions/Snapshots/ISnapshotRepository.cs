@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Abstractions.Snapshots;
 
@@ -9,6 +10,14 @@ namespace EntityDb.Abstractions.Snapshots;
 /// <typeparam name="TSnapshot">The type of snapshot stored in the <see cref="ISnapshotRepository{TSnapshot}" />.</typeparam>
 public interface ISnapshotRepository<TSnapshot> : IDisposableResource
 {
+    /// <ignore />
+    [Obsolete("Please use GetSnapshotOrDefault(...) instead. This method will be removed at a later date.")]
+    [ExcludeFromCodeCoverage(Justification = "Obsolete")]
+    public Task<TSnapshot?> GetSnapshot(Id snapshotId, CancellationToken cancellationToken = default)
+    {
+        return GetSnapshotOrDefault(snapshotId, cancellationToken);
+    }
+
     /// <summary>
     ///     Returns an exact version of snapshot of a <typeparamref name="TSnapshot" /> or
     ///     <c>default(<typeparamref name="TSnapshot" />)</c>.

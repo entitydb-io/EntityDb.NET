@@ -20,6 +20,8 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     private static readonly TagSortBuilder SortBuilder = new();
 
+    public static readonly string[] HoistedFieldNames = { nameof(Label), nameof(Value) };
+
     public string Label { get; init; } = default!;
     public string Value { get; init; } = default!;
     public Id EntityId { get; init; }
