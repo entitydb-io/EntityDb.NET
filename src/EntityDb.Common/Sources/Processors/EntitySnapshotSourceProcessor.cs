@@ -9,7 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Sources.Processors;
 
-internal class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
+/// <summary>
+///     A source processor that creates entity snapshots
+/// </summary>
+/// <typeparam name="TEntity">The type of the entity</typeparam>
+public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
     where TEntity : IEntity<TEntity>
 {
     private readonly ILogger<EntitySnapshotSourceProcessor<TEntity>> _logger;
@@ -17,6 +21,7 @@ internal class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
     private readonly string _snapshotSessionOptionsName;
     private readonly string _transactionSessionOptionsName;
 
+    /// <ignore />
     public EntitySnapshotSourceProcessor
     (
         ILogger<EntitySnapshotSourceProcessor<TEntity>> logger,
@@ -31,6 +36,7 @@ internal class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
+    /// <inheritdoc />
     public async Task Process(ISource source, CancellationToken cancellationToken)
     {
         if (source is not ITransaction transaction)
@@ -84,7 +90,7 @@ internal class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
         }
     }
 
-    public static EntitySnapshotSourceProcessor<TEntity> Create(IServiceProvider serviceProvider,
+    internal static EntitySnapshotSourceProcessor<TEntity> Create(IServiceProvider serviceProvider,
         string transactionSessionOptionsName, string snapshotSessionOptionsName)
     {
         return ActivatorUtilities.CreateInstance<EntitySnapshotSourceProcessor<TEntity>>(serviceProvider,

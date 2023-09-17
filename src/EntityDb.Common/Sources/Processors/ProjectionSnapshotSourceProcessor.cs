@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Projections;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Sources.Processors;
 
-internal sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProcessor
+/// <summary>
+///     A source processor that creates projection snapshots
+/// </summary>
+/// <typeparam name="TProjection"></typeparam>
+public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProcessor
     where TProjection : IProjection<TProjection>
 {
     private readonly ILogger<ProjectionSnapshotSourceProcessor<TProjection>> _logger;
@@ -16,6 +19,7 @@ internal sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourcePr
     private readonly string _snapshotSessionOptionsName;
     private readonly string _transactionSessionOptionsName;
 
+    /// <ignore />
     public ProjectionSnapshotSourceProcessor
     (
         ILogger<ProjectionSnapshotSourceProcessor<TProjection>> logger,
@@ -30,6 +34,7 @@ internal sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourcePr
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
+    /// <inheritdoc />
     public async Task Process(ISource source, CancellationToken cancellationToken)
     {
         await using var projectionRepository = await _projectionRepositoryFactory
@@ -64,7 +69,7 @@ internal sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourcePr
         }
     }
 
-    public static ProjectionSnapshotSourceProcessor<TProjection> Create(IServiceProvider serviceProvider,
+    internal static ProjectionSnapshotSourceProcessor<TProjection> Create(IServiceProvider serviceProvider,
         string transactionSessionOptionsName, string snapshotSessionOptionsName)
     {
         return ActivatorUtilities.CreateInstance<ProjectionSnapshotSourceProcessor<TProjection>>(serviceProvider,
