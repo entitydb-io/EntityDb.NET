@@ -7,7 +7,7 @@ namespace EntityDb.Redis.Sessions;
 /// <summary>
 ///     Configuration options for the Redis implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
-public class RedisSnapshotSessionOptions
+public sealed class RedisSnapshotSessionOptions
 {
     /// <summary>
     ///     A connection string that is compatible with <see cref="ConfigurationOptions.Parse(string)"/>

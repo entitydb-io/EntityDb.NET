@@ -5,7 +5,7 @@ namespace EntityDb.MongoDb.Queries;
 /// <summary>
 ///     Options for configuring queries in MongoDb.
 /// </summary>
-public class MongoDbQueryOptions
+public sealed class MongoDbQueryOptions
 {
     /// <summary>
     ///     Options for finding documents.

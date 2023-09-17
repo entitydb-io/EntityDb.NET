@@ -12,7 +12,7 @@ namespace EntityDb.Common.Agents;
 ///     If all instances of <see cref="IAgentAccessor" /> throw an exception, this type will throw a
 ///     <see cref="NoAgentException" />.
 /// </summary>
-public class AgentAccessorChain : IAgentAccessor
+public sealed class AgentAccessorChain : IAgentAccessor
 {
     private readonly IAgentAccessor[] _agentAccessors;
     private readonly ILogger<AgentAccessorChain> _logger;

@@ -5,7 +5,7 @@ namespace EntityDb.Common.Agents;
 /// <summary>
 ///     Represents a type that indicates there is no known actor.
 /// </summary>
-public class UnknownAgentAccessor : IAgentAccessor
+public sealed class UnknownAgentAccessor : IAgentAccessor
 {
     private static readonly Dictionary<string, string> DefaultApplicationInfo = new();
 

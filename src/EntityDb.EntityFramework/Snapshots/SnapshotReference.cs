@@ -6,7 +6,7 @@ namespace EntityDb.EntityFramework.Snapshots;
 ///     Represents a unique snapshot and its pointer.
 /// </summary>
 /// <typeparam name="TSnapshot"></typeparam>
-public class SnapshotReference<TSnapshot>
+public sealed class SnapshotReference<TSnapshot>
 {
     /// <summary>
     ///     Te ID of the Reference record.

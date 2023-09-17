@@ -7,7 +7,7 @@ namespace EntityDb.SqlDb.Sessions;
 /// <summary>
 ///     Configuration options for the PostgreSql implementation of <see cref="ITransactionRepository"/>.
 /// </summary>
-public class SqlDbTransactionSessionOptions
+public sealed class SqlDbTransactionSessionOptions
 {
     /// <summary>
     ///     A connection string that is compatible with <see cref="object"/>

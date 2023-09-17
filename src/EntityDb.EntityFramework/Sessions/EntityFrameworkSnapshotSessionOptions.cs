@@ -7,7 +7,7 @@ namespace EntityDb.EntityFramework.Sessions;
 /// <summary>
 ///     Configuration options for the EntityFramework implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
 /// </summary>
-public class EntityFrameworkSnapshotSessionOptions
+public sealed class EntityFrameworkSnapshotSessionOptions
 {
     /// <summary>
     ///     This property is not used by the package. It only provides a convenient way to access

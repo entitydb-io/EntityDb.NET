@@ -6,7 +6,7 @@ namespace EntityDb.Npgsql.Queries;
 /// <summary>
 ///     Defines query options for the Npgsql driver.
 /// </summary>
-public class NpgsqlQueryOptions
+public sealed class NpgsqlQueryOptions
 {
     /// <summary>
     ///     Defines the collation for sorting on <see cref="ILease.Value"/>.

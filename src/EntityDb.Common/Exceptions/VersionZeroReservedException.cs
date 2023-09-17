@@ -12,7 +12,7 @@ namespace EntityDb.Common.Exceptions;
 /// <remarks>
 ///     Version Zero is reserved for an entity that has not yet been created/persisted.
 /// </remarks>
-public class VersionZeroReservedException : Exception
+public sealed class VersionZeroReservedException : Exception
 {
     /// <summary>
     ///     Throws a new <see cref="VersionZeroReservedException" /> if <paramref name="versionNumber" /> is

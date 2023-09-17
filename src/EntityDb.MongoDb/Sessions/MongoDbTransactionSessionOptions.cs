@@ -7,7 +7,7 @@ namespace EntityDb.MongoDb.Sessions;
 /// <summary>
 ///     Configuration options for the MongoDb implementation of <see cref="ITransactionRepository"/>.
 /// </summary>
-public class MongoDbTransactionSessionOptions
+public sealed class MongoDbTransactionSessionOptions
 {
     /// <summary>
     ///     A connection string that is compatible with <see cref="MongoClient(string)"/>
