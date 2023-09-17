@@ -7,8 +7,18 @@ using System.Collections.Immutable;
 
 namespace EntityDb.Common.Extensions;
 
-internal static class TransactionRepositoryExtensions
+/// <summary>
+///     Extensions for <see cref="ITransactionRepository"/>.
+/// </summary>
+public static class TransactionRepositoryExtensions
 {
+    /// <summary>
+    ///     Enumerate transaction ids for any supported query type
+    /// </summary>
+    /// <param name="transactionRepository">The transaction repository</param>
+    /// <param name="query">The query</param>
+    /// <param name="cancellationToken">A cancellation token</param>
+    /// <returns>Transaction ids</returns>
     public static IAsyncEnumerable<Id> EnumerateTransactionIds(this ITransactionRepository transactionRepository, IQuery query, CancellationToken cancellationToken = default)
     {
         return query switch
@@ -21,6 +31,13 @@ internal static class TransactionRepositoryExtensions
         };
     }
 
+    /// <summary>
+    ///     Reconstruct the <see cref="ITransaction"/> object by transaction id
+    /// </summary>
+    /// <param name="transactionRepository">The transaction repository</param>
+    /// <param name="transactionId">The transaction id</param>
+    /// <param name="cancellationToken">A cancellation token</param>
+    /// <returns>An instance of <see cref="ITransaction"/>.</returns>
     public static async Task<ITransaction> GetTransaction(this ITransactionRepository transactionRepository, Id transactionId, CancellationToken cancellationToken)
     {
         var query = new GetTransactionCommandsQuery(transactionId);
