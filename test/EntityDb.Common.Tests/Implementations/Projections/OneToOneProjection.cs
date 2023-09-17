@@ -49,30 +49,30 @@ public record OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWit
 
     public OneToOneProjection Reduce(ISource source)
     {
-        if (source is ITransaction transaction)
+        if (source is not ITransaction transaction)
         {
-            var projection = this with
-            {
-                LastTransactionAt = transaction.TimeStamp,
-            };
-
-            foreach (var command in transaction.Commands)
-            {
-                if (command.Data is not IReducer<OneToOneProjection> reducer)
-                {
-                    continue;
-                }
-
-                projection = reducer.Reduce(projection) with
-                {
-                    VersionNumber = command.EntityVersionNumber,
-                };
-            }
-
-            return projection;
+            throw new NotSupportedException();
         }
 
-        throw new NotSupportedException();
+        var projection = this with
+        {
+            LastTransactionAt = transaction.TimeStamp,
+        };
+
+        foreach (var command in transaction.Commands)
+        {
+            if (command.Data is not IReducer<OneToOneProjection> reducer)
+            {
+                continue;
+            }
+
+            projection = reducer.Reduce(projection) with
+            {
+                VersionNumber = command.EntityVersionNumber,
+            };
+        }
+
+        return projection;
     }
 
     public bool ShouldRecord()
