@@ -13,7 +13,8 @@ public interface IEntityDbContext<out TDbContext>
     /// <summary>
     ///     Returns a new <typeparamref name="TDbContext"/> that will be configured using <paramref name="entityFrameworkSnapshotSessionOptions"/>.
     /// </summary>
+    /// <param name="serviceProvider">A service provider for any injectable dependencies</param>
     /// <param name="entityFrameworkSnapshotSessionOptions">The options for the database</param>
     /// <returns>A new <typeparamref name="TDbContext"/> that will be configured using <paramref name="entityFrameworkSnapshotSessionOptions"/>.</returns>
-    static abstract TDbContext Construct(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions);
+    static abstract TDbContext Construct(IServiceProvider serviceProvider, EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions);
 }

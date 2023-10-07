@@ -3,16 +3,20 @@ using EntityDb.EntityFramework.DbContexts;
 using EntityDb.EntityFramework.Sessions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Tests.Implementations.DbContexts;
 
 internal class GenericDbContext<TSnapshot> : EntityDbContextBase, IEntityDbContext<GenericDbContext<TSnapshot>>
     where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
 {
+    private readonly ILoggerFactory _loggerFactory;
     private readonly EntityFrameworkSnapshotSessionOptions _options;
 
-    public GenericDbContext(EntityFrameworkSnapshotSessionOptions options)
+    public GenericDbContext(ILoggerFactory loggerFactory, EntityFrameworkSnapshotSessionOptions options)
     {
+        _loggerFactory = loggerFactory;
         _options = options;
     }
 
@@ -20,12 +24,13 @@ internal class GenericDbContext<TSnapshot> : EntityDbContextBase, IEntityDbConte
     {
         optionsBuilder
             .UseNpgsql($"{_options.ConnectionString};Include Error Detail=true")
+            .UseLoggerFactory(_loggerFactory)
             .EnableSensitiveDataLogging();
     }
 
-    public static GenericDbContext<TSnapshot> Construct(EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions)
+    public static GenericDbContext<TSnapshot> Construct(IServiceProvider serviceProvider, EntityFrameworkSnapshotSessionOptions entityFrameworkSnapshotSessionOptions)
     {
-        return new GenericDbContext<TSnapshot>(entityFrameworkSnapshotSessionOptions);
+        return ActivatorUtilities.CreateInstance<GenericDbContext<TSnapshot>>(serviceProvider, entityFrameworkSnapshotSessionOptions);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
