@@ -52,7 +52,12 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
             var previousProjection = await projectionRepository.SnapshotRepository
                 .GetSnapshotOrDefault(projectionId, cancellationToken);
 
-            var nextProjection = (previousProjection ?? TProjection.Construct(projectionId)).Reduce(source);
+            var nextProjection = previousProjection == null
+                ? TProjection.Construct(projectionId)
+                : previousProjection.Copy();
+
+            nextProjection.Mutate(source);
+
             var nextProjectionPointer = nextProjection.GetPointer();
 
             if (nextProjection.ShouldRecordAsLatest(previousProjection))

@@ -1,8 +1,7 @@
 ﻿using System.Linq.Expressions;
-using EntityDb.Abstractions.Reducers;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
-using EntityDb.Common.Tests.Implementations.Commands;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,6 +18,11 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
         {
             Id = entityId,
         };
+    }
+
+    public TestEntity Copy()
+    {
+        return this with { };
     }
 
     public static void Configure(EntityTypeBuilder<TestEntity> testEntityBuilder)
