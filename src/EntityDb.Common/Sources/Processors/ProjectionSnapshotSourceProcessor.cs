@@ -54,7 +54,7 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
 
             var nextProjection = previousProjection == null
                 ? TProjection.Construct(projectionId)
-                : previousProjection.Copy();
+                : previousProjection;
 
             nextProjection.Mutate(source);
 

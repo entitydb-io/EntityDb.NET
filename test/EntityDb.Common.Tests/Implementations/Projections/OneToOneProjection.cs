@@ -27,16 +27,6 @@ public class OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWith
         };
     }
 
-    public OneToOneProjection Copy()
-    {
-        return new OneToOneProjection
-        {
-            Id = Id,
-            VersionNumber = VersionNumber,
-            LastTransactionAt = LastTransactionAt,
-        };
-    }
-
     public static void Configure(EntityTypeBuilder<OneToOneProjection> oneToOneProjectionBuilder)
     {
         oneToOneProjectionBuilder
