@@ -12,6 +12,12 @@ namespace EntityDb.Common.Projections;
 public interface IProjection<TProjection> : ISnapshot<TProjection>
 {
     /// <summary>
+    ///     Creates a copy of a <typeparamref name="TProjection" />
+    /// </summary>
+    /// <returns>A copy of a <typeparamref name="TProjection" /></returns>
+    TProjection Copy();
+    
+    /// <summary>
     ///     Incorporates the source into the projection.
     /// </summary>
     /// <param name="source">The source of information</param>
