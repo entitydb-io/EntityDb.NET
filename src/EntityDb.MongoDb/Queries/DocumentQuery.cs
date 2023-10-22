@@ -1,4 +1,4 @@
-﻿using EntityDb.MongoDb.Sessions;
+﻿using EntityDb.MongoDb.Transactions.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 

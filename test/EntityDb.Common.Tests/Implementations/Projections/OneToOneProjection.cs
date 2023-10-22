@@ -119,6 +119,7 @@ public class OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWith
         return projectionIds;
     }
 
+    public static string MongoDbCollectionName => "OneToOneProjections";
     public static string RedisKeyNamespace => "one-to-one-projection";
 
     public OneToOneProjection WithVersionNumber(VersionNumber versionNumber)

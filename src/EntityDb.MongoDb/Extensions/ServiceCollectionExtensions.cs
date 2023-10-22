@@ -1,6 +1,8 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Snapshots;
 using EntityDb.MongoDb.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,7 +43,35 @@ public static class ServiceCollectionExtensions
             serviceProvider => serviceProvider
                 .GetRequiredService<MongoDbTransactionRepositoryFactory>()
                 .UseTestMode(testMode)
-                .UseAuthProvision(serviceProvider, autoProvision)
+                .UseAutoProvision(serviceProvider, autoProvision)
+        );
+    }
+
+    /// <summary>
+    ///     Adds a production-ready implementation of <see cref="ITransactionRepositoryFactory" /> to a service
+    ///     collection.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
+    /// <param name="autoProvision">Modifies the behavior of the repository to auto-provision collections.</param>
+    public static void AddMongoDbSnapshots<TSnapshot>(this IServiceCollection serviceCollection,
+        bool testMode = false, bool autoProvision = false)
+        where TSnapshot : notnull
+    {
+        serviceCollection.AddBsonDocumentEnvelopeService(true);
+
+        serviceCollection.Add<MongoDbSnapshotRepositoryFactory<TSnapshot>>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
+        );
+
+        serviceCollection.Add<ISnapshotRepositoryFactory<TSnapshot>>
+        (
+            testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
+            serviceProvider => serviceProvider
+                .GetRequiredService<MongoDbSnapshotRepositoryFactory<TSnapshot>>()
+                .UseTestMode(testMode)
+                .UseAutoProvision(serviceProvider, autoProvision)
         );
     }
 }

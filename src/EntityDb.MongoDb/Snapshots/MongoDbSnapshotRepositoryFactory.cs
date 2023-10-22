@@ -1,24 +1,27 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Snapshots;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Transactions;
-using EntityDb.MongoDb.Transactions.Sessions;
+using EntityDb.Common.Snapshots;
+using EntityDb.MongoDb.Snapshots.Sessions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace EntityDb.MongoDb.Transactions;
+namespace EntityDb.MongoDb.Snapshots;
 
-internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass, IMongoDbTransactionRepositoryFactory
+internal class MongoDbSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBaseClass,
+    IMongoDbSnapshotRepositoryFactory<TSnapshot>
+    where TSnapshot : notnull
 {
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
-    private readonly IOptionsFactory<MongoDbTransactionSessionOptions> _optionsFactory;
+    private readonly IOptionsFactory<MongoDbSnapshotSessionOptions> _optionsFactory;
     private readonly IServiceProvider _serviceProvider;
 
-    public MongoDbTransactionRepositoryFactory
+    public MongoDbSnapshotRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        IOptionsFactory<MongoDbTransactionSessionOptions> optionsFactory,
+        IOptionsFactory<MongoDbSnapshotSessionOptions> optionsFactory,
         IEnvelopeService<BsonDocument> envelopeService
     )
     {
@@ -27,12 +30,12 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         _envelopeService = envelopeService;
     }
 
-    public MongoDbTransactionSessionOptions GetTransactionSessionOptions(string transactionSessionOptionsName)
+    public MongoDbSnapshotSessionOptions GetSessionOptions(string snapshotSessionOptionsName)
     {
-        return _optionsFactory.Create(transactionSessionOptionsName);
+        return _optionsFactory.Create(snapshotSessionOptionsName);
     }
 
-    public async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
+    public async Task<IMongoSession> CreateSession(MongoDbSnapshotSessionOptions options,
         CancellationToken cancellationToken)
     {
         var mongoClient = new MongoClient(options.ConnectionString);
@@ -52,17 +55,17 @@ internal class MongoDbTransactionRepositoryFactory : DisposableResourceBaseClass
         );
     }
 
-    public ITransactionRepository CreateRepository
+    public ISnapshotRepository<TSnapshot> CreateRepository
     (
         IMongoSession mongoSession
     )
     {
-        var mongoDbTransactionRepository = new MongoDbTransactionRepository
+        var mongoDbSnapshotRepository = new MongoDbSnapshotRepository<TSnapshot>
         (
-            mongoSession,
-            _envelopeService
+            _envelopeService,
+            mongoSession
         );
 
-        return TryCatchTransactionRepository.Create(_serviceProvider, mongoDbTransactionRepository);
+        return TryCatchSnapshotRepository<TSnapshot>.Create(_serviceProvider, mongoDbSnapshotRepository);
     }
 }

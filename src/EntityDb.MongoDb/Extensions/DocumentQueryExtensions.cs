@@ -5,7 +5,7 @@ using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Queries;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Runtime.CompilerServices;

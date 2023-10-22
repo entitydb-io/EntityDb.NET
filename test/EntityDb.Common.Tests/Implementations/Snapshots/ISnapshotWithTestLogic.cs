@@ -9,6 +9,7 @@ public interface ISnapshotWithTestLogic<TSnapshot> : ISnapshot<TSnapshot>, IEnti
     where TSnapshot : class
 {
     VersionNumber VersionNumber { get; }
+    static abstract string MongoDbCollectionName { get; }
     static abstract string RedisKeyNamespace { get; }
     static abstract AsyncLocal<Func<TSnapshot, bool>?> ShouldRecordLogic { get; }
     static abstract AsyncLocal<Func<TSnapshot, TSnapshot?, bool>?> ShouldRecordAsLatestLogic { get; }

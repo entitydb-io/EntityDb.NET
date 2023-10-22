@@ -10,7 +10,7 @@ using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Extensions;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Transactions;

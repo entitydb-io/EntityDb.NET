@@ -33,7 +33,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
         var snapshotId = Id.NewId();
         var expectedSnapshot = TSnapshot.Construct(snapshotId).WithVersionNumber(new VersionNumber(300));
 
-        await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
+        var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>();
 
         await using var snapshotRepository = await snapshotRepositoryFactory

@@ -3,7 +3,7 @@ using EntityDb.MongoDb.Queries;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace EntityDb.MongoDb.Sessions;
+namespace EntityDb.MongoDb.Transactions.Sessions;
 
 internal interface IMongoSession : IDisposableResource
 {

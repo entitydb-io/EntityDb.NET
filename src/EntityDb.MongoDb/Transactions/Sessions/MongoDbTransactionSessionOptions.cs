@@ -2,7 +2,7 @@
 using MongoDB.Driver;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EntityDb.MongoDb.Sessions;
+namespace EntityDb.MongoDb.Transactions.Sessions;
 
 /// <summary>
 ///     Configuration options for the MongoDb implementation of <see cref="ITransactionRepository"/>.

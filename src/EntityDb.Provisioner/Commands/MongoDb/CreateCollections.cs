@@ -17,7 +17,7 @@ internal class CreateCollections : CommandBase
     {
         var mongoClient = new MongoClient(arguments.ConnectionString);
 
-        await mongoClient.ProvisionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionTransactionCollections(arguments.ServiceName);
     }
 
     private static void AddConnectionStringArgument(Command command)

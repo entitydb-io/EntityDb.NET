@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Transactions;
 using EntityDb.Common.Disposables;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 
 namespace EntityDb.MongoDb.Transactions;
 

@@ -65,6 +65,7 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
         return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
     }
 
+    public static string MongoDbCollectionName => "TestEntities";
     public static string RedisKeyNamespace => "test-entity";
 
     public TestEntity WithVersionNumber(VersionNumber versionNumber)

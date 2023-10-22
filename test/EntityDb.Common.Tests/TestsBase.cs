@@ -16,7 +16,8 @@ using EntityDb.EntityFramework.Extensions;
 using EntityDb.EntityFramework.Sessions;
 using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Snapshots.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using EntityDb.Npgsql.Extensions;
 using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
@@ -40,7 +41,7 @@ public class TestsBase<TStartup>
     where TStartup : IStartup, new()
 {
     public delegate void AddDependenciesDelegate(IServiceCollection serviceCollection);
-
+    
     private static readonly TransactionsAdder[] AllTransactionAdders =
     {
         new("MongoDb", typeof(MongoDbQueryOptions), (timeStamp) => timeStamp.WithMillisecondPrecision(), serviceCollection =>
@@ -92,31 +93,31 @@ public class TestsBase<TStartup>
             var databaseContainerFixture = serviceCollection
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
-
+        
             serviceCollection.AddNpgsqlTransactions(true, true);
-
+        
             serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
             {
                 options.LeaseValueSortCollation = "numeric";
                 options.TagValueSortCollation = "numeric";
             });
-
+        
             serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
             {
                 options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.GetConnectionString()};Include Error Detail=true";
             });
-
+        
             serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
             {
                 options.ReadOnly = false;
             });
-
+        
             serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
-
+        
             serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
             {
                 options.ReadOnly = true;
@@ -186,6 +187,47 @@ public class TestsBase<TStartup>
             });
         });
     }
+    
+    private static SnapshotAdder MongoDbSnapshotAdder<TSnapshot>()
+        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    {
+        return new SnapshotAdder($"MongoDb<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
+        {
+            var databaseContainerFixture = serviceCollection
+                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                .ImplementationInstance as DatabaseContainerFixture;
+
+            serviceCollection.AddMongoDbSnapshots<TSnapshot>(true, true);
+
+            serviceCollection.ConfigureAll<MongoDbSnapshotSessionOptions>(options =>
+            {
+                var host = databaseContainerFixture!.MongoDbContainer.Hostname;
+                var port = databaseContainerFixture!.MongoDbContainer.GetMappedPublicPort(27017);
+
+                options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
+                options.DatabaseName = DatabaseContainerFixture.OmniParameter;
+                options.CollectionName = TSnapshot.MongoDbCollectionName;
+                options.WriteTimeout = TimeSpan.FromSeconds(1);
+            });
+
+            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.Write, options =>
+            {
+                options.ReadOnly = false;
+            });
+
+            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = false;
+            });
+
+            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
+            {
+                options.ReadOnly = true;
+                options.SecondaryPreferred = true;
+            });
+        });
+    }
 
     private static SnapshotAdder RedisSnapshotAdder<TSnapshot>()
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
@@ -228,6 +270,7 @@ public class TestsBase<TStartup>
     {
         yield return EntityFrameworkSnapshotAdder<TSnapshot>();
         yield return RedisSnapshotAdder<TSnapshot>();
+        yield return MongoDbSnapshotAdder<TSnapshot>();
     }
 
     private static EntityAdder GetEntityAdder<TEntity>()

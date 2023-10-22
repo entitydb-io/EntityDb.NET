@@ -15,7 +15,7 @@ internal static class MongoDbTransactionRepositoryFactoryExtensions
             : mongoDbTransactionRepositoryFactory;
     }
 
-    public static IMongoDbTransactionRepositoryFactory UseAuthProvision(
+    public static IMongoDbTransactionRepositoryFactory UseAutoProvision(
         this IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory,
         IServiceProvider serviceProvider,
         bool autoProvision)

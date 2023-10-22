@@ -1,5 +1,5 @@
 using EntityDb.MongoDb.Extensions;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -52,7 +52,7 @@ internal sealed class
             return mongoSession;
         }
 
-        await mongoSession.MongoDatabase.Client.ProvisionCollections(mongoSession.MongoDatabase.DatabaseNamespace
+        await mongoSession.MongoDatabase.Client.ProvisionTransactionCollections(mongoSession.MongoDatabase.DatabaseNamespace
             .DatabaseName, cancellationToken);
 
         _provisioned = true;

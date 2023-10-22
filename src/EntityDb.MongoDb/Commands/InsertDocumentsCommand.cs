@@ -1,4 +1,4 @@
-﻿using EntityDb.MongoDb.Sessions;
+﻿using EntityDb.MongoDb.Transactions.Sessions;
 
 namespace EntityDb.MongoDb.Commands;
 

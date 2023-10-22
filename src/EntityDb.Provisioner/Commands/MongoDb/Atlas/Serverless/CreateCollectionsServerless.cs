@@ -39,7 +39,7 @@ internal class CreateCollectionsServerless : CommandBase
             new MongoClient(
                 $"{expectedProtocol}{arguments.ServiceName}:{arguments.ServicePassword}@{serverlessInstance.ConnectionStrings.StandardSrv[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionTransactionCollections(arguments.ServiceName);
     }
 
     protected static void AddServerlessNameArgument(Command command)

@@ -8,7 +8,7 @@ using EntityDb.MongoDb.Extensions;
 using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Queries.FilterBuilders;
 using EntityDb.MongoDb.Queries.SortBuilders;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;

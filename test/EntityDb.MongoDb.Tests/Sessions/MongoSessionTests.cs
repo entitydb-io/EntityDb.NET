@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests;
-using EntityDb.MongoDb.Sessions;
+using EntityDb.MongoDb.Transactions.Sessions;
 using Shouldly;
 using Xunit;
 

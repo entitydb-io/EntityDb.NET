@@ -39,7 +39,7 @@ internal class CreateCollections : CommandBase
             new MongoClient(
                 $"{expectedProtocol}{arguments.ServiceName}:{arguments.ServicePassword}@{cluster.SrvAddress[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionTransactionCollections(arguments.ServiceName);
     }
 
     protected static void AddClusterNameArgument(Command command)

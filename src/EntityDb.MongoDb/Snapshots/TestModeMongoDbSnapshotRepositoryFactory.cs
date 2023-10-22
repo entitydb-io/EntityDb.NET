@@ -1,28 +1,29 @@
-﻿using EntityDb.MongoDb.Transactions.Sessions;
+﻿using EntityDb.MongoDb.Snapshots.Sessions;
 
-namespace EntityDb.MongoDb.Transactions;
+namespace EntityDb.MongoDb.Snapshots;
 
-internal class
-    TestModeMongoDbTransactionRepositoryFactory : MongoDbTransactionRepositoryFactoryWrapper
+internal class TestModeMongoDbSnapshotRepositoryFactory<TSnapshot> : MongoDbSnapshotRepositoryFactoryWrapper<TSnapshot>
 {
     private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 
-    public TestModeMongoDbTransactionRepositoryFactory(
-        IMongoDbTransactionRepositoryFactory mongoDbTransactionRepositoryFactory) : base(
-        mongoDbTransactionRepositoryFactory)
+    public TestModeMongoDbSnapshotRepositoryFactory
+    (
+        IMongoDbSnapshotRepositoryFactory<TSnapshot> mongoDbSnapshotRepositoryFactory
+    )
+        : base(mongoDbSnapshotRepositoryFactory)
     {
     }
 
-    public override async Task<IMongoSession> CreateSession(MongoDbTransactionSessionOptions options,
+    public override async Task<IMongoSession> CreateSession(MongoDbSnapshotSessionOptions options,
         CancellationToken cancellationToken)
     {
         if (_sessions.HasValue)
         {
             return _sessions.Value.TestMode
-                .WithTransactionSessionOptions(options);
+                .WithSessionOptions(options);
         }
 
-        var normalOptions = new MongoDbTransactionSessionOptions
+        var normalOptions = new MongoDbSnapshotSessionOptions
         {
             ConnectionString = options.ConnectionString,
             DatabaseName = options.DatabaseName,
@@ -37,11 +38,11 @@ internal class
         _sessions = (normalSession, testModeSession);
 
         return _sessions.Value.TestMode
-            .WithTransactionSessionOptions(options);
+            .WithSessionOptions(options);
     }
 
     public override async ValueTask DisposeAsync()
-    {
+    {   
         if (_sessions.HasValue)
         {
             await _sessions.Value.Normal.AbortTransaction();

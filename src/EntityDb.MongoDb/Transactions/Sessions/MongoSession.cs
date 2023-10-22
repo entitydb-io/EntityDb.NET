@@ -8,7 +8,7 @@ using MongoDB.Driver;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace EntityDb.MongoDb.Sessions;
+namespace EntityDb.MongoDb.Transactions.Sessions;
 
 internal record MongoSession
 (
