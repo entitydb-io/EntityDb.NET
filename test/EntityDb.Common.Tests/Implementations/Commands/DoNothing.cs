@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 
@@ -22,7 +23,7 @@ public record DoNothing : IReducer<TestEntity>, IMutator<OneToOneProjection>
 
 public record AddLease(ILease Lease) : DoNothing, IAddLeasesCommand
 {
-    public IEnumerable<ILease> GetLeases()
+    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return Lease;
     }
@@ -30,7 +31,7 @@ public record AddLease(ILease Lease) : DoNothing, IAddLeasesCommand
 
 public record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesCommand
 {
-    public IEnumerable<ILease> GetLeases()
+    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return Lease;
     }
@@ -38,7 +39,7 @@ public record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesCommand
 
 public record AddTag(ITag Tag) : DoNothing, IAddTagsCommand
 {
-    public IEnumerable<ITag> GetTags()
+    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return Tag;
     }
@@ -46,7 +47,7 @@ public record AddTag(ITag Tag) : DoNothing, IAddTagsCommand
 
 public record DeleteTag(ITag Tag) : DoNothing, IDeleteTagsCommand
 {
-    public IEnumerable<ITag> GetTags()
+    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return Tag;
     }

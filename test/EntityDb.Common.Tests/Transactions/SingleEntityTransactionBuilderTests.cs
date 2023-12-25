@@ -105,7 +105,7 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         var addLeasesCommand =
             transaction.Commands[0].Data.ShouldBeAssignableTo<IAddLeasesCommand>().ShouldNotBeNull();
 
-        addLeasesCommand.GetLeases().ShouldNotBeEmpty();
+        addLeasesCommand.GetLeases(default, default).ShouldNotBeEmpty();
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(

@@ -33,7 +33,7 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
         IAddTagsCommand addTagsCommand
     )
     {
-        var tagDocuments = addTagsCommand.GetTags()
+        var tagDocuments = addTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
             .Select(insertTag => new TagDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
@@ -76,7 +76,7 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
         IDeleteTagsCommand deleteTagsCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags().ToArray());
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
 
         return new DeleteDocumentsCommand
         (

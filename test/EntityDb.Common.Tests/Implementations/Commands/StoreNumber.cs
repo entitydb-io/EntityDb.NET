@@ -2,6 +2,7 @@
 using EntityDb.Abstractions.Leases;
 using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Projections;
@@ -24,12 +25,12 @@ public record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOn
         };
     }
 
-    public IEnumerable<ILease> GetLeases()
+    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return new CountLease(Number);
     }
 
-    public IEnumerable<ITag> GetTags()
+    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
     {
         yield return new CountTag(Number);
     }

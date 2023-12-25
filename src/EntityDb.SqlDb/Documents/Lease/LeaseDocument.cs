@@ -44,7 +44,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
         return new InsertDocumentsCommand<LeaseDocument>
         (
             TableName,
-            addLeasesCommand.GetLeases()
+            addLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
                 .Select(insertLease => new LeaseDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
@@ -82,7 +82,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases().ToArray());
+            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
 
         return new DeleteDocumentsCommand
         (
