@@ -37,25 +37,24 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
     (
         IEnvelopeService<string> envelopeService,
         ITransaction transaction,
-        ITransactionCommand transactionCommand,
-        IAddLeasesCommand addLeasesCommand
+        ITransactionCommand transactionCommand
     )
     {
         return new InsertDocumentsCommand<LeaseDocument>
         (
             TableName,
-            addLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
-                .Select(insertLease => new LeaseDocument
+            transactionCommand.AddLeases
+                .Select(lease => new LeaseDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
                     EntityId = transactionCommand.EntityId,
                     EntityVersionNumber = transactionCommand.EntityVersionNumber,
-                    Scope = insertLease.Scope,
-                    Label = insertLease.Label,
-                    Value = insertLease.Value,
-                    DataType = insertLease.GetType().Name,
-                    Data = envelopeService.Serialize(insertLease)
+                    Scope = lease.Scope,
+                    Label = lease.Label,
+                    Value = lease.Value,
+                    DataType = lease.GetType().Name,
+                    Data = envelopeService.Serialize(lease)
                 })
                 .ToArray()
         );
@@ -78,11 +77,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand, IDeleteLeasesCommand deleteLeasesCommand
+        ITransactionCommand transactionCommand
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
+            new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
 
         return new DeleteDocumentsCommand
         (

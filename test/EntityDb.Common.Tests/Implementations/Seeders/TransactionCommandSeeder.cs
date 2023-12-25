@@ -1,4 +1,7 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using System.Collections.Immutable;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -21,7 +24,11 @@ public static class TransactionCommandSeeder
             {
                 EntityId = entityId,
                 EntityVersionNumber = previousVersionNumber,
-                Data = CommandSeeder.Create()
+                Data = CommandSeeder.Create(),
+                AddLeases = ImmutableArray<ILease>.Empty,
+                DeleteLeases = ImmutableArray<ILease>.Empty,
+                AddTags = ImmutableArray<ITag>.Empty,
+                DeleteTags = ImmutableArray<ITag>.Empty,
             };
         }
     }

@@ -10,7 +10,7 @@ using EntityDb.Common.Tests.Implementations.Tags;
 
 namespace EntityDb.Common.Tests.Implementations.Commands;
 
-public record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOneProjection>, IAddLeasesCommand, IAddTagsCommand
+public record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOneProjection>, IAddLeasesCommand<TestEntity>, IAddTagsCommand<TestEntity>
 {
     public void Mutate(OneToOneProjection projection)
     {
@@ -25,12 +25,12 @@ public record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOn
         };
     }
 
-    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ILease> GetLeases(TestEntity testEntity)
     {
         yield return new CountLease(Number);
     }
 
-    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ITag> GetTags(TestEntity testEntity)
     {
         yield return new CountTag(Number);
     }

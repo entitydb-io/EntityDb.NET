@@ -21,33 +21,33 @@ public record DoNothing : IReducer<TestEntity>, IMutator<OneToOneProjection>
     }
 }
 
-public record AddLease(ILease Lease) : DoNothing, IAddLeasesCommand
+public record AddLease(ILease Lease) : DoNothing, IAddLeasesCommand<TestEntity>
 {
-    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ILease> GetLeases(TestEntity testEntity)
     {
         yield return Lease;
     }
 }
 
-public record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesCommand
+public record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesCommand<TestEntity>
 {
-    public IEnumerable<ILease> GetLeases(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ILease> GetLeases(TestEntity testEntity)
     {
         yield return Lease;
     }
 }
 
-public record AddTag(ITag Tag) : DoNothing, IAddTagsCommand
+public record AddTag(ITag Tag) : DoNothing, IAddTagsCommand<TestEntity>
 {
-    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ITag> GetTags(TestEntity testEntity)
     {
         yield return Tag;
     }
 }
 
-public record DeleteTag(ITag Tag) : DoNothing, IDeleteTagsCommand
+public record DeleteTag(ITag Tag) : DoNothing, IDeleteTagsCommand<TestEntity>
 {
-    public IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber)
+    public IEnumerable<ITag> GetTags(TestEntity testEntity)
     {
         yield return Tag;
     }

@@ -29,21 +29,20 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
     (
         IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
-        ITransactionCommand transactionCommand,
-        IAddTagsCommand addTagsCommand
+        ITransactionCommand transactionCommand
     )
     {
-        var tagDocuments = addTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
-            .Select(insertTag => new TagDocument
+        var tagDocuments = transactionCommand.AddTags
+            .Select(tag => new TagDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
                 EntityId = transactionCommand.EntityId,
                 EntityVersionNumber = transactionCommand.EntityVersionNumber,
-                DataType = insertTag.GetType().Name,
-                Data = envelopeService.Serialize(insertTag),
-                Label = insertTag.Label,
-                Value = insertTag.Value
+                DataType = tag.GetType().Name,
+                Data = envelopeService.Serialize(tag),
+                Label = tag.Label,
+                Value = tag.Value
             })
             .ToArray();
 
@@ -72,11 +71,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand,
-        IDeleteTagsCommand deleteTagsCommand
+        ITransactionCommand transactionCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
 
         return new DeleteDocumentsCommand
         (

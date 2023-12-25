@@ -36,24 +36,23 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
     (
         IEnvelopeService<string> envelopeService,
         ITransaction transaction,
-        ITransactionCommand transactionCommand,
-        IAddTagsCommand addTagsCommand
+        ITransactionCommand transactionCommand
     )
     {
         return new InsertDocumentsCommand<TagDocument>
         (
             TableName,
-            addTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
-                .Select(insertTag => new TagDocument
+            transactionCommand.AddTags
+                .Select(tag => new TagDocument
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
                     EntityId = transactionCommand.EntityId,
                     EntityVersionNumber = transactionCommand.EntityVersionNumber,
-                    Label = insertTag.Label,
-                    Value = insertTag.Value,
-                    DataType = insertTag.GetType().Name,
-                    Data = envelopeService.Serialize(insertTag)
+                    Label = tag.Label,
+                    Value = tag.Value,
+                    DataType = tag.GetType().Name,
+                    Data = envelopeService.Serialize(tag)
                 })
                 .ToArray()
         );
@@ -76,10 +75,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand, IDeleteTagsCommand deleteTagsCommand
+        ITransactionCommand transactionCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, deleteTagsCommand.GetTags(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
 
         return new DeleteDocumentsCommand
         (

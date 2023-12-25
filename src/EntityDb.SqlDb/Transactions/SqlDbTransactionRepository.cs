@@ -200,31 +200,31 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
             .Execute(_sqlDbSession, cancellationToken);
 
 
-        if (transactionCommand.Data is IAddLeasesCommand addLeasesCommand)
+        if (transactionCommand.AddLeases.Length > 0)
         {
             await LeaseDocument
-                .GetInsertCommand(_envelopeService, transaction, transactionCommand, addLeasesCommand)
+                .GetInsertCommand(_envelopeService, transaction, transactionCommand)
                 .Execute(_sqlDbSession, cancellationToken);
         }
 
-        if (transactionCommand.Data is IAddTagsCommand addTagsCommand)
+        if (transactionCommand.AddTags.Length > 0)
         {
             await TagDocument
-                .GetInsertCommand(_envelopeService, transaction, transactionCommand, addTagsCommand)
+                .GetInsertCommand(_envelopeService, transaction, transactionCommand)
                 .Execute(_sqlDbSession, cancellationToken);
         }
 
-        if (transactionCommand.Data is IDeleteLeasesCommand deleteLeasesCommand)
+        if (transactionCommand.DeleteLeases.Length > 0)
         {
             await LeaseDocument
-                .GetDeleteCommand(transactionCommand, deleteLeasesCommand)
+                .GetDeleteCommand(transactionCommand)
                 .Execute(_sqlDbSession, cancellationToken);
         }
 
-        if (transactionCommand.Data is IDeleteTagsCommand deleteTagsCommand)
+        if (transactionCommand.DeleteTags.Length > 0)
         {
             await TagDocument
-                .GetDeleteCommand(transactionCommand, deleteTagsCommand)
+                .GetDeleteCommand(transactionCommand)
                 .Execute(_sqlDbSession, cancellationToken);
         }
     }

@@ -1,4 +1,7 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.ValueObjects;
+using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Transactions;
 
@@ -21,6 +24,26 @@ public interface ITransactionCommand
     ///     The command data.
     /// </summary>
     object Data { get; }
+    
+    /// <summary>
+    ///     The leases to be added.
+    /// </summary>
+    ImmutableArray<ILease> AddLeases { get; }
+    
+    /// <summary>
+    ///     The tags to be added.
+    /// </summary>
+    ImmutableArray<ITag> AddTags { get; }
+    
+    /// <summary>
+    ///     The leases to be deleted.
+    /// </summary>
+    ImmutableArray<ILease> DeleteLeases { get; }
+    
+    /// <summary>
+    ///     The tags to be deleted.
+    /// </summary>
+    ImmutableArray<ITag> DeleteTags { get; }
 
     /// <ignore />
     [Obsolete("Please use Data instead. This will be removed in a future version.")]

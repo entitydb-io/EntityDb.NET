@@ -1,20 +1,25 @@
 ﻿using EntityDb.Abstractions.Tags;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Commands;
 
 /// <summary>
 ///     Represents a command that adds tags.
 /// </summary>
-public interface IAddTagsCommand
+/// <typeparam name="TEntity">The type of the entity</typeparam>
+public interface IAddTagsCommand<in TEntity>
 {
     /// <summary>
     ///     Returns the tags that need to be added.
     /// </summary>
+    /// <param name="entity">The entity for which tags will be added</param>
     /// <returns>The tags that need to be added.</returns>
-    IEnumerable<ITag> GetTags(Id entityId, VersionNumber entityVersionNumber);
+    IEnumerable<ITag> GetTags(TEntity entity);
+}
 
+/// <ignore />
+[Obsolete("Please use IAddTagsCommand<TEntity> instead. This will be removed in a future version.", true)]
+public interface IAddTagsCommand
+{
     /// <ignore />
-    [Obsolete("Please use GetTags(Id, VersionNumber) instead. This will be removed in a future version.", true)]
     IEnumerable<ITag> GetTags() => throw new NotImplementedException();
 }

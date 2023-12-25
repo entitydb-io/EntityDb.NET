@@ -1,4 +1,7 @@
-﻿using EntityDb.Abstractions.Queries;
+﻿using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Queries;
@@ -38,6 +41,10 @@ public static class TransactionRepositoryExtensions
     /// <param name="transactionId">The transaction id</param>
     /// <param name="cancellationToken">A cancellation token</param>
     /// <returns>An instance of <see cref="ITransaction"/>.</returns>
+    /// <remarks>
+    ///     This does *not* initialize <see cref="ITransactionCommand.AddLeases"/>, <see cref="ITransactionCommand.DeleteLeases"/>,
+    ///     <see cref="ITransactionCommand.AddTags"/>, nor <see cref="ITransactionCommand.DeleteTags"/>. They will be empty.
+    /// </remarks>
     public static async Task<ITransaction> GetTransaction(this ITransactionRepository transactionRepository, Id transactionId, CancellationToken cancellationToken)
     {
         var query = new GetTransactionCommandsQuery(transactionId);
@@ -52,7 +59,11 @@ public static class TransactionRepositoryExtensions
             {
                 EntityId = annotatedCommand.EntityId,
                 EntityVersionNumber = annotatedCommand.EntityVersionNumber,
-                Data = annotatedCommand.Data
+                Data = annotatedCommand.Data,
+                AddLeases = ImmutableArray<ILease>.Empty,
+                AddTags = ImmutableArray<ITag>.Empty,
+                DeleteLeases = ImmutableArray<ILease>.Empty,
+                DeleteTags = ImmutableArray<ITag>.Empty,
             })
             .ToArrayAsync(cancellationToken);
 

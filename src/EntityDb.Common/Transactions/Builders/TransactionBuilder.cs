@@ -1,4 +1,7 @@
 ﻿using EntityDb.Abstractions.Agents;
+using EntityDb.Abstractions.Commands;
+using EntityDb.Abstractions.Leases;
+using EntityDb.Abstractions.Tags;
 using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.Transactions.Builders;
 using EntityDb.Abstractions.ValueObjects;
@@ -54,6 +57,18 @@ internal sealed class TransactionBuilder<TEntity> : ITransactionBuilder<TEntity>
             EntityId = entityId,
             EntityVersionNumber = entityVersionNumber,
             Data = command,
+            AddLeases = command is IAddLeasesCommand<TEntity> addLeasesCommand
+                ? addLeasesCommand.GetLeases(entity).ToImmutableArray()
+                : ImmutableArray<ILease>.Empty,
+            AddTags = command is IAddTagsCommand<TEntity> addTagsCommand
+                ? addTagsCommand.GetTags(entity).ToImmutableArray()
+                : ImmutableArray<ITag>.Empty,
+            DeleteLeases = command is IDeleteLeasesCommand<TEntity> deleteLeasesCommand
+                ? deleteLeasesCommand.GetLeases(entity).ToImmutableArray()
+                : ImmutableArray<ILease>.Empty,
+            DeleteTags = command is IDeleteTagsCommand<TEntity> deleteTagsCommand
+                ? deleteTagsCommand.GetTags(entity).ToImmutableArray()
+                : ImmutableArray<ITag>.Empty,
         });
 
         _knownEntities[entityId] = entity;

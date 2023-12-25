@@ -30,22 +30,21 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
     (
         IEnvelopeService<BsonDocument> envelopeService,
         ITransaction transaction,
-        ITransactionCommand transactionCommand,
-        IAddLeasesCommand addLeasesCommand
+        ITransactionCommand transactionCommand
     )
     {
-        var leaseDocuments = addLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber)
-            .Select(insertLease => new LeaseDocument
+        var leaseDocuments = transactionCommand.AddLeases
+            .Select(lease => new LeaseDocument
             {
                 TransactionTimeStamp = transaction.TimeStamp,
                 TransactionId = transaction.Id,
                 EntityId = transactionCommand.EntityId,
                 EntityVersionNumber = transactionCommand.EntityVersionNumber,
-                DataType = insertLease.GetType().Name,
-                Data = envelopeService.Serialize(insertLease),
-                Scope = insertLease.Scope,
-                Label = insertLease.Label,
-                Value = insertLease.Value
+                DataType = lease.GetType().Name,
+                Data = envelopeService.Serialize(lease),
+                Scope = lease.Scope,
+                Label = lease.Label,
+                Value = lease.Value
             })
             .ToArray();
 
@@ -74,12 +73,11 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand,
-        IDeleteLeasesCommand deleteLeasesCommand
+        ITransactionCommand transactionCommand
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(transactionCommand.EntityId, deleteLeasesCommand.GetLeases(transactionCommand.EntityId, transactionCommand.EntityVersionNumber).ToArray());
+            new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
 
         return new DeleteDocumentsCommand
         (

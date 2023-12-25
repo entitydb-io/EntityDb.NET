@@ -97,15 +97,17 @@ public class SingleEntityTransactionBuilderTests : TestsBase<Startup>
         var transaction = transactionBuilder
             .Append(new AddLease(new Lease(default!, default!, default!)))
             .Build(default);
+        
+        var entity = transactionBuilder.GetEntity();
 
         // ASSERT
 
         transaction.Commands.Length.ShouldBe(1);
 
         var addLeasesCommand =
-            transaction.Commands[0].Data.ShouldBeAssignableTo<IAddLeasesCommand>().ShouldNotBeNull();
+            transaction.Commands[0].Data.ShouldBeAssignableTo<IAddLeasesCommand<TEntity>>().ShouldNotBeNull();
 
-        addLeasesCommand.GetLeases(default, default).ShouldNotBeEmpty();
+        addLeasesCommand.GetLeases(entity).ShouldNotBeEmpty();
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
