@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Common.Extensions;
-using EntityDb.Common.Projections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -17,28 +15,25 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
     private readonly ILogger<ProjectionSnapshotSourceProcessor<TProjection>> _logger;
     private readonly IProjectionRepositoryFactory<TProjection> _projectionRepositoryFactory;
     private readonly string _snapshotSessionOptionsName;
-    private readonly string _transactionSessionOptionsName;
 
     /// <ignore />
     public ProjectionSnapshotSourceProcessor
     (
         ILogger<ProjectionSnapshotSourceProcessor<TProjection>> logger,
         IProjectionRepositoryFactory<TProjection> projectionRepositoryFactory,
-        string transactionSessionOptionsName,
         string snapshotSessionOptionsName
     )
     {
         _logger = logger;
         _projectionRepositoryFactory = projectionRepositoryFactory;
-        _transactionSessionOptionsName = transactionSessionOptionsName;
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
     /// <inheritdoc />
-    public async Task Process(ISource source, CancellationToken cancellationToken)
+    public async Task Process(Source source, CancellationToken cancellationToken)
     {
         await using var projectionRepository = await _projectionRepositoryFactory
-            .CreateRepository(_transactionSessionOptionsName, _snapshotSessionOptionsName, cancellationToken);
+            .CreateRepository(_snapshotSessionOptionsName, cancellationToken);
 
         if (projectionRepository.SnapshotRepository is null)
         {
@@ -47,13 +42,13 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
             return;
         }
 
-        foreach (var projectionId in TProjection.EnumerateProjectionIds(source))
+        foreach (var entityId in TProjection.EnumerateEntityIds(source))
         {
             var previousProjection = await projectionRepository.SnapshotRepository
-                .GetSnapshotOrDefault(projectionId, cancellationToken);
+                .GetSnapshotOrDefault(entityId, cancellationToken);
 
             var nextProjection = previousProjection == null
-                ? TProjection.Construct(projectionId)
+                ? TProjection.Construct(entityId)
                 : previousProjection;
 
             nextProjection.Mutate(source);
@@ -62,12 +57,14 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
 
             if (nextProjection.ShouldRecordAsLatest(previousProjection))
             {
-                await projectionRepository.SnapshotRepository.PutSnapshot(projectionId, nextProjection, cancellationToken);
+                await projectionRepository.SnapshotRepository.PutSnapshot(entityId, nextProjection,
+                    cancellationToken);
             }
 
             if (nextProjection.ShouldRecord())
             {
-                await projectionRepository.SnapshotRepository.PutSnapshot(nextProjectionPointer, nextProjection, cancellationToken);
+                await projectionRepository.SnapshotRepository.PutSnapshot(nextProjectionPointer, nextProjection,
+                    cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -75,10 +72,9 @@ public sealed class ProjectionSnapshotSourceProcessor<TProjection> : ISourceProc
     }
 
     internal static ProjectionSnapshotSourceProcessor<TProjection> Create(IServiceProvider serviceProvider,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        string snapshotSessionOptionsName)
     {
         return ActivatorUtilities.CreateInstance<ProjectionSnapshotSourceProcessor<TProjection>>(serviceProvider,
-            transactionSessionOptionsName,
             snapshotSessionOptionsName);
     }
 }

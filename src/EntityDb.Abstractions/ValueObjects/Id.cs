@@ -1,7 +1,7 @@
 namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
-///     Represents a unique identifier for an object.
+///     Represents an identifier for an entity or projection.
 /// </summary>
 /// <param name="Value">The backing value.</param>
 public readonly record struct Id(Guid Value)
@@ -15,22 +15,7 @@ public readonly record struct Id(Guid Value)
         return new Id(Guid.NewGuid());
     }
 
-    /// <summary>
-    ///     Returns a string representation of the value of this instance in
-    ///     registry format.
-    /// </summary>
-    /// <returns>
-    ///     The value of this <see cref="Id" />, formatted by using the "D"
-    ///     format specifier as follows:
-    ///     <c>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</c>
-    ///     where the value of the Id is represented as a series of lowercase
-    ///     hexadecimal digits in groups of 8, 4, 4, 4, and 12 digits and
-    ///     separated by hyphens. An example of a return value is
-    ///     "382c74c3-721d-4f34-80e5-57657b6cbc27". To convert the hexadecimal
-    ///     digits from a through f to uppercase, call the
-    ///     <see cref="M:System.String.ToUpper" /> method on the returned
-    ///     string.
-    /// </returns>
+    /// <inheritdoc cref="Guid.ToString()" />
     public override string ToString()
     {
         return Value.ToString();
@@ -42,17 +27,17 @@ public readonly record struct Id(Guid Value)
     /// <param name="id">The implicit id argument.</param>
     public static implicit operator Pointer(Id id)
     {
-        return id + VersionNumber.MinValue;
+        return id + Version.Zero;
     }
 
     /// <summary>
-    ///     Combine an Id and a VersionNumber into a Pointer.
+    ///     Combine an Id and a Version into a Pointer.
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="versionNumber"></param>
-    /// <returns>A pointer for the id and version number.</returns>
-    public static Pointer operator +(Id id, VersionNumber versionNumber)
+    /// <param name="version"></param>
+    /// <returns>A pointer for the id and version.</returns>
+    public static Pointer operator +(Id id, Version version)
     {
-        return new Pointer(id, versionNumber);
+        return new Pointer(id, version);
     }
 }

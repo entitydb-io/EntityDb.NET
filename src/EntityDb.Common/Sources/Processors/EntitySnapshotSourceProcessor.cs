@@ -1,9 +1,6 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
-using EntityDb.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -16,36 +13,36 @@ namespace EntityDb.Common.Sources.Processors;
 public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
     where TEntity : IEntity<TEntity>
 {
-    private readonly ILogger<EntitySnapshotSourceProcessor<TEntity>> _logger;
     private readonly IEntityRepositoryFactory<TEntity> _entityRepositoryFactory;
+    private readonly ILogger<EntitySnapshotSourceProcessor<TEntity>> _logger;
     private readonly string _snapshotSessionOptionsName;
-    private readonly string _transactionSessionOptionsName;
+    private readonly string _sourceSessionOptionsName;
 
     /// <ignore />
     public EntitySnapshotSourceProcessor
     (
         ILogger<EntitySnapshotSourceProcessor<TEntity>> logger,
         IEntityRepositoryFactory<TEntity> entityRepositoryFactory,
-        string transactionSessionOptionsName,
+        string sourceSessionOptionsName,
         string snapshotSessionOptionsName
     )
     {
         _logger = logger;
         _entityRepositoryFactory = entityRepositoryFactory;
-        _transactionSessionOptionsName = transactionSessionOptionsName;
+        _sourceSessionOptionsName = sourceSessionOptionsName;
         _snapshotSessionOptionsName = snapshotSessionOptionsName;
     }
 
     /// <inheritdoc />
-    public async Task Process(ISource source, CancellationToken cancellationToken)
+    public async Task Process(Source source, CancellationToken cancellationToken)
     {
-        if (source is not ITransaction transaction)
+        if (!source.Messages.Any(message => TEntity.CanReduce(message.Delta)))
         {
             throw new NotSupportedException();
         }
 
         await using var entityRepository = await _entityRepositoryFactory
-            .CreateRepository(_transactionSessionOptionsName, _snapshotSessionOptionsName, cancellationToken);
+            .CreateRepository(_sourceSessionOptionsName, _snapshotSessionOptionsName, cancellationToken);
 
         if (entityRepository.SnapshotRepository is null)
         {
@@ -57,21 +54,22 @@ public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
         var latestEntities = new Dictionary<Id, TEntity>();
         var saveEntities = new Dictionary<Pointer, TEntity>();
 
-        foreach (var command in transaction.Commands)
-        {   
-            var entityId = command.EntityId;
+        foreach (var message in source.Messages)
+        {
+            var entityPointer = message.EntityPointer;
 
-            if (!latestEntities.Remove(entityId, out var previousEntity))
+            if (!latestEntities.Remove(entityPointer.Id, out var previousEntity))
             {
-                previousEntity = await entityRepository.SnapshotRepository.GetSnapshotOrDefault(entityId, cancellationToken);
+                previousEntity =
+                    await entityRepository.SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken);
             }
 
-            var nextEntity = (previousEntity ?? TEntity.Construct(entityId)).Reduce(command.Data);
+            var nextEntity = (previousEntity ?? TEntity.Construct(entityPointer.Id)).Reduce(message.Delta);
             var nextEntityPointer = nextEntity.GetPointer();
 
             if (nextEntity.ShouldRecordAsLatest(previousEntity))
             {
-                saveEntities[entityId] = nextEntity;
+                saveEntities[entityPointer.Id] = nextEntity;
             }
 
             if (nextEntity.ShouldRecord())
@@ -79,7 +77,7 @@ public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
                 saveEntities[nextEntityPointer] = nextEntity;
             }
 
-            latestEntities[entityId] = nextEntity;
+            latestEntities[entityPointer.Id] = nextEntity;
 
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -91,9 +89,9 @@ public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
     }
 
     internal static EntitySnapshotSourceProcessor<TEntity> Create(IServiceProvider serviceProvider,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        string sourceSessionOptionsName, string snapshotSessionOptionsName)
     {
         return ActivatorUtilities.CreateInstance<EntitySnapshotSourceProcessor<TEntity>>(serviceProvider,
-            transactionSessionOptionsName, snapshotSessionOptionsName);
+            sourceSessionOptionsName, snapshotSessionOptionsName);
     }
 }

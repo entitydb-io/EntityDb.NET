@@ -46,24 +46,24 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[] { "application/json" }
+                    ["Content-Type"] = new[] { "application/json" },
                 },
-                HasIpAddress = true
+                HasIpAddress = true,
             },
             new HttpContextSeederOptions
             {
                 Headers = new Dictionary<string, string[]>
                 {
-                    ["Content-Type"] = new[] { "application/json" }
+                    ["Content-Type"] = new[] { "application/json" },
                 },
-                HasIpAddress = false
-            }
+                HasIpAddress = false,
+            },
         };
     }
 
     protected override Dictionary<string, string>? GetApplicationInfo(object agentSignature)
     {
-        return agentSignature is not HttpContextAgentSignature.Snapshot httpContextAgentSignature
+        return agentSignature is not HttpContextAgentSignature httpContextAgentSignature
             ? null
             : httpContextAgentSignature.ApplicationInfo;
     }

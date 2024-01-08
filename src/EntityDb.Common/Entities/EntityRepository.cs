@@ -1,11 +1,10 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Queries;
+using EntityDb.Common.Sources.Queries.Standard;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Entities;
@@ -18,16 +17,16 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
     public EntityRepository
     (
         IEnumerable<ISourceSubscriber> sourceSubscribers,
-        ITransactionRepository transactionRepository,
+        ISourceRepository sourceRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
         _sourceSubscribers = sourceSubscribers;
-        TransactionRepository = transactionRepository;
+        SourceRepository = sourceRepository;
         SnapshotRepository = snapshotRepository;
     }
 
-    public ITransactionRepository TransactionRepository { get; }
+    public ISourceRepository SourceRepository { get; }
     public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
 
     public async Task<TEntity> GetSnapshot(Pointer entityPointer, CancellationToken cancellationToken = default)
@@ -37,13 +36,21 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
               TEntity.Construct(entityPointer.Id)
             : TEntity.Construct(entityPointer.Id);
 
-        var commandQuery = new GetEntityCommandsQuery(entityPointer, snapshot.GetVersionNumber());
+        var snapshotPointer = snapshot.GetPointer();
 
-        var commands = TransactionRepository.EnumerateCommands(commandQuery, cancellationToken);
+        var query = new GetDeltasQuery(entityPointer, snapshotPointer.Version);
 
-        var entity = await commands.AggregateAsync(snapshot, (current, command) => current.Reduce(command), cancellationToken: cancellationToken);
+        var deltas = SourceRepository.EnumerateDeltas(query, cancellationToken);
 
-        if (!entityPointer.IsSatisfiedBy(entity.GetVersionNumber()))
+        var entity = await deltas
+            .AggregateAsync
+            (
+                snapshot,
+                (current, delta) => current.Reduce(delta),
+                cancellationToken
+            );
+
+        if (!entityPointer.IsSatisfiedBy(entity.GetPointer()))
         {
             throw new SnapshotPointerDoesNotExistException();
         }
@@ -51,13 +58,14 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         return entity;
     }
 
-    public async Task<bool> PutTransaction(ITransaction transaction, CancellationToken cancellationToken = default)
+    public async Task<bool> Commit(Source source,
+        CancellationToken cancellationToken = default)
     {
-        var success = await TransactionRepository.PutTransaction(transaction, cancellationToken);
+        var success = await SourceRepository.Commit(source, cancellationToken);
 
         if (success)
         {
-            Publish(transaction);
+            Publish(source);
         }
 
         return success;
@@ -65,7 +73,7 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
 
     public override async ValueTask DisposeAsync()
     {
-        await TransactionRepository.DisposeAsync();
+        await SourceRepository.DisposeAsync();
 
         if (SnapshotRepository is not null)
         {
@@ -73,28 +81,28 @@ internal class EntityRepository<TEntity> : DisposableResourceBaseClass, IEntityR
         }
     }
 
-    private void Publish(ITransaction transaction)
+    private void Publish(Source source)
     {
         foreach (var sourceSubscriber in _sourceSubscribers)
         {
-            sourceSubscriber.Notify(transaction);
+            sourceSubscriber.Notify(source);
         }
     }
 
     public static EntityRepository<TEntity> Create
     (
         IServiceProvider serviceProvider,
-        ITransactionRepository transactionRepository,
+        ISourceRepository sourceRepository,
         ISnapshotRepository<TEntity>? snapshotRepository = null
     )
     {
         if (snapshotRepository is null)
         {
             return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider,
-                transactionRepository);
+                sourceRepository);
         }
 
-        return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, transactionRepository,
+        return ActivatorUtilities.CreateInstance<EntityRepository<TEntity>>(serviceProvider, sourceRepository,
             snapshotRepository);
     }
 }

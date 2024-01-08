@@ -18,6 +18,10 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument<
     private static readonly AgentSignatureSortBuilder SortBuilder = new();
 
     public Id[] EntityIds { get; init; } = Array.Empty<Id>();
+    public Pointer[] EntityPointers { get; init; } = Array.Empty<Pointer>();
+
+    public Id[] GetSubjectIds() => EntityIds;
+    public Pointer[] GetSubjectPointers() => EntityPointers;
 
     public static IDocumentReader<AgentSignatureDocument> DocumentReader { get; } = new AgentSignatureDocumentReader();
 
@@ -42,12 +46,16 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument<
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityIds = transaction.Commands
-                        .Select(transactionCommand => transactionCommand.EntityId)
+                    EntityIds = transaction.Subjects
+                        .Select(transactionCommand => transactionCommand.SubjectId)
+                        .Distinct()
+                        .ToArray(),
+                    EntityPointers = transaction.Subjects
+                        .Select(transactionCommand => transactionCommand.SubjectId + transactionCommand.SubjectVersionNumber)
                         .Distinct()
                         .ToArray(),
                     DataType = transaction.AgentSignature.GetType().Name,
-                    Data = envelopeService.Serialize(transaction.AgentSignature)
+                    Data = envelopeService.Serialize(transaction.AgentSignature),
                 }
             }
         );

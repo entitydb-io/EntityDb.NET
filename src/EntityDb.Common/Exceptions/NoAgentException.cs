@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using EntityDb.Abstractions.Sources.Agents;
 
 namespace EntityDb.Common.Exceptions;
 

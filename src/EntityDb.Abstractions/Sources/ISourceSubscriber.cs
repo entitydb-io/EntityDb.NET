@@ -9,5 +9,5 @@ public interface ISourceSubscriber
     ///     Called when a source has been committed.
     /// </summary>
     /// <param name="source">The committed source.</param>
-    void Notify(ISource source);
+    void Notify(Source source);
 }

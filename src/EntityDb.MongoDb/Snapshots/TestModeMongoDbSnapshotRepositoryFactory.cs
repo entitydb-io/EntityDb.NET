@@ -25,8 +25,7 @@ internal class TestModeMongoDbSnapshotRepositoryFactory<TSnapshot> : MongoDbSnap
 
         var normalOptions = new MongoDbSnapshotSessionOptions
         {
-            ConnectionString = options.ConnectionString,
-            DatabaseName = options.DatabaseName,
+            ConnectionString = options.ConnectionString, DatabaseName = options.DatabaseName,
         };
 
         var normalSession = await base.CreateSession(normalOptions, cancellationToken);
@@ -42,7 +41,7 @@ internal class TestModeMongoDbSnapshotRepositoryFactory<TSnapshot> : MongoDbSnap
     }
 
     public override async ValueTask DisposeAsync()
-    {   
+    {
         if (_sessions.HasValue)
         {
             await _sessions.Value.Normal.AbortTransaction();

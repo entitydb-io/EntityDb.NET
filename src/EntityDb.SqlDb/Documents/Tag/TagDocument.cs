@@ -23,6 +23,9 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
     public string Value { get; init; } = default!;
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
+    
+    public Id GetSubjectId() => EntityId;
+    public VersionNumber GetSubjectVersionNumber() => EntityVersionNumber;
 
     public static IDocumentReader<TagDocument> DocumentReader { get; } = new TagDocumentReader();
 
@@ -47,8 +50,8 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                    EntityId = transactionCommand.SubjectId,
+                    EntityVersionNumber = transactionCommand.SubjectVersionNumber,
                     Label = tag.Label,
                     Value = tag.Value,
                     DataType = tag.GetType().Name,
@@ -78,7 +81,7 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument<TagDocument>
         ITransactionCommand transactionCommand
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
+        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.SubjectId, transactionCommand.DeleteTags);
 
         return new DeleteDocumentsCommand
         (

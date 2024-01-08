@@ -24,7 +24,7 @@ public interface ISnapshotRepository<TSnapshot> : IDisposableResource
     /// <summary>
     ///     Inserts a <typeparamref name="TSnapshot" /> snapshot.
     /// </summary>
-    /// <param name="snapshotPointer">A pointer to a specific snapshot.</param>
+    /// <param name="snapshotPointer">A pointer to a snapshot.</param>
     /// <param name="snapshot">The snapshot.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>

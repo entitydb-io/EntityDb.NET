@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Leases;
+﻿using EntityDb.Abstractions.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Leases;
 

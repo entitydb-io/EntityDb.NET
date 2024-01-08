@@ -13,7 +13,8 @@ internal class BufferBlockSourceProcessorQueue : BackgroundService, ISourceProce
     private readonly ILogger<BufferBlockSourceProcessorQueue> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public BufferBlockSourceProcessorQueue(ILogger<BufferBlockSourceProcessorQueue> logger, IServiceScopeFactory serviceScopeFactory)
+    public BufferBlockSourceProcessorQueue(ILogger<BufferBlockSourceProcessorQueue> logger,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
@@ -34,13 +35,13 @@ internal class BufferBlockSourceProcessorQueue : BackgroundService, ISourceProce
 
             using var logScope = _logger.BeginScope(new KeyValuePair<string, object>[]
             {
-                new("SourceProcessorType", item.SourceProcessorType.Name),
-                new("SourceId", item.Source.Id.Value)
+                new("SourceProcessorType", item.SourceProcessorType.Name), new("SourceId", item.Source.Id.Value),
             });
 
             try
             {
-                var sourceProcessor = (ISourceProcessor)serviceScope.ServiceProvider.GetRequiredService(item.SourceProcessorType);
+                var sourceProcessor =
+                    (ISourceProcessor)serviceScope.ServiceProvider.GetRequiredService(item.SourceProcessorType);
 
                 _logger.LogDebug("Started processing source");
 

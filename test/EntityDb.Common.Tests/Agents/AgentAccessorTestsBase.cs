@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -40,7 +40,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
         // ASSERT
 
-        Should.Throw<NoAgentException>(() => agentAccessor.GetAgentAsync(default!));
+        Should.Throw<NoAgentException>(() => agentAccessor.GetAgent(default!));
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgentAsync(default!);
+            var agent = agentAccessor.GetAgent(default!);
 
             // ASSERT
 
@@ -84,7 +84,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgent(default!);
 
             // ASSERT
 
@@ -106,7 +106,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgent(default!);
 
             // ACT
 
@@ -135,7 +135,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgent(default!);
 
             // ACT
 
@@ -160,13 +160,13 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var expectedApplicationInfo = new Dictionary<string, string>
             {
-                ["UserId"] = Guid.NewGuid().ToString()
+                ["UserId"] = Guid.NewGuid().ToString(),
             };
 
             var agentSignatureAugmenterMock = new Mock<IAgentSignatureAugmenter>(MockBehavior.Strict);
 
             agentSignatureAugmenterMock
-                .Setup(x => x.GetApplicationInfoAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetApplicationInfo(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedApplicationInfo);
 
             using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -178,7 +178,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgent(default!);
 
             // ACT
 

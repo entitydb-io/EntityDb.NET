@@ -14,7 +14,7 @@ internal interface IMongoSession : IDisposableResource
 
     Task<SnapshotDocument?> Find(Pointer snapshotPointer, CancellationToken cancellationToken);
 
-    Task Delete(Pointer[] snapshotPointers, CancellationToken cancellationToken);
+    Task Delete(Pointer[] snapshotPointer, CancellationToken cancellationToken);
 
     void StartTransaction();
     Task CommitTransaction(CancellationToken cancellationToken);

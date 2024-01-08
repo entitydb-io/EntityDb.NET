@@ -32,6 +32,9 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDo
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
 
+    public Id GetSubjectId() => EntityId;
+    public VersionNumber GetSubjectVersionNumber() => EntityVersionNumber;
+
     public static InsertDocumentsCommand<CommandDocument> GetInsertCommand
     (
         IEnvelopeService<string> envelopeService,
@@ -48,8 +51,8 @@ internal sealed record CommandDocument : DocumentBase, IEntityDocument<CommandDo
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                    EntityId = transactionCommand.SubjectId,
+                    EntityVersionNumber = transactionCommand.SubjectVersionNumber,
                     DataType = transactionCommand.Data.GetType().Name,
                     Data = envelopeService.Serialize(transactionCommand.Data)
                 }

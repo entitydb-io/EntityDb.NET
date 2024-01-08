@@ -1,6 +1,7 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using System.Diagnostics.CodeAnalysis;
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
 using EntityDb.Common.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -11,6 +12,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class TryCatchSnapshotRepositoryTests : TestsBase<Startup>
 {
     public TryCatchSnapshotRepositoryTests(IServiceProvider serviceProvider) : base(serviceProvider)

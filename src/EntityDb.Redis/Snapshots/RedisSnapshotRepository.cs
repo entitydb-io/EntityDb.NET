@@ -2,7 +2,7 @@
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
-using EntityDb.Redis.Sessions;
+using EntityDb.Redis.Snapshots.Sessions;
 
 namespace EntityDb.Redis.Snapshots;
 

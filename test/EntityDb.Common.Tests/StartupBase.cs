@@ -1,5 +1,5 @@
-﻿using EntityDb.Common.Agents;
-using EntityDb.Common.Extensions;
+﻿using EntityDb.Common.Extensions;
+using EntityDb.Common.Sources.Agents;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Tests;
@@ -20,7 +20,7 @@ public abstract class StartupBase : IStartup
 
         serviceCollection.AddAgentAccessor<UnknownAgentAccessor>();
 
-        // Transaction Processor Queue
+        // Source Processor Queue
 
         serviceCollection.AddSourceProcessorQueue(true);
     }

@@ -1,7 +1,5 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
@@ -9,20 +7,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Projections;
 
-internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass, IProjectionRepository<TProjection>
+internal sealed class ProjectionRepository<TProjection> : DisposableResourceBaseClass,
+    IProjectionRepository<TProjection>
     where TProjection : IProjection<TProjection>
 {
+    private readonly IServiceProvider _serviceProvider;
+
     public ProjectionRepository
     (
-        ITransactionRepository transactionRepository,
+        IServiceProvider serviceProvider,
         ISnapshotRepository<TProjection>? snapshotRepository = null
     )
     {
-        TransactionRepository = transactionRepository;
+        _serviceProvider = serviceProvider;
         SnapshotRepository = snapshotRepository;
     }
-
-    public ITransactionRepository TransactionRepository { get; }
 
     public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
 
@@ -33,14 +32,14 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
               TProjection.Construct(projectionPointer.Id)
             : TProjection.Construct(projectionPointer.Id);
 
-        var sources = projection.EnumerateSources(this, projectionPointer, cancellationToken);
+        var sources = projection.EnumerateSources(_serviceProvider, projectionPointer, cancellationToken);
 
         await foreach (var source in sources)
         {
             projection.Mutate(source);
         }
 
-        if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
+        if (!projectionPointer.IsSatisfiedBy(projection.GetPointer()))
         {
             throw new SnapshotPointerDoesNotExistException();
         }
@@ -49,16 +48,14 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
     }
 
     public static IProjectionRepository<TProjection> Create(IServiceProvider serviceProvider,
-        ITransactionRepository transactionRepository,
         ISnapshotRepository<TProjection>? snapshotRepository = null)
     {
         if (snapshotRepository is null)
         {
-            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-                transactionRepository);
+            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider);
         }
 
         return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-            transactionRepository, snapshotRepository);
+            snapshotRepository);
     }
 }

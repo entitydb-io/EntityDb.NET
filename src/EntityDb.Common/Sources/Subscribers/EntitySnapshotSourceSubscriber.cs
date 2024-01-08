@@ -1,6 +1,5 @@
-﻿using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Common.Entities;
+﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Sources.Processors;
 using EntityDb.Common.Sources.Processors.Queues;
@@ -17,9 +16,9 @@ internal class EntitySnapshotSourceSubscriber<TEntity> : ISourceSubscriber
         _sourceProcessorQueue = sourceProcessorQueue;
     }
 
-    public void Notify(ISource source)
+    public void Notify(Source source)
     {
-        if (source is not ITransaction transaction || !transaction.Commands.Any(command => TEntity.CanReduce(command.Data)))
+        if (!source.Messages.Any(message => TEntity.CanReduce(message.Delta)))
         {
             return;
         }

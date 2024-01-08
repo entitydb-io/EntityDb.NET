@@ -14,10 +14,10 @@ internal class InMemorySnapshotRepository<TSnapshot> : DisposableResourceBaseCla
         _inMemorySession = inMemorySession;
     }
 
-    public Task<bool> PutSnapshot(Pointer snapshotPointer, TSnapshot snapshot,
+    public Task<bool> PutSnapshot(Pointer subjectPointer, TSnapshot snapshot,
         CancellationToken cancellationToken = default)
     {
-        return _inMemorySession.Insert(snapshotPointer, snapshot).WaitAsync(cancellationToken);
+        return _inMemorySession.Insert(subjectPointer, snapshot).WaitAsync(cancellationToken);
     }
 
     public Task<TSnapshot?> GetSnapshotOrDefault(Pointer snapshotPointer, CancellationToken cancellationToken = default)

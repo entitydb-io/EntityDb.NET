@@ -103,7 +103,7 @@ public class DefaultTypeResolverTests
 
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
-            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
         });
 
         // ACT
@@ -134,7 +134,7 @@ public class DefaultTypeResolverTests
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
             [EnvelopeHelper.AssemblyFullName] = "Garbage",
             [EnvelopeHelper.TypeFullName] = "Garbage",
-            [EnvelopeHelper.MemberInfoName] = "Garbage"
+            [EnvelopeHelper.MemberInfoName] = "Garbage",
         });
 
         // ASSERT

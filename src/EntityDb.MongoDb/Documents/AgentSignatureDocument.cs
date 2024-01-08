@@ -1,42 +1,46 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Common.Envelopes;
-using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Queries;
-using EntityDb.MongoDb.Queries.FilterBuilders;
-using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.MongoDb.Documents.Commands;
+using EntityDb.MongoDb.Documents.Queries;
+using EntityDb.MongoDb.Sources.Queries;
+using EntityDb.MongoDb.Sources.Queries.SortBuilders;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
 
-internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
+internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
 {
     public const string CollectionName = "AgentSignatures";
 
-    private static readonly AgentSignatureFilterBuilder FilterBuilder = new();
-
-    private static readonly AgentSignatureSortBuilder SortBuilder = new();
-
-    public Id[] EntityIds { get; init; } = default!;
+    private static readonly MessageGroupSortBuilder SortBuilder = new();
 
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
         IEnvelopeService<BsonDocument> envelopeService,
-        ITransaction transaction
+        Source source
     )
     {
+        var entityPointers = source.Messages
+            .Select(message => message.EntityPointer)
+            .Distinct()
+            .ToArray();
+
+        var entityIds = entityPointers
+            .Select(entityPointer => entityPointer.Id)
+            .ToArray();
+
         var documents = new[]
         {
             new AgentSignatureDocument
             {
-                TransactionTimeStamp = transaction.TimeStamp,
-                TransactionId = transaction.Id,
-                EntityIds = transaction.Commands.Select(transactionCommand => transactionCommand.EntityId).Distinct()
-                    .ToArray(),
-                DataType = transaction.AgentSignature.GetType().Name,
-                Data = envelopeService.Serialize(transaction.AgentSignature)
-            }
+                SourceTimeStamp = source.TimeStamp,
+                SourceId = source.Id,
+                EntityIds = entityIds,
+                EntityPointers = entityPointers,
+                DataType = source.AgentSignature.GetType().Name,
+                Data = envelopeService.Serialize(source.AgentSignature),
+            },
         };
 
         return new InsertDocumentsCommand<AgentSignatureDocument>
@@ -48,17 +52,17 @@ internal sealed record AgentSignatureDocument : DocumentBase, IEntitiesDocument
 
     public static DocumentQuery<AgentSignatureDocument> GetQuery
     (
-        IAgentSignatureQuery agentSignatureQuery
+        IMessageGroupQuery messageGroupQuery
     )
     {
         return new DocumentQuery<AgentSignatureDocument>
         (
             CollectionName,
-            agentSignatureQuery.GetFilter(FilterBuilder),
-            agentSignatureQuery.GetSort(SortBuilder),
-            agentSignatureQuery.Skip,
-            agentSignatureQuery.Take,
-            agentSignatureQuery.Options as MongoDbQueryOptions
+            messageGroupQuery.GetFilter(FilterBuilder),
+            messageGroupQuery.GetSort(SortBuilder),
+            messageGroupQuery.Skip,
+            messageGroupQuery.Take,
+            messageGroupQuery.Options as MongoDbQueryOptions
         );
     }
 }

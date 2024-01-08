@@ -3,7 +3,7 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.ConnectionMultiplexers;
-using EntityDb.Redis.Sessions;
+using EntityDb.Redis.Snapshots.Sessions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -52,19 +52,9 @@ internal class RedisSnapshotRepositoryFactory<TSnapshot> : DisposableResourceBas
         CancellationToken cancellationToken)
     {
         var connectionMultiplexer =
-            await _connectionMultiplexerFactory.CreateConnectionMultiplexer(options.ConnectionString, cancellationToken);
+            await _connectionMultiplexerFactory.CreateConnectionMultiplexer(options.ConnectionString,
+                cancellationToken);
 
         return RedisSession.Create(_serviceProvider, connectionMultiplexer.GetDatabase(), options);
-    }
-
-    public static RedisSnapshotRepositoryFactory<TSnapshot> Create(IServiceProvider serviceProvider,
-        string connectionString, string keyNamespace)
-    {
-        return ActivatorUtilities.CreateInstance<RedisSnapshotRepositoryFactory<TSnapshot>>
-        (
-            serviceProvider,
-            connectionString,
-            keyNamespace
-        );
     }
 }

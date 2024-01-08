@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests;
-using EntityDb.Redis.Sessions;
+using EntityDb.Redis.Snapshots.Sessions;
 using Shouldly;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class RedisSessionTests : TestsBase<Startup>
 
         var readOnlyRedisSession = new RedisSession(default!, default!, new RedisSnapshotSessionOptions
         {
-            ReadOnly = true
+            ReadOnly = true,
         });
 
         // ASSERT

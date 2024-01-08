@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Transactions;
+﻿using EntityDb.Abstractions.Sources;
 using EntityDb.Void.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +10,7 @@ namespace EntityDb.Void.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///     Adds a production-ready implementation of <see cref="ITransactionRepositoryFactory" /> to a service
+    ///     Adds a production-ready implementation of <see cref="ISourceRepositoryFactory" /> to a service
     ///     collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
@@ -20,6 +20,6 @@ public static class ServiceCollectionExtensions
     public static void AddVoidTransactions(this IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddSingleton<ITransactionRepositoryFactory, VoidTransactionRepositoryFactory>();
+            .AddSingleton<ISourceRepositoryFactory, VoidSourceRepositoryFactory>();
     }
 }

@@ -1,28 +1,22 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using EntityDb.Abstractions.Queries;
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
-using EntityDb.Common.Projections;
-using EntityDb.Common.Tests.Implementations.DbContexts;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using EntityDb.EntityFramework.Extensions;
-using EntityDb.EntityFramework.Sessions;
 using EntityDb.MongoDb.Extensions;
-using EntityDb.MongoDb.Queries;
 using EntityDb.MongoDb.Snapshots.Sessions;
-using EntityDb.MongoDb.Transactions.Sessions;
-using EntityDb.Npgsql.Extensions;
-using EntityDb.Npgsql.Queries;
+using EntityDb.MongoDb.Sources.Queries;
+using EntityDb.MongoDb.Sources.Sessions;
 using EntityDb.Redis.Extensions;
-using EntityDb.Redis.Sessions;
-using EntityDb.SqlDb.Sessions;
+using EntityDb.Redis.Snapshots.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,97 +35,61 @@ public class TestsBase<TStartup>
     where TStartup : IStartup, new()
 {
     public delegate void AddDependenciesDelegate(IServiceCollection serviceCollection);
-    
-    private static readonly TransactionsAdder[] AllTransactionAdders =
+
+    private static readonly SourcesAdder[] AllSourceAdders =
     {
-        new("MongoDb", typeof(MongoDbQueryOptions), (timeStamp) => timeStamp.WithMillisecondPrecision(), serviceCollection =>
-        {
-            var databaseContainerFixture = serviceCollection
-                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
-                .ImplementationInstance as DatabaseContainerFixture;
-
-            serviceCollection.AddMongoDbTransactions(true, true);
-
-            serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
+        new("MongoDb", typeof(MongoDbQueryOptions), timeStamp => timeStamp.WithMillisecondPrecision(),
+            serviceCollection =>
             {
-                options.FindOptions = new FindOptions
+                var databaseContainerFixture = (serviceCollection
+                    .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
+                    .ImplementationInstance as DatabaseContainerFixture)!;
+
+                serviceCollection.AddMongoDbSources(true, true);
+
+                serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
                 {
-                    Collation = new Collation("en", numericOrdering: true)
-                };
-            });
+                    options.FindOptions = new FindOptions
+                    {
+                        Collation = new Collation("en", numericOrdering: true),
+                    };
+                });
 
-            serviceCollection.ConfigureAll<MongoDbTransactionSessionOptions>(options =>
-            {
-                var host = databaseContainerFixture!.MongoDbContainer.Hostname;
-                var port = databaseContainerFixture!.MongoDbContainer.GetMappedPublicPort(27017);
+                serviceCollection.ConfigureAll<MongoDbSourceSessionOptions>(options =>
+                {
+                    var host = databaseContainerFixture.MongoDbContainer.Hostname;
+                    var port = databaseContainerFixture.MongoDbContainer.GetMappedPublicPort(27017);
 
-                options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
-                options.DatabaseName = DatabaseContainerFixture.OmniParameter;
-                options.WriteTimeout = TimeSpan.FromSeconds(1);
-            });
+                    options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
+                    options.DatabaseName = DatabaseContainerFixture.OmniParameter;
+                    options.WriteTimeout = TimeSpan.FromSeconds(1);
+                });
 
-            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
+                serviceCollection.Configure<MongoDbSourceSessionOptions>(TestSessionOptions.Write,
+                    options => { options.ReadOnly = false; });
 
-            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = false;
-            });
+                serviceCollection.Configure<MongoDbSourceSessionOptions>(TestSessionOptions.ReadOnly, options =>
+                {
+                    options.ReadOnly = true;
+                    options.SecondaryPreferred = false;
+                });
 
-            serviceCollection.Configure<MongoDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-            });
-        }),
-
-        new("Npgsql", typeof(NpgsqlQueryOptions), (timeStamp) => timeStamp.WithMicrosecondPrecision(), serviceCollection =>
-        {
-            var databaseContainerFixture = serviceCollection
-                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
-                .ImplementationInstance as DatabaseContainerFixture;
-        
-            serviceCollection.AddNpgsqlTransactions(true, true);
-        
-            serviceCollection.Configure<NpgsqlQueryOptions>("Count", options =>
-            {
-                options.LeaseValueSortCollation = "numeric";
-                options.TagValueSortCollation = "numeric";
-            });
-        
-            serviceCollection.ConfigureAll<SqlDbTransactionSessionOptions>(options =>
-            {
-                options.ConnectionString = $"{databaseContainerFixture!.PostgreSqlContainer.GetConnectionString()};Include Error Detail=true";
-            });
-        
-            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
-        
-            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnly, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = false;
-            });
-        
-            serviceCollection.Configure<SqlDbTransactionSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-            });
-        })
+                serviceCollection.Configure<MongoDbSourceSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
+                    options =>
+                    {
+                        options.ReadOnly = true;
+                        options.SecondaryPreferred = true;
+                    });
+            }),
     };
 
     private readonly IConfiguration _configuration;
+    private readonly DatabaseContainerFixture? _databaseContainerFixture;
     private readonly ITest _test;
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
-    private readonly DatabaseContainerFixture? _databaseContainerFixture;
 
-    protected TestsBase(IServiceProvider startupServiceProvider, DatabaseContainerFixture? databaseContainerFixture = null)
+    protected TestsBase(IServiceProvider startupServiceProvider,
+        DatabaseContainerFixture? databaseContainerFixture = null)
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
         _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
@@ -155,54 +113,21 @@ public class TestsBase<TStartup>
             .ShouldNotBeNull();
     }
 
-    private static SnapshotAdder EntityFrameworkSnapshotAdder<TSnapshot>()
-        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
-    {
-        return new SnapshotAdder($"EntityFramework<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
-        {
-            var databaseContainerFixture = serviceCollection
-                .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
-                .ImplementationInstance as DatabaseContainerFixture;
-
-            serviceCollection.AddEntityFrameworkSnapshots<TSnapshot, GenericDbContext<TSnapshot>>(testMode: true);
-
-            serviceCollection.ConfigureAll<EntityFrameworkSnapshotSessionOptions>(options =>
-            {
-                options.ConnectionString = databaseContainerFixture!.PostgreSqlContainer.GetConnectionString();
-            });
-
-            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
-
-            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
-            {
-                options.ReadOnly = true;
-            });
-
-            serviceCollection.Configure<EntityFrameworkSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-            });
-        });
-    }
-    
     private static SnapshotAdder MongoDbSnapshotAdder<TSnapshot>()
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         return new SnapshotAdder($"MongoDb<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
         {
-            var databaseContainerFixture = serviceCollection
+            var databaseContainerFixture = (serviceCollection
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
-                .ImplementationInstance as DatabaseContainerFixture;
+                .ImplementationInstance as DatabaseContainerFixture)!;
 
             serviceCollection.AddMongoDbSnapshots<TSnapshot>(true, true);
 
             serviceCollection.ConfigureAll<MongoDbSnapshotSessionOptions>(options =>
             {
-                var host = databaseContainerFixture!.MongoDbContainer.Hostname;
-                var port = databaseContainerFixture!.MongoDbContainer.GetMappedPublicPort(27017);
+                var host = databaseContainerFixture.MongoDbContainer.Hostname;
+                var port = databaseContainerFixture.MongoDbContainer.GetMappedPublicPort(27017);
 
                 options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
                 options.DatabaseName = DatabaseContainerFixture.OmniParameter;
@@ -210,10 +135,8 @@ public class TestsBase<TStartup>
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
-            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
+            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.Write,
+                options => { options.ReadOnly = false; });
 
             serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
@@ -221,11 +144,12 @@ public class TestsBase<TStartup>
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-            });
+            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
+                options =>
+                {
+                    options.ReadOnly = true;
+                    options.SecondaryPreferred = true;
+                });
         });
     }
 
@@ -246,10 +170,8 @@ public class TestsBase<TStartup>
                 options.KeyNamespace = TSnapshot.RedisKeyNamespace;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.Write, options =>
-            {
-                options.ReadOnly = false;
-            });
+            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.Write,
+                options => { options.ReadOnly = false; });
 
             serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
@@ -257,18 +179,18 @@ public class TestsBase<TStartup>
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred, options =>
-            {
-                options.ReadOnly = true;
-                options.SecondaryPreferred = true;
-            });
+            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
+                options =>
+                {
+                    options.ReadOnly = true;
+                    options.SecondaryPreferred = true;
+                });
         });
     }
 
     private static IEnumerable<SnapshotAdder> AllSnapshotAdders<TSnapshot>()
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
-        yield return EntityFrameworkSnapshotAdder<TSnapshot>();
         yield return RedisSnapshotAdder<TSnapshot>();
         yield return MongoDbSnapshotAdder<TSnapshot>();
     }
@@ -286,12 +208,11 @@ public class TestsBase<TStartup>
         return
             from snapshotAdder in AllSnapshotAdders<TEntity>()
             let entityAdder = GetEntityAdder<TEntity>()
-            select new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
-            snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
+            select snapshotAdder with { AddDependencies = snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
             {
                 serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(TestSessionOptions.ReadOnly,
                     TestSessionOptions.Write);
-            }));
+            }) };
     }
 
     private static IEnumerable<EntityAdder> AllEntityAdders()
@@ -309,13 +230,11 @@ public class TestsBase<TStartup>
         where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
         return AllSnapshotAdders<TProjection>()
-            .Select(snapshotAdder => new SnapshotAdder(snapshotAdder.Name, snapshotAdder.SnapshotType,
-                snapshotAdder.AddDependencies + (serviceCollection =>
+            .Select(snapshotAdder => snapshotAdder with { AddDependencies = snapshotAdder.AddDependencies + (serviceCollection =>
                 {
                     serviceCollection.AddProjection<TProjection>();
-                    serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(
-                        TestSessionOptions.ReadOnly, TestSessionOptions.Write);
-                }))
+                    serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(TestSessionOptions.Write);
+                }) }
             );
     }
 
@@ -325,44 +244,44 @@ public class TestsBase<TStartup>
             .Concat(AllProjectionAdders<OneToOneProjection>());
     }
 
-    public static IEnumerable<object[]> AddTransactionsAndEntity()
+    public static IEnumerable<object[]> AddSourcesAndEntity()
     {
-        return from transactionAdder in AllTransactionAdders
-               from entityAdder in AllEntityAdders()
-               select new object[] { transactionAdder, entityAdder };
+        return from sourceAdder in AllSourceAdders
+            from entityAdder in AllEntityAdders()
+            select new object[] { sourceAdder, entityAdder };
     }
 
     public static IEnumerable<object[]> AddEntity()
     {
         return from entityAdder in AllEntityAdders()
-               select new object[] { entityAdder };
+            select new object[] { entityAdder };
     }
 
     public static IEnumerable<object[]> AddEntitySnapshots()
     {
         return from entitySnapshotAdder in AllEntitySnapshotAdders()
-               select new object[] { entitySnapshotAdder };
+            select new object[] { entitySnapshotAdder };
     }
 
     public static IEnumerable<object[]> AddProjectionSnapshots()
     {
         return from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-               select new object[] { projectionSnapshotAdder };
+            select new object[] { projectionSnapshotAdder };
     }
 
-    public static IEnumerable<object[]> AddTransactionsAndEntitySnapshots()
+    public static IEnumerable<object[]> AddSourcesAndEntitySnapshots()
     {
-        return from transactionAdder in AllTransactionAdders
-               from entitySnapshotAdder in AllEntitySnapshotAdders()
-               select new object[] { transactionAdder, entitySnapshotAdder };
+        return from sourceAdder in AllSourceAdders
+            from entitySnapshotAdder in AllEntitySnapshotAdders()
+            select new object[] { sourceAdder, entitySnapshotAdder };
     }
 
-    public static IEnumerable<object[]> AddTransactionsEntitySnapshotsAndProjectionSnapshots()
+    public static IEnumerable<object[]> AddSourcesEntitySnapshotsAndProjectionSnapshots()
     {
-        return from transactionAdder in AllTransactionAdders
-               from entitySnapshotAdder in AllEntitySnapshotAdders()
-               from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-               select new object[] { transactionAdder, entitySnapshotAdder, projectionSnapshotAdder };
+        return from sourceAdder in AllSourceAdders
+            from entitySnapshotAdder in AllEntitySnapshotAdders()
+            from projectionSnapshotAdder in AllProjectionSnapshotAdders()
+            select new object[] { sourceAdder, entitySnapshotAdder, projectionSnapshotAdder };
     }
 
     protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
@@ -382,17 +301,11 @@ public class TestsBase<TStartup>
             loggingBuilder.AddSimpleConsole(options => { options.IncludeScopes = true; });
         });
 
-        serviceCollection.Configure<LoggerFilterOptions>(x =>
-        {
-            x.MinLevel = LogLevel.Debug;
-        });
+        serviceCollection.Configure<LoggerFilterOptions>(x => { x.MinLevel = LogLevel.Debug; });
 
         startup.AddServices(serviceCollection);
 
-        if (_databaseContainerFixture != null)
-        {
-            serviceCollection.AddSingleton(_databaseContainerFixture);
-        }
+        if (_databaseContainerFixture != null) serviceCollection.AddSingleton(_databaseContainerFixture);
 
         configureServices?.Invoke(serviceCollection);
 
@@ -452,6 +365,8 @@ public class TestsBase<TStartup>
         loggerFactoryMock
             .Setup(factory => factory.AddProvider(It.IsAny<ILoggerProvider>()));
 
+        return (loggerFactoryMock.Object, Verifier);
+
         void Verifier(Times times)
         {
             loggerMock
@@ -468,40 +383,39 @@ public class TestsBase<TStartup>
                     times
                 );
         }
-
-        return (loggerFactoryMock.Object, Verifier);
     }
 
-    protected static ITransactionRepositoryFactory GetMockedTransactionRepositoryFactory(
-        object[]? commands = null)
+    protected static ISourceRepositoryFactory GetMockedSourceRepositoryFactory(
+        object[]? deltas = null)
     {
-        commands ??= Array.Empty<object>();
+        deltas ??= Array.Empty<object>();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
+        var sourceRepositoryMock = new Mock<ISourceRepository>(MockBehavior.Strict);
 
-        transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
+        sourceRepositoryMock
+            .Setup(repository =>
+                repository.Commit(It.IsAny<Source>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        transactionRepositoryMock
-            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(AsyncEnumerablePolyfill.FromResult(commands));
+        sourceRepositoryMock
+            .Setup(repository => repository.EnumerateDeltas(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(AsyncEnumerablePolyfill.FromResult(deltas));
 
-        transactionRepositoryMock
+        sourceRepositoryMock
             .Setup(repository => repository.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        var transactionRepositoryFactoryMock =
-            new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
+        var sourceRepositoryFactoryMock =
+            new Mock<ISourceRepositoryFactory>(MockBehavior.Strict);
 
-        transactionRepositoryFactoryMock
+        sourceRepositoryFactoryMock
             .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionRepositoryMock.Object);
+            .ReturnsAsync(sourceRepositoryMock.Object);
 
-        transactionRepositoryFactoryMock
+        sourceRepositoryFactoryMock
             .Setup(factory => factory.Dispose());
 
-        return transactionRepositoryFactoryMock.Object;
+        return sourceRepositoryFactoryMock.Object;
     }
 
     protected static ISnapshotRepositoryFactory<TEntity> GetMockedSnapshotRepositoryFactory<TEntity>
@@ -545,7 +459,8 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record TransactionsAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp, AddDependenciesDelegate AddDependencies)
+    public record SourcesAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
+        AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {

@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Queries.SortBuilders;
-using EntityDb.Common.Queries.SortBuilders;
+﻿using EntityDb.Abstractions.Sources.Queries.SortBuilders;
+using EntityDb.Common.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Extensions;
 
@@ -9,35 +9,33 @@ namespace EntityDb.Common.Extensions;
 public static class SortBuilderExtensions
 {
     /// <summary>
-    ///     Returns a <see cref="IAgentSignatureSortBuilder{TSort}" /> that orders agentSignatures in the reverse order of
-    ///     another
-    ///     <see cref="IAgentSignatureSortBuilder{TSort}" />.
+    ///     Returns a <see cref="IMessageGroupSortBuilder{TSort}" /> that orders objects in the reverse order of
+    ///     another <see cref="IMessageGroupSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-    /// <param name="agentSignatureSortBuilder">The agentSignature sort builder.</param>
+    /// <param name="builder">The message group sort builder.</param>
     /// <returns>
-    ///     A <see cref="IAgentSignatureSortBuilder{TSort}" /> that orders agentSignatures in the reverse order of
-    ///     <paramref name="agentSignatureSortBuilder" />.
+    ///     A <see cref="IMessageGroupSortBuilder{TSort}" /> that orders objects in the reverse order of
+    ///     <paramref name="builder" />.
     /// </returns>
-    public static IAgentSignatureSortBuilder<TSort> Reverse<TSort>(
-        this IAgentSignatureSortBuilder<TSort> agentSignatureSortBuilder)
+    public static IMessageGroupSortBuilder<TSort> Reverse<TSort>(this IMessageGroupSortBuilder<TSort> builder)
     {
-        return new AgentSignatureReverseSortBuilder<TSort>(agentSignatureSortBuilder);
+        return new ReverseMessageGroupSortBuilder<TSort>(builder);
     }
 
     /// <summary>
-    ///     Returns a <see cref="ICommandSortBuilder{TSort}" /> that orders commands in the reverse order of another
-    ///     <see cref="ICommandSortBuilder{TSort}" />.
+    ///     Returns a <see cref="IMessageSortBuilder{TSort}" /> that orders objects in the reverse order of another
+    ///     <see cref="IMessageSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-    /// <param name="commandSortBuilder">The command sort builder.</param>
+    /// <param name="builder">The message sort builder.</param>
     /// <returns>
-    ///     A <see cref="ICommandSortBuilder{TSort}" /> that orders commands in the reverse order of
-    ///     <paramref name="commandSortBuilder" />.
+    ///     A <see cref="IMessageSortBuilder{TSort}" /> that orders message in the reverse order of
+    ///     <paramref name="builder" />.
     /// </returns>
-    public static ICommandSortBuilder<TSort> Reverse<TSort>(this ICommandSortBuilder<TSort> commandSortBuilder)
+    public static IMessageSortBuilder<TSort> Reverse<TSort>(this IMessageSortBuilder<TSort> builder)
     {
-        return new CommandReverseSortBuilder<TSort>(commandSortBuilder);
+        return new ReverseMessageSortBuilder<TSort>(builder);
     }
 
     /// <summary>
@@ -45,14 +43,14 @@ public static class SortBuilderExtensions
     ///     <see cref="ILeaseSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-    /// <param name="leaseSortBuilder">The lease sort builder.</param>
+    /// <param name="builder">The lease sort builder.</param>
     /// <returns>
     ///     A <see cref="ILeaseSortBuilder{TSort}" /> that orders leases in the reverse order of
-    ///     <paramref name="leaseSortBuilder" />.
+    ///     <paramref name="builder" />.
     /// </returns>
-    public static ILeaseSortBuilder<TSort> Reverse<TSort>(this ILeaseSortBuilder<TSort> leaseSortBuilder)
+    public static ILeaseSortBuilder<TSort> Reverse<TSort>(this ILeaseSortBuilder<TSort> builder)
     {
-        return new LeaseReverseSortBuilder<TSort>(leaseSortBuilder);
+        return new ReverseLeaseSortBuilder<TSort>(builder);
     }
 
     /// <summary>
@@ -60,13 +58,13 @@ public static class SortBuilderExtensions
     ///     <see cref="ITagSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-    /// <param name="tagSortBuilder">The tag sort builder.</param>
+    /// <param name="builder">The tag sort builder.</param>
     /// <returns>
     ///     A <see cref="ITagSortBuilder{TSort}" /> that orders tags in the reverse order of
-    ///     <paramref name="tagSortBuilder" />.
+    ///     <paramref name="builder" />.
     /// </returns>
-    public static ITagSortBuilder<TSort> Reverse<TSort>(this ITagSortBuilder<TSort> tagSortBuilder)
+    public static ITagSortBuilder<TSort> Reverse<TSort>(this ITagSortBuilder<TSort> builder)
     {
-        return new TagReverseSortBuilder<TSort>(tagSortBuilder);
+        return new ReverseTagSortBuilder<TSort>(builder);
     }
 }

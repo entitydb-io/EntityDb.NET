@@ -1,4 +1,4 @@
-﻿using EntityDb.Common.Agents;
+﻿using EntityDb.Common.Sources.Agents;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Tests.Agents;
@@ -25,7 +25,7 @@ public class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
     {
         return new[]
         {
-            new object()
+            new object(),
         };
     }
 

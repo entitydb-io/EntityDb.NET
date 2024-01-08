@@ -17,23 +17,13 @@ internal record MongoSession
     MongoDbSnapshotSessionOptions Options
 ) : DisposableResourceBaseRecord, IMongoSession
 {
-    public string CollectionName => Options.CollectionName;
-    
     private static readonly WriteConcern WriteConcern = WriteConcern.WMajority;
 
     private static readonly FilterDefinitionBuilder<SnapshotDocument> Filter = Builders<SnapshotDocument>.Filter;
 
     private static readonly ReplaceOptions UpsertOptions = new() { IsUpsert = true };
+    public string CollectionName => Options.CollectionName;
 
-    private static FilterDefinition<SnapshotDocument> GetFilter(Id pointerId, VersionNumber pointerVersionNumber)
-    {
-        return Filter.And
-        (
-            Filter.Eq(document => document.PointerId, pointerId),
-            Filter.Eq(document => document.PointerVersionNumber, pointerVersionNumber)
-        );
-    }
-    
     public async Task Upsert(SnapshotDocument snapshotDocument, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
@@ -54,10 +44,10 @@ internal record MongoSession
             .ReplaceOneAsync
             (
                 ClientSessionHandle,
-                GetFilter(snapshotDocument.PointerId, snapshotDocument.PointerVersionNumber),
+                GetFilter(snapshotDocument.SnapshotPointer),
                 snapshotDocument,
                 UpsertOptions,
-                cancellationToken: cancellationToken
+                cancellationToken
             );
 
         Logger
@@ -76,7 +66,7 @@ internal record MongoSession
         CancellationToken cancellationToken
     )
     {
-        var filter = GetFilter(snapshotPointer.Id, snapshotPointer.VersionNumber);
+        var filter = GetFilter(snapshotPointer);
 
         var find = MongoDatabase
             .GetCollection<SnapshotDocument>(Options.CollectionName)
@@ -112,15 +102,15 @@ internal record MongoSession
 
         return snapshotDocument;
     }
-    
-    public async Task Delete(Pointer[] snapshotPointers, CancellationToken cancellationToken)
+
+    public async Task Delete(Pointer[] snapshotPointer, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
-        
-        var filter = Filter.And(snapshotPointers.Select(pointer => GetFilter(pointer.Id, pointer.VersionNumber)));
+
+        var filter = Filter.And(snapshotPointer.Select(GetFilter));
 
         var serverSessionId = ClientSessionHandle.ServerSession.Id.ToString();
-        
+
         var command = MongoDatabase
             .GetCollection<SnapshotDocument>(Options.CollectionName)
             .Find(filter)
@@ -164,7 +154,7 @@ internal record MongoSession
     public void StartTransaction()
     {
         AssertNotReadOnly();
-        
+
         ClientSessionHandle.StartTransaction(new TransactionOptions
         (
             writeConcern: WriteConcern,
@@ -219,6 +209,11 @@ internal record MongoSession
         return base.DisposeAsync();
     }
 
+    private static FilterDefinition<SnapshotDocument> GetFilter(Pointer snapshotPointer)
+    {
+        return Filter.Eq(document => document.SnapshotPointer, snapshotPointer);
+    }
+
     private ReadPreference GetReadPreference()
     {
         if (!Options.ReadOnly)
@@ -231,7 +226,7 @@ internal record MongoSession
             : ReadPreference.PrimaryPreferred;
     }
 
-    [ExcludeFromCodeCoverage(Justification = "Tests should always run in a transaction.")]
+    [ExcludeFromCodeCoverage(Justification = "Tests should always run in a source.")]
     private ReadConcern GetReadConcern()
     {
         return ClientSessionHandle.IsInTransaction

@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions.Projections;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Projections;
 using EntityDb.Common.Sources.Processors;
 using EntityDb.Common.Sources.Processors.Queues;
 
@@ -16,9 +16,9 @@ internal class ProjectionSnapshotSourceSubscriber<TProjection> : ISourceSubscrib
         _sourceProcessorQueue = sourceProcessorQueue;
     }
 
-    public void Notify(ISource source)
+    public void Notify(Source source)
     {
-        if (!TProjection.EnumerateProjectionIds(source).Any())
+        if (!TProjection.EnumerateEntityIds(source).Any())
         {
             return;
         }

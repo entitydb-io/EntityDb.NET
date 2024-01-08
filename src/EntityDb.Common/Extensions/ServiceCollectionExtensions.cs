@@ -1,15 +1,13 @@
-﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions.Builders;
+using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Common.Entities;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Sources.Processors;
 using EntityDb.Common.Sources.Processors.Queues;
 using EntityDb.Common.Sources.ReprocessorQueues;
 using EntityDb.Common.Sources.Subscribers;
-using EntityDb.Common.Transactions.Builders;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
@@ -29,7 +27,8 @@ public static class ServiceCollectionExtensions
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), serviceFactory, serviceLifetime));
     }
 
-    internal static void Add<TService, TImplementation>(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime)
+    internal static void Add<TService, TImplementation>(this IServiceCollection serviceCollection,
+        ServiceLifetime serviceLifetime)
         where TService : class
         where TImplementation : TService
     {
@@ -42,16 +41,8 @@ public static class ServiceCollectionExtensions
         serviceCollection.Add(new ServiceDescriptor(typeof(TService), typeof(TService), serviceLifetime));
     }
 
-    /// <ignore />
-    [Obsolete("Please register your TTransactionProcessor yourself. You may use any scope you want. You will need to call services.AddSourceProcessorQueue(), and you may enqueue source processing by injecting ISourceProcessorQueue and calling Enqueue. There is a generic extension method available if you don't want to implement ISourceProcessorQueueItem.", true)]
-    public static void AddTransactionProcessorSubscriber<TTransactionProcessor>(this IServiceCollection serviceCollection,
-        bool testMode, Func<IServiceProvider, TTransactionProcessor> transactionProcessorFactory)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
-    ///     Registers a queue for processing sources (e.g., transactions) as they are committed.
+    ///     Registers a queue for processing sources as they are committed.
     ///     For test mode, the queue is not actually a queue and will immediately process the source.
     ///     For non-test mode, the queue uses a buffer block.
     /// </summary>
@@ -78,7 +69,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Registers a queue for re-processing sources (e.g., transactions) after they have
+    ///     Registers a queue for re-processing sources after they have
     ///     already been committed (and potentially processed before). For test mode, the queue is
     ///     not actually a queue and will immediately reprocess sources. For non-test mode, the
     ///     queue uses a buffer block.
@@ -90,17 +81,17 @@ public static class ServiceCollectionExtensions
     {
         if (testMode)
         {
-            serviceCollection.AddSingleton<ITransactionReprocessorQueue, TestModeTransactionReprocessorQueue>();
+            serviceCollection.AddSingleton<ISourceReprocessorQueue, TestModeSourceReprocessorQueue>();
         }
         else
         {
-            serviceCollection.AddSingleton<BufferBlockTransactionReprocessorQueue>();
+            serviceCollection.AddSingleton<BufferBlockSourceReprocessorQueue>();
 
             serviceCollection.AddHostedService(serviceProvider =>
-                serviceProvider.GetRequiredService<BufferBlockTransactionReprocessorQueue>());
+                serviceProvider.GetRequiredService<BufferBlockSourceReprocessorQueue>());
 
-            serviceCollection.AddSingleton<ITransactionReprocessorQueue>(serviceProvider =>
-                serviceProvider.GetRequiredService<BufferBlockTransactionReprocessorQueue>());
+            serviceCollection.AddSingleton<ISourceReprocessorQueue>(serviceProvider =>
+                serviceProvider.GetRequiredService<BufferBlockSourceReprocessorQueue>());
         }
     }
 
@@ -152,7 +143,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a transient <see cref="TransactionBuilder{TEntity}" /> and a transient implementation of
+    ///     Adds a transient <see cref="EntitySourceBuilder{TEntity}" /> and a transient implementation of
     ///     <see cref="IEntityRepositoryFactory{TEntity}" /> to a service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
@@ -160,33 +151,27 @@ public static class ServiceCollectionExtensions
     public static void AddEntity<TEntity>(this IServiceCollection serviceCollection)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddTransient<ITransactionBuilderFactory<TEntity>, TransactionBuilderFactory<TEntity>>();
+        serviceCollection
+            .AddTransient<IEntitySourceBuilderFactory<TEntity>, EntitySourceBuilderFactory<TEntity>>();
 
         serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
-    }
-
-    /// <ignore />
-    [Obsolete("Please use AddEntitySnapshotSourceSubscriber instead. This will be removed in a future version.")]
-    public static void AddEntitySnapshotTransactionSubscriber<TEntity>(this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
-        where TEntity : IEntity<TEntity>
-    {
-        serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(transactionSessionOptionsName, snapshotSessionOptionsName);
     }
 
     /// <summary>
     ///     Adds a source subscriber that records snapshots of entities.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
+    /// <param name="sourceSessionOptionsName">The agent's intent for the source repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public static void AddEntitySnapshotSourceSubscriber<TEntity>(this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        string sourceSessionOptionsName, string snapshotSessionOptionsName)
         where TEntity : IEntity<TEntity>
     {
         serviceCollection.AddSingleton<ISourceSubscriber, EntitySnapshotSourceSubscriber<TEntity>>();
-        serviceCollection.AddScoped(serviceProvider => EntitySnapshotSourceProcessor<TEntity>.Create(serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
+        serviceCollection.AddScoped(serviceProvider =>
+            EntitySnapshotSourceProcessor<TEntity>.Create(serviceProvider, sourceSessionOptionsName,
+                snapshotSessionOptionsName));
     }
 
     /// <summary>
@@ -202,30 +187,19 @@ public static class ServiceCollectionExtensions
             .AddTransient<IProjectionRepositoryFactory<TProjection>, ProjectionRepositoryFactory<TProjection>>();
     }
 
-    /// <ignore />
-    [Obsolete("Please use AddProjectionSnapshotSourceSubscriber instead. This will be removed in a future version.")]
-    public static void AddProjectionSnapshotTransactionSubscriber<TProjection>(
-        this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
-        where TProjection : IProjection<TProjection>
-    {
-        serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(transactionSessionOptionsName, snapshotSessionOptionsName);
-    }
-
     /// <summary>
-    ///     Adds a transaction subscriber that records snapshots of projections.
+    ///     Adds a source subscriber that records snapshots of projections.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="transactionSessionOptionsName">The agent's intent for the transaction repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
     public static void AddProjectionSnapshotSourceSubscriber<TProjection>(
         this IServiceCollection serviceCollection,
-        string transactionSessionOptionsName, string snapshotSessionOptionsName)
+        string snapshotSessionOptionsName)
         where TProjection : IProjection<TProjection>
     {
-
         serviceCollection.AddSingleton<ISourceSubscriber, ProjectionSnapshotSourceSubscriber<TProjection>>();
-        serviceCollection.AddScoped(serviceProvider => ProjectionSnapshotSourceProcessor<TProjection>.Create(serviceProvider, transactionSessionOptionsName, snapshotSessionOptionsName));
+        serviceCollection.AddScoped(serviceProvider =>
+            ProjectionSnapshotSourceProcessor<TProjection>.Create(serviceProvider, snapshotSessionOptionsName));
     }
 }

@@ -1,17 +1,17 @@
 ﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.MongoDb.Transactions.Sessions;
+using EntityDb.MongoDb.Sources.Sessions;
 using MongoDB.Driver;
 using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.MongoDb.Snapshots.Sessions;
 
 /// <summary>
-///     Configuration options for the MongoDb implementation of <see cref="ISnapshotRepository{TSnapshot}"/>.
+///     Configuration options for the MongoDb implementation of <see cref="ISnapshotRepository{TSnapshot}" />.
 /// </summary>
 public sealed class MongoDbSnapshotSessionOptions
 {
     /// <summary>
-    ///     A connection string that is compatible with <see cref="MongoClient"/>
+    ///     A connection string that is compatible with <see cref="MongoClient" />
     /// </summary>
     public string ConnectionString { get; set; } = default!;
 
@@ -40,10 +40,10 @@ public sealed class MongoDbSnapshotSessionOptions
     /// </summary>
     public TimeSpan? WriteTimeout { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     [ExcludeFromCodeCoverage(Justification = "This is only overridden to make test names better.")]
     public override string ToString()
     {
-        return $"{nameof(MongoDbTransactionSessionOptions)}";
+        return $"{nameof(MongoDbSourceSessionOptions)}";
     }
 }

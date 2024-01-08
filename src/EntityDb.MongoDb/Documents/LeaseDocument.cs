@@ -1,18 +1,17 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Queries;
-using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Queries;
-using EntityDb.MongoDb.Queries.FilterBuilders;
-using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.Common.Sources.Queries.Standard;
+using EntityDb.MongoDb.Documents.Commands;
+using EntityDb.MongoDb.Documents.Queries;
+using EntityDb.MongoDb.Sources.Queries;
+using EntityDb.MongoDb.Sources.Queries.FilterBuilders;
+using EntityDb.MongoDb.Sources.Queries.SortBuilders;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
 
-internal sealed record LeaseDocument : DocumentBase, IEntityDocument
+internal sealed record LeaseDocument : MessageDocumentBase
 {
     public const string CollectionName = "Leases";
 
@@ -20,31 +19,30 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     private static readonly LeaseSortBuilder SortBuilder = new();
 
-    public string Scope { get; init; } = default!;
-    public string Label { get; init; } = default!;
-    public string Value { get; init; } = default!;
-    public Id EntityId { get; init; }
-    public VersionNumber EntityVersionNumber { get; init; }
+    public required string Scope { get; init; }
+    public required string Label { get; init; }
+    public required string Value { get; init; }
 
     public static InsertDocumentsCommand<LeaseDocument> GetInsertCommand
     (
         IEnvelopeService<BsonDocument> envelopeService,
-        ITransaction transaction,
-        ITransactionCommand transactionCommand
+        Source source,
+        Message message
     )
     {
-        var leaseDocuments = transactionCommand.AddLeases
+        var leaseDocuments = message.AddLeases
             .Select(lease => new LeaseDocument
             {
-                TransactionTimeStamp = transaction.TimeStamp,
-                TransactionId = transaction.Id,
-                EntityId = transactionCommand.EntityId,
-                EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                SourceTimeStamp = source.TimeStamp,
+                SourceId = source.Id,
+                EntityId = message.EntityPointer.Id,
+                EntityVersion = message.EntityPointer.Version,
+                EntityPointer = message.EntityPointer,
                 DataType = lease.GetType().Name,
                 Data = envelopeService.Serialize(lease),
                 Scope = lease.Scope,
                 Label = lease.Label,
-                Value = lease.Value
+                Value = lease.Value,
             })
             .ToArray();
 
@@ -73,11 +71,10 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand
+        Message message
     )
     {
-        var deleteLeasesQuery =
-            new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
+        var deleteLeasesQuery = new DeleteLeasesQuery(message.DeleteLeases);
 
         return new DeleteDocumentsCommand
         (

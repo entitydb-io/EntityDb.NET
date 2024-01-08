@@ -11,6 +11,11 @@ internal sealed class AgentSignatureFilterBuilder : FilterBuilderBase, IAgentSig
     {
         return AnyIn(nameof(AgentSignatureDocument.EntityIds), subjectIds);
     }
+    
+    public IFilterDefinition SubjectPointersIn(params Pointer[] subjectPointers)
+    {
+        return AnyIn(nameof(AgentSignatureDocument.EntityPointers), subjectPointers);
+    }
 
     public IFilterDefinition AgentSignatureTypeIn(params Type[] agentSignatureTypes)
     {

@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Projections;
@@ -9,7 +8,7 @@ namespace EntityDb.Abstractions.Projections;
 ///     Encapsulates the snapshot repository for a projection.
 /// </summary>
 /// <typeparam name="TProjection">The type of the projection.</typeparam>
-public interface IProjectionRepository<TProjection> : ISourceRepository, IDisposableResource
+public interface IProjectionRepository<TProjection> : IDisposableResource
 {
     /// <summary>
     ///     The backing snapshot repository.

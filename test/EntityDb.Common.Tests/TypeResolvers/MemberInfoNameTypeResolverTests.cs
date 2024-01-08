@@ -17,7 +17,7 @@ public class MemberInfoNameTypeResolverTests
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            [EnvelopeHelper.MemberInfoName] = expectedType.Name
+            [EnvelopeHelper.MemberInfoName] = expectedType.Name,
         });
 
         var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { expectedType });
@@ -61,7 +61,7 @@ public class MemberInfoNameTypeResolverTests
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            [EnvelopeHelper.MemberInfoName] = ""
+            [EnvelopeHelper.MemberInfoName] = "",
         });
 
         // ACT

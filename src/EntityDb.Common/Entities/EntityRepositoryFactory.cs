@@ -1,6 +1,6 @@
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
 
 namespace EntityDb.Common.Entities;
 
@@ -9,36 +9,36 @@ internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEnti
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapshotRepositoryFactory<TEntity>? _snapshotRepositoryFactory;
-    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
+    private readonly ISourceRepositoryFactory _sourceRepositoryFactory;
 
     public EntityRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        ITransactionRepositoryFactory transactionRepositoryFactory,
+        ISourceRepositoryFactory sourceRepositoryFactory,
         ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory = null
     )
     {
         _serviceProvider = serviceProvider;
-        _transactionRepositoryFactory = transactionRepositoryFactory;
+        _sourceRepositoryFactory = sourceRepositoryFactory;
         _snapshotRepositoryFactory = snapshotRepositoryFactory;
     }
 
-    public async Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
+    public async Task<IEntityRepository<TEntity>> CreateRepository(string sourceSessionOptionsName,
         string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
     {
-        var transactionRepository =
-            await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
+        var sourceRepository =
+            await _sourceRepositoryFactory.CreateRepository(sourceSessionOptionsName, cancellationToken);
 
         if (_snapshotRepositoryFactory is null || snapshotSessionOptionsName is null)
         {
             return EntityRepository<TEntity>.Create(_serviceProvider,
-                transactionRepository);
+                sourceRepository);
         }
 
         var snapshotRepository =
             await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
 
         return EntityRepository<TEntity>.Create(_serviceProvider,
-            transactionRepository, snapshotRepository);
+            sourceRepository, snapshotRepository);
     }
 }

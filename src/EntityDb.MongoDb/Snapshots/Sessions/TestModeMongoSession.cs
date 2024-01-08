@@ -6,9 +6,9 @@ using MongoDB.Driver;
 namespace EntityDb.MongoDb.Snapshots.Sessions;
 
 internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
-{ 
+{
     public string CollectionName => MongoSession.CollectionName;
-    
+
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
 
     public Task Upsert(SnapshotDocument snapshotDocument, CancellationToken cancellationToken)
@@ -25,14 +25,14 @@ internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableRes
         );
     }
 
-    public Task Delete(Pointer[] snapshotPointers, CancellationToken cancellationToken)
+    public Task Delete(Pointer[] snapshotPointer, CancellationToken cancellationToken)
     {
-        return MongoSession.Delete(snapshotPointers, cancellationToken);
+        return MongoSession.Delete(snapshotPointer, cancellationToken);
     }
 
     public IMongoSession WithSessionOptions(MongoDbSnapshotSessionOptions options)
     {
-        return this with { MongoSession = MongoSession.WithSessionOptions(options) };
+        return new TestModeMongoSession(MongoSession.WithSessionOptions(options));
     }
 
     public void StartTransaction()

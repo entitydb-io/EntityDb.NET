@@ -1,71 +1,44 @@
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using EntityDb.Abstractions.States;
+using EntityDb.Abstractions.Projections;
+using EntityDb.Abstractions.Snapshots.Transforms;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.Transactions;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Extensions;
-using EntityDb.Common.Projections;
-using EntityDb.Common.Queries;
+using EntityDb.Common.Sources.Queries.Standard;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
+using Microsoft.Extensions.DependencyInjection;
+using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
 public class OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWithTestLogic<OneToOneProjection>
 {
-    public required Id Id { get; set; }
-    public VersionNumber VersionNumber { get; set; }
-    public TimeStamp LastTransactionAt { get; set; }
+    public TimeStamp LastSourceAt { get; set; }
 
-    public static OneToOneProjection Construct(Id projectionId)
+    public static OneToOneProjection Construct(Pointer pointer)
     {
         return new OneToOneProjection
-        { 
-            Id = projectionId,
+        {
+            Pointer = pointer,
         };
     }
 
-    public static void Configure(EntityTypeBuilder<OneToOneProjection> oneToOneProjectionBuilder)
+    public Pointer GetPointer()
     {
-        oneToOneProjectionBuilder
-            .HasKey(oneToOneProjection => new
-            {
-                oneToOneProjection.Id,
-                oneToOneProjection.VersionNumber,
-            });
+        return Pointer;
     }
 
-    public Id GetId()
+    public void Mutate(Source source)
     {
-        return Id;
-    }
+        LastSourceAt = source.TimeStamp;
 
-    public VersionNumber GetVersionNumber()
-    {
-        return VersionNumber;
-    }
-
-    public void Mutate(ISource source)
-    {
-        if (source is not ITransaction transaction)
+        foreach (var message in source.Messages)
         {
-            throw new NotSupportedException();
-        }
-
-        LastTransactionAt = transaction.TimeStamp;
-
-        foreach (var command in transaction.Commands)
-        {
-            if (command.Data is not IMutator<OneToOneProjection> mutator)
-            {
-                continue;
-            }
+            if (message.Delta is not IMutator<OneToOneProjection> mutator) continue;
 
             mutator.Mutate(this);
 
-            VersionNumber = command.EntityVersionNumber;
+            Pointer = message.EntityPointer;
         }
     }
 
@@ -76,55 +49,48 @@ public class OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWith
 
     public bool ShouldRecordAsLatest(OneToOneProjection? previousSnapshot)
     {
-        return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
+        return ShouldRecordAsLatestLogic.Value is not null &&
+               ShouldRecordAsLatestLogic.Value.Invoke(this, previousSnapshot);
     }
 
-    public async IAsyncEnumerable<ISource> EnumerateSources
+    public async IAsyncEnumerable<Source> EnumerateSources
     (
-        ISourceRepository sourceRepository,
+        IServiceProvider serviceProvider,
         Pointer projectionPointer,
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
     {
-        var query = new GetEntityCommandsQuery(projectionPointer, VersionNumber);
+        var query = new GetDeltasQuery(projectionPointer, default);
 
-        var transactionIds = await sourceRepository.TransactionRepository
-            .EnumerateTransactionIds(query, cancellationToken)
+        var sourceRepository = await serviceProvider
+            .GetRequiredService<ISourceRepositoryFactory>()
+            .CreateRepository(TestSessionOptions.ReadOnly, cancellationToken);
+
+        var sourceIds = await sourceRepository
+            .EnumerateSourceIds(query, cancellationToken)
             .ToArrayAsync(cancellationToken);
 
-        foreach (var transactionId in transactionIds)
-        {
-            yield return await sourceRepository.TransactionRepository
-                .GetTransaction(transactionId, cancellationToken);
-        }
+        foreach (var sourceId in sourceIds)
+            yield return await sourceRepository
+                .GetSource(sourceId, cancellationToken);
     }
 
-    public static IEnumerable<Id> EnumerateProjectionIds(ISource source)
+    public static IEnumerable<Id> EnumerateEntityIds(Source source)
     {
-        var projectionIds = new HashSet<Id>();
-
-        if (source is ITransaction transaction)
-        {
-            foreach (var command in transaction.Commands)
-            {
-                if (command.Data is not IMutator<OneToOneProjection>)
-                {
-                    continue;
-                }
-
-                projectionIds.Add(command.EntityId);
-            }
-        }
-
-        return projectionIds;
+        return source.Messages
+            .Where(message => message.Delta is IMutator<OneToOneProjection>)
+            .Select(message => message.EntityPointer.Id)
+            .Distinct();
     }
+
+    public required Pointer Pointer { get; set; }
 
     public static string MongoDbCollectionName => "OneToOneProjections";
     public static string RedisKeyNamespace => "one-to-one-projection";
 
-    public OneToOneProjection WithVersionNumber(VersionNumber versionNumber)
+    public OneToOneProjection WithVersion(Version version)
     {
-        VersionNumber = versionNumber;
+        Pointer = Pointer.Id + version;
 
         return this;
     }
@@ -133,9 +99,4 @@ public class OneToOneProjection : IProjection<OneToOneProjection>, ISnapshotWith
 
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
         new();
-
-    public Expression<Func<OneToOneProjection, bool>> GetKeyPredicate()
-    {
-        return (oneToOneProjection) => oneToOneProjection.Id == Id && oneToOneProjection.VersionNumber == VersionNumber;
-    }
 }

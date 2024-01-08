@@ -47,7 +47,7 @@ internal static class DocumentQueryExtensions
         (
             sqlDbSession,
             TDocument.TransactionIdDocumentReader,
-            documents => documents.Select(document => document.TransactionId),
+            documents => documents.Select(document => document.GetSourceId()),
             cancellationToken
         );
     }
@@ -65,7 +65,7 @@ internal static class DocumentQueryExtensions
         (
             sqlDbSession,
             TDocument.EntityIdDocumentReader,
-            documents => documents.Select(document => document.EntityId),
+            documents => documents.Select(document => document.GetSubjectId()),
             cancellationToken
         );
     }
@@ -83,7 +83,7 @@ internal static class DocumentQueryExtensions
         (
             sqlDbSession,
             TDocument.EntityIdsDocumentReader,
-            documents => documents.SelectMany(document => AsyncEnumerablePolyfill.FromResult(document.EntityIds)),
+            documents => documents.SelectMany(document => AsyncEnumerablePolyfill.FromResult(document.GetSubjectIds())),
             cancellationToken
         );
     }
@@ -111,7 +111,7 @@ internal static class DocumentQueryExtensions
         }
     }
 
-    public static IAsyncEnumerable<IEntityAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData, TOptions>
+    public static IAsyncEnumerable<ISourceSubjectAnnotation<TData>> EnumerateEntityAnnotation<TDocument, TData, TOptions>
     (
         this DocumentQuery<TDocument> documentQuery,
         ISqlDbSession<TOptions> sqlDbSession,
@@ -132,7 +132,7 @@ internal static class DocumentQueryExtensions
         return documents.EnumerateEntityAnnotation<TDocument, string, TData>(envelopeService, cancellationToken);
     }
 
-    public static IAsyncEnumerable<IEntitiesAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData, TOptions>
+    public static IAsyncEnumerable<ISourceSubjectsAnnotation<TData>> EnumerateEntitiesAnnotation<TDocument, TData, TOptions>
     (
         this DocumentQuery<TDocument> documentQuery,
         ISqlDbSession<TOptions> sqlDbSession,

@@ -1,24 +1,48 @@
 ﻿namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
-///     Points to an object (e.g., entity, projection)
+///     Points to an entity or projection
 /// </summary>
-/// <param name="Id">The id of the object.</param>
-/// <param name="VersionNumber">The version number of the object.</param>
-public readonly record struct Pointer(Id Id, VersionNumber VersionNumber)
+/// <param name="Id">The id of the entity or projection.</param>
+/// <param name="Version">The version of the entity or projection.</param>
+public readonly record struct Pointer(Id Id, Version Version)
 {
     /// <summary>
-    ///     Checks if the version number found satisfies the pointer.
+    ///     Prints out <c>{Id}@{Version}</c>.
+    ///     See <see cref="Guid.ToString()" /> and
     /// </summary>
-    /// <param name="actualVersionNumber">The actual version number found via queries.</param>
-    /// <returns><c>true</c> if </returns>
-    public bool IsSatisfiedBy(VersionNumber actualVersionNumber)
+    /// <returns></returns>
+    public override string ToString()
     {
-        if (VersionNumber == VersionNumber.MinValue)
+        return $"{Id}@{Version}";
+    }
+
+    /// <summary>
+    ///     Checks if the pointer found satisfies the pointer.
+    /// </summary>
+    /// <param name="actualPointer">The actual version found via queries.</param>
+    /// <returns><c>true</c> if </returns>
+    public bool IsSatisfiedBy(Pointer actualPointer)
+    {
+        if (Id != actualPointer.Id)
         {
-            return actualVersionNumber != VersionNumber.MinValue;
+            return false;
         }
 
-        return actualVersionNumber == VersionNumber;
+        if (Version == Version.Zero)
+        {
+            return actualPointer.Version != Version.Zero;
+        }
+
+        return actualPointer.Version == Version;
+    }
+
+    /// <summary>
+    ///     Returns the next pointer.
+    /// </summary>
+    /// <returns>The next pointer.</returns>
+    public Pointer Next()
+    {
+        return Id + Version.Next();
     }
 }

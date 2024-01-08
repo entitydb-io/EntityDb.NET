@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Tests.Envelopes;
-using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Documents.Envelopes;
 using EntityDb.MongoDb.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -46,7 +46,8 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
         var bsonDocumentEnvelope = envelopeService.Serialize(value);
 
         var actualContainsTypeDiscriminatorProperty =
-            bsonDocumentEnvelope.GetElement("Value").Value.AsBsonDocument.Contains(MongoDbEnvelopeService.TypeDiscriminatorPropertyName);
+            bsonDocumentEnvelope.GetElement("Value").Value.AsBsonDocument
+                .Contains(MongoDbEnvelopeService.TypeDiscriminatorPropertyName);
 
         // ASSERT
 

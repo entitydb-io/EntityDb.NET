@@ -9,4 +9,7 @@ internal abstract record DocumentBase
     public Id TransactionId { get; init; }
     public string DataType { get; init; } = default!;
     public string Data { get; init; } = default!;
+
+    public Id GetSourceId() => TransactionId;
+    public TimeStamp GetSourceTimeStamp() => TransactionTimeStamp;
 }

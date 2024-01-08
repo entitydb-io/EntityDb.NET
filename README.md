@@ -25,38 +25,39 @@ information on the statement. (If I'm wrong, you should consider getting a new b
 
 ## How does EntityDb.NET implement Event Sourcing?
 
-There are several core objects at the heart of this implementation. Encalsulating these objects are various repositories.
+There are several core objects at the heart of this implementation. Encapsulating these objects are various
+repositories.
 
-1. Transaction Repository
-   - Agents
-   - Commands
-   - Tags
-   - Leases
+1. Source Repository
+    - Agents
+    - Deltas
+    - Tags
+    - Leases
+    - Aliases
 2. Snapshot Repository
-   - Snapshots
-2. Entity Repository
-   - Transaction Repository
-   - Optional: Snapshot Repository
-3. Projection Repository
-   - Transaction Repository
-   - Optional: Snapshot Repository
+    - Snapshots
+3. Entity Repository
+    - Transaction Repository
+    - Optional: Snapshot Repository
+4. Projection Repository
+    - Transaction Repository
+    - Optional: Snapshot Repository
 
 ### Transactions
 
-A transaction represents an atomic operation on multiple entities. A transaction is committed atomically or not
-at all. If some step in the transaction fails, the entire transaction should fail.
+A source represents an atomic operation on multiple entities. A source is committed atomically or not
+at all. If some step in the source fails, the entire source should fail.
 
 ### Agents
 
-An agent is an actor that can execute transactions. For example, if a transaction is initiated via an HTTP API, you
-might use the `HttpContextAgent` - it's signature includes headers and connection information, and it uses the
-ClaimsPrincipal to decide if an agent has a particular role required for authorized commands.
+An agent is an actor that can record sources. For example, if a source is initiated via an HTTP API, you
+might use the `HttpContextAgent` - it's signature includes headers and connection information.
 
-### Commands
+### Delta
 
-A command represents the intent to perform some operation on a single entity. Going back to the bank account example,
-one command could be `PerformDeposit` while another could be `PerformWithdrawl`. The things that you can do are
-commands.
+A delta represents a change to a single entity. Going back to the bank account example,
+one delta could be `PerformDeposit` while another could be `PerformWithdrawl`. The things that you can do (commands),
+as well as things that are done elsewhere (events), are delta.
 
 ### Tags
 
@@ -69,23 +70,29 @@ and `Value` is `Savings`. The number of savings accounts in the system would be 
 
 A lease is like a tag, except that it has a uniqueness constraint. Many banks have online portals, allowing bank members
 to see their accounts on the internet. From the bank's perspective, all of the accounts should be tied to a member id,
-probably a guid. But the member will not want to remember nor lookup this guid - they will want to use a username. What
-you can do in EntityDb is make a lease for member entities where the entity id is the member id, the `Label`
-is `Username`
-and the `Value` is whatever username the member wants to use. If an attempt to commit a transaction is made that would
+probably a guid. But the member will not want to remember nor lookup this id - they will want to use a username. What
+you can do in EntityDb is make a lease for members where the `Scope` is `Global`, the `Label`
+is `Username`, and the `Value` is whatever username the member wants to use. If an attempt to commit a source is made
+that would
 violate the uniqueness constraint, it will be rejected. (This is obnoxious behavior for the user, though, so the bank
 should check before attempting to commit to see if the username is available and give immediate feedback to choose a
 different username).
 
+### Aliases
+
+An alias is like a lease, except that it doesn't have a scope or a label. It is
+unique per entity branch name and a value, and it can be used to achieve idempotency automatically.
+Source repositories will skip messages if its alias is already recorded.
+
 ### Snapshots
 
-A snapshot is a stateful object at a given point in time. They always have an identifier and a version number.
-Together, the identifier and version number called a pointer. You can request different versions of a given snapshot
+A snapshot is a stateful object at a given point in time. They always have an identifier and a version.
+Together, the identifier and version called a pointer. You can request different versions of a given snapshot
 by using different pointers!
 
-In the context of snapshots, the reserved version number is reserved for pointing to the latest snapshot.
-So if you want the latest version, you use a pointer with the exact id and the reserved version number.
-If you want a specific version, you can create pointer with the exact id and version number you want.
+In the context of snapshots, the reserved version is reserved for pointing to the latest snapshot.
+So if you want the latest version, you use a pointer with the exact id and the reserved version.
+If you want a specific version, you can create pointer with the exact id and version you want.
 
 The balance on your bank account is a snapshot. You can build that snapshot by summing all of the deposits and
 withdrawls on your account. If you look at the bank statements, you will most likely see the snapshot of each bank
@@ -93,7 +100,7 @@ account for that statement, along with all of the deposits, withdrawls, and inte
 
 ### Entities
 
-An entity is conceptually an aggregate root inside of a bounded context, and it extends the concept of a snapshot.
+An entity is conceptually an aggregate id inside of a bounded context, and it extends the concept of a snapshot.
 In the banking example, there are multiple entities. You have a membership at the bank. That's an entity. You probably
 have a checking account. That's an entity. And you might even have a savings account. That is also an entity!
 
@@ -101,10 +108,6 @@ Which bounded contexts these entiies live in is up to the business.
 
 ### Projections
 
-A projection is an aggregate, but notably _not_ the aggregate root, and it too extends the concept of a snapshot.
+A projection is an aggregate, but notably _not_ the aggregate id, and it too extends the concept of a snapshot.
 In the banking example, one example of a projection could be your entire account balance. It can be anything, though!
 You are not constrained in what data you want to use for your projection.
-
-### Communications
-
-- Coming Soon!<sup>TM</sup>

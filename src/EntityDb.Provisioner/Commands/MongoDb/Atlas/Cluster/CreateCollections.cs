@@ -7,16 +7,6 @@ namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
 internal class CreateCollections : CommandBase
 {
-    public record Arguments
-    (
-        string GroupName,
-        string PublicKey,
-        string PrivateKey,
-        string ServiceName,
-        string ServicePassword,
-        string ClusterName
-    );
-
     private static async Task Execute(Arguments arguments)
     {
         const string expectedProtocol = "mongodb+srv://";
@@ -39,14 +29,14 @@ internal class CreateCollections : CommandBase
             new MongoClient(
                 $"{expectedProtocol}{arguments.ServiceName}:{arguments.ServicePassword}@{cluster.SrvAddress[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionTransactionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionSourceCollections(arguments.ServiceName);
     }
 
     protected static void AddClusterNameArgument(Command command)
     {
         var clusterNameArgument = new Argument<string>("cluster-name")
         {
-            Description = "The name of the Cluster on which the entity will be provisioned."
+            Description = "The name of the Cluster on which the entity will be provisioned.",
         };
 
         command.AddArgument(clusterNameArgument);
@@ -56,7 +46,7 @@ internal class CreateCollections : CommandBase
     {
         var createCollections = new Command("create-collections")
         {
-            Handler = CommandHandler.Create<Arguments>(Execute)
+            Handler = CommandHandler.Create<Arguments>(Execute),
         };
 
         AddMongoDbAtlasArguments(createCollections);
@@ -66,4 +56,14 @@ internal class CreateCollections : CommandBase
 
         parentCommand.AddCommand(createCollections);
     }
+
+    public record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string ServiceName,
+        string ServicePassword,
+        string ClusterName
+    );
 }

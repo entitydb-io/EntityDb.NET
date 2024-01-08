@@ -3,7 +3,6 @@ using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Snapshots;
 using EntityDb.MongoDb.Snapshots.Sessions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;

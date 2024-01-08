@@ -129,7 +129,7 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
             .EnumerateData<TagDocument, ITag, TOptions>(_sqlDbSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<IEntitiesAnnotation<object>> EnumerateAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
+    public IAsyncEnumerable<ISourceSubjectsAnnotation<object>> EnumerateAnnotatedAgentSignatures(IAgentSignatureQuery agentSignatureQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
@@ -137,7 +137,7 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
             .EnumerateEntitiesAnnotation<AgentSignatureDocument, object, TOptions>(_sqlDbSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<IEntityAnnotation<object>> EnumerateAnnotatedCommands(ICommandQuery commandQuery,
+    public IAsyncEnumerable<ISourceSubjectAnnotation<object>> EnumerateAnnotatedCommands(ICommandQuery commandQuery,
         CancellationToken cancellationToken = default)
     {
         return CommandDocument
@@ -153,17 +153,17 @@ internal class SqlDbTransactionRepository<TOptions> : DisposableResourceBaseClas
 
             await PutAgentSignature(transaction, cancellationToken);
 
-            foreach (var transactionCommand in transaction.Commands)
+            foreach (var transactionCommand in transaction.Subjects)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                VersionZeroReservedException.ThrowIfZero(transactionCommand.EntityVersionNumber);
+                VersionZeroReservedException.ThrowIfZero(transactionCommand.SubjectVersionNumber);
 
                 var previousVersionNumber = await CommandDocument
-                    .GetLastEntityVersionNumber(_sqlDbSession, transactionCommand.EntityId, cancellationToken);
+                    .GetLastEntityVersionNumber(_sqlDbSession, transactionCommand.SubjectId, cancellationToken);
 
                 OptimisticConcurrencyException.ThrowIfMismatch(previousVersionNumber.Next(),
-                    transactionCommand.EntityVersionNumber);
+                    transactionCommand.SubjectVersionNumber);
 
                 await PutCommand(transaction, transactionCommand, cancellationToken);
             }

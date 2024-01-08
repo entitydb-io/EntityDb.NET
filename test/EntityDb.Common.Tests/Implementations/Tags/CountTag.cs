@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.Tags;
+using EntityDb.Abstractions.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Tags;
 

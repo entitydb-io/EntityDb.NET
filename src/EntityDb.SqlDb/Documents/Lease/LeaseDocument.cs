@@ -24,7 +24,10 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
     public string Value { get; init; } = default!;
     public Id EntityId { get; init; }
     public VersionNumber EntityVersionNumber { get; init; }
-
+    
+    public Id GetSubjectId() => EntityId;
+    public VersionNumber GetSubjectVersionNumber() => EntityVersionNumber;
+    
     public static IDocumentReader<LeaseDocument> DocumentReader { get; } = new LeaseDocumentReader();
 
     public static IDocumentReader<LeaseDocument> TransactionIdDocumentReader { get; } = new LeaseTransactionIdDocumentReader();
@@ -48,8 +51,8 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
                 {
                     TransactionTimeStamp = transaction.TimeStamp,
                     TransactionId = transaction.Id,
-                    EntityId = transactionCommand.EntityId,
-                    EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                    EntityId = transactionCommand.SubjectId,
+                    EntityVersionNumber = transactionCommand.SubjectVersionNumber,
                     Scope = lease.Scope,
                     Label = lease.Label,
                     Value = lease.Value,
@@ -81,7 +84,7 @@ internal sealed record LeaseDocument : DocumentBase, IEntityDocument<LeaseDocume
     )
     {
         var deleteLeasesQuery =
-            new DeleteLeasesQuery(transactionCommand.EntityId, transactionCommand.DeleteLeases);
+            new DeleteLeasesQuery(transactionCommand.SubjectId, transactionCommand.DeleteLeases);
 
         return new DeleteDocumentsCommand
         (

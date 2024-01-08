@@ -35,8 +35,9 @@ internal class MongoDbSnapshotRepository<TSnapshot> : DisposableResourceBaseClas
             {
                 DataType = snapshot.GetType().Name,
                 Data = _envelopeService.Serialize(snapshot),
-                PointerId = snapshotPointer.Id,
-                PointerVersionNumber = snapshotPointer.VersionNumber,
+                SnapshotId = snapshotPointer.Id,
+                SnapshotVersion = snapshotPointer.Version,
+                SnapshotPointer = snapshotPointer,
             }, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();

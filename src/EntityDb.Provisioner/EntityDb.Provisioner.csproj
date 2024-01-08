@@ -1,26 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<!--Build-->
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-	</PropertyGroup>
+    <!--Build-->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
 
-	<!--Pack-->
-	<PropertyGroup>
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>entitydb-provisioner</ToolCommandName>
-		<PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
-		<Description>A dotnet tool for provisioning databases.</Description>
-	</PropertyGroup>
+    <!--Pack-->
+    <PropertyGroup>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>entitydb-provisioner</ToolCommandName>
+        <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
+        <Description>A dotnet tool for provisioning databases.</Description>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
-		<PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
+        <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj" />
-		<ProjectReference Include="..\EntityDb.Npgsql\EntityDb.Npgsql.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\EntityDb.MongoDb\EntityDb.MongoDb.csproj"/>
+    </ItemGroup>
 
 </Project>

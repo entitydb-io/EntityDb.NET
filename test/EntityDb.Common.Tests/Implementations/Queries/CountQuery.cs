@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Queries.FilterBuilders;
-using EntityDb.Abstractions.Queries.SortBuilders;
+﻿using EntityDb.Abstractions.Sources.Queries;
+using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
+using EntityDb.Abstractions.Sources.Queries.SortBuilders;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Tags;
 
@@ -16,7 +16,7 @@ public record CountQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseQ
     {
         return builder.And
         (
-            builder.LeaseTypeIn(typeof(CountLease)),
+            builder.DataTypeIn(typeof(CountLease)),
             builder.Or
             (
                 Enumerable
@@ -39,7 +39,7 @@ public record CountQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseQ
     {
         return builder.And
         (
-            builder.TagTypeIn(typeof(CountTag)),
+            builder.DataTypeIn(typeof(CountTag)),
             builder.Or
             (
                 Enumerable

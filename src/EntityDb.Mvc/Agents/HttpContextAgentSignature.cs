@@ -4,11 +4,26 @@ using Microsoft.Extensions.Primitives;
 namespace EntityDb.Mvc.Agents;
 
 /// <summary>
-///     Represents the description of an agent who requests transactions using an
+///     Represents the description of an agent who records sources using an
 ///     <see cref="HttpContext" />.
 /// </summary>
-public static class HttpContextAgentSignature
+public class HttpContextAgentSignature
 {
+    /// <summary>
+    ///     Request details
+    /// </summary>
+    public required RequestSnapshot Request { get; init; }
+
+    /// <summary>
+    ///     Connection details
+    /// </summary>
+    public required ConnectionSnapshot Connection { get; init; }
+
+    /// <summary>
+    ///     Application details
+    /// </summary>
+    public required Dictionary<string, string> ApplicationInfo { get; init; }
+
     private static NameValuesPairSnapshot[] GetNameValuesPairSnapshots(
         IEnumerable<KeyValuePair<string, StringValues>> dictionary, string[] redactedKeys, string redactedValue)
     {
@@ -50,28 +65,32 @@ public static class HttpContextAgentSignature
         );
     }
 
-    internal static Snapshot GetSnapshot
+    internal static HttpContextAgentSignature GetSnapshot
     (
         HttpContext httpContext,
         HttpContextAgentSignatureOptions httpContextAgentOptions,
         Dictionary<string, string> applicationInfo
     )
     {
-        return new Snapshot
-        (
-            GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
-            GetConnectionSnapshot(httpContext.Connection),
-            applicationInfo
-        );
+        return new HttpContextAgentSignature
+        {
+            Request = GetRequestSnapshot(httpContext.Request, httpContextAgentOptions),
+            Connection = GetConnectionSnapshot(httpContext.Connection),
+            ApplicationInfo = applicationInfo,
+        };
     }
 
+
     /// <summary>
-    ///     Represents the headers used by agent.
+    ///     Represents the connection used by agent.
     /// </summary>
-    public sealed record NameValuesPairSnapshot
+    public sealed record ConnectionSnapshot
     (
-        string Name,
-        string?[] Values
+        string ConnectionId,
+        string? RemoteIpAddress,
+        int RemotePort,
+        string? LocalIpAddress,
+        int LocalPort
     );
 
     /// <summary>
@@ -89,24 +108,11 @@ public static class HttpContextAgentSignature
     );
 
     /// <summary>
-    ///     Represents the connection used by agent.
+    ///     Represents the headers used by agent.
     /// </summary>
-    public sealed record ConnectionSnapshot
+    public sealed record NameValuesPairSnapshot
     (
-        string ConnectionId,
-        string? RemoteIpAddress,
-        int RemotePort,
-        string? LocalIpAddress,
-        int LocalPort
-    );
-
-    /// <summary>
-    ///     Represents the signature of the agent.
-    /// </summary>
-    public sealed record Snapshot
-    (
-        RequestSnapshot Request,
-        ConnectionSnapshot Connection,
-        Dictionary<string, string> ApplicationInfo
+        string Name,
+        string?[] Values
     );
 }

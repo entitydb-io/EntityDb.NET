@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Common.Extensions;
 using EntityDb.Mvc.Agents;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,18 +1,17 @@
-using EntityDb.Abstractions.Commands;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Common.Envelopes;
-using EntityDb.Common.Queries;
-using EntityDb.MongoDb.Commands;
-using EntityDb.MongoDb.Queries;
-using EntityDb.MongoDb.Queries.FilterBuilders;
-using EntityDb.MongoDb.Queries.SortBuilders;
+using EntityDb.Common.Sources.Queries.Standard;
+using EntityDb.MongoDb.Documents.Commands;
+using EntityDb.MongoDb.Documents.Queries;
+using EntityDb.MongoDb.Sources.Queries;
+using EntityDb.MongoDb.Sources.Queries.FilterBuilders;
+using EntityDb.MongoDb.Sources.Queries.SortBuilders;
 using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
 
-internal sealed record TagDocument : DocumentBase, IEntityDocument
+internal sealed record TagDocument : MessageDocumentBase
 {
     public const string CollectionName = "Tags";
 
@@ -20,29 +19,28 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     private static readonly TagSortBuilder SortBuilder = new();
 
-    public string Label { get; init; } = default!;
-    public string Value { get; init; } = default!;
-    public Id EntityId { get; init; }
-    public VersionNumber EntityVersionNumber { get; init; }
+    public required string Label { get; init; }
+    public required string Value { get; init; }
 
     public static InsertDocumentsCommand<TagDocument> GetInsertCommand
     (
         IEnvelopeService<BsonDocument> envelopeService,
-        ITransaction transaction,
-        ITransactionCommand transactionCommand
+        Source source,
+        Message message
     )
     {
-        var tagDocuments = transactionCommand.AddTags
+        var tagDocuments = message.AddTags
             .Select(tag => new TagDocument
             {
-                TransactionTimeStamp = transaction.TimeStamp,
-                TransactionId = transaction.Id,
-                EntityId = transactionCommand.EntityId,
-                EntityVersionNumber = transactionCommand.EntityVersionNumber,
+                SourceTimeStamp = source.TimeStamp,
+                SourceId = source.Id,
+                EntityId = message.EntityPointer.Id,
+                EntityVersion = message.EntityPointer.Version,
+                EntityPointer = message.EntityPointer,
                 DataType = tag.GetType().Name,
                 Data = envelopeService.Serialize(tag),
                 Label = tag.Label,
-                Value = tag.Value
+                Value = tag.Value,
             })
             .ToArray();
 
@@ -71,10 +69,10 @@ internal sealed record TagDocument : DocumentBase, IEntityDocument
 
     public static DeleteDocumentsCommand GetDeleteCommand
     (
-        ITransactionCommand transactionCommand
+        Message message
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(transactionCommand.EntityId, transactionCommand.DeleteTags);
+        var deleteTagsQuery = new DeleteTagsQuery(message.EntityPointer.Id, message.DeleteTags);
 
         return new DeleteDocumentsCommand
         (

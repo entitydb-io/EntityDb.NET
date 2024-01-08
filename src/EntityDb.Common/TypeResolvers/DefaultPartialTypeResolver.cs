@@ -13,17 +13,7 @@ internal class DefaultPartialTypeResolver : IPartialTypeResolver
     {
         _options = options;
     }
-    
-    private Assembly AssemblyResolver(AssemblyName assemblyName)
-    {
-        if (_options.Value.IgnoreVersion)
-        {
-            assemblyName.Version = null;
-        }
-        
-        return Assembly.Load(assemblyName);
-    }
-    
+
     public bool TryResolveType(EnvelopeHeaders envelopeHeaders, [NotNullWhen(true)] out Type? resolvedType)
     {
         if (EnvelopeHelper.NotThisPlatform(envelopeHeaders) ||
@@ -44,5 +34,15 @@ internal class DefaultPartialTypeResolver : IPartialTypeResolver
         )!;
 
         return true;
+    }
+
+    private Assembly AssemblyResolver(AssemblyName assemblyName)
+    {
+        if (_options.Value.IgnoreVersion)
+        {
+            assemblyName.Version = null;
+        }
+
+        return Assembly.Load(assemblyName);
     }
 }

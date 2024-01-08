@@ -1,56 +1,34 @@
-﻿using System.Linq.Expressions;
-using EntityDb.Abstractions.States;
+﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Snapshots.Transforms;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
 public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntity>
 {
-    public required Id Id { get; init; }
-    public VersionNumber VersionNumber { get; init; }
-
-    public static TestEntity Construct(Id entityId)
+    public static TestEntity Construct(Pointer pointer)
     {
         return new TestEntity
         {
-            Id = entityId,
+            Pointer = pointer,
         };
     }
 
-    public static void Configure(EntityTypeBuilder<TestEntity> testEntityBuilder)
+    public Pointer GetPointer()
     {
-        testEntityBuilder
-            .HasKey(testEntity => new
-            {
-                testEntity.Id,
-                testEntity.VersionNumber,
-            });
+        return Pointer;
     }
 
-    public Id GetId()
+    public static bool CanReduce(object delta)
     {
-        return Id;
+        return delta is IReducer<TestEntity>;
     }
 
-    public VersionNumber GetVersionNumber()
+    public TestEntity Reduce(object delta)
     {
-        return VersionNumber;
-    }
-
-    public static bool CanReduce(object command)
-    {
-        return command is IReducer<TestEntity>;
-    }
-
-    public TestEntity Reduce(object command)
-    {
-        if (command is IReducer<TestEntity> reducer)
-        {
-            return reducer.Reduce(this);
-        }
+        if (delta is IReducer<TestEntity> reducer) return reducer.Reduce(this);
 
         throw new NotSupportedException();
     }
@@ -62,23 +40,21 @@ public record TestEntity : IEntity<TestEntity>, ISnapshotWithTestLogic<TestEntit
 
     public bool ShouldRecordAsLatest(TestEntity? previousMostRecentSnapshot)
     {
-        return ShouldRecordAsLatestLogic.Value is not null && ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
+        return ShouldRecordAsLatestLogic.Value is not null &&
+               ShouldRecordAsLatestLogic.Value.Invoke(this, previousMostRecentSnapshot);
     }
+
+    public required Pointer Pointer { get; init; }
 
     public static string MongoDbCollectionName => "TestEntities";
     public static string RedisKeyNamespace => "test-entity";
 
-    public TestEntity WithVersionNumber(VersionNumber versionNumber)
+    public TestEntity WithVersion(Version version)
     {
-        return this with { VersionNumber = versionNumber };
+        return new TestEntity { Pointer = Pointer.Id + version };
     }
 
     public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
 
     public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
-
-    public Expression<Func<TestEntity, bool>> GetKeyPredicate()
-    {
-        return (testEntity) => testEntity.Id == Id && testEntity.VersionNumber == VersionNumber;
-    }
 }

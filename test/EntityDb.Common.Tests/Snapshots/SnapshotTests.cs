@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using System.Diagnostics.CodeAnalysis;
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Snapshots;
@@ -8,18 +9,21 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using Xunit;
+using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Snapshots;
 
 [Collection(nameof(DatabaseContainerCollection))]
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
 public sealed class SnapshotTests : TestsBase<Startup>
 {
-    public SnapshotTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) : base(startupServiceProvider, databaseContainerFixture)
+    public SnapshotTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture) :
+        base(startupServiceProvider, databaseContainerFixture)
     {
     }
 
     private async Task
-        Generic_GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched<TSnapshot>(
+        Generic_GivenEmptySnapshotRepository_WhenSnapshotCommittedAndFetched_ThenCommittedMatchesFetched<TSnapshot>(
             SnapshotAdder snapshotAdder)
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
@@ -30,8 +34,8 @@ public sealed class SnapshotTests : TestsBase<Startup>
             snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var snapshotId = Id.NewId();
-        var expectedSnapshot = TSnapshot.Construct(snapshotId).WithVersionNumber(new VersionNumber(300));
+        var entityId = Id.NewId();
+        var expectedSnapshot = TSnapshot.Construct(entityId).WithVersion(new Version(300));
 
         var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>();
@@ -41,13 +45,13 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         // ACT
 
-        var snapshotInserted = await snapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
+        var snapshotCommitted = await snapshotRepository.PutSnapshot(entityId, expectedSnapshot);
 
-        var actualSnapshot = await snapshotRepository.GetSnapshotOrDefault(snapshotId);
+        var actualSnapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
 
-        snapshotInserted.ShouldBeTrue();
+        snapshotCommitted.ShouldBeTrue();
 
         actualSnapshot.ShouldBeEquivalentTo(expectedSnapshot);
     }
@@ -55,7 +59,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenEmptySnapshotRepository_WhenSnapshotInsertedAndFetched_ThenInsertedMatchesFetched(
+    public Task GivenEmptySnapshotRepository_WhenSnapshotCommittedAndFetched_ThenCommittedMatchesFetched(
         SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
@@ -66,7 +70,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<
+        Generic_GivenEmptySnapshotRepository_WhenCommittingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged<
             TSnapshot>(SnapshotAdder snapshotAdder)
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
@@ -83,7 +87,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             serviceCollection.AddSingleton(loggerFactory);
         });
 
-        var snapshot = TSnapshot.Construct(default).WithVersionNumber(new VersionNumber(300));
+        var snapshot = TSnapshot.Construct(default).WithVersion(new Version(300));
 
         await using var snapshotRepository = await serviceScope.ServiceProvider
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
@@ -104,7 +108,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
     public Task
-        GivenEmptySnapshotRepository_WhenPuttingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(
+        GivenEmptySnapshotRepository_WhenCommittingSnapshotInReadOnlyMode_ThenCannotWriteInReadOnlyModeExceptionIsLogged(
             SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
@@ -115,15 +119,15 @@ public sealed class SnapshotTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenInsertedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot<TSnapshot>(
-        SnapshotAdder snapshotAdder)
+        Generic_GivenCommittedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot<TSnapshot>(
+            SnapshotAdder snapshotAdder)
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
-        Pointer latestSnapshotPointer = Id.NewId();
+        Pointer latestPointer = Id.NewId();
 
-        var snapshot = TSnapshot.Construct(latestSnapshotPointer.Id).WithVersionNumber(new VersionNumber(5000));
+        var snapshot = TSnapshot.Construct(latestPointer).WithVersion(new Version(5000));
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -136,7 +140,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.Write);
 
-        var inserted = await writeSnapshotRepository.PutSnapshot(latestSnapshotPointer, snapshot);
+        var inserted = await writeSnapshotRepository.PutSnapshot(latestPointer, snapshot);
 
         // ARRANGE ASSERTIONS
 
@@ -144,9 +148,9 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         // ACT
 
-        var deleted = await writeSnapshotRepository.DeleteSnapshots(new[] { latestSnapshotPointer });
+        var deleted = await writeSnapshotRepository.DeleteSnapshots(new[] { latestPointer });
 
-        var finalSnapshot = await writeSnapshotRepository.GetSnapshotOrDefault(latestSnapshotPointer);
+        var finalSnapshot = await writeSnapshotRepository.GetSnapshotOrDefault(latestPointer);
 
         // ASSERT
 
@@ -158,7 +162,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenInsertedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot(SnapshotAdder snapshotAdder)
+    public Task GivenCommittedSnapshotAsLatest_WhenSnapshotDeleted_ThenReturnNoSnapshot(SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
         (
@@ -167,15 +171,15 @@ public sealed class SnapshotTests : TestsBase<Startup>
         );
     }
 
-    private async Task Generic_GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(
+    private async Task Generic_GivenCommittedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot<TSnapshot>(
         SnapshotAdder snapshotAdder)
         where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
     {
         // ARRANGE
 
-        var snapshotId = Id.NewId();
+        var entityId = Id.NewId();
 
-        var expectedSnapshot = TSnapshot.Construct(snapshotId).WithVersionNumber(new VersionNumber(5000));
+        var expectedSnapshot = TSnapshot.Construct(entityId).WithVersion(new Version(5000));
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -194,7 +198,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
             .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
 
-        var inserted = await writeSnapshotRepository.PutSnapshot(snapshotId, expectedSnapshot);
+        var inserted = await writeSnapshotRepository.PutSnapshot(entityId, expectedSnapshot);
 
         // ARRANGE ASSERTIONS
 
@@ -202,10 +206,10 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         // ACT
 
-        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshotOrDefault(snapshotId);
+        var readOnlySnapshot = await readOnlySnapshotRepository.GetSnapshotOrDefault(entityId);
 
         var readOnlySecondaryPreferredSnapshot =
-            await readOnlySecondaryPreferredSnapshotRepository.GetSnapshotOrDefault(snapshotId);
+            await readOnlySecondaryPreferredSnapshotRepository.GetSnapshotOrDefault(entityId);
 
         // ASSERT
 
@@ -216,7 +220,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(AddEntitySnapshots))]
     [MemberData(nameof(AddProjectionSnapshots))]
-    public Task GivenInsertedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot(SnapshotAdder snapshotAdder)
+    public Task GivenCommittedSnapshot_WhenReadInVariousReadModes_ThenReturnSameSnapshot(SnapshotAdder snapshotAdder)
     {
         return RunGenericTestAsync
         (

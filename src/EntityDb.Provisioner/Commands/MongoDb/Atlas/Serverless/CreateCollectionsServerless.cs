@@ -7,16 +7,6 @@ namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Serverless;
 
 internal class CreateCollectionsServerless : CommandBase
 {
-    public record Arguments
-    (
-        string GroupName,
-        string PublicKey,
-        string PrivateKey,
-        string ServiceName,
-        string ServicePassword,
-        string InstanceName
-    );
-
     private static async Task Execute(Arguments arguments)
     {
         const string expectedProtocol = "mongodb+srv://";
@@ -39,14 +29,14 @@ internal class CreateCollectionsServerless : CommandBase
             new MongoClient(
                 $"{expectedProtocol}{arguments.ServiceName}:{arguments.ServicePassword}@{serverlessInstance.ConnectionStrings.StandardSrv[expectedProtocol.Length..]}/admin");
 
-        await mongoClient.ProvisionTransactionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionSourceCollections(arguments.ServiceName);
     }
 
     protected static void AddServerlessNameArgument(Command command)
     {
         var clusterNameArgument = new Argument<string>("instance-name")
         {
-            Description = "The name of the Serverless Instance on which the database will be provisioned."
+            Description = "The name of the Serverless Instance on which the database will be provisioned.",
         };
 
         command.AddArgument(clusterNameArgument);
@@ -56,7 +46,7 @@ internal class CreateCollectionsServerless : CommandBase
     {
         var createCollections = new Command("create-collections")
         {
-            Handler = CommandHandler.Create<Arguments>(Execute)
+            Handler = CommandHandler.Create<Arguments>(Execute),
         };
 
         AddMongoDbAtlasArguments(createCollections);
@@ -66,4 +56,14 @@ internal class CreateCollectionsServerless : CommandBase
 
         parentCommand.AddCommand(createCollections);
     }
+
+    public record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string ServiceName,
+        string ServicePassword,
+        string InstanceName
+    );
 }

@@ -1,18 +1,16 @@
+using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Snapshots;
-using EntityDb.EntityFramework.Snapshots;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Snapshots;
 
-public interface ISnapshotWithTestLogic<TSnapshot> : ISnapshot<TSnapshot>, IEntityFrameworkSnapshot<TSnapshot>
+public interface ISnapshotWithTestLogic<TSnapshot> : ISnapshot<TSnapshot>
     where TSnapshot : class
 {
-    VersionNumber VersionNumber { get; }
+    Pointer Pointer { get; }
     static abstract string MongoDbCollectionName { get; }
     static abstract string RedisKeyNamespace { get; }
     static abstract AsyncLocal<Func<TSnapshot, bool>?> ShouldRecordLogic { get; }
     static abstract AsyncLocal<Func<TSnapshot, TSnapshot?, bool>?> ShouldRecordAsLatestLogic { get; }
-    static abstract void Configure(EntityTypeBuilder<TSnapshot> snapshotBuilder);
-    TSnapshot WithVersionNumber(VersionNumber versionNumber);
+    TSnapshot WithVersion(Version version);
 }
