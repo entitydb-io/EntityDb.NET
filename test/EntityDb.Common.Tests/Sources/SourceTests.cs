@@ -466,7 +466,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         foreach (var count in counts) sourceBuilder.Append(new StoreNumber(count));
 
-        var source = sourceBuilder.Build(sourceId).ShouldBeOfType<Source>();
+        var source = sourceBuilder.Build(sourceId);
 
         if (timeStampOverride.HasValue)
             source = source with
@@ -598,8 +598,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var source = sourceBuilder
             .Append(DeltaSeeder.Create())
-            .Build(default)
-            .ShouldBeOfType<Source>();
+            .Build(default);
 
         source = source with
         {
