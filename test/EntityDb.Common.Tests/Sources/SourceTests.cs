@@ -1089,7 +1089,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var sourceCommitted = await sourceRepository.Commit(source);
 
-        var newCommands = await sourceRepository.EnumerateDeltas(versionOneQuery).ToArrayAsync();
+        var newDeltas = await sourceRepository.EnumerateDeltas(versionOneQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -1099,9 +1099,9 @@ public sealed class SourceTests : TestsBase<Startup>
 
         source.Messages[0].EntityPointer.Version.ShouldBe(new Version(1));
 
-        newCommands.Length.ShouldBe(1);
+        newDeltas.Length.ShouldBe(1);
 
-        newCommands[0].ShouldBeEquivalentTo(expectedDelta);
+        newDeltas[0].ShouldBeEquivalentTo(expectedDelta);
     }
 
     private async Task
@@ -1146,7 +1146,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var secondSourceCommitted = await sourceRepository.Commit(secondSource);
 
-        var newCommands = await sourceRepository.EnumerateDeltas(versionTwoQuery).ToArrayAsync();
+        var newDeltas = await sourceRepository.EnumerateDeltas(versionTwoQuery).ToArrayAsync();
 
         // ASSERT
 
@@ -1156,9 +1156,9 @@ public sealed class SourceTests : TestsBase<Startup>
 
         secondSource.Messages[0].EntityPointer.Version.ShouldBe(new Version(2));
 
-        newCommands.Length.ShouldBe(1);
+        newDeltas.Length.ShouldBe(1);
 
-        newCommands[0].ShouldBeEquivalentTo(expectedDelta);
+        newDeltas[0].ShouldBeEquivalentTo(expectedDelta);
     }
 
     private async Task
