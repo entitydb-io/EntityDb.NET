@@ -125,7 +125,7 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
             await tryCatchSourceRepository.EnumerateTags(default!).ToArrayAsync();
         var annotatedDeltas =
             await tryCatchSourceRepository.EnumerateAnnotatedDeltas(default!).ToArrayAsync();
-        var inserted =
+        var committed =
             await tryCatchSourceRepository.Commit(default!);
 
         // ASSERT
@@ -143,7 +143,7 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
         leases.ShouldBeEmpty();
         tags.ShouldBeEmpty();
         annotatedDeltas.ShouldBeEmpty();
-        inserted.ShouldBeFalse();
+        committed.ShouldBeFalse();
         loggerVerifier.Invoke(Times.Exactly(14));
     }
 }

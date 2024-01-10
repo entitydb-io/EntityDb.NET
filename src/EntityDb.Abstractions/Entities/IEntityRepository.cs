@@ -34,6 +34,6 @@ public interface IEntityRepository<TEntity> : IDisposableResource
     /// </summary>
     /// <param name="source">The source.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns><c>true</c> if the insert succeeded, or <c>false</c> if the insert failed.</returns>
+    /// <returns><c>true</c> if the commit succeeded, or <c>false</c> if the commit failed.</returns>
     Task<bool> Commit(Source source, CancellationToken cancellationToken = default);
 }

@@ -78,7 +78,7 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenSourceDoesInsertLeases<TEntity>(
+        Generic_GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases<TEntity>(
             EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -99,16 +99,10 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
             .Append(new AddLease(new Lease(default!, default!, default!)))
             .Build(default);
 
-        var entity = sourceBuilder.GetEntity();
-
         // ASSERT
 
         source.Messages.Length.ShouldBe(1);
-
-        var addLeasesDelta =
-            source.Messages[0].Delta.ShouldBeAssignableTo<IAddLeasesDelta<TEntity>>().ShouldNotBeNull();
-
-        addLeasesDelta.GetLeases(entity).ShouldNotBeEmpty();
+        source.Messages[0].AddLeases.Length.ShouldBe(1);
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
@@ -148,7 +142,7 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionAutoIncrements<TEntity>(
+        Generic_GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements<TEntity>(
             EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -249,7 +243,7 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenLeasingStrategy_WhenBuildingNewEntityWithLease_ThenSourceDoesInsertLeases(
+    public Task GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases(
         EntityAdder entityAdder)
     {
         return RunGenericTestAsync
@@ -272,7 +266,7 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddEntity))]
-    public Task GivenNonExistingEntityId_WhenUsingValidVersioningStrategy_ThenVersionAutoIncrements(
+    public Task GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements(
         EntityAdder entityAdder)
     {
         return RunGenericTestAsync

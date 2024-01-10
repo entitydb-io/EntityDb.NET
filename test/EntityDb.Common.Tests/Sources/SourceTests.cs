@@ -525,11 +525,11 @@ public sealed class SourceTests : TestsBase<Startup>
 
         // ACT
 
-        var inserted = await sourceRepository.Commit(source);
+        var committed = await sourceRepository.Commit(source);
 
         // ASSERT
 
-        inserted.ShouldBeFalse();
+        committed.ShouldBeFalse();
 
         loggerVerifier.Invoke(Times.Once());
     }
@@ -578,7 +578,7 @@ public sealed class SourceTests : TestsBase<Startup>
         secondSourceCommitted.ShouldBeFalse();
     }
 
-    private async Task Generic_GivenNonUniqueVersions_WhenInsertingDeltas_ThenReturnFalse<TEntity>(
+    private async Task Generic_GivenNonUniqueVersions_WhenCommittingDeltas_ThenReturnFalse<TEntity>(
         SourcesAdder sourcesAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -626,7 +626,7 @@ public sealed class SourceTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenVersionZero_WhenInsertingDeltas_ThenSourceIsCommitted<TEntity>(
+        Generic_GivenVersionZero_WhenCommittingDeltas_ThenReturnTrue<TEntity>(
             SourcesAdder sourcesAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -662,7 +662,7 @@ public sealed class SourceTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenNonUniqueVersions_WhenInsertingDeltas_ThenOptimisticConcurrencyExceptionIsLogged<TEntity>(
+        Generic_GivenNonUniqueVersions_WhenCommittingDeltas_ThenOptimisticConcurrencyExceptionIsLogged<TEntity>(
             SourcesAdder sourcesAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -726,7 +726,7 @@ public sealed class SourceTests : TestsBase<Startup>
         loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue<TEntity>(
+    private async Task Generic_GivenNonUniqueTags_WhenCommittingTags_ThenReturnTrue<TEntity>(
         SourcesAdder sourcesAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -761,7 +761,7 @@ public sealed class SourceTests : TestsBase<Startup>
         sourceCommitted.ShouldBeTrue();
     }
 
-    private async Task Generic_GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse<TEntity>(
+    private async Task Generic_GivenNonUniqueLeases_WhenCommittingLeases_ThenReturnFalse<TEntity>(
         SourcesAdder sourcesAdder, EntityAdder entityAdder)
         where TEntity : IEntity<TEntity>
     {
@@ -1506,7 +1506,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueVersions_WhenInsertingDeltas_ThenReturnFalse(SourcesAdder sourcesAdder,
+    public Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenReturnFalse(SourcesAdder sourcesAdder,
         EntityAdder entityAdder)
     {
         return RunGenericTestAsync
@@ -1518,7 +1518,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenVersionZero_WhenInsertingDeltas_ThenSourceIsCommitted(
+    public Task GivenVersionZero_WhenCommittingDeltas_ThenReturnTrue(
         SourcesAdder sourcesAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
@@ -1530,7 +1530,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueVersions_WhenInsertingDeltas_ThenOptimisticConcurrencyExceptionIsLogged(
+    public Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenOptimisticConcurrencyExceptionIsLogged(
         SourcesAdder sourcesAdder, EntityAdder entityAdder)
     {
         return RunGenericTestAsync
@@ -1542,7 +1542,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueTags_WhenInsertingTagDocuments_ThenReturnTrue(SourcesAdder sourcesAdder,
+    public Task GivenNonUniqueTags_WhenCommittingTags_ThenReturnTrue(SourcesAdder sourcesAdder,
         EntityAdder entityAdder)
     {
         return RunGenericTestAsync
@@ -1554,7 +1554,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueLeases_WhenInsertingLeaseDocuments_ThenReturnFalse(SourcesAdder sourcesAdder,
+    public Task GivenNonUniqueLeases_WhenCommittingLeases_ThenReturnFalse(SourcesAdder sourcesAdder,
         EntityAdder entityAdder)
     {
         return RunGenericTestAsync
