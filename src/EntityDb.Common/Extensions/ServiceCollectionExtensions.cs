@@ -1,8 +1,10 @@
 ﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.EventStreams;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Common.Entities;
+using EntityDb.Common.EventStreams;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Sources.Processors;
 using EntityDb.Common.Sources.Processors.Queues;
@@ -172,6 +174,16 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped(serviceProvider =>
             EntitySnapshotSourceProcessor<TEntity>.Create(serviceProvider, sourceSessionOptionsName,
                 snapshotSessionOptionsName));
+    }
+
+    /// <summary>
+    ///     Adds a transient implementation of <see cref="IEventStreamRepositoryFactory" />
+    ///     to a service collection.
+    /// </summary>
+    /// <param name="serviceCollection">The service collection.</param>
+    public static void AddEventStream(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddTransient<IEventStreamRepositoryFactory, EventStreamRepositoryFactory>();
     }
 
     /// <summary>

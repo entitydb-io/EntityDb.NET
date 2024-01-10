@@ -257,6 +257,12 @@ public class TestsBase<TStartup>
             select new object[] { sourceAdder, entityAdder };
     }
 
+    public static IEnumerable<object[]> AddSource()
+    {
+        return from sourceAdder in AllSourceAdders
+            select new object[] { sourceAdder };
+    }
+
     public static IEnumerable<object[]> AddEntity()
     {
         return from entityAdder in AllEntityAdders()
