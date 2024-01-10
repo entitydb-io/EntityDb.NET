@@ -391,6 +391,47 @@ public class TestsBase<TStartup>
         }
     }
 
+    protected static void SetupSourceRepositoryMock(Mock<ISourceRepository> sourceRepositoryMock,
+        List<Source> committedSources)
+    {
+    }
+
+    protected static ISourceRepositoryFactory GetMockedSourceRepositoryFactory(
+        Mock<ISourceRepository> sourceRepositoryMock, List<Source>? committedSources = null)
+    {
+        sourceRepositoryMock
+            .Setup(repository => repository.Commit(It.IsAny<Source>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Source source, CancellationToken _) =>
+            {
+                committedSources?.Add(source);
+
+                return true;
+            });
+
+        sourceRepositoryMock
+            .Setup(repository => repository.Dispose());
+
+        sourceRepositoryMock
+            .Setup(repository => repository.DisposeAsync())
+            .Returns(ValueTask.CompletedTask);
+
+        var sourceRepositoryFactoryMock =
+            new Mock<ISourceRepositoryFactory>(MockBehavior.Strict);
+
+        sourceRepositoryFactoryMock
+            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(sourceRepositoryMock.Object);
+
+        sourceRepositoryFactoryMock
+            .Setup(factory => factory.Dispose());
+
+        sourceRepositoryFactoryMock
+            .Setup(factory => factory.DisposeAsync())
+            .Returns(ValueTask.CompletedTask);
+
+        return sourceRepositoryFactoryMock.Object;
+    }
+
     protected static ISourceRepositoryFactory GetMockedSourceRepositoryFactory(
         object[]? deltas = null)
     {
@@ -407,21 +448,7 @@ public class TestsBase<TStartup>
             .Setup(repository => repository.EnumerateDeltas(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(deltas));
 
-        sourceRepositoryMock
-            .Setup(repository => repository.DisposeAsync())
-            .Returns(ValueTask.CompletedTask);
-
-        var sourceRepositoryFactoryMock =
-            new Mock<ISourceRepositoryFactory>(MockBehavior.Strict);
-
-        sourceRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(sourceRepositoryMock.Object);
-
-        sourceRepositoryFactoryMock
-            .Setup(factory => factory.Dispose());
-
-        return sourceRepositoryFactoryMock.Object;
+        return GetMockedSourceRepositoryFactory(sourceRepositoryMock, new List<Source>());
     }
 
     protected static ISnapshotRepositoryFactory<TEntity> GetMockedSnapshotRepositoryFactory<TEntity>
