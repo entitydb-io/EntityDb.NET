@@ -143,7 +143,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a transient <see cref="EntitySourceBuilder{TEntity}" /> and a transient implementation of
+    ///     Adds a transient <see cref="IEntitySourceBuilderFactory{TEntity}" /> and a transient implementation of
     ///     <see cref="IEntityRepositoryFactory{TEntity}" /> to a service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
