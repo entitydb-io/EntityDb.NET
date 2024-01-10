@@ -12,6 +12,8 @@ internal abstract record MessageGroupDocumentBase : DocumentBase, IMessageGroupD
 
     public static ProjectionDefinition<BsonDocument> EntityPointersProjection { get; } =
         ProjectionBuilder.Include(nameof(EntityPointers));
+    
+    public required Id[] MessageIds { get; init; }
 
     public required Id[] EntityIds { get; init; }
     public required Pointer[] EntityPointers { get; init; }

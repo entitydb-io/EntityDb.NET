@@ -14,7 +14,7 @@ internal sealed class EntitySourceBuilder<TEntity> : IEntitySourceBuilder<TEntit
 {
     private readonly IAgent _agent;
     private readonly Dictionary<Id, TEntity> _knownEntities = new();
-    private readonly List<Message> _sourceMessages = new();
+    private readonly List<Message> _messages = new();
 
     public EntitySourceBuilder(IAgent agent)
     {
@@ -49,8 +49,9 @@ internal sealed class EntitySourceBuilder<TEntity> : IEntitySourceBuilder<TEntit
 
         var entity = _knownEntities[entityId].Reduce(delta);
 
-        _sourceMessages.Add(new Message
+        _messages.Add(new Message
         {
+            Id = Id.NewId(),
             EntityPointer = entity.GetPointer(),
             Delta = delta,
             AddLeases = delta is IAddLeasesDelta<TEntity> addLeasesDelta
@@ -79,10 +80,10 @@ internal sealed class EntitySourceBuilder<TEntity> : IEntitySourceBuilder<TEntit
             Id = sourceId,
             TimeStamp = _agent.TimeStamp,
             AgentSignature = _agent.Signature,
-            Messages = _sourceMessages.ToImmutableArray(),
+            Messages = _messages.ToImmutableArray(),
         };
 
-        _sourceMessages.Clear();
+        _messages.Clear();
 
         return source;
     }

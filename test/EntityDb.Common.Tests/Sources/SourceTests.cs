@@ -640,6 +640,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var message = new Message
         {
+            Id = Id.NewId(),
             EntityPointer = Id.NewId() + Version.Zero,
             Delta = new DoNothing(),
         };

@@ -70,11 +70,13 @@ public static class SourceRepositoryExtensions
             .EnumerateAnnotatedAgentSignatures(query, cancellationToken)
             .SingleAsync(cancellationToken);
 
-        var sourceMessages = await sourceRepository
+        var messages = await sourceRepository
             .EnumerateAnnotatedDeltas(query, cancellationToken)
-            .Select(annotatedDeltas => new Message
+            .Select(annotatedDelta => new Message
             {
-                EntityPointer = annotatedDeltas.EntityPointer, Delta = annotatedDeltas.Data,
+                Id = annotatedDelta.MessageId,
+                EntityPointer = annotatedDelta.EntityPointer,
+                Delta = annotatedDelta.Data,
             })
             .ToArrayAsync(cancellationToken);
 
@@ -83,7 +85,7 @@ public static class SourceRepositoryExtensions
             Id = annotatedAgentSignature.SourceId,
             TimeStamp = annotatedAgentSignature.SourceTimeStamp,
             AgentSignature = annotatedAgentSignature.Data,
-            Messages = sourceMessages.ToImmutableArray(),
+            Messages = messages.ToImmutableArray(),
         };
     }
 }

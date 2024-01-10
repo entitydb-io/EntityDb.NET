@@ -17,6 +17,11 @@ public interface IAnnotatedSourceData<out TData>
     ///     The time stamp of the source
     /// </summary>
     TimeStamp SourceTimeStamp { get; }
+    
+    /// <summary>
+    ///     The id of the message
+    /// </summary>
+    Id MessageId { get; }
 
     /// <summary>
     ///     The data

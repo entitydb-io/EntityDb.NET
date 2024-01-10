@@ -20,6 +20,7 @@ public static class MessageSeeder
 
             yield return new Message
             {
+                Id = Id.NewId(),
                 EntityPointer = entityId + previousVersion,
                 Delta = DeltaSeeder.Create(),
             };

@@ -4,7 +4,7 @@ using EntityDb.Abstractions.Sources.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Sources.Queries;
 
 /// <summary>
-///     Abstracts a query on source messages.
+///     Abstracts a query on messages.
 /// </summary>
 public interface IMessageQuery : IQuery
 {

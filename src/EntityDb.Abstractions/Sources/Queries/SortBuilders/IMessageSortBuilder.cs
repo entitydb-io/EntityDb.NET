@@ -1,7 +1,7 @@
 ﻿namespace EntityDb.Abstractions.Sources.Queries.SortBuilders;
 
 /// <summary>
-///     Builds a <typeparamref name="TSort" /> for a source message query.
+///     Builds a <typeparamref name="TSort" /> for a message query.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface IMessageSortBuilder<TSort> : ISortBuilder<TSort>

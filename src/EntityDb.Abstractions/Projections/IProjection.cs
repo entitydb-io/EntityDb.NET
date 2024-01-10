@@ -24,7 +24,7 @@ public interface IProjection<TProjection> : ISnapshot<TProjection>
     /// <param name="projectionPointer">A pointer to the desired projection state</param>
     /// <param name="cancellationToken">A cancellation token</param>
     /// <returns>
-    ///     A <see cref="IQuery" /> that is used to load the rest of the source messages for the given projection
+    ///     A <see cref="IQuery" /> that is used to load the rest of the messages for the given projection
     ///     pointer.
     /// </returns>
     IAsyncEnumerable<Source> EnumerateSources(IServiceProvider serviceProvider, Pointer projectionPointer,

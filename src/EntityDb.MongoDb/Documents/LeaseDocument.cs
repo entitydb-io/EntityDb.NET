@@ -35,6 +35,7 @@ internal sealed record LeaseDocument : MessageDocumentBase
             {
                 SourceTimeStamp = source.TimeStamp,
                 SourceId = source.Id,
+                MessageId = message.Id,
                 EntityId = message.EntityPointer.Id,
                 EntityVersion = message.EntityPointer.Version,
                 EntityPointer = message.EntityPointer,

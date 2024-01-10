@@ -14,10 +14,21 @@ public static class MongoClientExtensions
 
     private static readonly CreateIndexOptions UniquenessConstraint = new()
     {
-        Name = "Uniqueness Constraint", Unique = true,
+        Name = "Uniqueness Constraint",
+        Unique = true,
+    };
+    
+    private static readonly CreateIndexOptions IdempotentConstraint = new()
+    {
+        Name = "Idempotent Constraint",
+        Unique = true,
     };
 
-    private static readonly CreateIndexOptions LookupIndex = new() { Name = "Lookup Index" };
+    private static readonly CreateIndexOptions LookupIndex = new()
+    {
+        Name = "Lookup Index",
+        Unique = false,
+    };
 
     private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> SourceCollections = new()
     {
@@ -34,6 +45,14 @@ public static class MongoClientExtensions
         },
         [DeltaDocument.CollectionName] = new[]
         {
+            new CreateIndexModel<BsonDocument>
+            (
+                IndexKeysBuilder.Combine
+                (
+                    IndexKeysBuilder.Descending(nameof(DeltaDocument.MessageId))
+                ),
+                IdempotentConstraint
+            ),
             new CreateIndexModel<BsonDocument>
             (
                 IndexKeysBuilder.Combine

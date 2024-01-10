@@ -10,6 +10,11 @@ namespace EntityDb.Abstractions.Sources;
 public sealed record Message
 {
     /// <summary>
+    ///     The id assigned to the message.
+    /// </summary>
+    public required Id Id { get; init; }
+    
+    /// <summary>
     ///     A pointer to the entity
     /// </summary>
     public required Pointer EntityPointer { get; init; }

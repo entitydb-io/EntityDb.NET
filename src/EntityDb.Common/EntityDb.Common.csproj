@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!--Pack-->
     <PropertyGroup>
         <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
         <Description>A standard set of implementations (excluding persistence) of the EntityDb abstraction layer.</Description>
@@ -9,6 +8,5 @@
     <ItemGroup>
         <ProjectReference Include="..\EntityDb.Abstractions\EntityDb.Abstractions.csproj"/>
     </ItemGroup>
-
-
+    
 </Project>

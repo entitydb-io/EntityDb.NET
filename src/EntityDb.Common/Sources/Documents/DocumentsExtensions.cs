@@ -78,6 +78,7 @@ internal static class DocumentsExtensions
             (
                 document.SourceId,
                 document.SourceTimeStamp,
+                document.MessageId,
                 envelopeService.Deserialize<TData>(document.Data),
                 document.EntityPointer
             );
@@ -104,6 +105,7 @@ internal static class DocumentsExtensions
             (
                 document.SourceId,
                 document.SourceTimeStamp,
+                document.MessageIds,
                 envelopeService.Deserialize<TData>(document.Data),
                 document.EntityPointers
             );

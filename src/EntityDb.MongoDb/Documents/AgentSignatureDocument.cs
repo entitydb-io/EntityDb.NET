@@ -21,6 +21,10 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
         Source source
     )
     {
+        var messageIds = source.Messages
+            .Select(message => message.Id)
+            .ToArray();
+        
         var entityPointers = source.Messages
             .Select(message => message.EntityPointer)
             .Distinct()
@@ -36,6 +40,7 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
             {
                 SourceTimeStamp = source.TimeStamp,
                 SourceId = source.Id,
+                MessageIds = messageIds,
                 EntityIds = entityIds,
                 EntityPointers = entityPointers,
                 DataType = source.AgentSignature.GetType().Name,

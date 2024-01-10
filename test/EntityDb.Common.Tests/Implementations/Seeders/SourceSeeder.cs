@@ -24,9 +24,10 @@ public static class SourceSeeder
         ulong previousVersionValue = 0)
         where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
-        var sourceMessages = MessageSeeder
-            .CreateFromDeltas<TEntity>(entityId, numDeltas, previousVersionValue).ToArray();
+        var messages = MessageSeeder
+            .CreateFromDeltas<TEntity>(entityId, numDeltas, previousVersionValue)
+            .ToArray();
 
-        return Create(sourceMessages);
+        return Create(messages);
     }
 }

@@ -7,6 +7,7 @@ internal record AnnotatedSourceData<TData>
 (
     Id SourceId,
     TimeStamp SourceTimeStamp,
+    Id MessageId,
     TData Data,
     Pointer EntityPointer
 ) : IAnnotatedSourceData<TData>
@@ -15,6 +16,7 @@ internal record AnnotatedSourceData<TData>
     (
         Id sourceId,
         TimeStamp sourceTimeStamp,
+        Id messageId,
         object boxedData,
         Pointer entityPointer
     )
@@ -26,6 +28,7 @@ internal record AnnotatedSourceData<TData>
             dataAnnotationType,
             sourceId,
             sourceTimeStamp,
+            messageId,
             boxedData,
             entityPointer
         )!;

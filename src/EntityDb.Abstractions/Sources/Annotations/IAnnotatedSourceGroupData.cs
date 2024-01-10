@@ -19,12 +19,17 @@ public interface IAnnotatedSourceGroupData<out TData>
     TimeStamp SourceTimeStamp { get; }
 
     /// <summary>
+    ///     The ids of the messages
+    /// </summary>
+    Id[] MessageIds { get; }
+    
+    /// <summary>
     ///     The data
     /// </summary>
     TData Data { get; }
 
     /// <summary>
-    ///     The pointers to the entities
+    ///     The pointers of the entities
     /// </summary>
     Pointer[] EntityPointers { get; }
 }
