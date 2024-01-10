@@ -68,12 +68,12 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
 
         // ACT
 
-        var actualEntityBranch = sourceBuilder.EntityId;
+        var actualEntityId = sourceBuilder.EntityId;
         var actualEntity = sourceBuilder.GetEntity();
 
         // ASSERT
 
-        actualEntityBranch.ShouldBe(expectedEntityId);
+        actualEntityId.ShouldBe(expectedEntityId);
         actualEntity.ShouldBe(expectedEntity);
     }
 
@@ -144,7 +144,7 @@ public class SingleEntitySourceBuilderTests : TestsBase<Startup>
 
         // ASSERT
 
-        Should.Throw<EntityBranchAlreadyLoadedException>(() => { sourceBuilder.Load(entity); });
+        Should.Throw<EntityAlreadyLoadedException>(() => { sourceBuilder.Load(entity); });
     }
 
     private async Task

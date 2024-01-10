@@ -13,12 +13,12 @@ public interface IMessageFilterBuilder<TFilter> : IFilterBuilder<TFilter>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
-    ///     branch in a set of entity branches.
+    ///     id in a set of entity ids.
     /// </summary>
-    /// <param name="entityIds">The entity branches.</param>
+    /// <param name="entityIds">The entity ids.</param>
     /// <returns>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
-    ///     branch in <paramref name="entityIds" />.
+    ///     id in <paramref name="entityIds" />.
     /// </returns>
     TFilter EntityIdIn(params Id[] entityIds);
 
@@ -26,7 +26,7 @@ public interface IMessageFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
     ///     version greater than or equal to a specific entity version.
     /// </summary>
-    /// <param name="entityVersion">The entity branches.</param>
+    /// <param name="entityVersion">The entity ids.</param>
     /// <returns>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
     ///     version greater than or equal to <paramref name="entityVersion" />.
@@ -37,7 +37,7 @@ public interface IMessageFilterBuilder<TFilter> : IFilterBuilder<TFilter>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
     ///     version greater than or equal to a specific entity version.
     /// </summary>
-    /// <param name="entityVersion">The entity branches.</param>
+    /// <param name="entityVersion">The entity ids.</param>
     /// <returns>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an entity
     ///     version less than or equal to <paramref name="entityVersion" />.

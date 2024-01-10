@@ -826,7 +826,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var sourceCommitted = await sourceRepository.Commit(source);
 
-        var query = new EntityBranchQuery(expectedEntityId);
+        var query = new EntityQuery(expectedEntityId);
 
         // ARRANGE ASSERTIONS
 
@@ -1358,7 +1358,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         entityId.ShouldNotBeNull();
 
-        var query = new EntityBranchQuery(entityId.Value);
+        var query = new EntityQuery(entityId.Value);
 
         await PutSources(serviceScope, sources);
         await TestGetSourceIds(serviceScope, query as IMessageGroupQuery, expectedObjects);

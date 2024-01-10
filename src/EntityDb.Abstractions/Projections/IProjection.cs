@@ -34,6 +34,6 @@ public interface IProjection<TProjection> : ISnapshot<TProjection>
     ///     Maps a source to a set of entity ids. May be empty if the source does not map to the projection.
     /// </summary>
     /// <param name="source">A source</param>
-    /// <returns>The entity branches for the projections.</returns>
+    /// <returns>The entity ids for the projections.</returns>
     static abstract IEnumerable<Id> EnumerateEntityIds(Source source);
 }

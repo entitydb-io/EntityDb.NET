@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Queries;
 
-public record EntityBranchQuery(Id EntityId, object? Options = null) : IMessageGroupQuery, IMessageQuery,
+public record EntityQuery(Id EntityId, object? Options = null) : IMessageGroupQuery, IMessageQuery,
     ILeaseQuery, ITagQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)

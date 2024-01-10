@@ -78,12 +78,6 @@ violate the uniqueness constraint, it will be rejected. (This is obnoxious behav
 should check before attempting to commit to see if the username is available and give immediate feedback to choose a
 different username).
 
-### Aliases
-
-An alias is like a lease, except that it doesn't have a scope or a label. It is
-unique per entity branch name and a value, and it can be used to achieve idempotency automatically.
-Source repositories will skip messages if its alias is already recorded.
-
 ### Snapshots
 
 A snapshot is a stateful object at a given point in time. They always have an identifier and a version.

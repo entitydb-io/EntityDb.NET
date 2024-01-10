@@ -35,7 +35,7 @@ internal sealed class EntitySourceBuilder<TEntity> : IEntitySourceBuilder<TEntit
     {
         if (IsEntityKnown(entityId))
         {
-            throw new EntityBranchAlreadyLoadedException();
+            throw new EntityAlreadyLoadedException();
         }
 
         _knownEntities.Add(entityId, entity);

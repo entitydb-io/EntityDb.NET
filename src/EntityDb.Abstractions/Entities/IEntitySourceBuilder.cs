@@ -11,14 +11,14 @@ namespace EntityDb.Abstractions.Entities;
 public interface IEntitySourceBuilder<TEntity>
 {
     /// <summary>
-    ///     Returns a <typeparamref name="TEntity" /> associated with a given branch, if it is known.
+    ///     Returns a <typeparamref name="TEntity" /> associated with a given id, if it is known.
     /// </summary>
     /// <param name="entityId">The id associated with the entity.</param>
     /// <returns>A <typeparamref name="TEntity" /> associated with <paramref name="entityId" />, if it is known.</returns>
     TEntity GetEntity(Id entityId);
 
     /// <summary>
-    ///     Indicates whether or not a <typeparamref name="TEntity" /> associated with a given branch is in memory.
+    ///     Indicates whether or not a <typeparamref name="TEntity" /> associated with a given id is in memory.
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
     /// <returns>
@@ -28,9 +28,9 @@ public interface IEntitySourceBuilder<TEntity>
     bool IsEntityKnown(Id entityId);
 
     /// <summary>
-    ///     Associate a <typeparamref name="TEntity" /> with a given entity branch.
+    ///     Associate a <typeparamref name="TEntity" /> with a given entity id.
     /// </summary>
-    /// <param name="entityId">A branch associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="entityId">A id associated with a <typeparamref name="TEntity" />.</param>
     /// <param name="entity">A <typeparamref name="TEntity" />.</param>
     /// <returns>The source builder.</returns>
     /// <remarks>
@@ -40,9 +40,9 @@ public interface IEntitySourceBuilder<TEntity>
     IEntitySourceBuilder<TEntity> Load(Id entityId, TEntity entity);
 
     /// <summary>
-    ///     Adds a single delta to the source with a given entity branch.
+    ///     Adds a single delta to the source with a given entity id.
     /// </summary>
-    /// <param name="entityId">The branch associated with the <typeparamref name="TEntity" />.</param>
+    /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
     /// <param name="delta">The new delta that modifies the <typeparamref name="TEntity" />.</param>
     /// <returns>The source builder.</returns>
     IEntitySourceBuilder<TEntity> Append(Id entityId, object delta);
