@@ -57,12 +57,16 @@ internal class MongoDbSourceRepositoryFactory : DisposableResourceBaseClass, IMo
         IMongoSession mongoSession
     )
     {
-        var mongoDbSourceRepository = new MongoDbSourceRepository
+        ISourceRepository sourceRepository = new MongoDbSourceRepository
         (
             mongoSession,
             _envelopeService
         );
 
-        return TryCatchSourceRepository.Create(_serviceProvider, mongoDbSourceRepository);
+        sourceRepository = TryCatchSourceRepository.Create(_serviceProvider, sourceRepository);
+
+        sourceRepository = PublishSourceRepository.Create(_serviceProvider, sourceRepository);
+        
+        return sourceRepository;
     }
 }

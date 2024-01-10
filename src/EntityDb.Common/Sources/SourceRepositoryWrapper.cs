@@ -102,7 +102,7 @@ internal abstract class SourceRepositoryWrapper : DisposableResourceBaseClass, I
         return WrapQuery(() => _sourceRepository.EnumerateAnnotatedDeltas(messageQuery, cancellationToken));
     }
 
-    public Task<bool> Commit(Source source,
+    public virtual Task<bool> Commit(Source source,
         CancellationToken cancellationToken = default)
     {
         return WrapCommand(() => _sourceRepository.Commit(source, cancellationToken));
@@ -113,7 +113,13 @@ internal abstract class SourceRepositoryWrapper : DisposableResourceBaseClass, I
         await _sourceRepository.DisposeAsync();
     }
 
-    protected abstract IAsyncEnumerable<T> WrapQuery<T>(Func<IAsyncEnumerable<T>> enumerable);
+    protected virtual IAsyncEnumerable<T> WrapQuery<T>(Func<IAsyncEnumerable<T>> enumerable)
+    {
+        return enumerable.Invoke();
+    }
 
-    protected abstract Task<bool> WrapCommand(Func<Task<bool>> task);
+    protected virtual Task<bool> WrapCommand(Func<Task<bool>> task)
+    {
+        return task.Invoke();
+    }
 }

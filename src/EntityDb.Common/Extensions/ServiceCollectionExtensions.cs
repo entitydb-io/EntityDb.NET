@@ -145,17 +145,14 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a transient <see cref="IEntitySourceBuilderFactory{TEntity}" /> and a transient implementation of
-    ///     <see cref="IEntityRepositoryFactory{TEntity}" /> to a service collection.
+    ///     Adds a transient <see cref="IEntityRepositoryFactory{TEntity}" /> to a
+    ///     service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     public static void AddEntity<TEntity>(this IServiceCollection serviceCollection)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection
-            .AddTransient<IEntitySourceBuilderFactory<TEntity>, EntitySourceBuilderFactory<TEntity>>();
-
         serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
@@ -6,7 +7,9 @@ using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Polyfills;
+using EntityDb.Common.Sources.Agents;
 using EntityDb.Common.Tests.Implementations.Deltas;
+using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.Snapshots;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -25,34 +28,6 @@ public class EntityTests : TestsBase<Startup>
     {
     }
 
-    private static async Task<Source> BuildSource<TEntity>
-    (
-        IServiceScope serviceScope,
-        Id entityId,
-        Version from,
-        Version to,
-        TEntity? entity = default
-    )
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
-    {
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
-
-        if (entity is not null) sourceBuilder.Load(entity);
-
-        for (var i = from; i.Value <= to.Value; i = i.Next())
-        {
-            if (sourceBuilder.IsEntityKnown() &&
-                sourceBuilder.GetEntity().Pointer.Version.Value >= i.Value) continue;
-
-            sourceBuilder.Append(new DoNothing());
-        }
-
-        return sourceBuilder.Build(Id.NewId());
-    }
-
-
     private async Task Generic_GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM<TEntity>(
         SourcesAdder sourcesAdder, SnapshotAdder entitySnapshotAdder)
         where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
@@ -61,8 +36,6 @@ public class EntityTests : TestsBase<Startup>
 
         const ulong n = 10UL;
         const ulong m = 5UL;
-
-        var versionN = new Version(n);
 
         var versionM = new Version(m);
 
@@ -74,26 +47,29 @@ public class EntityTests : TestsBase<Startup>
 
         var entityId = Id.NewId();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write,
-                TestSessionOptions.Write);
-
-        var source = await BuildSource<TEntity>(serviceScope, entityId, new Version(1), versionN);
-
-        var sourceCommitted = await entityRepository.Commit(source);
-
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
+        
+        writeRepository.Create(entityId);
+        writeRepository.Seed(entityId, m);
+        writeRepository.Seed(entityId, n - m);
+        
+        var committed = await writeRepository.Commit(default);
+        
         // ARRANGE ASSERTIONS
 
-        sourceCommitted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
-        var entityAtVersionM = await entityRepository.GetSnapshot(entityId + versionM);
+        await using var readOnlyRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
+        await readOnlyRepository.Load(entityId + new Version(m));
+        
+        var entity = readOnlyRepository.Get(entityId);
+        
         // ASSERT
 
-        entityAtVersionM.Pointer.Version.ShouldBe(versionM);
+        entity.Pointer.Version.ShouldBe(versionM);
     }
 
     private async Task Generic_GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetDeltasRuns<TEntity>(
@@ -102,7 +78,8 @@ public class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var expectedVersion = new Version(10);
+        const uint expectedVersionNumber = 10;
+        var expectedVersion = new Version(expectedVersionNumber);
 
         var entityId = Id.NewId();
 
@@ -143,26 +120,28 @@ public class EntityTests : TestsBase<Startup>
             serviceCollection.AddSingleton(sourceRepositoryFactoryMock.Object);
         });
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
-        var source =
-            await BuildSource<TEntity>(serviceScope, entityId, new Version(1), expectedVersion);
-
-        var sourceCommitted = await entityRepository.Commit(source);
+        writeRepository.Create(entityId);
+        writeRepository.Seed(entityId, expectedVersionNumber);
+        
+        var committed = await writeRepository.Commit(default);
 
         // ARRANGE ASSERTIONS
 
-        sourceCommitted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
-        var currenEntity = await entityRepository.GetSnapshot(entityId);
+        await using var readOnlyRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
+
+        await readOnlyRepository.Load(entityId);
+        
+        var entity = readOnlyRepository.Get(entityId);
 
         // ASSERT
 
-        currenEntity.Pointer.Version.ShouldBe(expectedVersion);
+        entity.Pointer.Version.ShouldBe(expectedVersion);
 
         sourceRepositoryMock
             .Verify(
@@ -189,9 +168,7 @@ public class EntityTests : TestsBase<Startup>
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetService<ISnapshotRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
         // ASSERT
 
@@ -220,9 +197,7 @@ public class EntityTests : TestsBase<Startup>
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetService<ISnapshotRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL");
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
         // ASSERT
 
@@ -251,9 +226,7 @@ public class EntityTests : TestsBase<Startup>
         await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
             .GetService<ISnapshotRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
         // ASSERT
 
@@ -287,17 +260,16 @@ public class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
 
-        var snapshotOrDefault = await entityRepository.GetSnapshot(default);
+        await entityRepository.Load(default);
+        
+        var entity = entityRepository.Get(default);
 
         // ASSERT
 
-        snapshotOrDefault.ShouldNotBe(default);
-        snapshotOrDefault.ShouldNotBe(snapshot);
-        snapshotOrDefault.Pointer.Version.ShouldBe(
+        entity.ShouldNotBe(snapshot);
+        entity.Pointer.Version.ShouldBe(
             new Version(snapshot.Pointer.Version.Value + Convert.ToUInt64(newDeltas.Length)));
     }
 
@@ -314,16 +286,62 @@ public class EntityTests : TestsBase<Startup>
             serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory());
         });
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(default!);
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
 
         // ASSERT
 
-        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(async () =>
+        Should.Throw<EntityNotLoadedException>(() => entityRepository.Get(default));
+    }
+    
+    private async Task Generic_GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity<TEntity>(
+        SourcesAdder sourcesAdder, EntityAdder entityAdder)
+        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+    {
+        // ARRANGE
+    
+        using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            await entityRepository.GetSnapshot(default);
+            sourcesAdder.AddDependencies.Invoke(serviceCollection);
+            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+    
+        var entityId = Id.NewId();
+    
+        var expectedEntity = TEntity.Construct(entityId).WithVersion(new Version(1));
+    
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+
+        var source = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = Id.NewId(),
+                    EntityPointer = entityId,
+                    Delta = new DoNothing(),
+                }
+            }.ToImmutableArray()
+        };
+    
+        var committed = await entityRepository.SourceRepository.Commit(source);
+    
+        // ARRANGE ASSERTIONS
+    
+        committed.ShouldBeTrue();
+    
+        // ACT
+
+        await entityRepository.Load(entityId);
+        
+        var actualEntity = entityRepository.Get(entityId);
+    
+        // ASSERT
+    
+        actualEntity.ShouldBeEquivalentTo(expectedEntity);
     }
 
     [Theory]
@@ -406,6 +424,18 @@ public class EntityTests : TestsBase<Startup>
         (
             new[] { entityAdder.EntityType },
             new object?[] { entityAdder }
+        );
+    }
+
+    [Theory]
+    [MemberData(nameof(AddSourcesAndEntity))]
+    public Task GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity(SourcesAdder sourcesAdder,
+        EntityAdder entityAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entityAdder.EntityType },
+            new object?[] { sourcesAdder, entityAdder }
         );
     }
 }

@@ -1,18 +1,65 @@
+using EntityDb.Abstractions.ValueObjects;
+
 namespace EntityDb.Abstractions.Entities;
 
 /// <summary>
-///     Represents a type used to create instances of <see cref="IEntityRepository{TEntity}" />
+///     Represents a type used to create instances of <see cref="IMultipleEntityRepository{TEntity}" />
+///     and <see cref="ISingleEntityRepository{TEntity}"/>.
 /// </summary>
-/// <typeparam name="TEntity">The type of entity managed by the <see cref="IEntityRepository{TEntity}" />.</typeparam>
+/// <typeparam name="TEntity">The type of entity.</typeparam>
 public interface IEntityRepositoryFactory<TEntity>
 {
     /// <summary>
-    ///     Create a new instance of <see cref="IEntityRepository{TEntity}" />
+    ///     Create a new instance of <see cref="ISingleEntityRepository{TEntity}" />
+    ///     for a new entity.
     /// </summary>
+    /// <param name="entityId">A id associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="sourceSessionOptionsName">The agent's use case for the source repository.</param>
     /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>A new instance of <see cref="IEntityRepository{TEntity}" />.</returns>
-    Task<IEntityRepository<TEntity>> CreateRepository(string sourceSessionOptionsName,
-        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default);
+    /// <returns>A new instance of <see cref="ISingleEntityRepository{TEntity}" />.</returns>
+    Task<ISingleEntityRepository<TEntity>> CreateSingleForNew
+    (
+        Id entityId,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? snapshotSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    );
+    
+    /// <summary>
+    ///     Create a new instance of <see cref="ISingleEntityRepository{TEntity}" />
+    ///     for an existing entity.
+    /// </summary>
+    /// <param name="entityPointer">A pointer associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
+    /// <param name="sourceSessionOptionsName">The agent's use case for the source repository.</param>
+    /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A new instance of <see cref="ISingleEntityRepository{TEntity}" />.</returns>
+    Task<ISingleEntityRepository<TEntity>> CreateSingleForExisting
+    (
+        Pointer entityPointer,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? snapshotSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    );
+    
+    /// <summary>
+    ///     Create a new instance of <see cref="IMultipleEntityRepository{TEntity}" />
+    /// </summary>
+    /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
+    /// <param name="sourceSessionOptionsName">The agent's use case for the source repository.</param>
+    /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A new instance of <see cref="IMultipleEntityRepository{TEntity}" />.</returns>
+    Task<IMultipleEntityRepository<TEntity>> CreateMultiple
+    (
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? snapshotSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    );
 }

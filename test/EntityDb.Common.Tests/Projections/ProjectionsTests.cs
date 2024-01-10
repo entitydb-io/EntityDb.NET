@@ -5,7 +5,6 @@ using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.Snapshots;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
 using Version = EntityDb.Abstractions.ValueObjects.Version;
@@ -34,16 +33,13 @@ public class ProjectionsTests : TestsBase<Startup>
             projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var projectionRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
 
         // ACT & ASSERT
 
         await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(() =>
             projectionRepository.GetSnapshot(default));
     }
-
 
     private async Task
         Generic_GivenSourceCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(
@@ -61,9 +57,6 @@ public class ProjectionsTests : TestsBase<Startup>
             projection.Pointer.Version == new Version(replaceAtVersionValue);
 
         var entityId = Id.NewId();
-        var firstSource = SourceSeeder.Create<TEntity>(entityId, replaceAtVersionValue);
-        var secondSource = SourceSeeder.Create<TEntity>(entityId,
-            numberOfVersions - replaceAtVersionValue, replaceAtVersionValue);
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -72,17 +65,19 @@ public class ProjectionsTests : TestsBase<Startup>
             projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
+        await using var projectionRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
 
-        await using var projectionRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
-            .CreateRepository(TestSessionOptions.Write);
+        entityRepository.Create(entityId);
+        
+        entityRepository.Seed(entityId, replaceAtVersionValue);
+        
+        var firstSourceCommitted = await entityRepository.Commit(Id.NewId());
+        
+        entityRepository.Seed(entityId, numberOfVersions - replaceAtVersionValue);
 
-        var firstSourceCommitted = await entityRepository.Commit(firstSource);
-        var secondSourceCommitted = await entityRepository.Commit(secondSource);
-
+        var secondSourceCommitted = await entityRepository.Commit(Id.NewId());
+        
         // ARRANGE ASSERTIONS
 
         numberOfVersions.ShouldBeGreaterThan(replaceAtVersionValue);
@@ -100,9 +95,7 @@ public class ProjectionsTests : TestsBase<Startup>
         // ASSERT
 
         currentProjection.Pointer.Version.Value.ShouldBe(numberOfVersions);
-
         projectionSnapshot.ShouldNotBeNull();
-
         projectionSnapshot.Pointer.Version.Value.ShouldBe(replaceAtVersionValue);
     }
 

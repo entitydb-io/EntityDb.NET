@@ -12,6 +12,6 @@ public interface IProjectionRepositoryFactory<TProjection>
     /// <param name="snapshotSessionOptionsName">The agent's use case for the snapshot repository.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="IProjectionRepository{TProjection}" />.</returns>
-    Task<IProjectionRepository<TProjection>> CreateRepository(string snapshotSessionOptionsName,
+    Task<IProjectionRepository<TProjection>> CreateRepository(string? snapshotSessionOptionsName = null,
         CancellationToken cancellationToken = default);
 }

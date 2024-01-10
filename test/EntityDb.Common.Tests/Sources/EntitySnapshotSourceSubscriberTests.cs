@@ -22,7 +22,7 @@ public class EntitySnapshotSourceSubscriberTests : TestsBase<Startup>
     private async Task
         Generic_GivenSnapshotShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntitySnapshotSourceSubscriber_ThenAlwaysWriteSnapshot<
             TEntity>(
-            SourcesAdder sourcesAdder, SnapshotAdder entitySnapshotAdder)
+            SourcesAdder sourcesAdder, SnapshotAdder snapshotAdder)
         where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
     {
         // ARRANGE
@@ -32,28 +32,27 @@ public class EntitySnapshotSourceSubscriberTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
+            snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var entityId = Id.NewId();
 
         const uint numberOfVersions = 10;
 
-        var source = SourceSeeder.Create<TEntity>(entityId, numberOfVersions);
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.ReadOnly);
+        await using var snapshotRepository = await GetReadOnlySnapshotRepository<TEntity>(serviceScope);
 
         // ACT
+        
+        entityRepository.Create(entityId);
+        entityRepository.Seed(entityId, numberOfVersions);
+        
+        var committed = await entityRepository
+            .Commit(default);
 
-        var committed = await entityRepository.Commit(source);
-
-        var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
+        var snapshot = await snapshotRepository
+            .GetSnapshotOrDefault(entityId);
 
         // ASSERT
 
@@ -89,22 +88,18 @@ public class EntitySnapshotSourceSubscriberTests : TestsBase<Startup>
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
             snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
+        
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
+        await using var snapshotRepository = await GetReadOnlySnapshotRepository<TEntity>(serviceScope);
 
         var entityId = Id.NewId();
 
-        var source = SourceSeeder.Create<TEntity>(entityId, 10);
-
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.ReadOnly);
-
         // ACT
 
-        await entityRepository.Commit(source);
+        entityRepository.Create(entityId);
+        entityRepository.Seed(entityId, 10);
+        
+        await entityRepository.Commit(default);
 
         var snapshot = await snapshotRepository.GetSnapshotOrDefault(entityId);
 

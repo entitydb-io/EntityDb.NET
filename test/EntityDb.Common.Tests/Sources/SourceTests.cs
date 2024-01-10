@@ -1,12 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
-using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Agents;
 using EntityDb.Common.Sources.Attributes;
 using EntityDb.Common.Sources.Queries;
@@ -16,13 +13,11 @@ using EntityDb.Common.Tests.Implementations.Deltas;
 using EntityDb.Common.Tests.Implementations.Leases;
 using EntityDb.Common.Tests.Implementations.Queries;
 using EntityDb.Common.Tests.Implementations.Seeders;
-using EntityDb.Common.Tests.Implementations.Snapshots;
 using EntityDb.Common.Tests.Implementations.Tags;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Moq;
 using Shouldly;
 using Xunit;
 using Version = EntityDb.Abstractions.ValueObjects.Version;
@@ -37,15 +32,14 @@ public sealed class SourceTests : TestsBase<Startup>
         : base(startupServiceProvider, databaseContainerFixture)
     {
     }
-
+    
     private static async Task PutSources
     (
         IServiceScope serviceScope,
         List<Source> sources
     )
     {
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
         foreach (var source in sources)
         {
@@ -449,38 +443,34 @@ public sealed class SourceTests : TestsBase<Startup>
         }
     }
 
-    private static async Task<Source> BuildSource<TEntity>
+    private static Source CreateSource
     (
-        IServiceScope serviceScope,
-        Id sourceId,
-        Id entityId,
-        IEnumerable<ulong> counts,
-        TimeStamp? timeStampOverride = null,
-        object? agentSignatureOverride = null
+        IEnumerable<ulong> versionNumbers,
+        Id? id = null,
+        Id? entityId = null,
+        TimeStamp? timeStamp = null,
+        object? agentSignature = null,
+        IDeltaSeeder? deltaSeeder = null
     )
-        where TEntity : IEntity<TEntity>
     {
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
+        var nonNullableEntityId = entityId ?? Id.NewId();
 
-        foreach (var count in counts) sourceBuilder.Append(new StoreNumber(count));
-
-        var source = sourceBuilder.Build(sourceId);
-
-        if (timeStampOverride.HasValue)
-            source = source with
-            {
-                TimeStamp = timeStampOverride.Value,
-            };
-
-        if (agentSignatureOverride is not null)
-            source = source with
-            {
-                AgentSignature = agentSignatureOverride,
-            };
-
-        return source;
+        deltaSeeder ??= new StoreNumberSeeder();
+        
+        return new Source
+        {
+            Id = id ?? Id.NewId(),
+            TimeStamp = timeStamp ?? TimeStamp.UtcNow,
+            AgentSignature = agentSignature ?? new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = versionNumbers
+                .Select(versionNumber =>new Message
+                {
+                    Id = Id.NewId(),
+                    EntityPointer = nonNullableEntityId + new Version(versionNumber),
+                    Delta = deltaSeeder.Create(versionNumber),
+                })
+                .ToImmutableArray(),
+        };
     }
 
     private static Id[] GetSortedIds(int numberOfIds)
@@ -492,36 +482,97 @@ public sealed class SourceTests : TestsBase<Startup>
             .ToArray();
     }
 
-    private async Task
-        Generic_GivenReadOnlyMode_WhenCommittingSource_ThenCannotWriteInReadOnlyModeExceptionIsLogged<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    private async Task Generic_GivenSourceAlreadyCommitted_WhenQueryingByData_ThenReturnExpectedObjects<TOptions>(SourcesAdder sourcesAdder)
+        where TOptions : class
     {
-        // ARRANGE
-
-        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<CannotWriteInReadOnlyModeException>();
+        const ulong countTo = 20UL;
+        const ulong gte = 5UL;
+        const ulong lte = 15UL;
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+        });
+
+        var sources = new List<Source>();
+        var expectedObjects = new ExpectedObjects();
+
+        var sourceIds = GetSortedIds((int)countTo);
+        var entityIds = GetSortedIds((int)countTo);
+
+        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
+
+        var deltas = new object[] { new DoNothing() };
+
+        for (var i = 1UL; i <= countTo; i++)
+        {
+            var currentSourceId = sourceIds[i - 1];
+            var currentEntityId = entityIds[i - 1];
+
+            var leases = new[] { new CountLease(i) };
+
+            var tags = new[] { new CountTag(i) };
+
+            expectedObjects.Add(i is >= gte and <= lte, currentSourceId, currentEntityId, agentSignature, deltas,
+                leases, tags);
+
+            var source = new Source
+            {
+                Id = currentSourceId,
+                TimeStamp = TimeStamp.UtcNow,
+                AgentSignature = agentSignature,
+                Messages = deltas
+                    .Select(delta =>new Message
+                    {
+                        Id = Id.NewId(),
+                        EntityPointer = currentEntityId,
+                        Delta = delta,
+                        AddLeases = leases.ToImmutableArray<ILease>(),
+                        AddTags = tags.ToImmutableArray<ITag>(),
+                    })
+                    .ToImmutableArray(),
+            };
+
+            sources.Add(source);
+        }
+
+        var options = serviceScope.ServiceProvider
+            .GetRequiredService<IOptionsFactory<TOptions>>()
+            .Create("Count");
+
+        var query = new CountQuery(gte, lte, options);
+
+        await PutSources(serviceScope, sources);
+        await TestGetSourceIds(serviceScope, query as ILeaseQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ITagQuery, expectedObjects);
+        await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
+        await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
+        await TestGetLeases(serviceScope, query, expectedObjects);
+        await TestGetTags(serviceScope, query, expectedObjects);
+    }
+    
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenReadOnlyMode_WhenCommittingSource_ThenCannotWriteInReadOnlyModeExceptionIsLogged(SourcesAdder sourcesAdder)
+    {
+        // ARRANGE
+
+        //var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<CannotWriteInReadOnlyModeException>();
+
+        var logs = new List<Log>();
+        
+        using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            sourcesAdder.AddDependencies.Invoke(serviceCollection);
 
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
-            serviceCollection.AddSingleton(loggerFactory);
+            serviceCollection.AddSingleton(GetMockedLoggerFactory(logs));
         });
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
+        await using var sourceRepository = await GetReadOnlySourceRepository(serviceScope);
 
-        var source = sourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(default);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.ReadOnly);
+        var source = CreateSource(new[] { 1ul });
 
         // ACT
 
@@ -531,41 +582,26 @@ public sealed class SourceTests : TestsBase<Startup>
 
         committed.ShouldBeFalse();
 
-        loggerVerifier.Invoke(Times.Once());
+        logs.Count(log => log.Exception is not null).ShouldBe(1);
+
+        //loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueSourceIds_WhenCommittingSources_ThenSecondPutReturnsFalse<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenNonUniqueSourceIds_WhenCommittingSources_ThenSecondPutReturnsFalse(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+        
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
-        var sourceId = Id.NewId();
-
-        var firstSourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var secondSourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var firstSource = firstSourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(sourceId);
-
-        var secondSource = secondSourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(sourceId);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
+        var firstSource = CreateSource(new[] { 1ul });
+        var secondSource = CreateSource(new[] { 1ul }, id: firstSource.Id);
 
         // ACT
 
@@ -578,9 +614,9 @@ public sealed class SourceTests : TestsBase<Startup>
         secondSourceCommitted.ShouldBeFalse();
     }
 
-    private async Task Generic_GivenNonUniqueVersions_WhenCommittingDeltas_ThenReturnFalse<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenReturnFalse(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
@@ -589,16 +625,11 @@ public sealed class SourceTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
-        var source = sourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(default);
+        var source = CreateSource(new[] { 1ul });
 
         source = source with
         {
@@ -608,233 +639,206 @@ public sealed class SourceTests : TestsBase<Startup>
                 .ToImmutableArray(),
         };
 
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
-
         // ARRANGE ASSERTIONS
 
         repeatCount.ShouldBeGreaterThan(1);
 
         // ACT
 
-        var sourceCommitted = await sourceRepository.Commit(source);
+        var committed = await sourceRepository.Commit(source);
 
         // ASSERT
 
-        sourceCommitted.ShouldBeFalse();
+        committed.ShouldBeFalse();
     }
 
-    private async Task
-        Generic_GivenVersionZero_WhenCommittingDeltas_ThenReturnTrue<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenVersionZero_WhenCommittingDeltas_ThenReturnTrue(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var message = new Message
-        {
-            Id = Id.NewId(),
-            EntityPointer = Id.NewId() + Version.Zero,
-            Delta = new DoNothing(),
-        };
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
-        var source = SourceSeeder.Create(message);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
+        var source = CreateSource(new[] { 0ul });
 
         // ACT
 
-        var sourceCommitted =
-            await sourceRepository.Commit(source);
+        var sourceCommitted = await sourceRepository.Commit(source);
 
         // ASSERT
 
         sourceCommitted.ShouldBeTrue();
     }
 
-    private async Task
-        Generic_GivenNonUniqueVersions_WhenCommittingDeltas_ThenOptimisticConcurrencyExceptionIsLogged<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenOptimisticConcurrencyExceptionIsLogged(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
-        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<OptimisticConcurrencyException>();
+        //var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<OptimisticConcurrencyException>();
 
+        var logs = new List<Log>();
+        
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
 
             serviceCollection.RemoveAll(typeof(ILoggerFactory));
 
-            serviceCollection.AddSingleton(loggerFactory);
+            serviceCollection.AddSingleton(GetMockedLoggerFactory(logs));
         });
 
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
+        
         var entityId = Id.NewId();
 
-        var firstSourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
-
-        var secondSourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
-
-        var firstSource = firstSourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(Id.NewId());
-
-        var secondSource = secondSourceBuilder
-            .Append(DeltaSeeder.Create())
-            .Build(Id.NewId());
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
+        var firstSource = CreateSource(new[] { 1ul }, entityId: entityId);
+        var secondSource = CreateSource(new[] { 1ul }, entityId: entityId);
 
         // ACT
 
-        var firstSourceCommitted =
-            await sourceRepository.Commit(firstSource);
-        var secondSourceCommitted =
-            await sourceRepository.Commit(secondSource);
+        var firstSourceCommitted = await sourceRepository.Commit(firstSource);
+        var secondSourceCommitted = await sourceRepository.Commit(secondSource);
 
         // ASSERT
-
-        firstSource.Messages.Length.ShouldBe(1);
-        secondSource.Messages.Length.ShouldBe(1);
-
-        firstSource.Messages.ShouldAllBe(message => message.EntityPointer.Id == entityId);
-        secondSource.Messages.ShouldAllBe(message => message.EntityPointer.Id == entityId);
-
-        firstSource.Messages[0].EntityPointer.Version
-            .ShouldBe(secondSource.Messages[0].EntityPointer.Version);
 
         firstSourceCommitted.ShouldBeTrue();
         secondSourceCommitted.ShouldBeFalse();
 
-        loggerVerifier.Invoke(Times.Once());
+        logs.Count(log => log.Exception is not null).ShouldBe(1);
+
+        //loggerVerifier.Invoke(Times.Once());
     }
 
-    private async Task Generic_GivenNonUniqueTags_WhenCommittingTags_ThenReturnTrue<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenNonUniqueTags_WhenCommittingTags_ThenReturnTrue(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
+        
         var tag = TagSeeder.Create();
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var source = sourceBuilder
-            .Append(new AddTag(tag))
-            .Append(new AddTag(tag))
-            .Build(default);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
+        var source = new Source
+        {
+            Id = default,
+            TimeStamp = default,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = default,
+                    EntityPointer = default,
+                    Delta = new DoNothing(),
+                    AddTags = new[] { tag, tag }.ToImmutableArray(),
+                },
+            }.ToImmutableArray(),
+        };
 
         // ACT
 
-        var sourceCommitted = await sourceRepository.Commit(source);
+        var committed = await sourceRepository.Commit(source);
 
         // ASSERT
 
-        sourceCommitted.ShouldBeTrue();
+        committed.ShouldBeTrue();
     }
 
-    private async Task Generic_GivenNonUniqueLeases_WhenCommittingLeases_ThenReturnFalse<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenNonUniqueLeases_WhenCommittingLeases_ThenReturnFalse(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+        
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
         var lease = LeaseSeeder.Create();
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var source = sourceBuilder
-            .Append(new AddLease(lease))
-            .Append(new AddLease(lease))
-            .Build(default);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
+        var source = new Source
+        {
+            Id = default,
+            TimeStamp = default,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = default,
+                    EntityPointer = default,
+                    Delta = new DoNothing(),
+                    AddLeases = new[] { lease, lease }.ToImmutableArray(),
+                },
+            }.ToImmutableArray(),
+        };
 
         // ACT
 
-        var sourceCommitted = await sourceRepository.Commit(source);
+        var committed = await sourceRepository.Commit(source);
 
         // ASSERT
 
-        sourceCommitted.ShouldBeFalse();
+        committed.ShouldBeFalse();
     }
 
-    private async Task
-        Generic_GivenDeltaCommitted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenDeltaCommitted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature(SourcesAdder sourcesAdder)
     {
         // ARRANGE
-
-        const ulong expectedCount = 5;
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+        
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
         var expectedSourceId = Id.NewId();
         var expectedEntityId = Id.NewId();
         var expectedSourceTimeStamp = sourcesAdder.FixTimeStamp(TimeStamp.UtcNow);
+        var expectedAgentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
 
-        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
-
-        var source = await BuildSource<TEntity>(serviceScope, expectedSourceId, expectedEntityId,
-            new[] { expectedCount }, expectedSourceTimeStamp, agentSignature);
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        var sourceCommitted = await sourceRepository.Commit(source);
+        var source = CreateSource
+        (
+            new[] { 1ul },
+            id: expectedSourceId,
+            timeStamp: expectedSourceTimeStamp,
+            entityId: expectedEntityId,
+            agentSignature: expectedAgentSignature
+        );
+        
+        var committed = await sourceRepository.Commit(source);
 
         var query = new EntityQuery(expectedEntityId);
 
         // ARRANGE ASSERTIONS
 
-        sourceCommitted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
-        var annotatedAgentSignatures =
-            await sourceRepository.EnumerateAnnotatedAgentSignatures(query).ToArrayAsync();
+        var annotatedAgentSignatures = await sourceRepository
+            .EnumerateAnnotatedAgentSignatures(query)
+            .ToArrayAsync();
 
         // ASSERT
 
@@ -844,41 +848,43 @@ public sealed class SourceTests : TestsBase<Startup>
         annotatedAgentSignatures[0].SourceTimeStamp.ShouldBe(expectedSourceTimeStamp);
         annotatedAgentSignatures[0].EntityPointers.Length.ShouldBe(1);
         annotatedAgentSignatures[0].EntityPointers[0].Id.ShouldBe(expectedEntityId);
-        annotatedAgentSignatures[0].Data.ShouldBeEquivalentTo(agentSignature);
+        annotatedAgentSignatures[0].Data.ShouldBeEquivalentTo(expectedAgentSignature);
     }
 
-    private async Task Generic_GivenDeltaCommitted_WhenGettingAnnotatedDeltas_ThenReturnAnnotatedDelta<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenDeltaCommitted_WhenGettingAnnotatedDeltas_ThenReturnAnnotatedDelta(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
-        const ulong expectedDeltaCount = 5;
-
+        ulong[] numbers = { 1, 2, 3, 4, 5 };
+        
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+        
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
         var expectedSourceId = Id.NewId();
         var expectedEntityId = Id.NewId();
         var expectedSourceTimeStamp = sourcesAdder.FixTimeStamp(TimeStamp.UtcNow);
 
-        var source = await BuildSource<TEntity>(serviceScope, expectedSourceId, expectedEntityId,
-            new[] { expectedDeltaCount }, expectedSourceTimeStamp);
+        var source = CreateSource
+        (
+            numbers,
+            id: expectedSourceId,
+            timeStamp: expectedSourceTimeStamp,
+            entityId: expectedEntityId
+        );
 
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        var sourceCommitted = await sourceRepository.Commit(source);
+        var committed = await sourceRepository.Commit(source);
 
         var query = new GetDeltasQuery(expectedEntityId, default);
 
         // ARRANGE ASSERTIONS
 
-        sourceCommitted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
@@ -886,90 +892,80 @@ public sealed class SourceTests : TestsBase<Startup>
 
         // ASSERT
 
-        annotatedDeltas.Length.ShouldBe(1);
+        annotatedDeltas.Length.ShouldBe(numbers.Length);
 
-        annotatedDeltas[0].SourceId.ShouldBe(expectedSourceId);
-        annotatedDeltas[0].SourceTimeStamp.ShouldBe(expectedSourceTimeStamp);
-        annotatedDeltas[0].EntityPointer.Id.ShouldBe(expectedEntityId);
-        annotatedDeltas[0].EntityPointer.Version.ShouldBe(new Version(1));
+        foreach (var number in numbers)
+        {
+            var annotatedDelta = annotatedDeltas[Convert.ToInt32(number) - 1];
+            
+            annotatedDelta.SourceId.ShouldBe(expectedSourceId);
+            annotatedDelta.SourceTimeStamp.ShouldBe(expectedSourceTimeStamp);
+            annotatedDelta.EntityPointer.Id.ShouldBe(expectedEntityId);
+            annotatedDelta.EntityPointer.Version.ShouldBe(new Version(number));
 
-        var actualDeltaCount = annotatedDeltas[0].Data.ShouldBeAssignableTo<StoreNumber>().ShouldNotBeNull();
-
-        actualDeltaCount.Number.ShouldBe(expectedDeltaCount);
+            annotatedDelta.Data
+                .ShouldBeAssignableTo<StoreNumber>()
+                .ShouldNotBeNull()
+                .Number
+                .ShouldBe(number);
+        }
     }
 
-    private async Task Generic_GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenEntityCommittedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
+        
         var entityId = Id.NewId();
-
-        var expectedEntity = TEntity.Construct(entityId).WithVersion(new Version(1));
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
-
-        var entityRepository = EntityRepository<TEntity>.Create(serviceScope.ServiceProvider, sourceRepository);
-
-        var source = await BuildSource<TEntity>(serviceScope, Id.NewId(), entityId,
-            new[] { 0UL });
-
-        var sourceCommitted = await sourceRepository.Commit(source);
-
-        // ARRANGE ASSERTIONS
-
-        sourceCommitted.ShouldBeTrue();
-
-        // ACT
-
-        var actualEntity = await entityRepository.GetSnapshot(entityId);
-
-        // ASSERT
-
-        actualEntity.ShouldBeEquivalentTo(expectedEntity);
-    }
-
-    private async Task Generic_GivenEntityCommittedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
-    {
-        // ARRANGE
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
-        });
-
-        var entityId = Id.NewId();
-
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
 
         var tag = new Tag("Foo", "Bar");
+        var tags = new[] { tag }.ToImmutableArray<ITag>();
 
-        var expectedInitialTags = new[] { tag }.ToImmutableArray<ITag>();
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        var initialSource = sourceBuilder
-            .Append(new AddTag(tag))
-            .Build(Id.NewId());
+        var initialSource = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = Id.NewId(),
+                    Delta = new DoNothing(),
+                    EntityPointer = entityId,
+                    AddTags = tags,
+                },
+            }.ToImmutableArray(),
+        };
 
         var initialSourceCommitted = await sourceRepository.Commit(initialSource);
+        
+        var finalSource = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = Id.NewId(),
+                    Delta = new DoNothing(),
+                    EntityPointer = entityId,
+                    DeleteTags = tags,
+                },
+            }.ToImmutableArray(),
+        };
 
-        var tagQuery = new DeleteTagsQuery(entityId, expectedInitialTags);
+        var tagQuery = new DeleteTagsQuery(entityId, tags);
 
         // ARRANGE ASSERTIONS
 
@@ -977,58 +973,77 @@ public sealed class SourceTests : TestsBase<Startup>
 
         // ACT
 
-        var actualInitialTags = await sourceRepository.EnumerateTags(tagQuery).ToArrayAsync();
-
-        var finalSource = sourceBuilder
-            .Append(new DeleteTag(tag))
-            .Build(Id.NewId());
+        var initialTags = await sourceRepository
+            .EnumerateTags(tagQuery)
+            .ToArrayAsync();
 
         var finalSourceCommitted = await sourceRepository.Commit(finalSource);
 
-        var actualFinalTags = await sourceRepository.EnumerateTags(tagQuery).ToArrayAsync();
+        var finalTags = await sourceRepository
+            .EnumerateTags(tagQuery)
+            .ToArrayAsync();
 
         // ASSERT
 
+        initialTags.Length.ShouldBe(1);
+        initialTags[0].ShouldBeEquivalentTo(tag);
         finalSourceCommitted.ShouldBeTrue();
-
-        expectedInitialTags.SequenceEqual(actualInitialTags).ShouldBeTrue();
-
-        actualFinalTags.ShouldBeEmpty();
+        finalTags.ShouldBeEmpty();
     }
 
-    private async Task Generic_GivenEntityCommittedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases<TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenEntityCommittedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        var entityId = Id.NewId();
-
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
-
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
+        
         var lease = new Lease("Foo", "Bar", "Baz");
+        var leases = new[] { lease }.ToImmutableArray<ILease>();
 
-        var expectedInitialLeases = new[] { lease }.ToImmutableArray<ILease>();
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
-
-        var initialSource = sourceBuilder
-            .Append(new AddLease(lease))
-            .Build(Id.NewId());
-
+        var initialSource = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = Id.NewId(),
+                    Delta = new DoNothing(),
+                    EntityPointer = default,
+                    AddLeases = leases,
+                }
+            }.ToImmutableArray(),
+        };
+        
         var initialSourceCommitted = await sourceRepository.Commit(initialSource);
+        
+        var finalSource = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[]
+            {
+                new Message
+                {
+                    Id = Id.NewId(),
+                    Delta = new DoNothing(),
+                    EntityPointer = default,
+                    DeleteLeases = leases,
+                },
+            }.ToImmutableArray(),
+        };
 
-        var leaseQuery = new DeleteLeasesQuery(expectedInitialLeases);
+        var leaseQuery = new DeleteLeasesQuery(leases);
 
         // ARRANGE ASSERTIONS
 
@@ -1036,53 +1051,41 @@ public sealed class SourceTests : TestsBase<Startup>
 
         // ACT
 
-        var actualInitialLeases = await sourceRepository.EnumerateLeases(leaseQuery).ToArrayAsync();
-
-        var finalSource = sourceBuilder
-            .Append(new DeleteLease(lease))
-            .Build(Id.NewId());
-
+        var initialLeases = await sourceRepository
+            .EnumerateLeases(leaseQuery)
+            .ToArrayAsync();
+        
         var finalSourceCommitted = await sourceRepository.Commit(finalSource);
 
-        var actualFinalLeases = await sourceRepository.EnumerateLeases(leaseQuery).ToArrayAsync();
+        var finalLeases = await sourceRepository
+            .EnumerateLeases(leaseQuery)
+            .ToArrayAsync();
 
         // ASSERT
 
+        initialLeases.Length.ShouldBe(1);
         finalSourceCommitted.ShouldBeTrue();
-
-        actualInitialLeases.SequenceEqual(expectedInitialLeases).ShouldBeTrue();
-
-        actualFinalLeases.ShouldBeEmpty();
+        finalLeases.ShouldBeEmpty();
     }
 
-    private async Task
-        Generic_GivenSourceCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedDelta<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedDelta(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
+
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
 
         var expectedDelta = new StoreNumber(1);
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var source = sourceBuilder
-            .Append(expectedDelta)
-            .Build(Id.NewId());
+        var source = CreateSource(new[] { 1ul });
 
         var versionOneQuery = new EntityVersionQuery(new Version(1), new Version(1));
-
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository(TestSessionOptions.Write);
 
         // ACT
 
@@ -1093,55 +1096,34 @@ public sealed class SourceTests : TestsBase<Startup>
         // ASSERT
 
         sourceCommitted.ShouldBeTrue();
-
-        source.Messages.Length.ShouldBe(1);
-
-        source.Messages[0].EntityPointer.Version.ShouldBe(new Version(1));
-
         newDeltas.Length.ShouldBe(1);
-
         newDeltas[0].ShouldBeEquivalentTo(expectedDelta);
     }
 
-    private async Task
-        Generic_GivenSourceAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedDelta<
-            TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedDelta(SourcesAdder sourcesAdder)
     {
         // ARRANGE
 
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
-
+        
+        await using var sourceRepository = await GetWriteSourceRepository(serviceScope);
+        
         var expectedDelta = new StoreNumber(2);
 
-        var sourceBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntitySourceBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, default);
-
-        var firstSource = sourceBuilder
-            .Append(new StoreNumber(1))
-            .Build(Id.NewId());
-
-        var secondSource = sourceBuilder
-            .Append(expectedDelta)
-            .Build(Id.NewId());
+        var entityId = Id.NewId();
+        var firstSource = CreateSource(new[] { 1ul }, entityId: entityId);
+        var secondSource = CreateSource(new[] { 2ul }, entityId: entityId);
 
         var versionTwoQuery = new EntityVersionQuery(new Version(2), new Version(2));
 
-        await using var sourceRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISourceRepositoryFactory>().CreateRepository(TestSessionOptions.Write);
+        // ACT
 
         var firstSourceCommitted = await sourceRepository.Commit(firstSource);
-
-        // ARRANGE ASSERTIONS
-
-        firstSourceCommitted.ShouldBeTrue();
-
-        // ACT
 
         var secondSourceCommitted = await sourceRepository.Commit(secondSource);
 
@@ -1149,21 +1131,15 @@ public sealed class SourceTests : TestsBase<Startup>
 
         // ASSERT
 
+        firstSourceCommitted.ShouldBeTrue();
         secondSourceCommitted.ShouldBeTrue();
-
-        secondSource.Messages.Length.ShouldBe(1);
-
-        secondSource.Messages[0].EntityPointer.Version.ShouldBe(new Version(2));
-
         newDeltas.Length.ShouldBe(1);
-
         newDeltas[0].ShouldBeEquivalentTo(expectedDelta);
     }
 
-    private async Task
-        Generic_GivenSourceAlreadyCommitted_WhenQueryingBySourceTimeStamp_ThenReturnExpectedObjects<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceAlreadyCommitted_WhenQueryingBySourceTimeStamp_ThenReturnExpectedObjects(SourcesAdder sourcesAdder)
     {
         const ulong timeSpanInMinutes = 60UL;
         const ulong gteInMinutes = 20UL;
@@ -1172,7 +1148,6 @@ public sealed class SourceTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var originTimeStamp = TimeStamp.UnixEpoch;
@@ -1195,9 +1170,7 @@ public sealed class SourceTests : TestsBase<Startup>
             var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
 
             var deltas = new object[] { new StoreNumber(i) };
-
             var leases = new[] { new CountLease(i) };
-
             var tags = new[] { new CountTag(i) };
 
             expectedObjects.Add(i is >= gteInMinutes and <= lteInMinutes, currentSourceId, currentEntityId,
@@ -1214,9 +1187,22 @@ public sealed class SourceTests : TestsBase<Startup>
                     break;
             }
 
-            var source = await BuildSource<TEntity>(serviceScope, currentSourceId, currentEntityId,
-                new[] { i },
-                currentSourceTimeStamp, agentSignature);
+            var source = new Source
+            {
+                Id = currentSourceId,
+                TimeStamp = currentSourceTimeStamp,
+                AgentSignature = agentSignature,
+                Messages = deltas
+                    .Select(delta =>new Message
+                    {
+                        Id = Id.NewId(),
+                        EntityPointer = currentEntityId,
+                        Delta = delta,
+                        AddLeases = leases.ToImmutableArray<ILease>(),
+                        AddTags = tags.ToImmutableArray<ITag>(),
+                    })
+                    .ToImmutableArray(),
+            };
 
             sources.Add(source);
         }
@@ -1241,10 +1227,10 @@ public sealed class SourceTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task
-        Generic_GivenSourceAlreadyCommitted_WhenQueryingBySourceId_ThenReturnExpectedObjects<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceAlreadyCommitted_WhenQueryingBySourceId_ThenReturnExpectedObjects(
+        SourcesAdder sourcesAdder)
     {
         const ulong numberOfSourceIds = 10UL;
         const ulong whichSourceId = 5UL;
@@ -1252,7 +1238,6 @@ public sealed class SourceTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var sources = new List<Source>();
@@ -1271,9 +1256,7 @@ public sealed class SourceTests : TestsBase<Startup>
             var currentEntityId = entityIds[i - 1];
 
             var deltas = new object[] { new StoreNumber(i) };
-
             var leases = new[] { new CountLease(i) };
-
             var tags = new[] { new CountTag(i) };
 
             expectedObjects.Add(i == whichSourceId, currentSourceId, currentEntityId, agentSignature,
@@ -1282,9 +1265,22 @@ public sealed class SourceTests : TestsBase<Startup>
 
             if (i == whichSourceId) sourceId = currentSourceId;
 
-            var source = await BuildSource<TEntity>(serviceScope, currentSourceId, currentEntityId,
-                new[] { i },
-                agentSignatureOverride: agentSignature);
+            var source = new Source
+            {
+                Id = currentSourceId,
+                TimeStamp = TimeStamp.UtcNow,
+                AgentSignature = agentSignature,
+                Messages = deltas
+                    .Select(delta =>new Message
+                    {
+                        Id = Id.NewId(),
+                        EntityPointer = currentEntityId,
+                        Delta = delta,
+                        AddLeases = leases.ToImmutableArray<ILease>(),
+                        AddTags = tags.ToImmutableArray<ITag>(),
+                    })
+                    .ToImmutableArray(),
+            };
 
             sources.Add(source);
         }
@@ -1308,10 +1304,9 @@ public sealed class SourceTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task
-        Generic_GivenSourceAlreadyCommitted_WhenQueryingByEntityId_ThenReturnExpectedObjects<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceAlreadyCommitted_WhenQueryingByEntityId_ThenReturnExpectedObjects(SourcesAdder sourcesAdder)
     {
         const ulong numberOfEntityIds = 10UL;
         const ulong whichEntityId = 5UL;
@@ -1319,7 +1314,6 @@ public sealed class SourceTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var sources = new List<Source>();
@@ -1347,10 +1341,23 @@ public sealed class SourceTests : TestsBase<Startup>
                 leases, tags);
 
             if (i == whichEntityId) entityId = currentEntityId;
-
-            var source = await BuildSource<TEntity>(serviceScope, currentSourceId, currentEntityId,
-                new[] { i },
-                agentSignatureOverride: agentSignature);
+            
+            var source = new Source
+            {
+                Id = currentSourceId,
+                TimeStamp = TimeStamp.UtcNow,
+                AgentSignature = agentSignature,
+                Messages = deltas
+                    .Select(delta =>new Message
+                    {
+                        Id = Id.NewId(),
+                        EntityPointer = currentEntityId,
+                        Delta = delta,
+                        AddLeases = leases.ToImmutableArray<ILease>(),
+                        AddTags = tags.ToImmutableArray<ITag>(),
+                    })
+                    .ToImmutableArray(),
+            };
 
             sources.Add(source);
         }
@@ -1374,10 +1381,9 @@ public sealed class SourceTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task
-        Generic_GivenSourceAlreadyCommitted_WhenQueryingByEntityVersion_ThenReturnExpectedObjects<TEntity>(
-            SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TEntity : IEntity<TEntity>
+    [Theory]
+    [MemberData(nameof(AddSource))]
+    public async Task GivenSourceAlreadyCommitted_WhenQueryingByEntityVersion_ThenReturnExpectedObjects(SourcesAdder sourcesAdder)
     {
         const ulong numberOfVersions = 20;
         const ulong gte = 5UL;
@@ -1386,28 +1392,42 @@ public sealed class SourceTests : TestsBase<Startup>
         using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var counts = new List<ulong>();
         var expectedObjects = new ExpectedObjects();
 
+        var messages = new List<Message>();
+
         for (var i = 1UL; i <= numberOfVersions; i++)
         {
             var delta = new StoreNumber(i);
-
             var leases = new[] { new CountLease(i) };
-
             var tags = new[] { new CountTag(i) };
 
             counts.Add(i);
 
             expectedObjects.Add(i is >= gte and <= lte, default, default, default!, new[] { delta },
                 leases, tags);
+            
+            messages.Add(new Message
+            {
+                Id = Id.NewId(),
+                EntityPointer = default,
+                Delta = delta,
+                AddLeases = leases.ToImmutableArray<ILease>(),
+                AddTags = tags.ToImmutableArray<ITag>(),
+            });
         }
-
-        var source = await BuildSource<TEntity>(serviceScope, Id.NewId(), Id.NewId(), counts.ToArray());
-
+        
+        var source = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = messages.ToImmutableArray(),
+        };
+        
         var sources = new List<Source> { source };
 
         var query = new EntityVersionQuery(new Version(gte), new Version(lte));
@@ -1418,292 +1438,14 @@ public sealed class SourceTests : TestsBase<Startup>
         await TestGetTags(serviceScope, query, expectedObjects);
     }
 
-    private async Task Generic_GivenSourceAlreadyCommitted_WhenQueryingByData_ThenReturnExpectedObjects<TOptions,
-        TEntity>(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-        where TOptions : class
-        where TEntity : IEntity<TEntity>
-    {
-        const ulong countTo = 20UL;
-        const ulong gte = 5UL;
-        const ulong lte = 15UL;
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
-        });
-
-        var sources = new List<Source>();
-        var expectedObjects = new ExpectedObjects();
-
-        var sourceIds = GetSortedIds((int)countTo);
-        var entityIds = GetSortedIds((int)countTo);
-
-        var agentSignature = new UnknownAgentSignature(new Dictionary<string, string>());
-
-        var deltas = new object[] { new DoNothing() };
-
-        for (var i = 1UL; i <= countTo; i++)
-        {
-            var currentSourceId = sourceIds[i - 1];
-            var currentEntityId = entityIds[i - 1];
-
-            var leases = new[] { new CountLease(i) };
-
-            var tags = new[] { new CountTag(i) };
-
-            expectedObjects.Add(i is >= gte and <= lte, currentSourceId, currentEntityId, agentSignature, deltas,
-                leases, tags);
-
-            var source = await BuildSource<TEntity>(serviceScope, currentSourceId, currentEntityId,
-                new[] { i },
-                agentSignatureOverride: agentSignature);
-
-            sources.Add(source);
-        }
-
-        var options = serviceScope.ServiceProvider
-            .GetRequiredService<IOptionsFactory<TOptions>>()
-            .Create("Count");
-
-        var query = new CountQuery(gte, lte, options);
-
-        await PutSources(serviceScope, sources);
-        await TestGetSourceIds(serviceScope, query as ILeaseQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ITagQuery, expectedObjects);
-        await TestGetEntityIds(serviceScope, query as ILeaseQuery, expectedObjects);
-        await TestGetEntityIds(serviceScope, query as ITagQuery, expectedObjects);
-        await TestGetLeases(serviceScope, query, expectedObjects);
-        await TestGetTags(serviceScope, query, expectedObjects);
-    }
-
-
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenReadOnlyMode_WhenCommittingSource_ThenCannotWriteInReadOnlyModeExceptionIsLogged(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(AddSource))]
+    public Task GivenSourceAlreadyCommitted_WhenQueryingByData_ThenReturnExpectedObjects(SourcesAdder sourcesAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueSourceIds_WhenCommittingSources_ThenSecondPutReturnsFalse(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenReturnFalse(SourcesAdder sourcesAdder,
-        EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenVersionZero_WhenCommittingDeltas_ThenReturnTrue(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueVersions_WhenCommittingDeltas_ThenOptimisticConcurrencyExceptionIsLogged(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueTags_WhenCommittingTags_ThenReturnTrue(SourcesAdder sourcesAdder,
-        EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonUniqueLeases_WhenCommittingLeases_ThenReturnFalse(SourcesAdder sourcesAdder,
-        EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenDeltaCommitted_WhenGettingAnnotatedAgentSignature_ThenReturnAnnotatedAgentSignature(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenDeltaCommitted_WhenGettingAnnotatedDeltas_ThenReturnAnnotatedDelta(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity(SourcesAdder sourcesAdder,
-        EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenEntityCommittedWithTags_WhenRemovingAllTags_ThenFinalEntityHasNoTags(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenEntityCommittedWithLeases_WhenRemovingAllLeases_ThenFinalEntityHasNoLeases(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceCreatesEntity_WhenQueryingForVersionOne_ThenReturnTheExpectedDelta(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAppendsEntityWithOneVersion_WhenQueryingForVersionTwo_ThenReturnExpectedDelta(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAlreadyCommitted_WhenQueryingBySourceTimeStamp_ThenReturnExpectedObjects(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAlreadyCommitted_WhenQueryingBySourceId_ThenReturnExpectedObjects(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAlreadyCommitted_WhenQueryingByEntityId_ThenReturnExpectedObjects(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAlreadyCommitted_WhenQueryingByEntityVersion_ThenReturnExpectedObjects(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenSourceAlreadyCommitted_WhenQueryingByData_ThenReturnExpectedObjects(
-        SourcesAdder sourcesAdder, EntityAdder entityAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { sourcesAdder.QueryOptionsType, entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { sourcesAdder.QueryOptionsType },
+            new object?[] { sourcesAdder }
         );
     }
 

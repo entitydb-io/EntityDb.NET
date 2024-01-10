@@ -89,9 +89,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
 
         var snapshot = TSnapshot.Construct(default).WithVersion(new Version(300));
 
-        await using var snapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.ReadOnly);
+        await using var snapshotRepository = await GetReadOnlySnapshotRepository<TSnapshot>(serviceScope);
 
         // ACT
 
@@ -136,9 +134,7 @@ public sealed class SnapshotTests : TestsBase<Startup>
             TSnapshot.ShouldRecordAsLatestLogic.Value = (_, _) => true;
         });
 
-        await using var writeSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var writeSnapshotRepository = await GetWriteSnapshotRepository<TSnapshot>(serviceScope);
 
         var inserted = await writeSnapshotRepository.PutSnapshot(latestPointer, snapshot);
 
@@ -186,17 +182,11 @@ public sealed class SnapshotTests : TestsBase<Startup>
             snapshotAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var writeSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var writeSnapshotRepository = await GetWriteSnapshotRepository<TSnapshot>(serviceScope);
 
-        await using var readOnlySnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.ReadOnly);
+        await using var readOnlySnapshotRepository = await GetReadOnlySnapshotRepository<TSnapshot>(serviceScope);
 
-        await using var readOnlySecondaryPreferredSnapshotRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.ReadOnlySecondaryPreferred);
+        await using var readOnlySecondaryPreferredSnapshotRepository = await GetReadOnlySnapshotRepository<TSnapshot>(serviceScope, secondaryPreferred: true);
 
         var inserted = await writeSnapshotRepository.PutSnapshot(entityId, expectedSnapshot);
 

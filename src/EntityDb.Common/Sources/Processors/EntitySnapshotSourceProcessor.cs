@@ -42,7 +42,7 @@ public sealed class EntitySnapshotSourceProcessor<TEntity> : ISourceProcessor
         }
 
         await using var entityRepository = await _entityRepositoryFactory
-            .CreateRepository(_sourceSessionOptionsName, _snapshotSessionOptionsName, cancellationToken);
+            .CreateMultiple(default!, _sourceSessionOptionsName, _snapshotSessionOptionsName, cancellationToken);
 
         if (entityRepository.SnapshotRepository is null)
         {

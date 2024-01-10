@@ -61,7 +61,7 @@ public static class SourceRepositoryExtensions
     (
         this ISourceRepository sourceRepository,
         Id sourceId,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         var query = new GetSourceQuery(sourceId);

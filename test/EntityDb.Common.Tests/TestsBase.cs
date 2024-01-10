@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Snapshots;
@@ -330,6 +331,80 @@ public class TestsBase<TStartup>
         return new TestServiceScope(singletonServiceProvider, serviceScopeFactory.CreateScope());
     }
 
+    public record Log
+    {
+        public required object[] ScopesStates { get; init; }
+        public required LogLevel LogLevel { get; init; }
+        public required EventId EventId { get; init; }
+        public required object? State { get; init; }
+        public required Exception? Exception { get; init; }
+    }
+
+    private class Logger : ILogger
+    {
+        private readonly List<Log> _logs;
+        private readonly Stack<object> _scopeStates = new();
+
+        public Logger(List<Log> logs)
+        {
+            _logs = logs;
+        }
+        
+        private class Scope : IDisposable
+        {
+            private readonly Logger _logger;
+
+            public Scope(Logger logger)
+            {
+                _logger = logger;
+            }
+
+            void IDisposable.Dispose()
+            {
+                _logger._scopeStates.Pop();
+            }
+        }
+
+        IDisposable ILogger.BeginScope<TState>(TState state)
+        {
+            _scopeStates.Push(state);
+            
+            return new Scope(this);
+        }
+
+        bool ILogger.IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            _logs.Add(new Log
+            {
+                ScopesStates = _scopeStates.ToArray(),
+                LogLevel = logLevel,
+                EventId = eventId,
+                State = state,
+                Exception = exception,
+            });
+        }
+    }
+
+    
+    protected static ILoggerFactory GetMockedLoggerFactory(List<Log> logs)
+    {   
+        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
+
+        loggerFactoryMock
+            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
+            .Returns(new Logger(logs));
+
+        loggerFactoryMock
+            .Setup(factory => factory.AddProvider(It.IsAny<ILoggerProvider>()));
+
+        return loggerFactoryMock.Object;
+    }
+
     protected static (ILoggerFactory Logger, Action<Times> LoggerVerifier) GetMockedLoggerFactory<TException>()
         where TException : Exception
     {
@@ -397,11 +472,91 @@ public class TestsBase<TStartup>
         }
     }
 
-    protected static void SetupSourceRepositoryMock(Mock<ISourceRepository> sourceRepositoryMock,
-        List<Source> committedSources)
+    protected static ISourceSubscriber GetMockedSourceSubscriber(List<Source> committedSources)
     {
+        var sourceSubscriberMock = new Mock<ISourceSubscriber>();
+
+        sourceSubscriberMock
+            .Setup(subscriber => subscriber.Notify(It.IsAny<Source>()))
+            .Callback((Source source) =>
+            {
+                committedSources.Add(source);
+            });
+
+        return sourceSubscriberMock.Object;
     }
 
+    protected static Task<IMultipleEntityRepository<TEntity>> GetWriteEntityRepository<TEntity>(IServiceScope serviceScope, bool snapshots)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
+            .CreateMultiple
+            (
+                TestSessionOptions.Default,
+                TestSessionOptions.Write, 
+                snapshots ? TestSessionOptions.Write : null
+            );
+    }
+
+    protected static Task<IMultipleEntityRepository<TEntity>> GetReadOnlyEntityRepository<TEntity>(IServiceScope serviceScope, bool snapshots)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
+            .CreateMultiple
+            (
+                TestSessionOptions.Default, 
+                TestSessionOptions.ReadOnly,
+                snapshots ? TestSessionOptions.ReadOnly : null
+            );
+
+    }
+
+    protected static Task<ISnapshotRepository<TSnapshot>> GetWriteSnapshotRepository<TSnapshot>(
+        IServiceScope serviceScope)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
+            .CreateRepository(TestSessionOptions.Write);
+    }
+    
+    protected static Task<ISnapshotRepository<TSnapshot>> GetReadOnlySnapshotRepository<TSnapshot>(
+        IServiceScope serviceScope, bool secondaryPreferred = false)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
+            .CreateRepository(secondaryPreferred ? TestSessionOptions.ReadOnlySecondaryPreferred : TestSessionOptions.ReadOnly);
+    }
+    
+    protected static Task<ISourceRepository> GetWriteSourceRepository(IServiceScope serviceScope)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<ISourceRepositoryFactory>()
+            .CreateRepository
+            (
+                TestSessionOptions.Write
+            );
+    }
+
+    protected static Task<ISourceRepository> GetReadOnlySourceRepository(IServiceScope serviceScope)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<ISourceRepositoryFactory>()
+            .CreateRepository
+            (
+                TestSessionOptions.ReadOnly
+            );
+    }
+    
+    protected static Task<IProjectionRepository<TProjection>> GetReadOnlyProjectionRepository<TProjection>(IServiceScope serviceScope, bool snapshots)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
+            .CreateRepository
+            (
+                snapshots ? TestSessionOptions.Write : null
+            );
+    }
+    
     protected static ISourceRepositoryFactory GetMockedSourceRepositoryFactory(
         Mock<ISourceRepository> sourceRepositoryMock, List<Source>? committedSources = null)
     {
