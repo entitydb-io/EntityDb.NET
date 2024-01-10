@@ -24,7 +24,7 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
         var messageIds = source.Messages
             .Select(message => message.Id)
             .ToArray();
-        
+
         var entityPointers = source.Messages
             .Select(message => message.EntityPointer)
             .Distinct()

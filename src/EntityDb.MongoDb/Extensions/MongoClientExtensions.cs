@@ -14,21 +14,15 @@ public static class MongoClientExtensions
 
     private static readonly CreateIndexOptions UniquenessConstraint = new()
     {
-        Name = "Uniqueness Constraint",
-        Unique = true,
-    };
-    
-    private static readonly CreateIndexOptions IdempotentConstraint = new()
-    {
-        Name = "Idempotent Constraint",
-        Unique = true,
+        Name = "Uniqueness Constraint", Unique = true,
     };
 
-    private static readonly CreateIndexOptions LookupIndex = new()
+    private static readonly CreateIndexOptions IdempotentConstraint = new()
     {
-        Name = "Lookup Index",
-        Unique = false,
+        Name = "Idempotent Constraint", Unique = true,
     };
+
+    private static readonly CreateIndexOptions LookupIndex = new() { Name = "Lookup Index", Unique = false };
 
     private static readonly Dictionary<string, CreateIndexModel<BsonDocument>[]> SourceCollections = new()
     {

@@ -4,7 +4,6 @@ using EntityDb.Common.Envelopes;
 using EntityDb.Common.Snapshots;
 using EntityDb.Redis.ConnectionMultiplexers;
 using EntityDb.Redis.Snapshots.Sessions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace EntityDb.Redis.Snapshots;

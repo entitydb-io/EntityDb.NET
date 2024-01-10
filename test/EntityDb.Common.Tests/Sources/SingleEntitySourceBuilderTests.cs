@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Entities.Deltas;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Attributes;

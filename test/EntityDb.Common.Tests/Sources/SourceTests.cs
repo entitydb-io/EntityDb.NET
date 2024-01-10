@@ -126,7 +126,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -153,7 +153,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         IAsyncEnumerable<Id> GetActualResults(ISourceRepository sourceRepository,
@@ -180,7 +180,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -207,7 +207,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -234,7 +234,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -263,7 +263,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -292,7 +292,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -321,7 +321,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         Id[] GetExpectedResults(bool invert)
@@ -350,7 +350,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         object[] GetExpectedResults(bool invert)
@@ -377,7 +377,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         object[] GetExpectedResults(bool invert)
@@ -404,7 +404,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         ILease[] GetExpectedResults(bool invert)
@@ -431,7 +431,7 @@ public sealed class SourceTests : TestsBase<Startup>
     {
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, true);
         await TestGet(serviceScope, GetExpectedResults, GetActualResults, false);
-        
+
         return;
 
         IAsyncEnumerable<ITag> GetActualResults(ISourceRepository sourceRepository,

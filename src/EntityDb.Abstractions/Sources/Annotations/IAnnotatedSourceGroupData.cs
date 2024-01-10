@@ -22,7 +22,7 @@ public interface IAnnotatedSourceGroupData<out TData>
     ///     The ids of the messages
     /// </summary>
     Id[] MessageIds { get; }
-    
+
     /// <summary>
     ///     The data
     /// </summary>

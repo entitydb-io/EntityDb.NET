@@ -8,5 +8,5 @@
     <ItemGroup>
         <ProjectReference Include="..\EntityDb.Abstractions\EntityDb.Abstractions.csproj"/>
     </ItemGroup>
-    
+
 </Project>

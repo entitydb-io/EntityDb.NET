@@ -13,7 +13,7 @@ public sealed record Message
     ///     The id assigned to the message.
     /// </summary>
     public required Id Id { get; init; }
-    
+
     /// <summary>
     ///     A pointer to the entity
     /// </summary>

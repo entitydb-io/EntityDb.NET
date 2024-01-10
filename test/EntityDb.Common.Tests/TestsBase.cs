@@ -208,11 +208,14 @@ public class TestsBase<TStartup>
         return
             from snapshotAdder in AllSnapshotAdders<TEntity>()
             let entityAdder = GetEntityAdder<TEntity>()
-            select snapshotAdder with { AddDependencies = snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
+            select snapshotAdder with
             {
-                serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(TestSessionOptions.ReadOnly,
-                    TestSessionOptions.Write);
-            }) };
+                AddDependencies = snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
+                {
+                    serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(TestSessionOptions.ReadOnly,
+                        TestSessionOptions.Write);
+                }),
+            };
     }
 
     private static IEnumerable<EntityAdder> AllEntityAdders()
@@ -230,11 +233,14 @@ public class TestsBase<TStartup>
         where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
     {
         return AllSnapshotAdders<TProjection>()
-            .Select(snapshotAdder => snapshotAdder with { AddDependencies = snapshotAdder.AddDependencies + (serviceCollection =>
+            .Select(snapshotAdder => snapshotAdder with
                 {
-                    serviceCollection.AddProjection<TProjection>();
-                    serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(TestSessionOptions.Write);
-                }) }
+                    AddDependencies = snapshotAdder.AddDependencies + (serviceCollection =>
+                    {
+                        serviceCollection.AddProjection<TProjection>();
+                        serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(TestSessionOptions.Write);
+                    }),
+                }
             );
     }
 
