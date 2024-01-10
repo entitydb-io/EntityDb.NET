@@ -36,7 +36,7 @@ internal class CreateCollections : CommandBase
     {
         var clusterNameArgument = new Argument<string>("cluster-name")
         {
-            Description = "The name of the Cluster on which the entity will be provisioned.",
+            Description = "The name of the Cluster on which the collections will be provisioned.",
         };
 
         command.AddArgument(clusterNameArgument);

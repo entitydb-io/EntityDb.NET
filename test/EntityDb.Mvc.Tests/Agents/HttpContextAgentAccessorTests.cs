@@ -1,4 +1,4 @@
-﻿using EntityDb.Common.Tests.Agents;
+﻿using EntityDb.Common.Tests.Sources.Agents;
 using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Microsoft.AspNetCore.Http;
@@ -44,18 +44,12 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
         {
             new HttpContextSeederOptions
             {
-                Headers = new Dictionary<string, string[]>
-                {
-                    ["Content-Type"] = new[] { "application/json" },
-                },
+                Headers = new Dictionary<string, string[]> { ["Content-Type"] = new[] { "application/json" } },
                 HasIpAddress = true,
             },
             new HttpContextSeederOptions
             {
-                Headers = new Dictionary<string, string[]>
-                {
-                    ["Content-Type"] = new[] { "application/json" },
-                },
+                Headers = new Dictionary<string, string[]> { ["Content-Type"] = new[] { "application/json" } },
                 HasIpAddress = false,
             },
         };

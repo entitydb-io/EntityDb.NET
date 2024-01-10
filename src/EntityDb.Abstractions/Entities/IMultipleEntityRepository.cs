@@ -1,12 +1,12 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Entities;
 
 /// <summary>
-///     Manages the sources and snapshots of multiple entities.
+///     Manages the sources and states of multiple entities.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
 public interface IMultipleEntityRepository<TEntity> : IDisposableResource
@@ -17,12 +17,12 @@ public interface IMultipleEntityRepository<TEntity> : IDisposableResource
     ISourceRepository SourceRepository { get; }
 
     /// <summary>
-    ///     The backing snapshot repository (if snapshot is available).
+    ///     The backing state repository (if state is available).
     /// </summary>
-    ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+    IStateRepository<TEntity>? StateRepository { get; }
 
     /// <summary>
-    ///     Start a new entity if a given entity id.
+    ///     Start a new entity with a given entity id.
     /// </summary>
     /// <param name="entityId">A new id for the new entity.</param>
     /// <remarks>
@@ -31,7 +31,7 @@ public interface IMultipleEntityRepository<TEntity> : IDisposableResource
     void Create(Id entityId);
 
     /// <summary>
-    ///     Associate a <typeparamref name="TEntity" /> with a given entity id.
+    ///     Associate a <typeparamref name="TEntity" /> with a given state id.
     /// </summary>
     /// <param name="entityPointer">A pointer associated with a <typeparamref name="TEntity" />.</param>
     /// <param name="cancellationToken">A cancellation token</param>
@@ -41,26 +41,25 @@ public interface IMultipleEntityRepository<TEntity> : IDisposableResource
     ///     <see cref="Append" />.
     /// </remarks>
     Task Load(Pointer entityPointer, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
-    ///     Returns the snapshot of a <typeparamref name="TEntity" /> for a given <see cref="Id" />.
+    ///     Returns the state of a <typeparamref name="TEntity" /> for a given <see cref="Id" />.
     /// </summary>
     /// <param name="entityId">The id of the entity.</param>
-    /// <returns>The snapshot of a <typeparamref name="TEntity" /> for <paramref name="entityId" />.</returns>
+    /// <returns>The state of a <typeparamref name="TEntity" /> for <paramref name="entityId" />.</returns>
     TEntity Get(Id entityId);
 
     /// <summary>
-    ///     Adds a single delta to the source with a given entity id.
+    ///     Adds a single delta to the source with a given state id.
     /// </summary>
     /// <param name="entityId">The id associated with the <typeparamref name="TEntity" />.</param>
     /// <param name="delta">The new delta that modifies the <typeparamref name="TEntity" />.</param>
     void Append(Id entityId, object delta);
-    
+
     /// <summary>
     ///     Atomically commits a source.
     /// </summary>
-    /// <param name="sourceId">A new id for the new source.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns><c>true</c> if the commit succeeded, or <c>false</c> if the commit failed.</returns>
-    Task<bool> Commit(Id sourceId, CancellationToken cancellationToken = default);
+    Task<bool> Commit(CancellationToken cancellationToken = default);
 }

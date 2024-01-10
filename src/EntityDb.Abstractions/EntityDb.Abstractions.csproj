@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageTags>EntityDb EventSourcing DDD CQRS</PackageTags>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS</PackageTags>
         <Description>An abstraction layer for the EntityDb suite of packages.</Description>
     </PropertyGroup>
 

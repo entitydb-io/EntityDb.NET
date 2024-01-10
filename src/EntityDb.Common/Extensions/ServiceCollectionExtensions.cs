@@ -1,15 +1,15 @@
 ﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.EventStreams;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
+using EntityDb.Abstractions.Streams;
 using EntityDb.Common.Entities;
-using EntityDb.Common.EventStreams;
 using EntityDb.Common.Projections;
 using EntityDb.Common.Sources.Processors;
 using EntityDb.Common.Sources.Processors.Queues;
 using EntityDb.Common.Sources.ReprocessorQueues;
 using EntityDb.Common.Sources.Subscribers;
+using EntityDb.Common.Streams;
 using EntityDb.Common.TypeResolvers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
@@ -150,37 +150,37 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public static void AddEntity<TEntity>(this IServiceCollection serviceCollection)
+    public static void AddEntityRepository<TEntity>(this IServiceCollection serviceCollection)
         where TEntity : IEntity<TEntity>
     {
         serviceCollection.AddTransient<IEntityRepositoryFactory<TEntity>, EntityRepositoryFactory<TEntity>>();
     }
 
     /// <summary>
-    ///     Adds a source subscriber that records snapshots of entities.
+    ///     Adds a source subscriber that records states of entities.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="sourceSessionOptionsName">The agent's intent for the source repository.</param>
-    /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
+    /// <param name="stateSessionOptionsName">The agent's intent for the state repository.</param>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public static void AddEntitySnapshotSourceSubscriber<TEntity>(this IServiceCollection serviceCollection,
-        string sourceSessionOptionsName, string snapshotSessionOptionsName)
+    public static void AddEntityStateSourceSubscriber<TEntity>(this IServiceCollection serviceCollection,
+        string sourceSessionOptionsName, string stateSessionOptionsName)
         where TEntity : IEntity<TEntity>
     {
-        serviceCollection.AddSingleton<ISourceSubscriber, EntitySnapshotSourceSubscriber<TEntity>>();
+        serviceCollection.AddSingleton<ISourceSubscriber, EntityStateSourceSubscriber<TEntity>>();
         serviceCollection.AddScoped(serviceProvider =>
-            EntitySnapshotSourceProcessor<TEntity>.Create(serviceProvider, sourceSessionOptionsName,
-                snapshotSessionOptionsName));
+            EntityStateSourceProcessor<TEntity>.Create(serviceProvider, sourceSessionOptionsName,
+                stateSessionOptionsName));
     }
 
     /// <summary>
-    ///     Adds a transient implementation of <see cref="IEventStreamRepositoryFactory" />
+    ///     Adds a transient implementation of <see cref="IStreamRepositoryFactory" />
     ///     to a service collection.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    public static void AddEventStream(this IServiceCollection serviceCollection)
+    public static void AddStreamRepository(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddTransient<IEventStreamRepositoryFactory, EventStreamRepositoryFactory>();
+        serviceCollection.AddTransient<IStreamRepositoryFactory, StreamRepositoryFactory>();
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
-    public static void AddProjection<TProjection>(
+    public static void AddProjectionRepository<TProjection>(
         this IServiceCollection serviceCollection)
         where TProjection : IProjection<TProjection>
     {
@@ -197,18 +197,18 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     Adds a source subscriber that records snapshots of projections.
+    ///     Adds a source subscriber that records states of projections.
     /// </summary>
     /// <param name="serviceCollection">The service collection.</param>
-    /// <param name="snapshotSessionOptionsName">The agent's intent for the snapshot repository.</param>
+    /// <param name="stateSessionOptionsName">The agent's intent for the state repository.</param>
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
-    public static void AddProjectionSnapshotSourceSubscriber<TProjection>(
+    public static void AddProjectionStateSourceSubscriber<TProjection>(
         this IServiceCollection serviceCollection,
-        string snapshotSessionOptionsName)
+        string stateSessionOptionsName)
         where TProjection : IProjection<TProjection>
     {
-        serviceCollection.AddSingleton<ISourceSubscriber, ProjectionSnapshotSourceSubscriber<TProjection>>();
+        serviceCollection.AddSingleton<ISourceSubscriber, ProjectionStateSourceSubscriber<TProjection>>();
         serviceCollection.AddScoped(serviceProvider =>
-            ProjectionSnapshotSourceProcessor<TProjection>.Create(serviceProvider, snapshotSessionOptionsName));
+            ProjectionStateSourceProcessor<TProjection>.Create(serviceProvider, stateSessionOptionsName));
     }
 }

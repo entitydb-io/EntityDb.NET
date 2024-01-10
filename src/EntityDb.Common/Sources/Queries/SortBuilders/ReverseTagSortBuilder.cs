@@ -2,17 +2,19 @@ using EntityDb.Abstractions.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.SortBuilders;
 
-internal sealed record ReverseTagSortBuilder<TSort>
-    (ITagSortBuilder<TSort> TagSortBuilder) : ReverseSortBuilderBase<TSort>(TagSortBuilder), ITagSortBuilder<TSort>
+internal sealed record ReverseTagSortBuilder<TSort> : ReverseSortBuilderBase<TSort>, ITagSortBuilder<TSort>
 {
-    public TSort EntityId(bool ascending)
+    public required ITagSortBuilder<TSort> TagSortBuilder { get; init; }
+    protected override ISortBuilder<TSort> SortBuilder => TagSortBuilder;
+
+    public TSort StateId(bool ascending)
     {
-        return TagSortBuilder.EntityId(!ascending);
+        return TagSortBuilder.StateId(!ascending);
     }
 
-    public TSort EntityVersion(bool ascending)
+    public TSort StateVersion(bool ascending)
     {
-        return TagSortBuilder.EntityVersion(!ascending);
+        return TagSortBuilder.StateVersion(!ascending);
     }
 
     public TSort TagLabel(bool ascending)

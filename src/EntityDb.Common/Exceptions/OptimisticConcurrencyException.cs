@@ -11,7 +11,7 @@ namespace EntityDb.Common.Exceptions;
 ///     <see cref="ISourceRepository.Commit" /> with any
 ///     <see cref="Message" /> where the value of
 ///     <see cref="Pointer.Version" /> in
-///     <see cref="Message.EntityPointer" />
+///     <see cref="Message.StatePointer" />
 ///     is not equal to <see cref="Abstractions.ValueObjects.Version.Next()" />
 ///     of the committed previous version.
 /// </summary>

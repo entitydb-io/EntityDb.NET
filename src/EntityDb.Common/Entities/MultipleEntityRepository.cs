@@ -1,15 +1,14 @@
 ﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Entities.Deltas;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
-using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Abstractions.States;
+using EntityDb.Abstractions.States.Attributes;
+using EntityDb.Abstractions.States.Deltas;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Queries.Standard;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Immutable;
 
 namespace EntityDb.Common.Entities;
 
@@ -24,57 +23,57 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
     (
         IAgent agent,
         ISourceRepository sourceRepository,
-        ISnapshotRepository<TEntity>? snapshotRepository = null
+        IStateRepository<TEntity>? stateRepository = null
     )
     {
         _agent = agent;
         SourceRepository = sourceRepository;
-        SnapshotRepository = snapshotRepository;
+        StateRepository = stateRepository;
     }
 
     public ISourceRepository SourceRepository { get; }
-    public ISnapshotRepository<TEntity>? SnapshotRepository { get; }
+    public IStateRepository<TEntity>? StateRepository { get; }
 
     public void Create(Id entityId)
     {
         if (_knownEntities.ContainsKey(entityId))
         {
-            throw new EntityAlreadyLoadedException();
+            throw new ExistingEntityException();
         }
 
         var entity = TEntity.Construct(entityId);
 
         _knownEntities.Add(entityId, entity);
     }
-    
+
     public async Task Load(Pointer entityPointer, CancellationToken cancellationToken = default)
     {
         if (_knownEntities.ContainsKey(entityPointer.Id))
         {
-            throw new EntityAlreadyLoadedException();
+            throw new ExistingEntityException();
         }
-        
-        var snapshot = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshotOrDefault(entityPointer, cancellationToken) ??
+
+        var state = StateRepository is not null
+            ? await StateRepository.Get(entityPointer, cancellationToken) ??
               TEntity.Construct(entityPointer.Id)
             : TEntity.Construct(entityPointer.Id);
 
-        var snapshotPointer = snapshot.GetPointer();
+        var statePointer = state.GetPointer();
 
-        var query = new GetDeltasQuery(entityPointer, snapshotPointer.Version);
+        var query = new GetDeltasQuery(entityPointer, statePointer.Version);
 
         var entity = await SourceRepository
             .EnumerateDeltas(query, cancellationToken)
             .AggregateAsync
             (
-                snapshot,
+                state,
                 (current, delta) => current.Reduce(delta),
                 cancellationToken
             );
 
         if (!entityPointer.IsSatisfiedBy(entity.GetPointer()))
         {
-            throw new SnapshotPointerDoesNotExistException();
+            throw new StateDoesNotExistException();
         }
 
         _knownEntities.Add(entityPointer.Id, entity);
@@ -84,17 +83,17 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
     {
         if (!_knownEntities.TryGetValue(entityId, out var entity))
         {
-            throw new EntityNotLoadedException();
+            throw new UnknownEntityIdException();
         }
-        
+
         return entity;
     }
-    
+
     public void Append(Id entityId, object delta)
     {
         if (!_knownEntities.TryGetValue(entityId, out var entity))
         {
-            throw new EntityNotLoadedException();
+            throw new UnknownEntityIdException();
         }
 
         entity = entity.Reduce(delta);
@@ -102,48 +101,54 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
         _messages.Add(new Message
         {
             Id = Id.NewId(),
-            EntityPointer = entity.GetPointer(),
+            StatePointer = entity.GetPointer(),
             Delta = delta,
             AddLeases = delta is IAddLeasesDelta<TEntity> addLeasesDelta
-                ? addLeasesDelta.GetLeases(entity).ToImmutableArray()
-                : ImmutableArray<ILease>.Empty,
+                ? addLeasesDelta.GetLeases(entity).ToArray()
+                : Array.Empty<ILease>(),
             AddTags = delta is IAddTagsDelta<TEntity> addTagsDelta
-                ? addTagsDelta.GetTags(entity).ToImmutableArray()
-                : ImmutableArray<ITag>.Empty,
+                ? addTagsDelta.GetTags(entity).ToArray()
+                : Array.Empty<ITag>(),
             DeleteLeases = delta is IDeleteLeasesDelta<TEntity> deleteLeasesDelta
-                ? deleteLeasesDelta.GetLeases(entity).ToImmutableArray()
-                : ImmutableArray<ILease>.Empty,
+                ? deleteLeasesDelta.GetLeases(entity).ToArray()
+                : Array.Empty<ILease>(),
             DeleteTags = delta is IDeleteTagsDelta<TEntity> deleteTagsDelta
-                ? deleteTagsDelta.GetTags(entity).ToImmutableArray()
-                : ImmutableArray<ITag>.Empty,
+                ? deleteTagsDelta.GetTags(entity).ToArray()
+                : Array.Empty<ITag>(),
         });
 
         _knownEntities[entityId] = entity;
     }
-    
-    public async Task<bool> Commit(Id sourceId,
-        CancellationToken cancellationToken = default)
+
+    public async Task<bool> Commit(CancellationToken cancellationToken = default)
     {
         var source = new Source
         {
-            Id = sourceId,
+            Id = Id.NewId(),
             TimeStamp = _agent.TimeStamp,
             AgentSignature = _agent.Signature,
-            Messages = _messages.ToImmutableArray(),
+            Messages = _messages.ToArray(),
         };
 
+        var committed = await SourceRepository.Commit(source, cancellationToken);
+
+        if (!committed)
+        {
+            return false;
+        }
+
         _messages.Clear();
-        
-        return await SourceRepository.Commit(source, cancellationToken);
+
+        return true;
     }
 
     public override async ValueTask DisposeAsync()
     {
         await SourceRepository.DisposeAsync();
 
-        if (SnapshotRepository is not null)
+        if (StateRepository is not null)
         {
-            await SnapshotRepository.DisposeAsync();
+            await StateRepository.DisposeAsync();
         }
     }
 
@@ -152,10 +157,10 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
         IServiceProvider serviceProvider,
         IAgent agent,
         ISourceRepository sourceRepository,
-        ISnapshotRepository<TEntity>? snapshotRepository = null
+        IStateRepository<TEntity>? stateRepository = null
     )
     {
-        if (snapshotRepository is null)
+        if (stateRepository is null)
         {
             return ActivatorUtilities.CreateInstance<MultipleEntityRepository<TEntity>>
             (
@@ -167,10 +172,10 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
 
         return ActivatorUtilities.CreateInstance<MultipleEntityRepository<TEntity>>
         (
-            serviceProvider, 
+            serviceProvider,
             agent,
             sourceRepository,
-            snapshotRepository
+            stateRepository
         );
     }
 }

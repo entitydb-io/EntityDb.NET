@@ -1,5 +1,5 @@
-﻿using System.Text;
-using EntityDb.Common.Tests.Envelopes;
+﻿using EntityDb.Common.Tests.Envelopes;
+using System.Text;
 
 namespace EntityDb.Redis.Tests.Envelopes;
 

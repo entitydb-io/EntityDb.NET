@@ -1,25 +1,25 @@
 using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Projections;
 
 /// <summary>
-///     Encapsulates the snapshot repository for a projection.
+///     Encapsulates the state repository for a projection.
 /// </summary>
 /// <typeparam name="TProjection">The type of the projection.</typeparam>
 public interface IProjectionRepository<TProjection> : IDisposableResource
 {
     /// <summary>
-    ///     The backing snapshot repository.
+    ///     The backing state repository.
     /// </summary>
-    ISnapshotRepository<TProjection>? SnapshotRepository { get; }
+    IStateRepository<TProjection>? StateRepository { get; }
 
     /// <summary>
-    ///     Returns the snapshot of a <typeparamref name="TProjection" /> for a given <see cref="Pointer" />.
+    ///     Returns the state of a <typeparamref name="TProjection" /> for a given <see cref="Pointer" />.
     /// </summary>
     /// <param name="projectionPointer">A pointer to the projection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The snapshot of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
-    Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default);
+    /// <returns>The state of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
+    Task<TProjection> Get(Pointer projectionPointer, CancellationToken cancellationToken = default);
 }

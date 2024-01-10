@@ -60,8 +60,7 @@ public class MemberInfoNameTypeResolverTests
 
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
-            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            [EnvelopeHelper.MemberInfoName] = "",
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform, [EnvelopeHelper.MemberInfoName] = "",
         });
 
         // ACT

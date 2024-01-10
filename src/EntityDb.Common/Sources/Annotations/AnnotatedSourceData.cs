@@ -7,18 +7,18 @@ internal record AnnotatedSourceData<TData>
 (
     Id SourceId,
     TimeStamp SourceTimeStamp,
-    Id MessageId,
+    Id[] MessageIds,
     TData Data,
-    Pointer EntityPointer
+    Pointer[] StatePointers
 ) : IAnnotatedSourceData<TData>
 {
     public static IAnnotatedSourceData<TData> CreateFromBoxedData
     (
         Id sourceId,
         TimeStamp sourceTimeStamp,
-        Id messageId,
+        Id[] messageIds,
         object boxedData,
-        Pointer entityPointer
+        Pointer[] statePointers
     )
     {
         var dataAnnotationType = typeof(AnnotatedSourceData<>).MakeGenericType(boxedData.GetType());
@@ -28,9 +28,9 @@ internal record AnnotatedSourceData<TData>
             dataAnnotationType,
             sourceId,
             sourceTimeStamp,
-            messageId,
+            messageIds,
             boxedData,
-            entityPointer
+            statePointers
         )!;
     }
 }

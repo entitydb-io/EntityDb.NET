@@ -3,7 +3,7 @@ using EntityDb.Abstractions.ValueObjects;
 namespace EntityDb.Abstractions.Sources.Annotations;
 
 /// <summary>
-///     Annotated source data
+///     Annotated source-level data
 /// </summary>
 /// <typeparam name="TData">The type of the data</typeparam>
 public interface IAnnotatedSourceData<out TData>
@@ -19,9 +19,9 @@ public interface IAnnotatedSourceData<out TData>
     TimeStamp SourceTimeStamp { get; }
 
     /// <summary>
-    ///     The id of the message
+    ///     The ids of the messages
     /// </summary>
-    Id MessageId { get; }
+    Id[] MessageIds { get; }
 
     /// <summary>
     ///     The data
@@ -29,7 +29,7 @@ public interface IAnnotatedSourceData<out TData>
     TData Data { get; }
 
     /// <summary>
-    ///     A pointer to the entity
+    ///     The pointers of the entities
     /// </summary>
-    Pointer EntityPointer { get; }
+    Pointer[] StatePointers { get; }
 }

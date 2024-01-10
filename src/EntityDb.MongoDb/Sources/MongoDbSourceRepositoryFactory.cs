@@ -66,7 +66,7 @@ internal class MongoDbSourceRepositoryFactory : DisposableResourceBaseClass, IMo
         sourceRepository = TryCatchSourceRepository.Create(_serviceProvider, sourceRepository);
 
         sourceRepository = PublishSourceRepository.Create(_serviceProvider, sourceRepository);
-        
+
         return sourceRepository;
     }
 }

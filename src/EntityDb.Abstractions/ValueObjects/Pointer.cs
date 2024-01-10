@@ -1,10 +1,10 @@
 ﻿namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
-///     Points to an entity or projection
+///     References a state with a given id at a given version
 /// </summary>
-/// <param name="Id">The id of the entity or projection.</param>
-/// <param name="Version">The version of the entity or projection.</param>
+/// <param name="Id">The id of the state.</param>
+/// <param name="Version">The version of the state.</param>
 public readonly record struct Pointer(Id Id, Version Version)
 {
     /// <summary>

@@ -1,15 +1,16 @@
 ﻿using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
-using EntityDb.Common.Extensions;
+using EntityDb.Common.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.Modified;
 
-internal sealed record ModifiedLeaseQuery
-    (ILeaseQuery LeaseQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(LeaseQuery,
-        ModifiedQueryOptions), ILeaseQuery
+internal sealed record ModifiedLeaseQuery : ModifiedQueryBase, ILeaseQuery
 {
-    public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
+    public required ILeaseQuery LeaseQuery { get; init; }
+    protected override IQuery Query => LeaseQuery;
+
+    public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
         if (ModifiedQueryOptions.InvertFilter)
         {

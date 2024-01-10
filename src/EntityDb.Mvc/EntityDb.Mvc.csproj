@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageTags>EntityDb EventSourcing DDD CQRS MVC</PackageTags>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS</PackageTags>
         <Description>Provides a model for an AgentSignature that is mapped from an HttpContext. The source includes: Claims, Connection Information, and Raw Headers.</Description>
     </PropertyGroup>
 

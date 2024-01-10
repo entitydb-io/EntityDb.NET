@@ -2,18 +2,19 @@
 
 namespace EntityDb.Common.Sources.Queries.SortBuilders;
 
-internal sealed record ReverseLeaseSortBuilder<TSort>
-    (ILeaseSortBuilder<TSort> LeaseSortBuilder) : ReverseSortBuilderBase<TSort>(LeaseSortBuilder),
-        ILeaseSortBuilder<TSort>
+internal sealed record ReverseLeaseSortBuilder<TSort> : ReverseSortBuilderBase<TSort>, ILeaseSortBuilder<TSort>
 {
-    public TSort EntityId(bool ascending)
+    public required ILeaseSortBuilder<TSort> LeaseSortBuilder { get; init; }
+    protected override ISortBuilder<TSort> SortBuilder => LeaseSortBuilder;
+
+    public TSort StateId(bool ascending)
     {
-        return LeaseSortBuilder.EntityId(!ascending);
+        return LeaseSortBuilder.StateId(!ascending);
     }
 
-    public TSort EntityVersion(bool ascending)
+    public TSort StateVersion(bool ascending)
     {
-        return LeaseSortBuilder.EntityVersion(!ascending);
+        return LeaseSortBuilder.StateVersion(!ascending);
     }
 
     public TSort LeaseScope(bool ascending)

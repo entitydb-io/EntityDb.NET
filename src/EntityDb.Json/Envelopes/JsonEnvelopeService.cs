@@ -58,7 +58,7 @@ internal abstract class JsonEnvelopeService<TSerializedData> : JsonEnvelopeServi
         {
             _logger.LogError(exception, "Unable to serialize");
 
-            throw new SerializeException();
+            throw new DataSerializationException();
         }
     }
 
@@ -75,7 +75,7 @@ internal abstract class JsonEnvelopeService<TSerializedData> : JsonEnvelopeServi
         {
             _logger.LogError(exception, "Unable to deserialize");
 
-            throw new DeserializeException();
+            throw new DataDeserializationException();
         }
     }
 

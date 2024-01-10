@@ -1,9 +1,9 @@
-﻿using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Extensions;
 using EntityDb.MongoDb.Documents.Envelopes;
-using EntityDb.MongoDb.Snapshots;
 using EntityDb.MongoDb.Sources;
+using EntityDb.MongoDb.States;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.MongoDb.Extensions;
@@ -54,22 +54,22 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceCollection">The service collection.</param>
     /// <param name="testMode">Modifies the behavior of the repository to accomodate tests.</param>
     /// <param name="autoProvision">Modifies the behavior of the repository to auto-provision collections.</param>
-    public static void AddMongoDbSnapshots<TSnapshot>(this IServiceCollection serviceCollection,
+    public static void AddMongoDbStateRepository<TState>(this IServiceCollection serviceCollection,
         bool testMode = false, bool autoProvision = false)
-        where TSnapshot : notnull
+        where TState : notnull
     {
         serviceCollection.AddBsonDocumentEnvelopeService(true);
 
-        serviceCollection.Add<MongoDbSnapshotRepositoryFactory<TSnapshot>>
+        serviceCollection.Add<MongoDbStateRepositoryFactory<TState>>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient
         );
 
-        serviceCollection.Add<ISnapshotRepositoryFactory<TSnapshot>>
+        serviceCollection.Add<IStateRepositoryFactory<TState>>
         (
             testMode ? ServiceLifetime.Singleton : ServiceLifetime.Transient,
             serviceProvider => serviceProvider
-                .GetRequiredService<MongoDbSnapshotRepositoryFactory<TSnapshot>>()
+                .GetRequiredService<MongoDbStateRepositoryFactory<TState>>()
                 .UseTestMode(testMode)
                 .UseAutoProvision(serviceProvider, autoProvision)
         );

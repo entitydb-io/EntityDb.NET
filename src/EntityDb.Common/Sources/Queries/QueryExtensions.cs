@@ -9,28 +9,36 @@ namespace EntityDb.Common.Sources.Queries;
 public static class QueryExtensions
 {
     /// <summary>
-    ///     Returns a new, modified <see cref="IMessageGroupQuery" />. The way in which
+    ///     Returns a new, modified <see cref="ISourceDataQuery" />. The way in which
     ///     it is modified depends on the parameters of this extension method.
     /// </summary>
-    /// <param name="messageGroupQuery">The message group query.</param>
+    /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="IMessageGroupQuery" />.</returns>
-    public static IMessageGroupQuery Modify(this IMessageGroupQuery messageGroupQuery,
+    /// <returns>A new, modified <see cref="ISourceDataQuery" />.</returns>
+    public static ISourceDataQuery Modify(this ISourceDataQuery sourceDataQuery,
         ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedMessageGroupQuery(messageGroupQuery, modifiedQueryOptions);
+        return new ModifiedSourceDataQuery
+        {
+            ModifiedQueryOptions = modifiedQueryOptions, SourceDataQuery = sourceDataQuery,
+        };
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="IMessageQuery" />. The way in which it is modified depends on the parameters of
+    ///     Returns a new, modified <see cref="IMessageDataQuery" />. The way in which it is modified depends on the parameters
+    ///     of
     ///     this extension method.
     /// </summary>
-    /// <param name="messageQuery">The message query.</param>
+    /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="IMessageQuery" />.</returns>
-    public static IMessageQuery Modify(this IMessageQuery messageQuery, ModifiedQueryOptions modifiedQueryOptions)
+    /// <returns>A new, modified <see cref="IMessageDataQuery" />.</returns>
+    public static IMessageDataQuery Modify(this IMessageDataQuery messageDataQuery,
+        ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedMessageQuery(messageQuery, modifiedQueryOptions);
+        return new ModifiedMessageDataQuery
+        {
+            ModifiedQueryOptions = modifiedQueryOptions, MessageDataQuery = messageDataQuery,
+        };
     }
 
     /// <summary>
@@ -42,7 +50,7 @@ public static class QueryExtensions
     /// <returns>A new, modified <see cref="ILeaseQuery" />.</returns>
     public static ILeaseQuery Modify(this ILeaseQuery leaseQuery, ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedLeaseQuery(leaseQuery, modifiedQueryOptions);
+        return new ModifiedLeaseQuery { ModifiedQueryOptions = modifiedQueryOptions, LeaseQuery = leaseQuery };
     }
 
     /// <summary>
@@ -54,6 +62,6 @@ public static class QueryExtensions
     /// <returns>A new, modified <see cref="ITagQuery" />.</returns>
     public static ITagQuery Modify(this ITagQuery tagQuery, ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedTagQuery(tagQuery, modifiedQueryOptions);
+        return new ModifiedTagQuery { ModifiedQueryOptions = modifiedQueryOptions, TagQuery = tagQuery };
     }
 }

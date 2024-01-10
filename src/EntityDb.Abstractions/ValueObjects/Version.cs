@@ -1,10 +1,10 @@
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
-///     Represents a version for an entity or projection.
+///     Represents a version for an state.
 /// </summary>
 /// <param name="Value">The backing value.</param>
 public readonly record struct Version(ulong Value)
@@ -13,8 +13,8 @@ public readonly record struct Version(ulong Value)
     ///     This constant represents the minimum possible version.
     ///     In the context of an <see cref="ISourceRepository" />,
     ///     this value is reserved for auto-increment behavior.
-    ///     In the context of an <see cref="ISnapshotRepository{TSnapshot}" />,
-    ///     this value is reserved to point to the latest snapshot.
+    ///     In the context of an <see cref="IStateRepository{TState}" />,
+    ///     this value is reserved to point to the latest state.
     /// </summary>
     public static readonly Version Zero = new(ulong.MinValue);
 

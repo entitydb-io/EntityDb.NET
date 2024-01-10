@@ -6,15 +6,15 @@ using MongoDB.Driver;
 namespace EntityDb.MongoDb.Sources.Queries.SortBuilders;
 
 internal class MessageSortBuilder : SortBuilderBase,
-    IMessageSortBuilder<SortDefinition<BsonDocument>>
+    IMessageDataSortBuilder<SortDefinition<BsonDocument>>
 {
-    public SortDefinition<BsonDocument> EntityId(bool ascending)
+    public SortDefinition<BsonDocument> StateId(bool ascending)
     {
-        return Sort(ascending, nameof(LeaseDocument.EntityId));
+        return Sort(ascending, nameof(LeaseDataDocument.StateId));
     }
 
-    public SortDefinition<BsonDocument> EntityVersion(bool ascending)
+    public SortDefinition<BsonDocument> StateVersion(bool ascending)
     {
-        return Sort(ascending, nameof(LeaseDocument.EntityVersion));
+        return Sort(ascending, nameof(LeaseDataDocument.StateVersion));
     }
 }

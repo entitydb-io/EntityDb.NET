@@ -7,8 +7,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Testcontainers.MongoDb" Version="3.0.0"/>
-        <PackageReference Include="Testcontainers.Redis" Version="3.0.0"/>
+        <PackageReference Include="Testcontainers.MongoDb" Version="3.7.0"/>
+        <PackageReference Include="Testcontainers.Redis" Version="3.7.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -16,5 +16,6 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+
 
 </Project>

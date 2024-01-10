@@ -9,16 +9,16 @@ internal sealed class LeaseSortBuilder : MessageSortBuilder, ILeaseSortBuilder<S
 {
     public SortDefinition<BsonDocument> LeaseScope(bool ascending)
     {
-        return Sort(ascending, nameof(LeaseDocument.Scope));
+        return Sort(ascending, nameof(LeaseDataDocument.Scope));
     }
 
     public SortDefinition<BsonDocument> LeaseLabel(bool ascending)
     {
-        return Sort(ascending, nameof(LeaseDocument.Label));
+        return Sort(ascending, nameof(LeaseDataDocument.Label));
     }
 
     public SortDefinition<BsonDocument> LeaseValue(bool ascending)
     {
-        return Sort(ascending, nameof(LeaseDocument.Value));
+        return Sort(ascending, nameof(LeaseDataDocument.Value));
     }
 }

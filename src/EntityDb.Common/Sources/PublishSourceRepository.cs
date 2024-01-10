@@ -32,7 +32,7 @@ internal sealed class PublishSourceRepository : SourceRepositoryWrapper
 
         return true;
     }
-    
+
     public static ISourceRepository Create(IServiceProvider serviceProvider,
         ISourceRepository sourceRepository)
     {

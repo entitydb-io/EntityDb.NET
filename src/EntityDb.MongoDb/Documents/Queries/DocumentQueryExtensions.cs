@@ -67,36 +67,36 @@ internal static class DocumentQueryExtensions
         );
     }
 
-    public static IAsyncEnumerable<Pointer> EnumerateMessageGroupEntityPointers<TDocument>
+    public static IAsyncEnumerable<Pointer> EnumerateSourceDataStatePointers<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         CancellationToken cancellationToken
     )
-        where TDocument : MessageGroupDocumentBase
+        where TDocument : SourceDataDocumentBase
     {
         return documentQuery.EnumeratePointers
         (
             mongoSession,
-            MessageGroupDocumentBase.EntityPointersProjection,
-            documents => documents.SelectMany(document => AsyncEnumerablePolyfill.FromResult(document.EntityPointers)),
+            SourceDataDocumentBase.StatePointersProjection,
+            documents => documents.SelectMany(document => AsyncEnumerablePolyfill.FromResult(document.StatePointers)),
             cancellationToken
         );
     }
 
-    public static IAsyncEnumerable<Pointer> EnumerateMessageEntityPointers<TDocument>
+    public static IAsyncEnumerable<Pointer> EnumerateMessageStatePointers<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         CancellationToken cancellationToken
     )
-        where TDocument : MessageDocumentBase
+        where TDocument : MessageDataDocumentBase
     {
         return documentQuery.EnumeratePointers
         (
             mongoSession,
-            MessageDocumentBase.EntityPointerProjection,
-            documents => documents.Select(document => document.EntityPointer),
+            MessageDataDocumentBase.StatePointerProjection,
+            documents => documents.Select(document => document.StatePointer),
             cancellationToken
         );
     }
@@ -118,29 +118,30 @@ internal static class DocumentQueryExtensions
         }
     }
 
-    public static IAsyncEnumerable<IAnnotatedSourceData<TData>> EnumerateEntityAnnotation<TDocument, TData>
+    public static IAsyncEnumerable<IAnnotatedMessageData<TData>> EnumerateAnnotatedSourceData<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         IEnvelopeService<BsonDocument> envelopeService,
         CancellationToken cancellationToken
     )
-        where TDocument : MessageDocumentBase
+        where TDocument : MessageDataDocumentBase
         where TData : notnull
     {
         var documents = documentQuery.Execute(mongoSession, DocumentBase.NoIdProjection, cancellationToken);
 
-        return documents.EnumerateEntityAnnotation<TDocument, BsonDocument, TData>(envelopeService, cancellationToken);
+        return documents.EnumerateAnnotatedSourceData<TDocument, BsonDocument, TData>(envelopeService,
+            cancellationToken);
     }
 
-    public static IAsyncEnumerable<IAnnotatedSourceGroupData<TData>> EnumerateEntitiesAnnotation<TDocument, TData>
+    public static IAsyncEnumerable<IAnnotatedSourceData<TData>> EnumerateEntitiesAnnotation<TDocument, TData>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         IEnvelopeService<BsonDocument> envelopeService,
         CancellationToken cancellationToken
     )
-        where TDocument : MessageGroupDocumentBase
+        where TDocument : SourceDataDocumentBase
         where TData : notnull
     {
         var documents = documentQuery.Execute(mongoSession, DocumentBase.NoIdProjection, cancellationToken);

@@ -2,8 +2,10 @@
 
 namespace EntityDb.Common.Sources.Queries.SortBuilders;
 
-internal abstract record ReverseSortBuilderBase<TSort>(ISortBuilder<TSort> SortBuilder)
+internal abstract record ReverseSortBuilderBase<TSort>
 {
+    protected abstract ISortBuilder<TSort> SortBuilder { get; }
+
     public TSort SourceTimeStamp(bool ascending)
     {
         return SortBuilder.SourceTimeStamp(!ascending);

@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Snapshots;
+﻿using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Entities;
 
@@ -6,7 +6,7 @@ namespace EntityDb.Abstractions.Entities;
 ///     Indicates the entity is compatible with several EntityDb.Common implementations.
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity.</typeparam>
-public interface IEntity<TEntity> : ISnapshot<TEntity>
+public interface IEntity<TEntity> : IState<TEntity>
 {
     /// <summary>
     ///     Returns <c>true</c> if <see cref="Reduce(object)" /> is not expected to throw an exception.

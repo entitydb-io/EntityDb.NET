@@ -1,6 +1,5 @@
-using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Abstractions.States.Attributes;
 using EntityDb.Abstractions.ValueObjects;
-using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Sources;
 
@@ -15,9 +14,9 @@ public sealed record Message
     public required Id Id { get; init; }
 
     /// <summary>
-    ///     A pointer to the entity
+    ///     A pointer to the state
     /// </summary>
-    public required Pointer EntityPointer { get; init; }
+    public required Pointer StatePointer { get; init; }
 
     /// <summary>
     ///     The data.
@@ -27,20 +26,20 @@ public sealed record Message
     /// <summary>
     ///     The leases to be added.
     /// </summary>
-    public ImmutableArray<ILease> AddLeases { get; init; } = ImmutableArray<ILease>.Empty;
+    public ILease[] AddLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The tags to be added.
     /// </summary>
-    public ImmutableArray<ITag> AddTags { get; init; } = ImmutableArray<ITag>.Empty;
+    public ITag[] AddTags { get; init; } = Array.Empty<ITag>();
 
     /// <summary>
     ///     The tags to be deleted.
     /// </summary>
-    public ImmutableArray<ILease> DeleteLeases { get; init; } = ImmutableArray<ILease>.Empty;
+    public ILease[] DeleteLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The aliases to be added.
     /// </summary>
-    public ImmutableArray<ITag> DeleteTags { get; init; } = ImmutableArray<ITag>.Empty;
+    public ITag[] DeleteTags { get; init; } = Array.Empty<ITag>();
 }

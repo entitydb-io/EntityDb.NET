@@ -1,15 +1,16 @@
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
-using EntityDb.Common.Extensions;
+using EntityDb.Common.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.Modified;
 
-internal sealed record ModifiedTagQuery
-    (ITagQuery TagQuery, ModifiedQueryOptions ModifiedQueryOptions) : ModifiedQueryBase(TagQuery,
-        ModifiedQueryOptions), ITagQuery
+internal sealed record ModifiedTagQuery : ModifiedQueryBase, ITagQuery
 {
-    public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+    public required ITagQuery TagQuery { get; init; }
+    protected override IQuery Query => TagQuery;
+
+    public TFilter GetFilter<TFilter>(ITagDataFilterBuilder<TFilter> builder)
     {
         if (ModifiedQueryOptions.InvertFilter)
         {

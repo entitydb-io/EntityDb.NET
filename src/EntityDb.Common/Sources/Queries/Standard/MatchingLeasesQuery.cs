@@ -1,13 +1,13 @@
-using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
+using EntityDb.Abstractions.States.Attributes;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
 internal sealed record MatchingLeasesQuery(params ILease[] Leases) : ILeaseQuery
 {
-    public TFilter GetFilter<TFilter>(ILeaseFilterBuilder<TFilter> builder)
+    public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
         return builder.Or
         (

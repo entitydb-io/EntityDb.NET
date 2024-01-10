@@ -5,7 +5,7 @@ namespace EntityDb.MongoDb.Sources;
 
 internal interface IMongoDbSourceRepositoryFactory : ISourceRepositoryFactory
 {
-    async Task<ISourceRepository> ISourceRepositoryFactory.CreateRepository(
+    async Task<ISourceRepository> ISourceRepositoryFactory.Create(
         string sourceSessionOptionsName, CancellationToken cancellationToken)
     {
         var options = GetSourceSessionOptions(sourceSessionOptionsName);

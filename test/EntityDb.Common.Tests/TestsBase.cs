@@ -1,29 +1,30 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Queries;
+using EntityDb.Abstractions.States;
+using EntityDb.Abstractions.Streams;
 using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Common.Disposables;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
 using EntityDb.Common.Tests.Implementations.Entities;
 using EntityDb.Common.Tests.Implementations.Projections;
-using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.Common.Tests.Implementations.States;
 using EntityDb.MongoDb.Extensions;
-using EntityDb.MongoDb.Snapshots.Sessions;
 using EntityDb.MongoDb.Sources.Queries;
 using EntityDb.MongoDb.Sources.Sessions;
+using EntityDb.MongoDb.States.Sessions;
 using EntityDb.Redis.Extensions;
-using EntityDb.Redis.Snapshots.Sessions;
+using EntityDb.Redis.States.Sessions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Moq;
 using Shouldly;
+using System.Diagnostics;
+using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
@@ -37,7 +38,7 @@ public class TestsBase<TStartup>
 {
     public delegate void AddDependenciesDelegate(IServiceCollection serviceCollection);
 
-    private static readonly SourcesAdder[] AllSourceAdders =
+    private static readonly SourceRepositoryAdder[] AllSourceRepositoryAdders =
     {
         new("MongoDb", typeof(MongoDbQueryOptions), timeStamp => timeStamp.WithMillisecondPrecision(),
             serviceCollection =>
@@ -50,18 +51,12 @@ public class TestsBase<TStartup>
 
                 serviceCollection.Configure<MongoDbQueryOptions>("Count", options =>
                 {
-                    options.FindOptions = new FindOptions
-                    {
-                        Collation = new Collation("en", numericOrdering: true),
-                    };
+                    options.FindOptions = new FindOptions { Collation = new Collation("en", numericOrdering: true) };
                 });
 
                 serviceCollection.ConfigureAll<MongoDbSourceSessionOptions>(options =>
                 {
-                    var host = databaseContainerFixture.MongoDbContainer.Hostname;
-                    var port = databaseContainerFixture.MongoDbContainer.GetMappedPublicPort(27017);
-
-                    options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
+                    options.ConnectionString = databaseContainerFixture.MongoDbContainer.GetConnectionString();
                     options.DatabaseName = DatabaseContainerFixture.OmniParameter;
                     options.WriteTimeout = TimeSpan.FromSeconds(1);
                 });
@@ -114,38 +109,35 @@ public class TestsBase<TStartup>
             .ShouldNotBeNull();
     }
 
-    private static SnapshotAdder MongoDbSnapshotAdder<TSnapshot>()
-        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    private static StateRepositoryAdder MongoDbStateRepositoryAdder<TState>()
+        where TState : class, IStateWithTestLogic<TState>
     {
-        return new SnapshotAdder($"MongoDb<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
+        return new StateRepositoryAdder($"MongoDb<{typeof(TState).Name}>", typeof(TState), serviceCollection =>
         {
             var databaseContainerFixture = (serviceCollection
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture)!;
 
-            serviceCollection.AddMongoDbSnapshots<TSnapshot>(true, true);
+            serviceCollection.AddMongoDbStateRepository<TState>(true, true);
 
-            serviceCollection.ConfigureAll<MongoDbSnapshotSessionOptions>(options =>
+            serviceCollection.ConfigureAll<MongoDbStateSessionOptions>(options =>
             {
-                var host = databaseContainerFixture.MongoDbContainer.Hostname;
-                var port = databaseContainerFixture.MongoDbContainer.GetMappedPublicPort(27017);
-
-                options.ConnectionString = new UriBuilder("mongodb://", host, port).ToString();
+                options.ConnectionString = databaseContainerFixture.MongoDbContainer.GetConnectionString();
                 options.DatabaseName = DatabaseContainerFixture.OmniParameter;
-                options.CollectionName = TSnapshot.MongoDbCollectionName;
+                options.CollectionName = TState.MongoDbCollectionName;
                 options.WriteTimeout = TimeSpan.FromSeconds(1);
             });
 
-            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.Write,
+            serviceCollection.Configure<MongoDbStateSessionOptions>(TestSessionOptions.Write,
                 options => { options.ReadOnly = false; });
 
-            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            serviceCollection.Configure<MongoDbStateSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<MongoDbSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
+            serviceCollection.Configure<MongoDbStateSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
                 options =>
                 {
                     options.ReadOnly = true;
@@ -154,33 +146,33 @@ public class TestsBase<TStartup>
         });
     }
 
-    private static SnapshotAdder RedisSnapshotAdder<TSnapshot>()
-        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    private static StateRepositoryAdder RedisStateRepositoryAdder<TState>()
+        where TState : class, IStateWithTestLogic<TState>
     {
-        return new SnapshotAdder($"Redis<{typeof(TSnapshot).Name}>", typeof(TSnapshot), serviceCollection =>
+        return new StateRepositoryAdder($"Redis<{typeof(TState).Name}>", typeof(TState), serviceCollection =>
         {
             var databaseContainerFixture = serviceCollection
                 .Single(descriptor => descriptor.ServiceType == typeof(DatabaseContainerFixture))
                 .ImplementationInstance as DatabaseContainerFixture;
 
-            serviceCollection.AddRedisSnapshots<TSnapshot>(true);
+            serviceCollection.AddRedisStateRepository<TState>(true);
 
-            serviceCollection.ConfigureAll<RedisSnapshotSessionOptions>(options =>
+            serviceCollection.ConfigureAll<RedisStateSessionOptions>(options =>
             {
                 options.ConnectionString = databaseContainerFixture!.RedisContainer.GetConnectionString();
-                options.KeyNamespace = TSnapshot.RedisKeyNamespace;
+                options.KeyNamespace = TState.RedisKeyNamespace;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.Write,
+            serviceCollection.Configure<RedisStateSessionOptions>(TestSessionOptions.Write,
                 options => { options.ReadOnly = false; });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnly, options =>
+            serviceCollection.Configure<RedisStateSessionOptions>(TestSessionOptions.ReadOnly, options =>
             {
                 options.ReadOnly = true;
                 options.SecondaryPreferred = false;
             });
 
-            serviceCollection.Configure<RedisSnapshotSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
+            serviceCollection.Configure<RedisStateSessionOptions>(TestSessionOptions.ReadOnlySecondaryPreferred,
                 options =>
                 {
                     options.ReadOnly = true;
@@ -189,115 +181,135 @@ public class TestsBase<TStartup>
         });
     }
 
-    private static IEnumerable<SnapshotAdder> AllSnapshotAdders<TSnapshot>()
-        where TSnapshot : class, ISnapshotWithTestLogic<TSnapshot>
+    private static IEnumerable<StateRepositoryAdder> AllStateRepositoryAdders<TState>()
+        where TState : class, IStateWithTestLogic<TState>
     {
-        yield return RedisSnapshotAdder<TSnapshot>();
-        yield return MongoDbSnapshotAdder<TSnapshot>();
+        yield return RedisStateRepositoryAdder<TState>();
+        yield return MongoDbStateRepositoryAdder<TState>();
     }
 
-    private static EntityAdder GetEntityAdder<TEntity>()
+    private static EntityRepositoryAdder GetEntityRepositoryAdder<TEntity>()
         where TEntity : IEntity<TEntity>
     {
-        return new EntityAdder(typeof(TEntity).Name, typeof(TEntity),
-            serviceCollection => { serviceCollection.AddEntity<TEntity>(); });
+        return new EntityRepositoryAdder(typeof(TEntity).Name, typeof(TEntity),
+            serviceCollection => { serviceCollection.AddEntityRepository<TEntity>(); });
     }
 
-    private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders<TEntity>()
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+    private static IEnumerable<EntityRepositoryAdder> AllEntityRepositoryAdders()
+    {
+        yield return GetEntityRepositoryAdder<TestEntity>();
+    }
+
+    private static ProjectionRepositoryAdder GetProjectionRepositoryAdder<TProjection>()
+        where TProjection : IProjection<TProjection>
+    {
+        return new ProjectionRepositoryAdder(typeof(TProjection).Name, typeof(TProjection), serviceCollection =>
+        {
+            serviceCollection.AddProjectionRepository<TProjection>();
+        });
+    }
+
+    private static IEnumerable<ProjectionRepositoryAdder> AllProjectionRepositoryAdders()
+    {
+        yield return GetProjectionRepositoryAdder<OneToOneProjection>();
+    }
+
+    private static IEnumerable<StateRepositoryAdder> GetEntityStateRepositoryAdders<TEntity>()
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
         return
-            from snapshotAdder in AllSnapshotAdders<TEntity>()
-            let entityAdder = GetEntityAdder<TEntity>()
-            select snapshotAdder with
+            from stateRepositoryAdder in AllStateRepositoryAdders<TEntity>()
+            let entityRepositoryAdder = GetEntityRepositoryAdder<TEntity>()
+            select stateRepositoryAdder with
             {
-                AddDependencies = snapshotAdder.AddDependencies + entityAdder.AddDependencies + (serviceCollection =>
-                {
-                    serviceCollection.AddEntitySnapshotSourceSubscriber<TEntity>(TestSessionOptions.ReadOnly,
-                        TestSessionOptions.Write);
-                }),
+                AddDependencies = stateRepositoryAdder.AddDependencies + entityRepositoryAdder.AddDependencies +
+                                  (serviceCollection =>
+                                  {
+                                      serviceCollection.AddEntityStateSourceSubscriber<TEntity>(
+                                          TestSessionOptions.ReadOnly,
+                                          TestSessionOptions.Write);
+                                  }),
             };
     }
 
-    private static IEnumerable<EntityAdder> AllEntityAdders()
+    private static IEnumerable<StateRepositoryAdder> GetProjectionStateRepositoryAdders<TProjection>()
+        where TProjection : class, IProjection<TProjection>, IStateWithTestLogic<TProjection>
     {
-        yield return GetEntityAdder<TestEntity>();
+        return
+            from stateRepositoryAdder in AllStateRepositoryAdders<TProjection>()
+            let projectionRepositoryAdder = GetProjectionRepositoryAdder<TProjection>()
+            select stateRepositoryAdder with
+            {
+                AddDependencies = stateRepositoryAdder.AddDependencies + projectionRepositoryAdder.AddDependencies +
+                                  (serviceCollection =>
+                                  {
+                                      serviceCollection.AddProjectionStateSourceSubscriber<TProjection>(
+                                          TestSessionOptions.Write);
+                                  }),
+            };
     }
 
-    private static IEnumerable<SnapshotAdder> AllEntitySnapshotAdders()
+    private static IEnumerable<StateRepositoryAdder> AllEntityStateRepositoryAdders()
     {
-        return Enumerable.Empty<SnapshotAdder>()
-            .Concat(AllEntitySnapshotAdders<TestEntity>());
+        return Enumerable.Empty<StateRepositoryAdder>()
+            .Concat(GetEntityStateRepositoryAdders<TestEntity>());
     }
 
-    private static IEnumerable<SnapshotAdder> AllProjectionAdders<TProjection>()
-        where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+    private static IEnumerable<StateRepositoryAdder> AllProjectionStateRepositoryAdders()
     {
-        return AllSnapshotAdders<TProjection>()
-            .Select(snapshotAdder => snapshotAdder with
-                {
-                    AddDependencies = snapshotAdder.AddDependencies + (serviceCollection =>
-                    {
-                        serviceCollection.AddProjection<TProjection>();
-                        serviceCollection.AddProjectionSnapshotSourceSubscriber<TProjection>(TestSessionOptions.Write);
-                    }),
-                }
-            );
+        return Enumerable.Empty<StateRepositoryAdder>()
+            .Concat(GetProjectionStateRepositoryAdders<OneToOneProjection>());
     }
 
-    private static IEnumerable<SnapshotAdder> AllProjectionSnapshotAdders()
+    public static IEnumerable<object[]> With_Source_Entity()
     {
-        return Enumerable.Empty<SnapshotAdder>()
-            .Concat(AllProjectionAdders<OneToOneProjection>());
+        return
+            from sourceRepositoryAdder in AllSourceRepositoryAdders
+            from entityRepositoryAdder in AllEntityRepositoryAdders()
+            select new object[] { sourceRepositoryAdder, entityRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddSourcesAndEntity()
+    public static IEnumerable<object[]> With_Source()
     {
-        return from sourceAdder in AllSourceAdders
-            from entityAdder in AllEntityAdders()
-            select new object[] { sourceAdder, entityAdder };
+        return
+            from sourceRepositoryAdder in AllSourceRepositoryAdders
+            select new object[] { sourceRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddSource()
+    public static IEnumerable<object[]> With_Entity()
     {
-        return from sourceAdder in AllSourceAdders
-            select new object[] { sourceAdder };
+        return from entityRepositoryAdder in AllEntityRepositoryAdders()
+            select new object[] { entityRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddEntity()
+    public static IEnumerable<object[]> With_EntityState()
     {
-        return from entityAdder in AllEntityAdders()
-            select new object[] { entityAdder };
+        return from entityStateRepositoryAdder in AllEntityStateRepositoryAdders()
+            select new object[] { entityStateRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddEntitySnapshots()
+    public static IEnumerable<object[]> With_ProjectionState()
     {
-        return from entitySnapshotAdder in AllEntitySnapshotAdders()
-            select new object[] { entitySnapshotAdder };
+        return from projectionStateRepositoryAdder in AllProjectionStateRepositoryAdders()
+            select new object[] { projectionStateRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddProjectionSnapshots()
+    public static IEnumerable<object[]> With_Source_EntityState()
     {
-        return from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-            select new object[] { projectionSnapshotAdder };
+        return from sourceRepositoryAdder in AllSourceRepositoryAdders
+            from entityStateRepositoryAdder in AllEntityStateRepositoryAdders()
+            select new object[] { sourceRepositoryAdder, entityStateRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddSourcesAndEntitySnapshots()
+    public static IEnumerable<object[]> With_Source_EntityState_ProjectionState()
     {
-        return from sourceAdder in AllSourceAdders
-            from entitySnapshotAdder in AllEntitySnapshotAdders()
-            select new object[] { sourceAdder, entitySnapshotAdder };
+        return from sourceRepositoryAdder in AllSourceRepositoryAdders
+            from entityStateRepositoryAdder in AllEntityStateRepositoryAdders()
+            from projectionStateRepositoryAdder in AllProjectionStateRepositoryAdders()
+            select new object[] { sourceRepositoryAdder, entityStateRepositoryAdder, projectionStateRepositoryAdder };
     }
 
-    public static IEnumerable<object[]> AddSourcesEntitySnapshotsAndProjectionSnapshots()
-    {
-        return from sourceAdder in AllSourceAdders
-            from entitySnapshotAdder in AllEntitySnapshotAdders()
-            from projectionSnapshotAdder in AllProjectionSnapshotAdders()
-            select new object[] { sourceAdder, entitySnapshotAdder, projectionSnapshotAdder };
-    }
-
-    protected IServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
+    internal TestServiceScope CreateServiceScope(Action<IServiceCollection>? configureServices = null)
     {
         var serviceCollection = new ServiceCollection();
 
@@ -318,7 +330,10 @@ public class TestsBase<TStartup>
 
         startup.AddServices(serviceCollection);
 
-        if (_databaseContainerFixture != null) serviceCollection.AddSingleton(_databaseContainerFixture);
+        if (_databaseContainerFixture != null)
+        {
+            serviceCollection.AddSingleton(_databaseContainerFixture);
+        }
 
         configureServices?.Invoke(serviceCollection);
 
@@ -328,71 +343,15 @@ public class TestsBase<TStartup>
 
         var serviceScopeFactory = singletonServiceProvider.GetRequiredService<IServiceScopeFactory>();
 
-        return new TestServiceScope(singletonServiceProvider, serviceScopeFactory.CreateScope());
+        return new TestServiceScope
+        {
+            SingletonServiceProvider = singletonServiceProvider,
+            AsyncServiceScope = serviceScopeFactory.CreateAsyncScope(),
+        };
     }
 
-    public record Log
-    {
-        public required object[] ScopesStates { get; init; }
-        public required LogLevel LogLevel { get; init; }
-        public required EventId EventId { get; init; }
-        public required object? State { get; init; }
-        public required Exception? Exception { get; init; }
-    }
-
-    private class Logger : ILogger
-    {
-        private readonly List<Log> _logs;
-        private readonly Stack<object> _scopeStates = new();
-
-        public Logger(List<Log> logs)
-        {
-            _logs = logs;
-        }
-        
-        private class Scope : IDisposable
-        {
-            private readonly Logger _logger;
-
-            public Scope(Logger logger)
-            {
-                _logger = logger;
-            }
-
-            void IDisposable.Dispose()
-            {
-                _logger._scopeStates.Pop();
-            }
-        }
-
-        IDisposable ILogger.BeginScope<TState>(TState state)
-        {
-            _scopeStates.Push(state);
-            
-            return new Scope(this);
-        }
-
-        bool ILogger.IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-
-        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            _logs.Add(new Log
-            {
-                ScopesStates = _scopeStates.ToArray(),
-                LogLevel = logLevel,
-                EventId = eventId,
-                State = state,
-                Exception = exception,
-            });
-        }
-    }
-
-    
     protected static ILoggerFactory GetMockedLoggerFactory(List<Log> logs)
-    {   
+    {
         var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
 
         loggerFactoryMock
@@ -403,73 +362,6 @@ public class TestsBase<TStartup>
             .Setup(factory => factory.AddProvider(It.IsAny<ILoggerProvider>()));
 
         return loggerFactoryMock.Object;
-    }
-
-    protected static (ILoggerFactory Logger, Action<Times> LoggerVerifier) GetMockedLoggerFactory<TException>()
-        where TException : Exception
-    {
-        var disposableMock = new Mock<IDisposable>(MockBehavior.Strict);
-
-        disposableMock.Setup(disposable => disposable.Dispose());
-
-        var loggerMock = new Mock<ILogger>(MockBehavior.Strict);
-
-        loggerMock
-            .Setup(logger => logger.BeginScope(It.IsAny<It.IsAnyType>()))
-            .Returns(disposableMock.Object);
-
-        loggerMock
-            .Setup(logger => logger.Log
-            (
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ));
-
-        loggerMock
-            .Setup(logger => logger.IsEnabled(It.IsAny<LogLevel>()))
-            .Returns((LogLevel logLevel) => logLevel == LogLevel.Error);
-
-        loggerMock
-            .Setup(logger => logger.Log
-            (
-                It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.Is<Exception>(exception => exception is TException),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ))
-            .Verifiable();
-
-        var loggerFactoryMock = new Mock<ILoggerFactory>(MockBehavior.Strict);
-
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
-            .Returns(loggerMock.Object);
-
-        loggerFactoryMock
-            .Setup(factory => factory.AddProvider(It.IsAny<ILoggerProvider>()));
-
-        return (loggerFactoryMock.Object, Verifier);
-
-        void Verifier(Times times)
-        {
-            loggerMock
-                .Verify
-                (
-                    logger => logger.Log
-                    (
-                        It.Is<LogLevel>(logLevel => logLevel == LogLevel.Error),
-                        It.IsAny<EventId>(),
-                        It.IsAny<It.IsAnyType>(),
-                        It.Is<Exception>(exception => exception is TException),
-                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                    ),
-                    times
-                );
-        }
     }
 
     protected static ISourceSubscriber GetMockedSourceSubscriber(List<Source> committedSources)
@@ -486,77 +378,104 @@ public class TestsBase<TStartup>
         return sourceSubscriberMock.Object;
     }
 
-    protected static Task<IMultipleEntityRepository<TEntity>> GetWriteEntityRepository<TEntity>(IServiceScope serviceScope, bool snapshots)
+    protected static Task<IMultipleEntityRepository<TEntity>> GetWriteEntityRepository<TEntity>(
+        IServiceScope serviceScope, bool getPersistedState)
     {
         return serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
             .CreateMultiple
             (
                 TestSessionOptions.Default,
-                TestSessionOptions.Write, 
-                snapshots ? TestSessionOptions.Write : null
+                TestSessionOptions.Write,
+                getPersistedState ? TestSessionOptions.Write : null
             );
     }
 
-    protected static Task<IMultipleEntityRepository<TEntity>> GetReadOnlyEntityRepository<TEntity>(IServiceScope serviceScope, bool snapshots)
+    protected static Task<IMultipleEntityRepository<TEntity>> GetReadOnlyEntityRepository<TEntity>(
+        IServiceScope serviceScope, bool getPersistedState)
     {
         return serviceScope.ServiceProvider
             .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
             .CreateMultiple
             (
-                TestSessionOptions.Default, 
+                TestSessionOptions.Default,
                 TestSessionOptions.ReadOnly,
-                snapshots ? TestSessionOptions.ReadOnly : null
+                getPersistedState ? TestSessionOptions.ReadOnly : null
             );
-
     }
 
-    protected static Task<ISnapshotRepository<TSnapshot>> GetWriteSnapshotRepository<TSnapshot>(
+    protected static Task<IMultipleStreamRepository> GetWriteStreamRepository(IServiceScope serviceScope)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<IStreamRepositoryFactory>()
+            .CreateMultiple
+            (
+                TestSessionOptions.Default,
+                TestSessionOptions.Write
+            );
+    }
+
+    protected static Task<IMultipleStreamRepository> GetReadOnlyStreamRepository(IServiceScope serviceScope)
+    {
+        return serviceScope.ServiceProvider
+            .GetRequiredService<IStreamRepositoryFactory>()
+            .CreateMultiple
+            (
+                TestSessionOptions.Default,
+                TestSessionOptions.ReadOnly
+            );
+    }
+
+    protected static Task<IStateRepository<TState>> GetWriteStateRepository<TState>(
         IServiceScope serviceScope)
     {
         return serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(TestSessionOptions.Write);
+            .GetRequiredService<IStateRepositoryFactory<TState>>()
+            .Create(TestSessionOptions.Write);
     }
-    
-    protected static Task<ISnapshotRepository<TSnapshot>> GetReadOnlySnapshotRepository<TSnapshot>(
-        IServiceScope serviceScope, bool secondaryPreferred = false)
+
+    protected static Task<IStateRepository<TState>> GetReadOnlyStateRepository<TState>(
+        IServiceScope serviceScope, bool secondary = false)
     {
         return serviceScope.ServiceProvider
-            .GetRequiredService<ISnapshotRepositoryFactory<TSnapshot>>()
-            .CreateRepository(secondaryPreferred ? TestSessionOptions.ReadOnlySecondaryPreferred : TestSessionOptions.ReadOnly);
+            .GetRequiredService<IStateRepositoryFactory<TState>>()
+            .Create(secondary ? TestSessionOptions.ReadOnlySecondaryPreferred : TestSessionOptions.ReadOnly);
     }
-    
+
     protected static Task<ISourceRepository> GetWriteSourceRepository(IServiceScope serviceScope)
     {
         return serviceScope.ServiceProvider
             .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository
+            .Create
             (
                 TestSessionOptions.Write
             );
     }
 
-    protected static Task<ISourceRepository> GetReadOnlySourceRepository(IServiceScope serviceScope)
+    protected static Task<ISourceRepository> GetReadOnlySourceRepository(IServiceScope serviceScope,
+        bool secondary = false)
     {
         return serviceScope.ServiceProvider
             .GetRequiredService<ISourceRepositoryFactory>()
-            .CreateRepository
+            .Create
             (
-                TestSessionOptions.ReadOnly
+                secondary
+                    ? TestSessionOptions.ReadOnlySecondaryPreferred
+                    : TestSessionOptions.ReadOnly
             );
     }
-    
-    protected static Task<IProjectionRepository<TProjection>> GetReadOnlyProjectionRepository<TProjection>(IServiceScope serviceScope, bool snapshots)
+
+    protected static Task<IProjectionRepository<TProjection>> GetReadOnlyProjectionRepository<TProjection>(
+        IServiceScope serviceScope, bool getPersistedState)
     {
         return serviceScope.ServiceProvider
             .GetRequiredService<IProjectionRepositoryFactory<TProjection>>()
             .CreateRepository
             (
-                snapshots ? TestSessionOptions.Write : null
+                getPersistedState ? TestSessionOptions.Write : null
             );
     }
-    
+
     protected static ISourceRepositoryFactory GetMockedSourceRepositoryFactory(
         Mock<ISourceRepository> sourceRepositoryMock, List<Source>? committedSources = null)
     {
@@ -580,7 +499,7 @@ public class TestsBase<TStartup>
             new Mock<ISourceRepositoryFactory>(MockBehavior.Strict);
 
         sourceRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(factory => factory.Create(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(sourceRepositoryMock.Object);
 
         sourceRepositoryFactoryMock
@@ -606,54 +525,103 @@ public class TestsBase<TStartup>
             .ReturnsAsync(true);
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateDeltas(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(deltas));
 
         return GetMockedSourceRepositoryFactory(sourceRepositoryMock, new List<Source>());
     }
 
-    protected static ISnapshotRepositoryFactory<TEntity> GetMockedSnapshotRepositoryFactory<TEntity>
+    protected static IStateRepositoryFactory<TEntity> GetMockedStateRepositoryFactory<TEntity>
     (
-        TEntity? snapshot = default
+        TEntity? state = default
     )
     {
-        var snapshotRepositoryMock = new Mock<ISnapshotRepository<TEntity>>(MockBehavior.Strict);
+        var stateRepositoryMock = new Mock<IStateRepository<TEntity>>(MockBehavior.Strict);
 
-        snapshotRepositoryMock
-            .Setup(repository => repository.GetSnapshotOrDefault(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(snapshot);
+        stateRepositoryMock
+            .Setup(repository => repository.Get(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(state);
 
-        snapshotRepositoryMock
+        stateRepositoryMock
             .Setup(repository => repository.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        var snapshotRepositoryFactoryMock = new Mock<ISnapshotRepositoryFactory<TEntity>>(MockBehavior.Strict);
+        var stateRepositoryFactoryMock = new Mock<IStateRepositoryFactory<TEntity>>(MockBehavior.Strict);
 
-        snapshotRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(snapshotRepositoryMock.Object);
+        stateRepositoryFactoryMock
+            .Setup(factory => factory.Create(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(stateRepositoryMock.Object);
 
-        snapshotRepositoryFactoryMock
+        stateRepositoryFactoryMock
             .Setup(factory => factory.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        return snapshotRepositoryFactoryMock.Object;
+        return stateRepositoryFactoryMock.Object;
     }
 
-    private record TestServiceScope
-        (ServiceProvider SingletonServiceProvider, IServiceScope ServiceScope) : IServiceScope
+    public record Log
     {
-        public IServiceProvider ServiceProvider => ServiceScope.ServiceProvider;
+        public required object[] ScopesStates { get; init; }
+        public required LogLevel LogLevel { get; init; }
+        public required EventId EventId { get; init; }
+        public required object? State { get; init; }
+        public required Exception? Exception { get; init; }
+    }
 
-        public void Dispose()
+    private class Logger(ICollection<Log> logs) : ILogger
+    {
+        private readonly Stack<object> _scopeStates = new();
+
+        IDisposable ILogger.BeginScope<TState>(TState state)
         {
-            ServiceScope.Dispose();
+            _scopeStates.Push(state);
 
-            SingletonServiceProvider.Dispose();
+            return new Scope(_scopeStates);
+        }
+
+        bool ILogger.IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            logs.Add(new Log
+            {
+                ScopesStates = _scopeStates.ToArray(),
+                LogLevel = logLevel,
+                EventId = eventId,
+                State = state,
+                Exception = exception,
+            });
+        }
+
+        private class Scope(Stack<object> scopeStates) : IDisposable
+        {
+            void IDisposable.Dispose()
+            {
+                scopeStates.Pop();
+            }
         }
     }
 
-    public record SourcesAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
+    internal record TestServiceScope : DisposableResourceBaseRecord, IServiceScope
+    {
+        public required ServiceProvider SingletonServiceProvider { get; init; }
+        public required AsyncServiceScope AsyncServiceScope { get; init; }
+
+        public IServiceProvider ServiceProvider => AsyncServiceScope.ServiceProvider;
+
+        public override async ValueTask DisposeAsync()
+        {
+            await SingletonServiceProvider.DisposeAsync();
+            await AsyncServiceScope.DisposeAsync();
+        }
+    }
+
+    public record SourceRepositoryAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
         AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
@@ -662,7 +630,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record SnapshotAdder(string Name, Type SnapshotType, AddDependenciesDelegate AddDependencies)
+    public record StateRepositoryAdder(string Name, Type StateType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
@@ -670,7 +638,15 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record EntityAdder(string Name, Type EntityType, AddDependenciesDelegate AddDependencies)
+    public record EntityRepositoryAdder(string Name, Type EntityType, AddDependenciesDelegate AddDependencies)
+    {
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    public record ProjectionRepositoryAdder(string Name, Type ProjectionType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {

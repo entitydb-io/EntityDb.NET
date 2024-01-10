@@ -9,11 +9,11 @@ using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.Documents;
 
-internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
+internal sealed record AgentSignatureDocument : SourceDataDocumentBase
 {
     public const string CollectionName = "AgentSignatures";
 
-    private static readonly MessageGroupSortBuilder SortBuilder = new();
+    private static readonly SourceDataSortBuilder SortBuilder = new();
 
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
@@ -25,13 +25,13 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
             .Select(message => message.Id)
             .ToArray();
 
-        var entityPointers = source.Messages
-            .Select(message => message.EntityPointer)
+        var statePointers = source.Messages
+            .Select(message => message.StatePointer)
             .Distinct()
             .ToArray();
 
-        var entityIds = entityPointers
-            .Select(entityPointer => entityPointer.Id)
+        var stateIds = statePointers
+            .Select(statePointer => statePointer.Id)
             .ToArray();
 
         var documents = new[]
@@ -41,8 +41,8 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
                 SourceTimeStamp = source.TimeStamp,
                 SourceId = source.Id,
                 MessageIds = messageIds,
-                EntityIds = entityIds,
-                EntityPointers = entityPointers,
+                StateIds = stateIds,
+                StatePointers = statePointers,
                 DataType = source.AgentSignature.GetType().Name,
                 Data = envelopeService.Serialize(source.AgentSignature),
             },
@@ -57,17 +57,17 @@ internal sealed record AgentSignatureDocument : MessageGroupDocumentBase
 
     public static DocumentQuery<AgentSignatureDocument> GetQuery
     (
-        IMessageGroupQuery messageGroupQuery
+        ISourceDataQuery sourceDataQuery
     )
     {
         return new DocumentQuery<AgentSignatureDocument>
-        (
-            CollectionName,
-            messageGroupQuery.GetFilter(FilterBuilder),
-            messageGroupQuery.GetSort(SortBuilder),
-            messageGroupQuery.Skip,
-            messageGroupQuery.Take,
-            messageGroupQuery.Options as MongoDbQueryOptions
-        );
+        {
+            CollectionName = CollectionName,
+            Filter = sourceDataQuery.GetFilter(FilterBuilder),
+            Sort = sourceDataQuery.GetSort(SortBuilder),
+            Skip = sourceDataQuery.Skip,
+            Limit = sourceDataQuery.Take,
+            Options = sourceDataQuery.Options as MongoDbQueryOptions,
+        };
     }
 }

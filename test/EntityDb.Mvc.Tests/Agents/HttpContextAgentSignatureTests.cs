@@ -15,17 +15,11 @@ public class HttpContextAgentSignatureTests
         const string headerName = nameof(headerName);
         const string headerValue = nameof(headerValue);
 
-        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
-        {
-            RedactedHeaders = Array.Empty<string>(),
-        };
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions { RedactedHeaders = Array.Empty<string>() };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            Headers = new Dictionary<string, string[]>
-            {
-                [headerName] = new[] { headerValue },
-            },
+            Headers = new Dictionary<string, string[]> { [headerName] = new[] { headerValue } },
         });
 
         // ACT
@@ -51,16 +45,12 @@ public class HttpContextAgentSignatureTests
 
         var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            RedactedHeaders = new[] { headerName },
-            RedactedValue = redactedValue,
+            RedactedHeaders = new[] { headerName }, RedactedValue = redactedValue,
         };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            Headers = new Dictionary<string, string[]>
-            {
-                [headerName] = new[] { headerValue },
-            },
+            Headers = new Dictionary<string, string[]> { [headerName] = new[] { headerValue } },
         });
 
         // ACT
@@ -121,8 +111,7 @@ public class HttpContextAgentSignatureTests
 
         var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            RedactedQueryStringParams = new[] { queryStringParamName },
-            RedactedValue = redactedValue,
+            RedactedQueryStringParams = new[] { queryStringParamName }, RedactedValue = redactedValue,
         };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions

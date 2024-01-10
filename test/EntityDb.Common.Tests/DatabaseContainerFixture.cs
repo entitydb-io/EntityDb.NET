@@ -1,6 +1,4 @@
-﻿using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
-using DotNet.Testcontainers.Containers;
+﻿using Testcontainers.MongoDb;
 using Testcontainers.Redis;
 using Xunit;
 
@@ -22,14 +20,12 @@ public class DatabaseContainerFixture : IAsyncLifetime
         .WithImage("redis:7.2.0")
         .Build();
 
-    public IContainer MongoDbContainer { get; } = new ContainerBuilder()
+    public MongoDbContainer MongoDbContainer { get; } = new MongoDbBuilder()
         .WithImage("mongo:7.0.0")
-        .WithPortBinding(27017, true)
+        .WithUsername(null)
+        .WithPassword(null)
         .WithBindMount(DockerVolumeMongoDbInit, "/docker-entrypoint-initdb.d")
-        .WithEnvironment("MONGO_INITDB_ROOT_USERNAME", null)
-        .WithEnvironment("MONGO_INITDB_ROOT_PASSWORD", null)
         .WithCommand("--replSet", OmniParameter)
-        .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new WaitUntil()))
         .Build();
 
     public async Task InitializeAsync()
@@ -42,18 +38,5 @@ public class DatabaseContainerFixture : IAsyncLifetime
     {
         await RedisContainer.DisposeAsync();
         await MongoDbContainer.DisposeAsync();
-    }
-
-    private sealed class WaitUntil : IWaitUntil
-    {
-        private static readonly string[] LineEndings = { "\r\n", "\n" };
-
-        public async Task<bool> UntilAsync(IContainer container)
-        {
-            var (text, text2) = await container.GetLogs(timestampsEnabled: false).ConfigureAwait(false);
-            return 2.Equals(Array.Empty<string>().Concat(text.Split(LineEndings, StringSplitOptions.RemoveEmptyEntries))
-                .Concat(text2.Split(LineEndings, StringSplitOptions.RemoveEmptyEntries))
-                .Count(line => line.Contains("Waiting for connections")));
-        }
     }
 }

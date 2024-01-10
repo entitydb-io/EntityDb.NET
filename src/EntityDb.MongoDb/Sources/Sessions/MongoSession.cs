@@ -258,7 +258,7 @@ internal record MongoSession
     {
         if (Options.ReadOnly)
         {
-            throw new CannotWriteInReadOnlyModeException();
+            throw new ReadOnlyWriteException();
         }
     }
 

@@ -11,7 +11,7 @@ public interface ISourceReprocessorQueueItem
 {
     /// <summary>
     ///     The name of the source session options passed to
-    ///     <see cref="ISourceRepositoryFactory.CreateRepository" />
+    ///     <see cref="ISourceRepositoryFactory.Create" />
     /// </summary>
     string SourceSessionOptionsName { get; }
 

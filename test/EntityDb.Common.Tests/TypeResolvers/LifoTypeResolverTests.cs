@@ -22,13 +22,15 @@ public class LifoTypeResolverTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
+        var logs = new List<Log>();
+
+        var loggerFactory = GetMockedLoggerFactory(logs);
 
         var partialTypeResolver = new Mock<IPartialTypeResolver>();
 
         partialTypeResolver
             .Setup(resolver => resolver.TryResolveType(It.IsAny<EnvelopeHeaders>(), out It.Ref<Type?>.IsAny))
-            .Throws(new Exception());
+            .Throws(new NotImplementedException());
 
         var typeResolver =
             new LifoTypeResolver(loggerFactory.CreateLogger<LifoTypeResolver>(), new[] { partialTypeResolver.Object });
@@ -37,11 +39,11 @@ public class LifoTypeResolverTests : TestsBase<Startup>
 
         Should.Throw<CannotResolveTypeException>(() => typeResolver.ResolveType(default!));
 
-        loggerVerifier.Invoke(Times.Once());
+        logs.Count(log => log.Exception is NotImplementedException).ShouldBe(1);
     }
 
     [Fact]
-    public void GivenFirstPartialTypeResolverReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
+    public async Task GivenFirstPartialTypeResolverReturnsNullAndSecondReturnsNotNull_WhenResolvingType_ThenReturnType()
     {
         // ARRANGE
 
@@ -71,7 +73,7 @@ public class LifoTypeResolverTests : TestsBase<Startup>
                 return true;
             }));
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(IPartialTypeResolver));
             serviceCollection.RemoveAll(typeof(ITypeResolver));

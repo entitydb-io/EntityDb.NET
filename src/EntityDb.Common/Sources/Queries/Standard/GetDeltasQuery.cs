@@ -6,29 +6,29 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetDeltasQuery(Pointer EntityPointer, Version SnapshotVersion,
-    object? Options = null) : IMessageQuery
+internal sealed record GetDeltasQuery(Pointer StatePointer, Version PersistedStateVersion,
+    object? Options = null) : IMessageDataQuery
 {
-    public TFilter GetFilter<TFilter>(IMessageFilterBuilder<TFilter> builder)
+    public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
         var filters = new List<TFilter>
         {
-            builder.EntityIdIn(EntityPointer.Id), builder.EntityVersionGte(EntityPointer.Version.Next()),
+            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(StatePointer.Version.Next()),
         };
 
-        if (SnapshotVersion != Version.Zero)
+        if (PersistedStateVersion != Version.Zero)
         {
-            filters.Add(builder.EntityVersionLte(SnapshotVersion));
+            filters.Add(builder.StateVersionLte(PersistedStateVersion));
         }
 
         return builder.And(filters.ToArray());
     }
 
-    public TSort GetSort<TSort>(IMessageSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(IMessageDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (
-            builder.EntityVersion(true)
+            builder.StateVersion(true)
         );
     }
 

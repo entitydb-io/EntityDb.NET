@@ -13,6 +13,6 @@ public interface ISourceRepositoryFactory : IDisposableResource
     /// <param name="sourceSessionOptionsName">The agent's use case for the repository.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>A new instance of <see cref="ISourceRepository" />.</returns>
-    Task<ISourceRepository> CreateRepository(string sourceSessionOptionsName,
+    Task<ISourceRepository> Create(string sourceSessionOptionsName,
         CancellationToken cancellationToken = default);
 }

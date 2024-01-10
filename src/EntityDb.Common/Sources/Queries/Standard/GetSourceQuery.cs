@@ -5,14 +5,24 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetSourceQuery(Id SourceId) : IMessageGroupQuery, IMessageQuery
+internal sealed record GetSourceQuery(Id SourceId) : ISourceDataQuery, IMessageDataQuery
 {
-    public TFilter GetFilter<TFilter>(IMessageGroupFilterBuilder<TFilter> builder)
+    public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
         return builder.SourceIdIn(SourceId);
     }
 
-    public TSort? GetSort<TSort>(IMessageGroupSortBuilder<TSort> builder)
+    public TSort? GetSort<TSort>(IMessageDataSortBuilder<TSort> builder)
+    {
+        return default;
+    }
+
+    public TFilter GetFilter<TFilter>(ISourceDataFilterBuilder<TFilter> builder)
+    {
+        return builder.SourceIdIn(SourceId);
+    }
+
+    public TSort? GetSort<TSort>(ISourceDataSortBuilder<TSort> builder)
     {
         return default;
     }
@@ -22,14 +32,4 @@ internal sealed record GetSourceQuery(Id SourceId) : IMessageGroupQuery, IMessag
     public int? Take => default;
 
     public object? Options => default;
-
-    public TFilter GetFilter<TFilter>(IMessageFilterBuilder<TFilter> builder)
-    {
-        return builder.SourceIdIn(SourceId);
-    }
-
-    public TSort? GetSort<TSort>(IMessageSortBuilder<TSort> builder)
-    {
-        return default;
-    }
 }

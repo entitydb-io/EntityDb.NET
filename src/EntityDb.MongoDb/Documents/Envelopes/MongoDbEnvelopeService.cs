@@ -61,7 +61,7 @@ internal class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
         {
             _logger.LogError(exception, "Unable to serialize");
 
-            throw new SerializeException();
+            throw new DataSerializationException();
         }
     }
 
@@ -78,7 +78,7 @@ internal class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
         {
             _logger.LogError(exception, "Unable to deserialize");
 
-            throw new DeserializeException();
+            throw new DataDeserializationException();
         }
     }
 

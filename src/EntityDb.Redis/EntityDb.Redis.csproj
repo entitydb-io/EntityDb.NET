@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageTags>EntityDb EventSourcing DDD CQRS Redis</PackageTags>
-        <Description>An implementation of the EntityDb Snapshot Repository interface, specifically for Redis.</Description>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS Redis</PackageTags>
+        <Description>An implementation of the EntityDb IStateRepository interface, specifically for Redis.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="StackExchange.Redis" Version="2.6.122"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.7.10"/>
     </ItemGroup>
 
     <ItemGroup>

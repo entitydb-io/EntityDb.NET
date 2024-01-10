@@ -1,7 +1,7 @@
 namespace EntityDb.Abstractions.ValueObjects;
 
 /// <summary>
-///     Represents an identifier for an entity or projection.
+///     Represents an identifier for a state.
 /// </summary>
 /// <param name="Value">The backing value.</param>
 public readonly record struct Id(Guid Value)

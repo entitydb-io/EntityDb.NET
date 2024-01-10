@@ -24,14 +24,14 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(
+    public async Task GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(
         bool removeTypeDiscriminatorProperty)
     {
         // ARRANGE
 
         var expectedContainsTypeDiscriminatorProperty = !removeTypeDiscriminatorProperty;
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(IEnvelopeService<BsonDocument>));
 

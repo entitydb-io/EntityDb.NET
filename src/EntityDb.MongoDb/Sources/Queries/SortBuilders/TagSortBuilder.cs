@@ -9,11 +9,11 @@ internal sealed class TagSortBuilder : MessageSortBuilder, ITagSortBuilder<SortD
 {
     public SortDefinition<BsonDocument> TagLabel(bool ascending)
     {
-        return Sort(ascending, nameof(TagDocument.Label));
+        return Sort(ascending, nameof(TagDataDocument.Label));
     }
 
     public SortDefinition<BsonDocument> TagValue(bool ascending)
     {
-        return Sort(ascending, nameof(TagDocument.Value));
+        return Sort(ascending, nameof(TagDataDocument.Value));
     }
 }

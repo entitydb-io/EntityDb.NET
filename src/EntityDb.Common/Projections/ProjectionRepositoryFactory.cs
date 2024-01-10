@@ -1,5 +1,5 @@
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Projections;
 
@@ -7,33 +7,33 @@ internal class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryF
     where TProjection : IProjection<TProjection>
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ISnapshotRepositoryFactory<TProjection>? _snapshotRepositoryFactory;
+    private readonly IStateRepositoryFactory<TProjection>? _stateRepositoryFactory;
 
     public ProjectionRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        ISnapshotRepositoryFactory<TProjection>? snapshotRepositoryFactory = null
+        IStateRepositoryFactory<TProjection>? stateRepositoryFactory = null
     )
     {
         _serviceProvider = serviceProvider;
-        _snapshotRepositoryFactory = snapshotRepositoryFactory;
+        _stateRepositoryFactory = stateRepositoryFactory;
     }
 
     public async Task<IProjectionRepository<TProjection>> CreateRepository
     (
-        string? snapshotSessionOptionsName = null,
+        string? stateSessionOptionsName = null,
         CancellationToken cancellationToken = default
     )
     {
-        if (_snapshotRepositoryFactory is null || snapshotSessionOptionsName is null)
+        if (_stateRepositoryFactory is null || stateSessionOptionsName is null)
         {
             return ProjectionRepository<TProjection>.Create(_serviceProvider);
         }
 
-        var snapshotRepository =
-            await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
+        var stateRepository =
+            await _stateRepositoryFactory.Create(stateSessionOptionsName, cancellationToken);
 
         return ProjectionRepository<TProjection>.Create(_serviceProvider,
-            snapshotRepository);
+            stateRepository);
     }
 }

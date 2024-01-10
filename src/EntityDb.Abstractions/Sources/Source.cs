@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.ValueObjects;
-using System.Collections.Immutable;
 
 namespace EntityDb.Abstractions.Sources;
 
@@ -26,5 +25,5 @@ public sealed record Source
     /// <summary>
     ///     The messages of the source.
     /// </summary>
-    public required ImmutableArray<Message> Messages { get; init; }
+    public required Message[] Messages { get; init; }
 }

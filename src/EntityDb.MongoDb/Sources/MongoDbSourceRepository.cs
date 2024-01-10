@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Annotations;
-using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
+using EntityDb.Abstractions.States.Attributes;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
@@ -29,26 +29,26 @@ internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRep
         _envelopeService = envelopeService;
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageGroupQuery messageGroupQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(messageGroupQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageQuery messageQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return DeltaDocument
-            .GetQuery(messageQuery)
+        return DeltaDataDocument
+            .GetQuery(messageDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
     public IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseQuery leaseQuery,
         CancellationToken cancellationToken = default)
     {
-        return LeaseDocument
+        return LeaseDataDocument
             .GetQuery(leaseQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
@@ -56,91 +56,92 @@ internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRep
     public IAsyncEnumerable<Id> EnumerateSourceIds(ITagQuery tagQuery,
         CancellationToken cancellationToken = default)
     {
-        return TagDocument
+        return TagDataDocument
             .GetQuery(tagQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateEntityPointers(IMessageGroupQuery messageGroupQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(messageGroupQuery)
-            .EnumerateMessageGroupEntityPointers(_mongoSession, cancellationToken);
+            .GetQuery(sourceDataQuery)
+            .EnumerateSourceDataStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateEntityPointers(IMessageQuery messageQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return DeltaDocument
-            .GetQuery(messageQuery)
-            .EnumerateMessageEntityPointers(_mongoSession, cancellationToken);
+        return DeltaDataDocument
+            .GetQuery(messageDataQuery)
+            .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateEntityPointers(ILeaseQuery leaseQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseQuery leaseQuery,
         CancellationToken cancellationToken = default)
     {
-        return LeaseDocument
+        return LeaseDataDocument
             .GetQuery(leaseQuery)
-            .EnumerateMessageEntityPointers(_mongoSession, cancellationToken);
+            .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateEntityPointers(ITagQuery tagQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagQuery tagQuery,
         CancellationToken cancellationToken = default)
     {
-        return TagDocument
+        return TagDataDocument
             .GetQuery(tagQuery)
-            .EnumerateMessageEntityPointers(_mongoSession, cancellationToken);
+            .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<object> EnumerateAgentSignatures(IMessageGroupQuery messageGroupQuery,
+    public IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(messageGroupQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateData<AgentSignatureDocument, object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<object> EnumerateDeltas(IMessageQuery messageQuery,
+    public IAsyncEnumerable<object> EnumerateDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return DeltaDocument
-            .GetQuery(messageQuery)
-            .EnumerateData<DeltaDocument, object>(_mongoSession, _envelopeService, cancellationToken);
+        return DeltaDataDocument
+            .GetQuery(messageDataQuery)
+            .EnumerateData<DeltaDataDocument, object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
     public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseQuery leaseQuery,
         CancellationToken cancellationToken = default)
     {
-        return LeaseDocument
+        return LeaseDataDocument
             .GetQuery(leaseQuery)
-            .EnumerateData<LeaseDocument, ILease>(_mongoSession, _envelopeService, cancellationToken);
+            .EnumerateData<LeaseDataDocument, ILease>(_mongoSession, _envelopeService, cancellationToken);
     }
 
     public IAsyncEnumerable<ITag> EnumerateTags(ITagQuery tagQuery,
         CancellationToken cancellationToken = default)
     {
-        return TagDocument
+        return TagDataDocument
             .GetQuery(tagQuery)
-            .EnumerateData<TagDocument, ITag>(_mongoSession, _envelopeService, cancellationToken);
+            .EnumerateData<TagDataDocument, ITag>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<IAnnotatedSourceGroupData<object>> EnumerateAnnotatedAgentSignatures(
-        IMessageGroupQuery messageGroupQuery,
+    public IAsyncEnumerable<IAnnotatedSourceData<object>> EnumerateAnnotatedAgentSignatures(
+        ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(messageGroupQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateEntitiesAnnotation<AgentSignatureDocument, object>(_mongoSession, _envelopeService,
                 cancellationToken);
     }
 
-    public IAsyncEnumerable<IAnnotatedSourceData<object>> EnumerateAnnotatedDeltas(IMessageQuery messageQuery,
+    public IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return DeltaDocument
-            .GetQuery(messageQuery)
-            .EnumerateEntityAnnotation<DeltaDocument, object>(_mongoSession, _envelopeService, cancellationToken);
+        return DeltaDataDocument
+            .GetQuery(messageDataQuery)
+            .EnumerateAnnotatedSourceData<DeltaDataDocument,
+                object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
     public async Task<bool> Commit(Source source,
@@ -158,20 +159,20 @@ internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRep
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var previousVersion = await DeltaDocument
-                    .GetLastEntityVersion(_mongoSession, message.EntityPointer.Id, cancellationToken);
+                var previousVersion = await DeltaDataDocument
+                    .GetLastStateVersion(_mongoSession, message.StatePointer.Id, cancellationToken);
 
-                if (message.EntityPointer.Version == Version.Zero)
+                if (message.StatePointer.Version == Version.Zero)
                 {
                     currentMessage = currentMessage with
                     {
-                        EntityPointer = currentMessage.EntityPointer.Id + previousVersion.Next(),
+                        StatePointer = currentMessage.StatePointer.Id + previousVersion.Next(),
                     };
                 }
                 else
                 {
                     OptimisticConcurrencyException.ThrowIfMismatch(previousVersion.Next(),
-                        message.EntityPointer.Version);
+                        message.StatePointer.Version);
                 }
 
                 await Put(source, currentMessage, cancellationToken);
@@ -205,34 +206,34 @@ internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRep
 
     private async Task Put(Source source, Message message, CancellationToken cancellationToken)
     {
-        await DeltaDocument
+        await DeltaDataDocument
             .GetInsertCommand(_envelopeService, source, message)
             .Execute(_mongoSession, cancellationToken);
 
         if (message.AddLeases.Length > 0)
         {
-            await LeaseDocument
+            await LeaseDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
         if (message.AddTags.Length > 0)
         {
-            await TagDocument
+            await TagDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
         if (message.DeleteLeases.Length > 0)
         {
-            await LeaseDocument
+            await LeaseDataDocument
                 .GetDeleteCommand(message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
         if (message.DeleteTags.Length > 0)
         {
-            await TagDocument
+            await TagDataDocument
                 .GetDeleteCommand(message)
                 .Execute(_mongoSession, cancellationToken);
         }

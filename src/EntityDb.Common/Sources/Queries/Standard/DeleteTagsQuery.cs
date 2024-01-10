@@ -1,19 +1,19 @@
-using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
+using EntityDb.Abstractions.States.Attributes;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
 internal sealed record DeleteTagsQuery
-    (Id EntityId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagQuery
+    (Id StateId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagQuery
 {
-    public TFilter GetFilter<TFilter>(ITagFilterBuilder<TFilter> builder)
+    public TFilter GetFilter<TFilter>(ITagDataFilterBuilder<TFilter> builder)
     {
         return builder.And
         (
-            builder.EntityIdIn(EntityId),
+            builder.StateIdIn(StateId),
             builder.Or
             (
                 Tags

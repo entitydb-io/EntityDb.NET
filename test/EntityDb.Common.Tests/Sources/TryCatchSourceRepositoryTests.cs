@@ -19,18 +19,20 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
+        var logs = new List<Log>();
+
+        var loggerFactory = GetMockedLoggerFactory(logs);
 
         var sourceRepositoryMock = new Mock<ISourceRepository>(MockBehavior.Strict);
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateSourceIds(It.IsAny<IMessageGroupQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateSourceIds(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateSourceIds(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateSourceIds(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
@@ -43,31 +45,32 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateEntityPointers(It.IsAny<IMessageGroupQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateEntityPointers(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateEntityPointers(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateEntityPointers(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ITagQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAgentSignatures(It.IsAny<IMessageGroupQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateAgentSignatures(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateDeltas(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
@@ -80,13 +83,13 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAnnotatedAgentSignatures(It.IsAny<IMessageGroupQuery>(),
+                repository.EnumerateAnnotatedAgentSignatures(It.IsAny<ISourceDataQuery>(),
                     It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAnnotatedDeltas(It.IsAny<IMessageQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateAnnotatedDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
@@ -99,22 +102,22 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
 
         // ACT
 
-        var sourceIdsFromMessageGroupQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(IMessageGroupQuery)!).ToArrayAsync();
-        var sourceIdsFromMessageQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(IMessageQuery)!).ToArrayAsync();
+        var sourceIdsFromSourceDataQuery =
+            await tryCatchSourceRepository.EnumerateSourceIds(default(ISourceDataQuery)!).ToArrayAsync();
+        var sourceIdsFromMessageDataQuery =
+            await tryCatchSourceRepository.EnumerateSourceIds(default(IMessageDataQuery)!).ToArrayAsync();
         var sourceIdsFromLeaseQuery =
             await tryCatchSourceRepository.EnumerateSourceIds(default(ILeaseQuery)!).ToArrayAsync();
         var sourceIdsFromTagQuery =
             await tryCatchSourceRepository.EnumerateSourceIds(default(ITagQuery)!).ToArrayAsync();
-        var entityPointersFromMessageGroupQuery =
-            await tryCatchSourceRepository.EnumerateEntityPointers(default(IMessageGroupQuery)!).ToArrayAsync();
-        var entityPointersFromMessageQuery =
-            await tryCatchSourceRepository.EnumerateEntityPointers(default(IMessageQuery)!).ToArrayAsync();
-        var entityPointersFromLeaseQuery =
-            await tryCatchSourceRepository.EnumerateEntityPointers(default(ILeaseQuery)!).ToArrayAsync();
-        var entityPointersFromTagQuery =
-            await tryCatchSourceRepository.EnumerateEntityPointers(default(ITagQuery)!).ToArrayAsync();
+        var statePointersFromSourceDataQuery =
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ISourceDataQuery)!).ToArrayAsync();
+        var statePointersFromMessageDataQuery =
+            await tryCatchSourceRepository.EnumerateStatePointers(default(IMessageDataQuery)!).ToArrayAsync();
+        var statePointersFromLeaseQuery =
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ILeaseQuery)!).ToArrayAsync();
+        var statePointersFromTagQuery =
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ITagQuery)!).ToArrayAsync();
         var agentSignatures =
             await tryCatchSourceRepository.EnumerateAgentSignatures(default!).ToArrayAsync();
         var deltas =
@@ -130,20 +133,21 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
 
         // ASSERT
 
-        sourceIdsFromMessageGroupQuery.ShouldBeEmpty();
-        sourceIdsFromMessageQuery.ShouldBeEmpty();
+        sourceIdsFromSourceDataQuery.ShouldBeEmpty();
+        sourceIdsFromMessageDataQuery.ShouldBeEmpty();
         sourceIdsFromLeaseQuery.ShouldBeEmpty();
         sourceIdsFromTagQuery.ShouldBeEmpty();
-        entityPointersFromMessageGroupQuery.ShouldBeEmpty();
-        entityPointersFromMessageQuery.ShouldBeEmpty();
-        entityPointersFromLeaseQuery.ShouldBeEmpty();
-        entityPointersFromTagQuery.ShouldBeEmpty();
+        statePointersFromSourceDataQuery.ShouldBeEmpty();
+        statePointersFromMessageDataQuery.ShouldBeEmpty();
+        statePointersFromLeaseQuery.ShouldBeEmpty();
+        statePointersFromTagQuery.ShouldBeEmpty();
         agentSignatures.ShouldBeEmpty();
         deltas.ShouldBeEmpty();
         leases.ShouldBeEmpty();
         tags.ShouldBeEmpty();
         annotatedDeltas.ShouldBeEmpty();
         committed.ShouldBeFalse();
-        loggerVerifier.Invoke(Times.Exactly(14));
+
+        logs.Count(log => log.Exception is NotImplementedException).ShouldBe(14);
     }
 }

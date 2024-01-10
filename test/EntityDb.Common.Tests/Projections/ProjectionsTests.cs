@@ -1,11 +1,11 @@
-using System.Diagnostics.CodeAnalysis;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Seeders;
-using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.Common.Tests.Implementations.States;
 using Shouldly;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 using Version = EntityDb.Abstractions.ValueObjects.Version;
 
@@ -21,63 +21,64 @@ public class ProjectionsTests : TestsBase<Startup>
     }
 
     private async Task Generic_GivenEmptySourceRepository_WhenGettingProjection_ThenThrow<TProjection>(
-        SourcesAdder sourcesAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+        SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder,
+        StateRepositoryAdder projectionStateRepositoryAdder)
         where TProjection : IProjection<TProjection>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
-            projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityStateRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            projectionStateRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var projectionRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
+        await using var readOnlyRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
 
         // ACT & ASSERT
 
-        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(() =>
-            projectionRepository.GetSnapshot(default));
+        await Should.ThrowAsync<StateDoesNotExistException>(() =>
+            readOnlyRepository.Get(default));
     }
 
     private async Task
         Generic_GivenSourceCommitted_WhenGettingProjection_ThenReturnExpectedProjection<TEntity, TProjection>(
-            SourcesAdder sourcesAdder, SnapshotAdder entitySnapshotAdder,
-            SnapshotAdder projectionSnapshotAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
-        where TProjection : class, IProjection<TProjection>, ISnapshotWithTestLogic<TProjection>
+            SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder,
+            StateRepositoryAdder projectionStateRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
+        where TProjection : class, IProjection<TProjection>, IStateWithTestLogic<TProjection>
     {
         // ARRANGE
 
-        const uint numberOfVersions = 5;
-        const uint replaceAtVersionValue = 3;
-
-        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
-            projection.Pointer.Version == new Version(replaceAtVersionValue);
-
-        var entityId = Id.NewId();
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
-            projectionSnapshotAdder.AddDependencies.Invoke(serviceCollection);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityStateRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            projectionStateRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
         await using var projectionRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
 
-        entityRepository.Create(entityId);
-        
-        entityRepository.Seed(entityId, replaceAtVersionValue);
-        
-        var firstSourceCommitted = await entityRepository.Commit(Id.NewId());
-        
-        entityRepository.Seed(entityId, numberOfVersions - replaceAtVersionValue);
+        const uint numberOfVersions = 5;
+        const uint replaceAtVersionValue = 3;
 
-        var secondSourceCommitted = await entityRepository.Commit(Id.NewId());
-        
+        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
+            projection.GetPointer().Version == new Version(replaceAtVersionValue);
+
+        var stateId = Id.NewId();
+
+        entityRepository.Create(stateId);
+
+        entityRepository.Seed(stateId, replaceAtVersionValue);
+
+        var firstSourceCommitted = await entityRepository.Commit();
+
+        entityRepository.Seed(stateId, numberOfVersions - replaceAtVersionValue);
+
+        var secondSourceCommitted = await entityRepository.Commit();
+
         // ARRANGE ASSERTIONS
 
         numberOfVersions.ShouldBeGreaterThan(replaceAtVersionValue);
@@ -85,41 +86,42 @@ public class ProjectionsTests : TestsBase<Startup>
         firstSourceCommitted.ShouldBeTrue();
         secondSourceCommitted.ShouldBeTrue();
 
-        projectionRepository.SnapshotRepository.ShouldNotBeNull();
+        projectionRepository.StateRepository.ShouldNotBeNull();
 
         // ACT
 
-        var currentProjection = await projectionRepository.GetSnapshot(entityId);
-        var projectionSnapshot = await projectionRepository.SnapshotRepository.GetSnapshotOrDefault(entityId);
+        var currentProjection = await projectionRepository.Get(stateId);
+        var persistedProjection = await projectionRepository.StateRepository.Get(stateId);
 
         // ASSERT
 
-        currentProjection.Pointer.Version.Value.ShouldBe(numberOfVersions);
-        projectionSnapshot.ShouldNotBeNull();
-        projectionSnapshot.Pointer.Version.Value.ShouldBe(replaceAtVersionValue);
+        currentProjection.GetPointer().Version.Value.ShouldBe(numberOfVersions);
+        persistedProjection.ShouldNotBeNull();
+        persistedProjection.GetPointer().Version.Value.ShouldBe(replaceAtVersionValue);
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesEntitySnapshotsAndProjectionSnapshots))]
-    public Task GivenEmptySourceRepository_WhenGettingProjection_ThenThrow(SourcesAdder sourcesAdder,
-        SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+    [MemberData(nameof(With_Source_EntityState_ProjectionState))]
+    public Task GivenEmptySourceRepository_WhenGettingProjection_ThenThrow(SourceRepositoryAdder sourceRepositoryAdder,
+        StateRepositoryAdder entityStateRepositoryAdder, StateRepositoryAdder projectionStateRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { projectionSnapshotAdder.SnapshotType },
-            new object?[] { sourcesAdder, entitySnapshotAdder, projectionSnapshotAdder }
+            new[] { projectionStateRepositoryAdder.StateType },
+            new object?[] { sourceRepositoryAdder, entityStateRepositoryAdder, projectionStateRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesEntitySnapshotsAndProjectionSnapshots))]
+    [MemberData(nameof(With_Source_EntityState_ProjectionState))]
     public Task GivenSourceCommitted_WhenGettingProjection_ThenReturnExpectedProjection(
-        SourcesAdder sourcesAdder, SnapshotAdder entitySnapshotAdder, SnapshotAdder projectionSnapshotAdder)
+        SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder,
+        StateRepositoryAdder projectionStateRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entitySnapshotAdder.SnapshotType, projectionSnapshotAdder.SnapshotType },
-            new object?[] { sourcesAdder, entitySnapshotAdder, projectionSnapshotAdder }
+            new[] { entityStateRepositoryAdder.StateType, projectionStateRepositoryAdder.StateType },
+            new object?[] { sourceRepositoryAdder, entityStateRepositoryAdder, projectionStateRepositoryAdder }
         );
     }
 }

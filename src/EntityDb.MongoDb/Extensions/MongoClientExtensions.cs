@@ -37,13 +37,13 @@ public static class MongoClientExtensions
                 UniquenessConstraint
             ),
         },
-        [DeltaDocument.CollectionName] = new[]
+        [DeltaDataDocument.CollectionName] = new[]
         {
             new CreateIndexModel<BsonDocument>
             (
                 IndexKeysBuilder.Combine
                 (
-                    IndexKeysBuilder.Descending(nameof(DeltaDocument.MessageId))
+                    IndexKeysBuilder.Descending(nameof(DeltaDataDocument.MessageId))
                 ),
                 IdempotentConstraint
             ),
@@ -51,46 +51,46 @@ public static class MongoClientExtensions
             (
                 IndexKeysBuilder.Combine
                 (
-                    IndexKeysBuilder.Descending(nameof(DeltaDocument.EntityId)),
-                    IndexKeysBuilder.Descending(nameof(DeltaDocument.EntityVersion))
+                    IndexKeysBuilder.Descending(nameof(DeltaDataDocument.StateId)),
+                    IndexKeysBuilder.Descending(nameof(DeltaDataDocument.StateVersion))
                 ),
                 UniquenessConstraint
             ),
         },
-        [LeaseDocument.CollectionName] = new[]
+        [LeaseDataDocument.CollectionName] = new[]
         {
             new CreateIndexModel<BsonDocument>
             (
                 IndexKeysBuilder.Combine
                 (
-                    IndexKeysBuilder.Descending(nameof(LeaseDocument.Scope)),
-                    IndexKeysBuilder.Descending(nameof(LeaseDocument.Label)),
-                    IndexKeysBuilder.Descending(nameof(LeaseDocument.Value))
+                    IndexKeysBuilder.Descending(nameof(LeaseDataDocument.Scope)),
+                    IndexKeysBuilder.Descending(nameof(LeaseDataDocument.Label)),
+                    IndexKeysBuilder.Descending(nameof(LeaseDataDocument.Value))
                 ),
                 UniquenessConstraint
             ),
         },
-        [TagDocument.CollectionName] = new[]
+        [TagDataDocument.CollectionName] = new[]
         {
             new CreateIndexModel<BsonDocument>
             (
                 IndexKeysBuilder.Combine
                 (
-                    IndexKeysBuilder.Descending(nameof(TagDocument.Label)),
-                    IndexKeysBuilder.Descending(nameof(TagDocument.Value))
+                    IndexKeysBuilder.Descending(nameof(TagDataDocument.Label)),
+                    IndexKeysBuilder.Descending(nameof(TagDataDocument.Value))
                 ),
                 LookupIndex
             ),
         },
     };
 
-    private static readonly CreateIndexModel<BsonDocument>[] SnapshotCollection =
+    private static readonly CreateIndexModel<BsonDocument>[] StateCollection =
     {
         new(
             IndexKeysBuilder.Combine
             (
-                IndexKeysBuilder.Descending(nameof(SnapshotDocument.SnapshotId)),
-                IndexKeysBuilder.Descending(nameof(SnapshotDocument.SnapshotVersion))
+                IndexKeysBuilder.Descending(nameof(StateDocument.StateId)),
+                IndexKeysBuilder.Descending(nameof(StateDocument.StateVersion))
             ),
             UniquenessConstraint
         ),
@@ -116,11 +116,13 @@ public static class MongoClientExtensions
         {
             var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
-            var entityCollectionNameCursor =
-                await mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken);
-            var entityCollectionNames = await entityCollectionNameCursor.ToListAsync(cancellationToken);
+            var sourceCollectionNameCursor = await mongoDatabase
+                .ListCollectionNamesAsync(cancellationToken: cancellationToken);
 
-            if (entityCollectionNames.Contains(collectionName))
+            var sourceCollectionNames = await sourceCollectionNameCursor
+                .ToListAsync(cancellationToken);
+
+            if (sourceCollectionNames.Contains(collectionName))
             {
                 continue;
             }
@@ -143,21 +145,23 @@ public static class MongoClientExtensions
     ///     You should ONLY use this in your code for integration testing. Real databases should be provisioned using the
     ///     dotnet tool EntityDb.MongoDb.Provisioner.
     /// </remarks>
-    public static async Task ProvisionSnapshotCollection(this IMongoClient mongoClient, string serviceName,
+    public static async Task ProvisionStateCollection(this IMongoClient mongoClient, string serviceName,
         string collectionName,
         CancellationToken cancellationToken = default)
     {
-        var collectionIndices = SnapshotCollection;
+        var collectionIndices = StateCollection;
 
         var mongoDatabase = mongoClient.GetDatabase(serviceName);
 
         var mongoCollection = mongoDatabase.GetCollection<BsonDocument>(collectionName);
 
-        var entityCollectionNameCursor =
-            await mongoDatabase.ListCollectionNamesAsync(cancellationToken: cancellationToken);
-        var entityCollectionNames = await entityCollectionNameCursor.ToListAsync(cancellationToken);
+        var collectionNameCursor = await mongoDatabase
+            .ListCollectionNamesAsync(cancellationToken: cancellationToken);
 
-        if (entityCollectionNames.Contains(collectionName))
+        var collectionNames = await collectionNameCursor
+            .ToListAsync(cancellationToken);
+
+        if (collectionNames.Contains(collectionName))
         {
             return;
         }

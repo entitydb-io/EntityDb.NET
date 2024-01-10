@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Sources;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Sources.Processors.Queues;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +30,7 @@ internal class TestModeSourceReprocessorQueue : ISourceReprocessorQueue
             _logger.LogDebug("Started reprocessing sources");
 
             await using var sourceRepository =
-                await _sourceRepositoryFactory.CreateRepository(item.SourceSessionOptionsName,
+                await _sourceRepositoryFactory.Create(item.SourceSessionOptionsName,
                     cancellationToken);
 
             var sourceIds = await sourceRepository

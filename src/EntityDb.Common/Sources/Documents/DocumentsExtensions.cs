@@ -58,14 +58,41 @@ internal static class DocumentsExtensions
         return pointers;
     }
 
-    public static async IAsyncEnumerable<IAnnotatedSourceData<TData>> EnumerateEntityAnnotation<TDocument,
+    public static async IAsyncEnumerable<IAnnotatedMessageData<TData>> EnumerateAnnotatedSourceData<TDocument,
         TSerializedData, TData>
     (
         this IAsyncEnumerable<TDocument> documents,
         IEnvelopeService<TSerializedData> envelopeService,
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
-        where TDocument : IMessageDocument<TSerializedData>
+        where TDocument : IMessageDataDocument<TSerializedData>
+        where TData : notnull
+    {
+        await using var enumerator = documents.GetAsyncEnumerator(cancellationToken);
+
+        while (await enumerator.MoveNextAsync(cancellationToken))
+        {
+            var document = enumerator.Current;
+
+            yield return AnnotatedMessageData<TData>.CreateFromBoxedData
+            (
+                document.SourceId,
+                document.SourceTimeStamp,
+                document.MessageId,
+                envelopeService.Deserialize<TData>(document.Data),
+                document.StatePointer
+            );
+        }
+    }
+
+    public static async IAsyncEnumerable<IAnnotatedSourceData<TData>> EnumerateEntitiesAnnotation<TDocument,
+        TSerializedData, TData>
+    (
+        this IAsyncEnumerable<TDocument> documents,
+        IEnvelopeService<TSerializedData> envelopeService,
+        [EnumeratorCancellation] CancellationToken cancellationToken
+    )
+        where TDocument : ISourceDataDocument<TSerializedData>
         where TData : notnull
     {
         await using var enumerator = documents.GetAsyncEnumerator(cancellationToken);
@@ -78,36 +105,9 @@ internal static class DocumentsExtensions
             (
                 document.SourceId,
                 document.SourceTimeStamp,
-                document.MessageId,
-                envelopeService.Deserialize<TData>(document.Data),
-                document.EntityPointer
-            );
-        }
-    }
-
-    public static async IAsyncEnumerable<IAnnotatedSourceGroupData<TData>> EnumerateEntitiesAnnotation<TDocument,
-        TSerializedData, TData>
-    (
-        this IAsyncEnumerable<TDocument> documents,
-        IEnvelopeService<TSerializedData> envelopeService,
-        [EnumeratorCancellation] CancellationToken cancellationToken
-    )
-        where TDocument : IMessageGroupDocument<TSerializedData>
-        where TData : notnull
-    {
-        await using var enumerator = documents.GetAsyncEnumerator(cancellationToken);
-
-        while (await enumerator.MoveNextAsync(cancellationToken))
-        {
-            var document = enumerator.Current;
-
-            yield return AnnotatedSourceGroupData<TData>.CreateFromBoxedData
-            (
-                document.SourceId,
-                document.SourceTimeStamp,
                 document.MessageIds,
                 envelopeService.Deserialize<TData>(document.Data),
-                document.EntityPointers
+                document.StatePointers
             );
         }
     }

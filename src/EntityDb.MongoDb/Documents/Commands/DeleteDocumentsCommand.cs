@@ -5,11 +5,10 @@ using MongoDB.Driver;
 namespace EntityDb.MongoDb.Documents.Commands;
 
 internal record DeleteDocumentsCommand
-(
-    string CollectionName,
-    FilterDefinition<BsonDocument> FilterDefinition
-)
 {
+    public required string CollectionName { get; init; }
+    public required FilterDefinition<BsonDocument> FilterDefinition { get; init; }
+
     public async Task Execute(IMongoSession mongoSession, CancellationToken cancellationToken)
     {
         await mongoSession

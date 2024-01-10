@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.Sources;
-using EntityDb.Common.Extensions;
 using EntityDb.Common.Sources.Processors.Queues;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -46,7 +45,7 @@ internal sealed class BufferBlockSourceReprocessorQueue : BackgroundService, ISo
             _logger.LogDebug("Started reprocessing sources");
 
             await using var sourceRepository =
-                await _sourceRepositoryFactory.CreateRepository(item.SourceSessionOptionsName,
+                await _sourceRepositoryFactory.Create(item.SourceSessionOptionsName,
                     cancellationToken);
 
             var sourceIds = await sourceRepository

@@ -1,5 +1,5 @@
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
@@ -16,19 +16,19 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
     public ProjectionRepository
     (
         IServiceProvider serviceProvider,
-        ISnapshotRepository<TProjection>? snapshotRepository = null
+        IStateRepository<TProjection>? stateRepository = null
     )
     {
         _serviceProvider = serviceProvider;
-        SnapshotRepository = snapshotRepository;
+        StateRepository = stateRepository;
     }
 
-    public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
+    public IStateRepository<TProjection>? StateRepository { get; }
 
-    public async Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default)
+    public async Task<TProjection> Get(Pointer projectionPointer, CancellationToken cancellationToken = default)
     {
-        var projection = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshotOrDefault(projectionPointer, cancellationToken) ??
+        var projection = StateRepository is not null
+            ? await StateRepository.Get(projectionPointer, cancellationToken) ??
               TProjection.Construct(projectionPointer.Id)
             : TProjection.Construct(projectionPointer.Id);
 
@@ -41,21 +41,21 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
         if (!projectionPointer.IsSatisfiedBy(projection.GetPointer()))
         {
-            throw new SnapshotPointerDoesNotExistException();
+            throw new StateDoesNotExistException();
         }
 
         return projection;
     }
 
     public static IProjectionRepository<TProjection> Create(IServiceProvider serviceProvider,
-        ISnapshotRepository<TProjection>? snapshotRepository = null)
+        IStateRepository<TProjection>? stateRepository = null)
     {
-        if (snapshotRepository is null)
+        if (stateRepository is null)
         {
             return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider);
         }
 
         return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-            snapshotRepository);
+            stateRepository);
     }
 }

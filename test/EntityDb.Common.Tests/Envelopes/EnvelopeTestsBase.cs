@@ -16,11 +16,12 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     protected abstract TEnvelopeValue GenerateCorruptedSerializedData();
 
     [Fact]
-    public void GivenValidRecord_WhenDeconstructedSerializedAndDeserialized_ThenReconstructReturnsEquivalentRecord()
+    public async Task
+        GivenValidRecord_WhenDeconstructedSerializedAndDeserialized_ThenReconstructReturnsEquivalentRecord()
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        await using var serviceScope = CreateServiceScope();
 
         var envelopeService = serviceScope.ServiceProvider
             .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
@@ -43,11 +44,11 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
     }
 
     [Fact]
-    public void WhenDeserializingCorruptedEnvelope_ThrowDeserializeException()
+    public async Task WhenDeserializingCorruptedEnvelope_ThrowDeserializeException()
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        await using var serviceScope = CreateServiceScope();
 
         var envelopeService = serviceScope.ServiceProvider
             .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
@@ -56,22 +57,25 @@ public abstract class EnvelopeTestsBase<TStartup, TEnvelopeValue> : TestsBase<TS
 
         // ASSERT
 
-        Should.Throw<DeserializeException>(() => { envelopeService.Deserialize<object>(corruptedSerializedData); });
+        Should.Throw<DataDeserializationException>(() =>
+        {
+            envelopeService.Deserialize<object>(corruptedSerializedData);
+        });
     }
 
     [Fact]
-    public void WhenSerializingNull_ThrowSerializeException()
+    public async Task WhenSerializingNull_ThrowSerializeException()
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope();
+        await using var serviceScope = CreateServiceScope();
 
         var envelopeService = serviceScope.ServiceProvider
             .GetRequiredService<IEnvelopeService<TEnvelopeValue>>();
 
         // ASSERT
 
-        Should.Throw<SerializeException>(() => { envelopeService.Serialize<object?>(null); });
+        Should.Throw<DataSerializationException>(() => { envelopeService.Serialize<object?>(null); });
     }
 
     private interface IRecord

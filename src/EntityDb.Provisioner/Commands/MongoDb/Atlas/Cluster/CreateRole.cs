@@ -32,17 +32,17 @@ internal class CreateRole : CommandBase
 
         var commandResource = new MongoDbAtlasResource
         {
-            Db = arguments.ServiceName, Collection = DeltaDocument.CollectionName,
+            Db = arguments.ServiceName, Collection = DeltaDataDocument.CollectionName,
         };
 
         var leaseResource = new MongoDbAtlasResource
         {
-            Db = arguments.ServiceName, Collection = LeaseDocument.CollectionName,
+            Db = arguments.ServiceName, Collection = LeaseDataDocument.CollectionName,
         };
 
         var tagResources = new MongoDbAtlasResource
         {
-            Db = arguments.ServiceName, Collection = TagDocument.CollectionName,
+            Db = arguments.ServiceName, Collection = TagDataDocument.CollectionName,
         };
 
         var roleActions = new[]

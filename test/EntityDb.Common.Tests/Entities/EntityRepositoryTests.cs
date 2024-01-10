@@ -1,12 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.Sources.Attributes;
-using EntityDb.Common.Tests.Implementations.Deltas;
+using EntityDb.Common.States.Attributes;
+using EntityDb.Common.Tests.Implementations.Entities.Deltas;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 using Version = EntityDb.Abstractions.ValueObjects.Version;
 
@@ -16,38 +16,41 @@ namespace EntityDb.Common.Tests.Entities;
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class EntityRepositoryTests : TestsBase<Startup>
 {
-    public EntityRepositoryTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(
-        serviceProvider, databaseContainerFixture)
+    public EntityRepositoryTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) :
+        base(
+            serviceProvider, databaseContainerFixture)
     {
     }
 
-    private async Task Generic_GivenEntityNotKnown_WhenGettingEntity_ThenThrow<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenEntityNotKnown_WhenGettingEntity_ThenThrow<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
-        });     
-        
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+        });
+
         var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
-        
+
         // ASSERT
 
-        Should.Throw<EntityNotLoadedException>(() => entityRepository.Get(default));
+        Should.Throw<UnknownEntityIdException>(() => entityRepository.Get(default));
     }
 
-    private async Task Generic_GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         var expectedEntityId = Id.NewId();
@@ -58,7 +61,7 @@ public class EntityRepositoryTests : TestsBase<Startup>
         var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
         entityRepository.Create(expectedEntityId);
-        
+
         // ARRANGE ASSERTIONS
 
         Should.NotThrow(() => entityRepository.Get(expectedEntityId));
@@ -74,30 +77,31 @@ public class EntityRepositoryTests : TestsBase<Startup>
         actualEntityId.ShouldBe(expectedEntityId);
     }
 
-    private async Task Generic_GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
         var committedSources = new List<Source>();
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.AddSingleton(GetMockedSourceSubscriber(committedSources));
 
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
         // ACT
 
-        entityRepository.Create(default);
-        
-        entityRepository.Append(default, new AddLease(new Lease(default!, default!, default!)));
+        writeRepository.Create(default);
 
-        await entityRepository.Commit(default);
+        writeRepository.Append(default, new AddLease(new Lease(default!, default!, default!)));
+
+        await writeRepository.Commit();
 
         // ASSERT
 
@@ -106,110 +110,112 @@ public class EntityRepositoryTests : TestsBase<Startup>
         committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
     }
 
-    private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
-        var entityId = Id.NewId();
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
         await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+        await using var readRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
+
+        var entityId = Id.NewId();
 
         writeRepository.Create(entityId);
         writeRepository.Append(entityId, new DoNothing());
 
-        var committed = await writeRepository.Commit(default);
-        
+        var committed = await writeRepository.Commit();
+
         // ARRANGE ASSERTIONS
 
         committed.ShouldBeTrue();
-        
-        // ACT
 
-        await using var readRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
+        // ACT
 
         await readRepository.Load(entityId);
 
         // ASSERT
 
-        await Should.ThrowAsync<EntityAlreadyLoadedException>(readRepository.Load(entityId));
+        await Should.ThrowAsync<ExistingEntityException>(readRepository.Load(entityId));
     }
 
-    private async Task Generic_GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
         var committedSources = new List<Source>();
 
-        var numberOfVersionsToTest = 10;
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.AddSingleton(GetMockedSourceSubscriber(committedSources));
-            
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
-        entityRepository.Create(default);
-        
+        const int numberOfVersionsToTest = 10;
+
+        writeRepository.Create(default);
+
         // ACT
 
         for (var i = 1; i <= numberOfVersionsToTest; i++)
         {
-            entityRepository.Append(default, new DoNothing());
+            writeRepository.Append(default, new DoNothing());
         }
 
-        await entityRepository.Commit(default);
+        await writeRepository.Commit();
 
         // ASSERT
 
         committedSources.Count.ShouldBe(1);
 
         var expectedVersion = Version.Zero;
-        
+
         for (var i = 1; i <= numberOfVersionsToTest; i++)
         {
             expectedVersion = expectedVersion.Next();
-            
-            committedSources[0].Messages[i - 1].EntityPointer.Version.ShouldBe(expectedVersion);
+
+            committedSources[0].Messages[i - 1].StatePointer.Version.ShouldBe(expectedVersion);
         }
     }
 
-    private async Task Generic_GivenExistingEntity_WhenAppendingNewDelta_ThenSourceBuilds<TEntity>(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    private async Task Generic_GivenExistingEntity_WhenAppendingNewDelta_ThenSourceBuilds<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
         where TEntity : IEntity<TEntity>
     {
         // ARRANGE
 
         var committedSources = new List<Source>();
-        
-        var expectedDelta = new DoNothing();
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.AddSingleton(GetMockedSourceSubscriber(committedSources));
-            
-            sourcesAdder.AddDependencies.Invoke(serviceCollection);
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
 
-        // ACT
-
         await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+
+        var expectedDelta = new DoNothing();
+
+        // ACT
 
         entityRepository.Create(default);
         entityRepository.Append(default, expectedDelta);
 
-        await entityRepository.Commit(default);
+        await entityRepository.Commit();
 
         // ASSERT
 
@@ -219,68 +225,74 @@ public class EntityRepositoryTests : TestsBase<Startup>
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenEntityNotKnown_WhenGettingEntity_ThenThrow(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenEntityNotKnown_WhenGettingEntity_ThenThrow(SourceRepositoryAdder sourceRepositoryAdder,
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity(SourceRepositoryAdder sourceRepositoryAdder,
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddSourcesAndEntity))]
-    public Task GivenExistingEntity_WhenAppendingNewDelta_ThenSourceBuilds(SourcesAdder sourcesAdder, EntityAdder entityAdder)
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenExistingEntity_WhenAppendingNewDelta_ThenSourceBuilds(SourceRepositoryAdder sourceRepositoryAdder,
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { sourcesAdder, entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 }
