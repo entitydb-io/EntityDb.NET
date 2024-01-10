@@ -526,7 +526,7 @@ public class TestsBase<TStartup>
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateDeltas(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(deltas));
 
         return GetMockedSourceRepositoryFactory(sourceRepositoryMock, new List<Source>());

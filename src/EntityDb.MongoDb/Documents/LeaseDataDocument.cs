@@ -17,7 +17,7 @@ internal sealed record LeaseDataDocument : MessageDataDocumentBase
 
     private static readonly LeaseDataFilterBuilder DataFilterBuilder = new();
 
-    private static readonly LeaseSortBuilder SortBuilder = new();
+    private static readonly LeaseDataSortBuilder DataSortBuilder = new();
 
     public required string Scope { get; init; }
     public required string Label { get; init; }
@@ -56,17 +56,17 @@ internal sealed record LeaseDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<LeaseDataDocument> GetQuery
     (
-        ILeaseQuery leaseQuery
+        ILeaseDataDataQuery leaseDataDataQuery
     )
     {
         return new DocumentQuery<LeaseDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = leaseQuery.GetFilter(DataFilterBuilder),
-            Sort = leaseQuery.GetSort(SortBuilder),
-            Skip = leaseQuery.Skip,
-            Limit = leaseQuery.Take,
-            Options = leaseQuery.Options as MongoDbQueryOptions,
+            Filter = leaseDataDataQuery.GetFilter(DataFilterBuilder),
+            Sort = leaseDataDataQuery.GetSort(DataSortBuilder),
+            Skip = leaseDataDataQuery.Skip,
+            Limit = leaseDataDataQuery.Take,
+            Options = leaseDataDataQuery.Options as MongoDbQueryOptions,
         };
     }
 
@@ -75,7 +75,7 @@ internal sealed record LeaseDataDocument : MessageDataDocumentBase
         Message message
     )
     {
-        var deleteLeasesQuery = new DeleteLeasesQuery(message.DeleteLeases);
+        var deleteLeasesQuery = new DeleteLeasesDataQuery(message.DeleteLeases);
 
         return new DeleteDocumentsCommand
         {

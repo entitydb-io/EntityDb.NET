@@ -6,7 +6,7 @@ namespace EntityDb.Abstractions.Sources.Queries.SortBuilders;
 ///     Builds a sort for a tag query.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-public interface ITagSortBuilder<TSort> : IMessageDataSortBuilder<TSort>
+public interface ITagDataSortBuilder<TSort> : IMessageDataSortBuilder<TSort>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders tags by <see cref="ITag.Label" />.

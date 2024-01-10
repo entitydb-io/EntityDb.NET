@@ -61,17 +61,17 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<DeltaDataDocument> GetQuery
     (
-        IMessageDataQuery messageDataQuery
+        IMessageDataDataQuery messageDataDataQuery
     )
     {
         return new DocumentQuery<DeltaDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = messageDataQuery.GetFilter(DataFilterBuilder),
-            Sort = messageDataQuery.GetSort(SortBuilder),
-            Skip = messageDataQuery.Skip,
-            Limit = messageDataQuery.Take,
-            Options = messageDataQuery.Options as MongoDbQueryOptions,
+            Filter = messageDataDataQuery.GetFilter(DataFilterBuilder),
+            Sort = messageDataDataQuery.GetSort(SortBuilder),
+            Skip = messageDataDataQuery.Skip,
+            Limit = messageDataDataQuery.Take,
+            Options = messageDataDataQuery.Options as MongoDbQueryOptions,
         };
     }
 
@@ -82,7 +82,7 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
         CancellationToken cancellationToken
     )
     {
-        var lastStateVersionQuery = new GetLastStateVersionQuery(stateId);
+        var lastStateVersionQuery = new GetLastStateVersionDataQuery(stateId);
 
         var document = await GetQuery(lastStateVersionQuery)
             .Execute(mongoSession, StateVersionProjection, cancellationToken)

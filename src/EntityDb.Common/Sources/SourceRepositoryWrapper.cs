@@ -16,90 +16,90 @@ internal abstract class SourceRepositoryWrapper : DisposableResourceBaseClass, I
         _sourceRepository = sourceRepository;
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataQuery sourceDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataDataQuery sourceDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(sourceDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(sourceDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataDataQuery messageDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(messageDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(messageDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseQuery leaseQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseDataDataQuery leaseDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(leaseQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(leaseDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ITagQuery tagQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ITagDataDataQuery tagDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(tagQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateSourceIds(tagDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataDataQuery sourceDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(sourceDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(sourceDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataDataQuery messageDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(messageDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(messageDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseQuery leaseQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataDataQuery leaseDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(leaseQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(leaseDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagQuery tagQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataDataQuery tagDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(tagQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateStatePointers(tagDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataQuery sourceDataQuery,
+    public IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataDataQuery sourceDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateAgentSignatures(sourceDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateAgentSignatures(sourceDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<object> EnumerateDeltas(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<object> EnumerateDeltas(IMessageDataDataQuery messageDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateDeltas(messageDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateDeltas(messageDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseQuery leaseQuery,
+    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseDataDataQuery leaseDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateLeases(leaseQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateLeases(leaseDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<ITag> EnumerateTags(ITagQuery tagQuery,
+    public IAsyncEnumerable<ITag> EnumerateTags(ITagDataDataQuery tagDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateTags(tagQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateTags(tagDataDataQuery, cancellationToken));
     }
 
     public IAsyncEnumerable<IAnnotatedSourceData<object>> EnumerateAnnotatedAgentSignatures(
-        ISourceDataQuery sourceDataQuery,
+        ISourceDataDataQuery sourceDataDataQuery,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() =>
-            _sourceRepository.EnumerateAnnotatedAgentSignatures(sourceDataQuery, cancellationToken));
+            _sourceRepository.EnumerateAnnotatedAgentSignatures(sourceDataDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataDataQuery messageDataDataQuery,
         CancellationToken cancellationToken = default)
     {
-        return WrapQuery(() => _sourceRepository.EnumerateAnnotatedDeltas(messageDataQuery, cancellationToken));
+        return WrapQuery(() => _sourceRepository.EnumerateAnnotatedDeltas(messageDataDataQuery, cancellationToken));
     }
 
     public virtual Task<bool> Commit(Source source,

@@ -24,7 +24,7 @@ public interface ISourceReprocessorQueueItem
     /// <summary>
     ///     Determines which sources need to be reprocessed.
     /// </summary>
-    IQuery Query { get; }
+    IDataQuery DataQuery { get; }
 
     /// <summary>
     ///     Determines how long to wait between each call to enqueue.

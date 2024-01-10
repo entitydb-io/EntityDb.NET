@@ -57,17 +57,17 @@ internal sealed record AgentSignatureDocument : SourceDataDocumentBase
 
     public static DocumentQuery<AgentSignatureDocument> GetQuery
     (
-        ISourceDataQuery sourceDataQuery
+        ISourceDataDataQuery sourceDataDataQuery
     )
     {
         return new DocumentQuery<AgentSignatureDocument>
         {
             CollectionName = CollectionName,
-            Filter = sourceDataQuery.GetFilter(FilterBuilder),
-            Sort = sourceDataQuery.GetSort(SortBuilder),
-            Skip = sourceDataQuery.Skip,
-            Limit = sourceDataQuery.Take,
-            Options = sourceDataQuery.Options as MongoDbQueryOptions,
+            Filter = sourceDataDataQuery.GetFilter(FilterBuilder),
+            Sort = sourceDataDataQuery.GetSort(SortBuilder),
+            Skip = sourceDataDataQuery.Skip,
+            Limit = sourceDataDataQuery.Take,
+            Options = sourceDataDataQuery.Options as MongoDbQueryOptions,
         };
     }
 }

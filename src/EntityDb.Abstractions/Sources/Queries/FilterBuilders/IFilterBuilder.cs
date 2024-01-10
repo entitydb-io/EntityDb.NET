@@ -4,7 +4,7 @@ namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 
 /// <summary>
 ///     Builds a <typeparamref name="TFilter" /> for an object. Possible objects include:
-///     agent signatures, deltas, facts, tags, and aliases
+///     agent signatures, deltas, facts, and tags.
 /// </summary>
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
 public interface IFilterBuilder<TFilter>

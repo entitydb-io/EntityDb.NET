@@ -5,8 +5,8 @@ using EntityDb.Abstractions.States.Attributes;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record DeleteLeasesQuery(IReadOnlyCollection<ILease> Leases,
-    object? Options = null) : ILeaseQuery
+internal sealed record DeleteLeasesDataQuery(IReadOnlyCollection<ILease> Leases,
+    object? Options = null) : ILeaseDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
@@ -23,7 +23,7 @@ internal sealed record DeleteLeasesQuery(IReadOnlyCollection<ILease> Leases,
         );
     }
 
-    public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort? GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return default;
     }

@@ -6,7 +6,7 @@ namespace EntityDb.Abstractions.Sources.Queries.SortBuilders;
 ///     Builds a sort for a lease query.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-public interface ILeaseSortBuilder<TSort> : IMessageDataSortBuilder<TSort>
+public interface ILeaseDataSortBuilder<TSort> : IMessageDataSortBuilder<TSort>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders leases by <see cref="ILease.Scope" />.

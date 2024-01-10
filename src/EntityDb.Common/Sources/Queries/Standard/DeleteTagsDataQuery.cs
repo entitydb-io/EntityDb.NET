@@ -6,8 +6,8 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record DeleteTagsQuery
-    (Id StateId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagQuery
+internal sealed record DeleteTagsDataQuery
+    (Id StateId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ITagDataFilterBuilder<TFilter> builder)
     {
@@ -26,7 +26,7 @@ internal sealed record DeleteTagsQuery
         );
     }
 
-    public TSort? GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    public TSort? GetSort<TSort>(ITagDataSortBuilder<TSort> builder)
     {
         return default;
     }

@@ -5,9 +5,9 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record SourceTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataQuery,
-    IMessageDataQuery,
-    ILeaseQuery, ITagQuery
+public record SourceTimeStampDataDataDataDataQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataDataQuery,
+    IMessageDataDataQuery,
+    ILeaseDataDataQuery, ITagDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
@@ -18,7 +18,7 @@ public record SourceTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Options
         );
     }
 
-    public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (
@@ -77,7 +77,7 @@ public record SourceTimeStampQuery(TimeStamp Gte, TimeStamp Lte, object? Options
         );
     }
 
-    public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ITagDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (

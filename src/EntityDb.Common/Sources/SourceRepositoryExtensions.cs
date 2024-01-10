@@ -14,19 +14,19 @@ public static class SourceRepositoryExtensions
     ///     Enumerate source ids for any supported query type
     /// </summary>
     /// <param name="sourceRepository">The source repository</param>
-    /// <param name="query">The query</param>
+    /// <param name="dataQuery">The query</param>
     /// <param name="cancellationToken">A cancellation token</param>
-    /// <returns>The source id which are found by <paramref name="query" /></returns>
+    /// <returns>The source id which are found by <paramref name="dataQuery" /></returns>
     public static IAsyncEnumerable<Id> EnumerateSourceIds(this ISourceRepository sourceRepository,
-        IQuery query, CancellationToken cancellationToken = default)
+        IDataQuery dataQuery, CancellationToken cancellationToken = default)
     {
-        return query switch
+        return dataQuery switch
         {
-            ISourceDataQuery sourceDataQuery => sourceRepository.EnumerateSourceIds(sourceDataQuery, cancellationToken),
-            IMessageDataQuery messageDataQuery => sourceRepository.EnumerateSourceIds(messageDataQuery,
+            ISourceDataDataQuery sourceDataQuery => sourceRepository.EnumerateSourceIds(sourceDataQuery, cancellationToken),
+            IMessageDataDataQuery messageDataQuery => sourceRepository.EnumerateSourceIds(messageDataQuery,
                 cancellationToken),
-            ILeaseQuery leaseQuery => sourceRepository.EnumerateSourceIds(leaseQuery, cancellationToken),
-            ITagQuery tagQuery => sourceRepository.EnumerateSourceIds(tagQuery, cancellationToken),
+            ILeaseDataDataQuery leaseDataQuery => sourceRepository.EnumerateSourceIds(leaseDataQuery, cancellationToken),
+            ITagDataDataQuery tagDataQuery => sourceRepository.EnumerateSourceIds(tagDataQuery, cancellationToken),
             _ => AsyncEnumerable.Empty<Id>(),
         };
     }
@@ -63,7 +63,7 @@ public static class SourceRepositoryExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var query = new GetSourceQuery(sourceId);
+        var query = new GetSourceDataQuery(sourceId);
 
         var annotatedAgentSignature = await sourceRepository
             .EnumerateAnnotatedAgentSignatures(query, cancellationToken)

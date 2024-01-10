@@ -6,8 +6,8 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetDeltasQuery(Pointer StatePointer, Version PersistedStateVersion,
-    object? Options = null) : IMessageDataQuery
+internal sealed record GetDeltasDataQuery(Pointer StatePointer, Version PersistedStateVersion,
+    object? Options = null) : IMessageDataDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {

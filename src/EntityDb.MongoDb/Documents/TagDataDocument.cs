@@ -17,7 +17,7 @@ internal sealed record TagDataDocument : MessageDataDocumentBase
 
     private static readonly TagDataFilterBuilder DataFilterBuilder = new();
 
-    private static readonly TagSortBuilder SortBuilder = new();
+    private static readonly TagDataSortBuilder DataSortBuilder = new();
 
     public required string Label { get; init; }
     public required string Value { get; init; }
@@ -54,17 +54,17 @@ internal sealed record TagDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<TagDataDocument> GetQuery
     (
-        ITagQuery tagQuery
+        ITagDataDataQuery tagDataDataQuery
     )
     {
         return new DocumentQuery<TagDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = tagQuery.GetFilter(DataFilterBuilder),
-            Sort = tagQuery.GetSort(SortBuilder),
-            Skip = tagQuery.Skip,
-            Limit = tagQuery.Take,
-            Options = tagQuery.Options as MongoDbQueryOptions,
+            Filter = tagDataDataQuery.GetFilter(DataFilterBuilder),
+            Sort = tagDataDataQuery.GetSort(DataSortBuilder),
+            Skip = tagDataDataQuery.Skip,
+            Limit = tagDataDataQuery.Take,
+            Options = tagDataDataQuery.Options as MongoDbQueryOptions,
         };
     }
 
@@ -73,7 +73,7 @@ internal sealed record TagDataDocument : MessageDataDocumentBase
         Message message
     )
     {
-        var deleteTagsQuery = new DeleteTagsQuery(message.StatePointer.Id, message.DeleteTags);
+        var deleteTagsQuery = new DeleteTagsDataQuery(message.StatePointer.Id, message.DeleteTags);
 
         return new DeleteDocumentsCommand
         {

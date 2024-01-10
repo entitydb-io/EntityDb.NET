@@ -4,12 +4,12 @@ namespace EntityDb.Common.Sources.Queries.Modified;
 
 internal abstract record ModifiedQueryBase
 {
-    protected abstract IQuery Query { get; }
+    protected abstract IDataQuery DataQuery { get; }
     public required ModifiedQueryOptions ModifiedQueryOptions { get; init; }
 
-    public int? Skip => ModifiedQueryOptions.ReplaceSkip ?? Query.Skip;
+    public int? Skip => ModifiedQueryOptions.ReplaceSkip ?? DataQuery.Skip;
 
-    public int? Take => ModifiedQueryOptions.ReplaceTake ?? Query.Take;
+    public int? Take => ModifiedQueryOptions.ReplaceTake ?? DataQuery.Take;
 
-    public object? Options => Query.Options;
+    public object? Options => DataQuery.Options;
 }

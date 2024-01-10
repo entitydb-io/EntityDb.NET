@@ -49,7 +49,7 @@ internal sealed class BufferBlockSourceReprocessorQueue : BackgroundService, ISo
                     cancellationToken);
 
             var sourceIds = await sourceRepository
-                .EnumerateSourceIds(item.Query, cancellationToken)
+                .EnumerateSourceIds(item.DataQuery, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
             foreach (var sourceId in sourceIds)

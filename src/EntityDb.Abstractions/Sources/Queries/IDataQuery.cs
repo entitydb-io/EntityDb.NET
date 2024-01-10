@@ -2,9 +2,9 @@
 
 /// <summary>
 ///     Abstracts a query for an object repository. Possible objects include:
-///     agentSignatures, deltas, facts, leases, and aliases.
+///     agentSignatures, deltas, facts, and leases.
 /// </summary>
-public interface IQuery
+public interface IDataQuery
 {
     /// <summary>
     ///     The number of objects to skip.

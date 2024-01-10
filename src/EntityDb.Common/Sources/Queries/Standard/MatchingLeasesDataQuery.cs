@@ -5,7 +5,7 @@ using EntityDb.Abstractions.States.Attributes;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record MatchingLeasesQuery(params ILease[] Leases) : ILeaseQuery
+internal sealed record MatchingLeasesDataQuery(params ILease[] Leases) : ILeaseDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
@@ -21,7 +21,7 @@ internal sealed record MatchingLeasesQuery(params ILease[] Leases) : ILeaseQuery
         );
     }
 
-    public TSort? GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort? GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return default;
     }

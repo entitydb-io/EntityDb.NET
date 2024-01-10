@@ -5,7 +5,7 @@ using EntityDb.Common.Tests.Implementations.States.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record CountQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseQuery, ITagQuery
+public record CountDataDataDataDataQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseDataDataQuery, ITagDataDataQuery
 {
     public int? Skip => null;
 
@@ -26,7 +26,7 @@ public record CountQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseQ
         );
     }
 
-    public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (
@@ -49,7 +49,7 @@ public record CountQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseQ
         );
     }
 
-    public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ITagDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (

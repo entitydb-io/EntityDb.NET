@@ -38,32 +38,32 @@ public static class SortBuilderExtensions
     }
 
     /// <summary>
-    ///     Returns a <see cref="ILeaseSortBuilder{TSort}" /> that orders leases in the reverse order of another
-    ///     <see cref="ILeaseSortBuilder{TSort}" />.
+    ///     Returns a <see cref="ILeaseDataSortBuilder{TSort}" /> that orders leases in the reverse order of another
+    ///     <see cref="ILeaseDataSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     /// <param name="builder">The lease sort builder.</param>
     /// <returns>
-    ///     A <see cref="ILeaseSortBuilder{TSort}" /> that orders leases in the reverse order of
+    ///     A <see cref="ILeaseDataSortBuilder{TSort}" /> that orders leases in the reverse order of
     ///     <paramref name="builder" />.
     /// </returns>
-    public static ILeaseSortBuilder<TSort> Reverse<TSort>(this ILeaseSortBuilder<TSort> builder)
+    public static ILeaseDataSortBuilder<TSort> Reverse<TSort>(this ILeaseDataSortBuilder<TSort> builder)
     {
-        return new ReverseLeaseSortBuilder<TSort> { LeaseSortBuilder = builder };
+        return new ReverseLeaseDataSortBuilder<TSort> { LeaseDataSortBuilder = builder };
     }
 
     /// <summary>
-    ///     Returns a <see cref="ITagSortBuilder{TSort}" /> that orders tags in the reverse order of another
-    ///     <see cref="ITagSortBuilder{TSort}" />.
+    ///     Returns a <see cref="ITagDataSortBuilder{TSort}" /> that orders tags in the reverse order of another
+    ///     <see cref="ITagDataSortBuilder{TSort}" />.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
     /// <param name="builder">The tag sort builder.</param>
     /// <returns>
-    ///     A <see cref="ITagSortBuilder{TSort}" /> that orders tags in the reverse order of
+    ///     A <see cref="ITagDataSortBuilder{TSort}" /> that orders tags in the reverse order of
     ///     <paramref name="builder" />.
     /// </returns>
-    public static ITagSortBuilder<TSort> Reverse<TSort>(this ITagSortBuilder<TSort> builder)
+    public static ITagDataSortBuilder<TSort> Reverse<TSort>(this ITagDataSortBuilder<TSort> builder)
     {
-        return new ReverseTagSortBuilder<TSort> { TagSortBuilder = builder };
+        return new ReverseTagDataSortBuilder<TSort> { TagDataSortBuilder = builder };
     }
 }

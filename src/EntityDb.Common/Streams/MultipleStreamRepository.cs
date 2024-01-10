@@ -82,6 +82,11 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
 
     public async Task<bool> Commit(CancellationToken cancellationToken = default)
     {
+        if (_messages.Count == 0)
+        {
+            return true;
+        }
+        
         var source = new Source
         {
             Id = Id.NewId(),
@@ -119,7 +124,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
 
     private async Task<Pointer> GetStreamPointer(ILease lease, CancellationToken cancellationToken)
     {
-        var query = new MatchingLeaseQuery(lease);
+        var query = new MatchingLeaseDataQuery(lease);
 
         return await SourceRepository
             .EnumerateStatePointers(query, cancellationToken)

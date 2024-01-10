@@ -15,7 +15,7 @@ public sealed class MongoDbSourceSessionOptions
     public string ConnectionString { get; set; } = default!;
 
     /// <summary>
-    ///     The name of the database that contains the collections (AgentSignatures, Deltas, Tags, Leases, Aliases)
+    ///     The name of the database that contains the collections (AgentSignatures, Deltas, Leases, Tags)
     /// </summary>
     public string DatabaseName { get; set; } = default!;
 

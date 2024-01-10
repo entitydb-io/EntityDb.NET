@@ -42,6 +42,6 @@ public interface ISingleEntityRepository<TEntity> : IDisposableResource
     ///     Atomically commits a source.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns><c>true</c> if the commit succeeded, or <c>false</c> if the commit failed.</returns>
+    /// <returns>Only returns <c>false</c> if there are uncommitted messages.</returns>
     Task<bool> Commit(CancellationToken cancellationToken = default);
 }

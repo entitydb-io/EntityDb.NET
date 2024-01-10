@@ -60,7 +60,7 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
 
         var statePointer = state.GetPointer();
 
-        var query = new GetDeltasQuery(entityPointer, statePointer.Version);
+        var query = new GetDeltasDataQuery(entityPointer, statePointer.Version);
 
         var entity = await SourceRepository
             .EnumerateDeltas(query, cancellationToken)
@@ -122,6 +122,11 @@ internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, 
 
     public async Task<bool> Commit(CancellationToken cancellationToken = default)
     {
+        if (_messages.Count == 0)
+        {
+            return true;
+        }
+        
         var source = new Source
         {
             Id = Id.NewId(),

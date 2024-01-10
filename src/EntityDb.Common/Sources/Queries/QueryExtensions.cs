@@ -9,59 +9,59 @@ namespace EntityDb.Common.Sources.Queries;
 public static class QueryExtensions
 {
     /// <summary>
-    ///     Returns a new, modified <see cref="ISourceDataQuery" />. The way in which
+    ///     Returns a new, modified <see cref="ISourceDataDataQuery" />. The way in which
     ///     it is modified depends on the parameters of this extension method.
     /// </summary>
-    /// <param name="sourceDataQuery">The source data query.</param>
+    /// <param name="sourceDataDataQuery">The source data query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="ISourceDataQuery" />.</returns>
-    public static ISourceDataQuery Modify(this ISourceDataQuery sourceDataQuery,
+    /// <returns>A new, modified <see cref="ISourceDataDataQuery" />.</returns>
+    public static ISourceDataDataQuery Modify(this ISourceDataDataQuery sourceDataDataQuery,
         ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedSourceDataQuery
+        return new ModifiedSourceDataDataQuery
         {
-            ModifiedQueryOptions = modifiedQueryOptions, SourceDataQuery = sourceDataQuery,
+            ModifiedQueryOptions = modifiedQueryOptions, SourceDataDataQuery = sourceDataDataQuery,
         };
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="IMessageDataQuery" />. The way in which it is modified depends on the parameters
+    ///     Returns a new, modified <see cref="IMessageDataDataQuery" />. The way in which it is modified depends on the parameters
     ///     of
     ///     this extension method.
     /// </summary>
-    /// <param name="messageDataQuery">The message data query.</param>
+    /// <param name="messageDataDataQuery">The message data query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="IMessageDataQuery" />.</returns>
-    public static IMessageDataQuery Modify(this IMessageDataQuery messageDataQuery,
+    /// <returns>A new, modified <see cref="IMessageDataDataQuery" />.</returns>
+    public static IMessageDataDataQuery Modify(this IMessageDataDataQuery messageDataDataQuery,
         ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedMessageDataQuery
+        return new ModifiedMessageDataDataQuery
         {
-            ModifiedQueryOptions = modifiedQueryOptions, MessageDataQuery = messageDataQuery,
+            ModifiedQueryOptions = modifiedQueryOptions, MessageDataDataQuery = messageDataDataQuery,
         };
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="ILeaseQuery" />. The way in which it is modified depends on the parameters of
+    ///     Returns a new, modified <see cref="ILeaseDataDataQuery" />. The way in which it is modified depends on the parameters of
     ///     this extension method.
     /// </summary>
-    /// <param name="leaseQuery">The lease query.</param>
+    /// <param name="leaseDataDataQuery">The lease query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="ILeaseQuery" />.</returns>
-    public static ILeaseQuery Modify(this ILeaseQuery leaseQuery, ModifiedQueryOptions modifiedQueryOptions)
+    /// <returns>A new, modified <see cref="ILeaseDataDataQuery" />.</returns>
+    public static ILeaseDataDataQuery Modify(this ILeaseDataDataQuery leaseDataDataQuery, ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedLeaseQuery { ModifiedQueryOptions = modifiedQueryOptions, LeaseQuery = leaseQuery };
+        return new ModifiedLeaseDataDataQuery { ModifiedQueryOptions = modifiedQueryOptions, LeaseDataDataQuery = leaseDataDataQuery };
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="ITagQuery" />. The way in which it is modified depends on the parameters of this
+    ///     Returns a new, modified <see cref="ITagDataDataQuery" />. The way in which it is modified depends on the parameters of this
     ///     extension method.
     /// </summary>
-    /// <param name="tagQuery">The tag query.</param>
+    /// <param name="tagDataDataQuery">The tag query.</param>
     /// <param name="modifiedQueryOptions">The options for modifying the query.</param>
-    /// <returns>A new, modified <see cref="ITagQuery" />.</returns>
-    public static ITagQuery Modify(this ITagQuery tagQuery, ModifiedQueryOptions modifiedQueryOptions)
+    /// <returns>A new, modified <see cref="ITagDataDataQuery" />.</returns>
+    public static ITagDataDataQuery Modify(this ITagDataDataQuery tagDataDataQuery, ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedTagQuery { ModifiedQueryOptions = modifiedQueryOptions, TagQuery = tagQuery };
+        return new ModifiedTagDataDataQuery { ModifiedQueryOptions = modifiedQueryOptions, TagDataDataQuery = tagDataDataQuery };
     }
 }

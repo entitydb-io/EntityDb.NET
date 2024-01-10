@@ -62,7 +62,7 @@ public class OneToOneProjection : IProjection<OneToOneProjection>, IStateWithTes
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
     {
-        var query = new GetDeltasQuery(projectionPointer, default);
+        var query = new GetDeltasDataQuery(projectionPointer, default);
 
         var sourceRepository = await serviceProvider
             .GetRequiredService<ISourceRepositoryFactory>()

@@ -5,8 +5,8 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record StateVersionQuery(Version Gte, Version Lte, object? Options = null) : IMessageDataQuery,
-    ILeaseQuery, ITagQuery
+public record StateVersionDataDataDataDataQuery(Version Gte, Version Lte, object? Options = null) : IMessageDataDataQuery,
+    ILeaseDataDataQuery, ITagDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
@@ -17,7 +17,7 @@ public record StateVersionQuery(Version Gte, Version Lte, object? Options = null
         );
     }
 
-    public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return builder.StateVersion(true);
     }
@@ -49,7 +49,7 @@ public record StateVersionQuery(Version Gte, Version Lte, object? Options = null
         );
     }
 
-    public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ITagDataSortBuilder<TSort> builder)
     {
         return builder.StateVersion(true);
     }

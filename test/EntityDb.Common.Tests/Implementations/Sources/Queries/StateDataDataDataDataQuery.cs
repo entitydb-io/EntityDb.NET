@@ -5,15 +5,15 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record StateQuery(Id StateId, object? Options = null) : ISourceDataQuery, IMessageDataQuery,
-    ILeaseQuery, ITagQuery
+public record StateDataDataDataDataQuery(Id StateId, object? Options = null) : ISourceDataDataQuery, IMessageDataDataQuery,
+    ILeaseDataDataQuery, ITagDataDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
         return builder.StateIdIn(StateId);
     }
 
-    public TSort GetSort<TSort>(ILeaseSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (
@@ -55,7 +55,7 @@ public record StateQuery(Id StateId, object? Options = null) : ISourceDataQuery,
         return builder.StateIdIn(StateId);
     }
 
-    public TSort GetSort<TSort>(ITagSortBuilder<TSort> builder)
+    public TSort GetSort<TSort>(ITagDataSortBuilder<TSort> builder)
     {
         return builder.Combine
         (

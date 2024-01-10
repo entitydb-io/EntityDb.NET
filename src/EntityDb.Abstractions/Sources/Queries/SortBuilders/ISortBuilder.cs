@@ -2,7 +2,7 @@
 
 /// <summary>
 ///     Builds a sort for an object repository. Possible objects include:
-///     agentSignatures, deltas, facts, leases, and aliases.
+///     agentSignatures, deltas, facts, and leases.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
 public interface ISortBuilder<TSort>

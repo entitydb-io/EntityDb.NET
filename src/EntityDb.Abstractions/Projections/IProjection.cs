@@ -18,13 +18,13 @@ public interface IProjection<TProjection> : IState<TProjection>
     void Mutate(Source source);
 
     /// <summary>
-    ///     Returns a <see cref="ISourceDataQuery" /> that finds sources that need to be passed to the reducer.
+    ///     Returns a <see cref="ISourceDataDataQuery" /> that finds sources that need to be passed to the reducer.
     /// </summary>
     /// <param name="serviceProvider">A service provider for fetching repositories.</param>
     /// <param name="projectionPointer">A pointer to the desired projection state</param>
     /// <param name="cancellationToken">A cancellation token</param>
     /// <returns>
-    ///     A <see cref="IQuery" /> that is used to load the rest of the messages for the given projection
+    ///     A <see cref="IDataQuery" /> that is used to load the rest of the messages for the given projection
     ///     pointer.
     /// </returns>
     IAsyncEnumerable<Source> EnumerateSources(IServiceProvider serviceProvider, Pointer projectionPointer,

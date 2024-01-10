@@ -34,7 +34,7 @@ internal class TestModeSourceReprocessorQueue : ISourceReprocessorQueue
                     cancellationToken);
 
             var sourceIds = await sourceRepository
-                .EnumerateSourceIds(item.Query, cancellationToken)
+                .EnumerateSourceIds(item.DataQuery, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
             foreach (var sourceId in sourceIds)

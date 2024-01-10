@@ -5,10 +5,10 @@ using EntityDb.Common.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.Modified;
 
-internal sealed record ModifiedSourceDataQuery : ModifiedQueryBase, ISourceDataQuery
+internal sealed record ModifiedSourceDataDataQuery : ModifiedQueryBase, ISourceDataDataQuery
 {
-    public required ISourceDataQuery SourceDataQuery { get; init; }
-    protected override IQuery Query => SourceDataQuery;
+    public required ISourceDataDataQuery SourceDataDataQuery { get; init; }
+    protected override IDataQuery DataQuery => SourceDataDataQuery;
 
     public TFilter GetFilter<TFilter>(ISourceDataFilterBuilder<TFilter> builder)
     {
@@ -16,16 +16,16 @@ internal sealed record ModifiedSourceDataQuery : ModifiedQueryBase, ISourceDataQ
         {
             return builder.Not
             (
-                SourceDataQuery.GetFilter(builder)
+                SourceDataDataQuery.GetFilter(builder)
             );
         }
 
-        return SourceDataQuery.GetFilter(builder);
+        return SourceDataDataQuery.GetFilter(builder);
     }
 
     public TSort? GetSort<TSort>(ISourceDataSortBuilder<TSort> builder)
     {
-        return SourceDataQuery.GetSort(ModifiedQueryOptions.ReverseSort
+        return SourceDataDataQuery.GetSort(ModifiedQueryOptions.ReverseSort
             ? builder.Reverse()
             : builder);
     }

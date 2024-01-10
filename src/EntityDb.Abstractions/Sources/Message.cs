@@ -34,12 +34,12 @@ public sealed record Message
     public ITag[] AddTags { get; init; } = Array.Empty<ITag>();
 
     /// <summary>
-    ///     The tags to be deleted.
+    ///     The leases to be deleted.
     /// </summary>
     public ILease[] DeleteLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
-    ///     The aliases to be added.
+    ///     The tags to be deleted.
     /// </summary>
     public ITag[] DeleteTags { get; init; } = Array.Empty<ITag>();
 }

@@ -23,14 +23,14 @@ public record ModifiedQueryOptions
     public bool ReverseSort { get; init; }
 
     /// <summary>
-    ///     If not <c>null</c>, then the new query will return this value for <see cref="IQuery.Skip" />. Otherwise, the new
-    ///     query will return the same <see cref="IQuery.Skip" /> as the original query.
+    ///     If not <c>null</c>, then the new query will return this value for <see cref="IDataQuery.Skip" />. Otherwise, the new
+    ///     query will return the same <see cref="IDataQuery.Skip" /> as the original query.
     /// </summary>
     public int? ReplaceSkip { get; init; }
 
     /// <summary>
-    ///     If not <c>null</c>, then the new query will return this value for <see cref="IQuery.Take" />. Otherwise, the new
-    ///     query will return the same <see cref="IQuery.Skip" /> as the original query.
+    ///     If not <c>null</c>, then the new query will return this value for <see cref="IDataQuery.Take" />. Otherwise, the new
+    ///     query will return the same <see cref="IDataQuery.Skip" /> as the original query.
     /// </summary>
     public int? ReplaceTake { get; init; }
 }

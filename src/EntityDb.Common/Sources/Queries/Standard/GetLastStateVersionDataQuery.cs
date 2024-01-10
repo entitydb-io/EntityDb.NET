@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetLastStateVersionQuery(Id StateId, object? Options = null) : IMessageDataQuery
+internal sealed record GetLastStateVersionDataQuery(Id StateId, object? Options = null) : IMessageDataDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
