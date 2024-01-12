@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.SortBuilders;
 
-internal sealed class SourceDataSortBuilder : SortBuilderBase,
+internal sealed class SourceDataSortBuilder : DataSortBuilderBase,
     ISourceDataSortBuilder<SortDefinition<BsonDocument>>
 {
     public SortDefinition<BsonDocument> StateIds(bool ascending)

@@ -22,11 +22,11 @@ public static class SourceRepositoryExtensions
     {
         return dataQuery switch
         {
-            ISourceDataDataQuery sourceDataQuery => sourceRepository.EnumerateSourceIds(sourceDataQuery, cancellationToken),
-            IMessageDataDataQuery messageDataQuery => sourceRepository.EnumerateSourceIds(messageDataQuery,
+            ISourceDataQuery sourceDataQuery => sourceRepository.EnumerateSourceIds(sourceDataQuery, cancellationToken),
+            IMessageDataQuery messageDataQuery => sourceRepository.EnumerateSourceIds(messageDataQuery,
                 cancellationToken),
-            ILeaseDataDataQuery leaseDataQuery => sourceRepository.EnumerateSourceIds(leaseDataQuery, cancellationToken),
-            ITagDataDataQuery tagDataQuery => sourceRepository.EnumerateSourceIds(tagDataQuery, cancellationToken),
+            ILeaseDataQuery leaseDataQuery => sourceRepository.EnumerateSourceIds(leaseDataQuery, cancellationToken),
+            ITagDataQuery tagDataQuery => sourceRepository.EnumerateSourceIds(tagDataQuery, cancellationToken),
             _ => AsyncEnumerable.Empty<Id>(),
         };
     }

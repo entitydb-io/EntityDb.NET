@@ -6,7 +6,7 @@ internal sealed record ReverseMessageDataSortBuilder<TSort> : ReverseSortBuilder
     IMessageDataSortBuilder<TSort>
 {
     public required IMessageDataSortBuilder<TSort> MessageDataSortBuilder { get; init; }
-    protected override ISortBuilder<TSort> SortBuilder => MessageDataSortBuilder;
+    protected override IDataSortBuilder<TSort> DataSortBuilder => MessageDataSortBuilder;
 
     public TSort StateId(bool ascending)
     {

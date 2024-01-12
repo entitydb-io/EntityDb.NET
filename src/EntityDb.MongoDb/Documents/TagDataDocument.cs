@@ -54,17 +54,17 @@ internal sealed record TagDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<TagDataDocument> GetQuery
     (
-        ITagDataDataQuery tagDataDataQuery
+        ITagDataQuery tagDataQuery
     )
     {
         return new DocumentQuery<TagDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = tagDataDataQuery.GetFilter(DataFilterBuilder),
-            Sort = tagDataDataQuery.GetSort(DataSortBuilder),
-            Skip = tagDataDataQuery.Skip,
-            Limit = tagDataDataQuery.Take,
-            Options = tagDataDataQuery.Options as MongoDbQueryOptions,
+            Filter = tagDataQuery.GetFilter(DataFilterBuilder),
+            Sort = tagDataQuery.GetSort(DataSortBuilder),
+            Skip = tagDataQuery.Skip,
+            Limit = tagDataQuery.Take,
+            Options = tagDataQuery.Options as MongoDbQueryOptions,
         };
     }
 

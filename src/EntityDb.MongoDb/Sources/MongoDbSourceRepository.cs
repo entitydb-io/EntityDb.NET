@@ -29,117 +29,117 @@ internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRep
         _envelopeService = envelopeService;
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataDataQuery sourceDataDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(sourceDataDataQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataDataQuery messageDataDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return DeltaDataDocument
-            .GetQuery(messageDataDataQuery)
+            .GetQuery(messageDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseDataDataQuery leaseDataDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default)
     {
         return LeaseDataDocument
-            .GetQuery(leaseDataDataQuery)
+            .GetQuery(leaseDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Id> EnumerateSourceIds(ITagDataDataQuery tagDataDataQuery,
+    public IAsyncEnumerable<Id> EnumerateSourceIds(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default)
     {
         return TagDataDocument
-            .GetQuery(tagDataDataQuery)
+            .GetQuery(tagDataQuery)
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataDataQuery sourceDataDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(sourceDataDataQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateSourceDataStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataDataQuery messageDataDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return DeltaDataDocument
-            .GetQuery(messageDataDataQuery)
+            .GetQuery(messageDataQuery)
             .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataDataQuery leaseDataDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default)
     {
         return LeaseDataDocument
-            .GetQuery(leaseDataDataQuery)
+            .GetQuery(leaseDataQuery)
             .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataDataQuery tagDataDataQuery,
+    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default)
     {
         return TagDataDocument
-            .GetQuery(tagDataDataQuery)
+            .GetQuery(tagDataQuery)
             .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataDataQuery sourceDataDataQuery,
+    public IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(sourceDataDataQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateData<AgentSignatureDocument, object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<object> EnumerateDeltas(IMessageDataDataQuery messageDataDataQuery,
+    public IAsyncEnumerable<object> EnumerateDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return DeltaDataDocument
-            .GetQuery(messageDataDataQuery)
+            .GetQuery(messageDataQuery)
             .EnumerateData<DeltaDataDocument, object>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseDataDataQuery leaseDataDataQuery,
+    public IAsyncEnumerable<ILease> EnumerateLeases(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default)
     {
         return LeaseDataDocument
-            .GetQuery(leaseDataDataQuery)
+            .GetQuery(leaseDataQuery)
             .EnumerateData<LeaseDataDocument, ILease>(_mongoSession, _envelopeService, cancellationToken);
     }
 
-    public IAsyncEnumerable<ITag> EnumerateTags(ITagDataDataQuery tagDataDataQuery,
+    public IAsyncEnumerable<ITag> EnumerateTags(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default)
     {
         return TagDataDocument
-            .GetQuery(tagDataDataQuery)
+            .GetQuery(tagDataQuery)
             .EnumerateData<TagDataDocument, ITag>(_mongoSession, _envelopeService, cancellationToken);
     }
 
     public IAsyncEnumerable<IAnnotatedSourceData<object>> EnumerateAnnotatedAgentSignatures(
-        ISourceDataDataQuery sourceDataDataQuery,
+        ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
-            .GetQuery(sourceDataDataQuery)
+            .GetQuery(sourceDataQuery)
             .EnumerateEntitiesAnnotation<AgentSignatureDocument, object>(_mongoSession, _envelopeService,
                 cancellationToken);
     }
 
-    public IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataDataQuery messageDataDataQuery,
+    public IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return DeltaDataDocument
-            .GetQuery(messageDataDataQuery)
+            .GetQuery(messageDataQuery)
             .EnumerateAnnotatedSourceData<DeltaDataDocument,
                 object>(_mongoSession, _envelopeService, cancellationToken);
     }

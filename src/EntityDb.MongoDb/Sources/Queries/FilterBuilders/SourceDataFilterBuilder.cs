@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.FilterBuilders;
 
-internal sealed class SourceDataFilterBuilder : FilterBuilderBase,
+internal sealed class SourceDataFilterBuilder : DataFilterBuilderBase,
     ISourceDataFilterBuilder<FilterDefinition<BsonDocument>>
 {
     public FilterDefinition<BsonDocument> AnyStateIdIn(params Id[] stateIds)

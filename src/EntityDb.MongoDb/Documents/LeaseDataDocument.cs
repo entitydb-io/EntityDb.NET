@@ -56,17 +56,17 @@ internal sealed record LeaseDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<LeaseDataDocument> GetQuery
     (
-        ILeaseDataDataQuery leaseDataDataQuery
+        ILeaseDataQuery leaseDataQuery
     )
     {
         return new DocumentQuery<LeaseDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = leaseDataDataQuery.GetFilter(DataFilterBuilder),
-            Sort = leaseDataDataQuery.GetSort(DataSortBuilder),
-            Skip = leaseDataDataQuery.Skip,
-            Limit = leaseDataDataQuery.Take,
-            Options = leaseDataDataQuery.Options as MongoDbQueryOptions,
+            Filter = leaseDataQuery.GetFilter(DataFilterBuilder),
+            Sort = leaseDataQuery.GetSort(DataSortBuilder),
+            Skip = leaseDataQuery.Skip,
+            Limit = leaseDataQuery.Take,
+            Options = leaseDataQuery.Options as MongoDbQueryOptions,
         };
     }
 

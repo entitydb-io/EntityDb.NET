@@ -4,23 +4,23 @@ using EntityDb.Abstractions.Sources.Queries.SortBuilders;
 namespace EntityDb.Abstractions.Sources.Queries;
 
 /// <summary>
-///     Abstracts a query on leases.
+///     Abstracts a query on messages.
 /// </summary>
-public interface ILeaseDataDataQuery : IDataQuery
+public interface IMessageDataQuery : IDataQuery
 {
     /// <summary>
-    ///     Returns a <typeparamref name="TFilter" /> built from a lease filter builder.
+    ///     Returns a <typeparamref name="TFilter" /> built from a message filter builder.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-    /// <param name="builder">The lease filter builder.</param>
+    /// <param name="builder">The message filter builder.</param>
     /// <returns>A <typeparamref name="TFilter" /> built from <paramref name="builder" />.</returns>
-    TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder);
+    TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder);
 
     /// <summary>
-    ///     Returns a <typeparamref name="TSort" /> built from a lease sort builder.
+    ///     Returns a <typeparamref name="TSort" /> built from a message sort builder.
     /// </summary>
     /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-    /// <param name="builder">The lease sort builder.</param>
+    /// <param name="builder">The message sort builder.</param>
     /// <returns>A <typeparamref name="TSort" /> built from <paramref name="builder" />.</returns>
-    TSort? GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder);
+    TSort? GetSort<TSort>(IMessageDataSortBuilder<TSort> builder);
 }

@@ -36,14 +36,14 @@ public class StreamTests : TestsBase<Startup>
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerable.Empty<Pointer>());
 
         // Second query checks if message key lease already exists
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerable.Empty<Pointer>());
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -145,14 +145,14 @@ public class StreamTests : TestsBase<Startup>
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(new[] { statePointer }));
 
         // First query checks if message key lease already exists
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerable.Empty<Pointer>());
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -264,14 +264,14 @@ public class StreamTests : TestsBase<Startup>
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(new[] { statePointer }));
 
         // Second query checks if message key lease already exists
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(AsyncEnumerablePolyfill.FromResult(new[] { statePointer }));
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>

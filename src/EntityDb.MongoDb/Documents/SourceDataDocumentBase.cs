@@ -8,7 +8,7 @@ namespace EntityDb.MongoDb.Documents;
 
 internal abstract record SourceDataDocumentBase : DocumentBase, ISourceDataDocument<BsonDocument>
 {
-    protected static readonly SourceDataFilterBuilder FilterBuilder = new();
+    protected static readonly SourceDataFilterBuilder DataFilterBuilder = new();
 
     public static ProjectionDefinition<BsonDocument> StatePointersProjection { get; } =
         ProjectionBuilder.Include(nameof(StatePointers));

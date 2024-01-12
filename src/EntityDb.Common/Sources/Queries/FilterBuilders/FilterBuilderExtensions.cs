@@ -11,18 +11,18 @@ public static class FilterBuilderExtensions
     ///     Returns a <typeparamref name="TFilter" /> that excludes objects which do match all filters in a set of filters.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-    /// <param name="filterBuilder">The filter builder.</param>
+    /// <param name="dataFilterBuilder">The filter builder.</param>
     /// <param name="filters">The set of filters.</param>
     /// <returns>
     ///     A <typeparamref name="TFilter" /> that excludes objects which do match all filters in
     ///     <paramref name="filters" />.
     /// </returns>
-    public static TFilter Nand<TFilter>(this IFilterBuilder<TFilter> filterBuilder,
+    public static TFilter Nand<TFilter>(this IDataFilterBuilder<TFilter> dataFilterBuilder,
         params TFilter[] filters)
     {
-        return filterBuilder.Not
+        return dataFilterBuilder.Not
         (
-            filterBuilder.And(filters)
+            dataFilterBuilder.And(filters)
         );
     }
 
@@ -30,17 +30,17 @@ public static class FilterBuilderExtensions
     ///     Returns a <typeparamref name="TFilter" /> that excludes objects which do match any filter in a set of filters.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-    /// <param name="filterBuilder">The filter builder.</param>
+    /// <param name="dataFilterBuilder">The filter builder.</param>
     /// <param name="filters">The set of filters.</param>
     /// <returns>
     ///     A <typeparamref name="TFilter" /> that excludes objects which do match any filter in
     ///     <paramref name="filters" />.
     /// </returns>
-    public static TFilter Nor<TFilter>(this IFilterBuilder<TFilter> filterBuilder, params TFilter[] filters)
+    public static TFilter Nor<TFilter>(this IDataFilterBuilder<TFilter> dataFilterBuilder, params TFilter[] filters)
     {
-        return filterBuilder.Not
+        return dataFilterBuilder.Not
         (
-            filterBuilder.Or(filters)
+            dataFilterBuilder.Or(filters)
         );
     }
 
@@ -48,26 +48,26 @@ public static class FilterBuilderExtensions
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects which only match one filter.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-    /// <param name="filterBuilder">The filter builder.</param>
+    /// <param name="dataFilterBuilder">The filter builder.</param>
     /// <param name="filterA">The first filter.</param>
     /// <param name="filterB">The second filter.</param>
     /// <returns>
     ///     A <typeparamref name="TFilter" /> that only includes objects which only match <paramref name="filterA" /> or
     ///     only match <paramref name="filterB" />.
     /// </returns>
-    public static TFilter Xor<TFilter>(this IFilterBuilder<TFilter> filterBuilder, TFilter filterA,
+    public static TFilter Xor<TFilter>(this IDataFilterBuilder<TFilter> dataFilterBuilder, TFilter filterA,
         TFilter filterB)
     {
-        return filterBuilder.Or
+        return dataFilterBuilder.Or
         (
-            filterBuilder.And
+            dataFilterBuilder.And
             (
                 filterA,
-                filterBuilder.Not(filterB)
+                dataFilterBuilder.Not(filterB)
             ),
-            filterBuilder.And
+            dataFilterBuilder.And
             (
-                filterBuilder.Not(filterA),
+                dataFilterBuilder.Not(filterA),
                 filterB
             )
         );
@@ -77,19 +77,19 @@ public static class FilterBuilderExtensions
     ///     Returns a <typeparamref name="TFilter" /> that excludes objects which only match one filter.
     /// </summary>
     /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-    /// <param name="filterBuilder">The filter builder.</param>
+    /// <param name="dataFilterBuilder">The filter builder.</param>
     /// <param name="filterA">The first filter.</param>
     /// <param name="filterB">The second filter.</param>
     /// <returns>
     ///     A <typeparamref name="TFilter" /> that excludes objects which only match <paramref name="filterA" /> or only
     ///     match <paramref name="filterB" />.
     /// </returns>
-    public static TFilter Xnor<TFilter>(this IFilterBuilder<TFilter> filterBuilder, TFilter filterA,
+    public static TFilter Xnor<TFilter>(this IDataFilterBuilder<TFilter> dataFilterBuilder, TFilter filterA,
         TFilter filterB)
     {
-        return filterBuilder.Not
+        return dataFilterBuilder.Not
         (
-            filterBuilder.Xor(filterA, filterB)
+            dataFilterBuilder.Xor(filterA, filterB)
         );
     }
 }

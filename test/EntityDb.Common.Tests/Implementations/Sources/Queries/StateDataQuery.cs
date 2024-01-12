@@ -5,8 +5,8 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record StateDataDataDataDataQuery(Id StateId, object? Options = null) : ISourceDataDataQuery, IMessageDataDataQuery,
-    ILeaseDataDataQuery, ITagDataDataQuery
+public record StateDataQuery(Id StateId, object? Options = null) : ISourceDataQuery, IMessageDataQuery,
+    ILeaseDataQuery, ITagDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {

@@ -4,7 +4,7 @@
 ///     Builds a <typeparamref name="TSort" /> for a message query.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-public interface IMessageDataSortBuilder<TSort> : ISortBuilder<TSort>
+public interface IMessageDataSortBuilder<TSort> : IDataSortBuilder<TSort>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders objects by state id.

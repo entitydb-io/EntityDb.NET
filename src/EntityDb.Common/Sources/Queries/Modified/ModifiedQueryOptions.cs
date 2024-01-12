@@ -10,7 +10,7 @@ public record ModifiedQueryOptions
 {
     /// <summary>
     ///     If <c>true</c>, then the new query will return the value of
-    ///     <see cref="IFilterBuilder{TFilter}.Not(TFilter)" />
+    ///     <see cref="IDataFilterBuilder{TFilter}.Not(TFilter)" />
     ///     applied to the filter of the original query. Otherwise, the new query will return the same filter as the original
     ///     query.
     /// </summary>

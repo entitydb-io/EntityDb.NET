@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.SortBuilders;
 
-internal sealed class LeaseDataSortBuilder : MessageSortBuilder, ILeaseDataSortBuilder<SortDefinition<BsonDocument>>
+internal sealed class LeaseDataSortBuilder : MessageDataSortBuilder, ILeaseDataSortBuilder<SortDefinition<BsonDocument>>
 {
     public SortDefinition<BsonDocument> LeaseScope(bool ascending)
     {

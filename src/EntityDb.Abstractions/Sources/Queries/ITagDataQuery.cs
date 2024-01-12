@@ -6,7 +6,7 @@ namespace EntityDb.Abstractions.Sources.Queries;
 /// <summary>
 ///     Abstracts a query on tags.
 /// </summary>
-public interface ITagDataDataQuery : IDataQuery
+public interface ITagDataQuery : IDataQuery
 {
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> built from a tag filter builder.

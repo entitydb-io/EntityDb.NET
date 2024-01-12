@@ -5,7 +5,7 @@ namespace EntityDb.Common.Sources.Queries.SortBuilders;
 internal sealed record ReverseTagDataSortBuilder<TSort> : ReverseSortBuilderBase<TSort>, ITagDataSortBuilder<TSort>
 {
     public required ITagDataSortBuilder<TSort> TagDataSortBuilder { get; init; }
-    protected override ISortBuilder<TSort> SortBuilder => TagDataSortBuilder;
+    protected override IDataSortBuilder<TSort> DataSortBuilder => TagDataSortBuilder;
 
     public TSort StateId(bool ascending)
     {

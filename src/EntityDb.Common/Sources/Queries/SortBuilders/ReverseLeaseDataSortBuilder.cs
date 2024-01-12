@@ -5,7 +5,7 @@ namespace EntityDb.Common.Sources.Queries.SortBuilders;
 internal sealed record ReverseLeaseDataSortBuilder<TSort> : ReverseSortBuilderBase<TSort>, ILeaseDataSortBuilder<TSort>
 {
     public required ILeaseDataSortBuilder<TSort> LeaseDataSortBuilder { get; init; }
-    protected override ISortBuilder<TSort> SortBuilder => LeaseDataSortBuilder;
+    protected override IDataSortBuilder<TSort> DataSortBuilder => LeaseDataSortBuilder;
 
     public TSort StateId(bool ascending)
     {

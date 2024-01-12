@@ -8,9 +8,9 @@ namespace EntityDb.Common.Tests.Extensions;
 
 public class FilterBuilderExtensionsTests
 {
-    private static IFilterBuilder<bool> GetFilterBuilder()
+    private static IDataFilterBuilder<bool> GetFilterBuilder()
     {
-        var filterBuilderMock = new Mock<IFilterBuilder<bool>>(MockBehavior.Strict);
+        var filterBuilderMock = new Mock<IDataFilterBuilder<bool>>(MockBehavior.Strict);
 
         filterBuilderMock
             .Setup(builder => builder.Not(It.IsAny<bool>()))

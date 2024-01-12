@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetSourceDataQuery(Id SourceId) : ISourceDataDataQuery, IMessageDataDataQuery
+internal sealed record GetSourceDataQuery(Id SourceId) : ISourceDataQuery, IMessageDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {

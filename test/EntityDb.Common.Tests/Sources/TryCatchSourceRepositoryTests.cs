@@ -27,69 +27,69 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateSourceIds(It.IsAny<ISourceDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateSourceIds(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateSourceIds(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateSourceIds(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ITagDataDataQuery>(), It.IsAny<CancellationToken>()))
-            .Throws(new NotImplementedException());
-
-        sourceRepositoryMock
-            .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ISourceDataDataQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ITagDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateStatePointers(It.IsAny<ITagDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAgentSignatures(It.IsAny<ISourceDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateStatePointers(It.IsAny<ITagDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateDeltas(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
-            .Throws(new NotImplementedException());
-
-        sourceRepositoryMock
-            .Setup(repository => repository.EnumerateLeases(It.IsAny<ILeaseDataDataQuery>(), It.IsAny<CancellationToken>()))
-            .Throws(new NotImplementedException());
-
-        sourceRepositoryMock
-            .Setup(repository => repository.EnumerateTags(It.IsAny<ITagDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateAgentSignatures(It.IsAny<ISourceDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAnnotatedAgentSignatures(It.IsAny<ISourceDataDataQuery>(),
+                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
+
+        sourceRepositoryMock
+            .Setup(repository => repository.EnumerateLeases(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
+
+        sourceRepositoryMock
+            .Setup(repository => repository.EnumerateTags(It.IsAny<ITagDataQuery>(), It.IsAny<CancellationToken>()))
+            .Throws(new NotImplementedException());
+
+        sourceRepositoryMock
+            .Setup(repository =>
+                repository.EnumerateAnnotatedAgentSignatures(It.IsAny<ISourceDataQuery>(),
                     It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateAnnotatedDeltas(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateAnnotatedDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
@@ -103,21 +103,21 @@ public class TryCatchSourceRepositoryTests : TestsBase<Startup>
         // ACT
 
         var sourceIdsFromSourceDataQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(ISourceDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateSourceIds(default(ISourceDataQuery)!).ToArrayAsync();
         var sourceIdsFromMessageDataQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(IMessageDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateSourceIds(default(IMessageDataQuery)!).ToArrayAsync();
         var sourceIdsFromLeaseDataQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(ILeaseDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateSourceIds(default(ILeaseDataQuery)!).ToArrayAsync();
         var sourceIdsFromTagDataQuery =
-            await tryCatchSourceRepository.EnumerateSourceIds(default(ITagDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateSourceIds(default(ITagDataQuery)!).ToArrayAsync();
         var statePointersFromSourceDataQuery =
-            await tryCatchSourceRepository.EnumerateStatePointers(default(ISourceDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ISourceDataQuery)!).ToArrayAsync();
         var statePointersFromMessageDataQuery =
-            await tryCatchSourceRepository.EnumerateStatePointers(default(IMessageDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateStatePointers(default(IMessageDataQuery)!).ToArrayAsync();
         var statePointersFromLeaseDataQuery =
-            await tryCatchSourceRepository.EnumerateStatePointers(default(ILeaseDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ILeaseDataQuery)!).ToArrayAsync();
         var statePointersFromTagDataQuery =
-            await tryCatchSourceRepository.EnumerateStatePointers(default(ITagDataDataQuery)!).ToArrayAsync();
+            await tryCatchSourceRepository.EnumerateStatePointers(default(ITagDataQuery)!).ToArrayAsync();
         var agentSignatures =
             await tryCatchSourceRepository.EnumerateAgentSignatures(default!).ToArrayAsync();
         var deltas =

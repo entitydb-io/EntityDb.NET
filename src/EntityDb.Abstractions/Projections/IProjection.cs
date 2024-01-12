@@ -18,7 +18,7 @@ public interface IProjection<TProjection> : IState<TProjection>
     void Mutate(Source source);
 
     /// <summary>
-    ///     Returns a <see cref="ISourceDataDataQuery" /> that finds sources that need to be passed to the reducer.
+    ///     Returns a <see cref="ISourceDataQuery" /> that finds sources that need to be passed to the reducer.
     /// </summary>
     /// <param name="serviceProvider">A service provider for fetching repositories.</param>
     /// <param name="projectionPointer">A pointer to the desired projection state</param>

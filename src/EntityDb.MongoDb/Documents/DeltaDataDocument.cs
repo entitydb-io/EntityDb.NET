@@ -28,7 +28,7 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
 
     private static readonly MessageDataFilterBuilder DataFilterBuilder = new();
 
-    private static readonly MessageSortBuilder SortBuilder = new();
+    private static readonly MessageDataSortBuilder DataSortBuilder = new();
 
     public static InsertDocumentsCommand<DeltaDataDocument> GetInsertCommand
     (
@@ -61,17 +61,17 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
 
     public static DocumentQuery<DeltaDataDocument> GetQuery
     (
-        IMessageDataDataQuery messageDataDataQuery
+        IMessageDataQuery messageDataQuery
     )
     {
         return new DocumentQuery<DeltaDataDocument>
         {
             CollectionName = CollectionName,
-            Filter = messageDataDataQuery.GetFilter(DataFilterBuilder),
-            Sort = messageDataDataQuery.GetSort(SortBuilder),
-            Skip = messageDataDataQuery.Skip,
-            Limit = messageDataDataQuery.Take,
-            Options = messageDataDataQuery.Options as MongoDbQueryOptions,
+            Filter = messageDataQuery.GetFilter(DataFilterBuilder),
+            Sort = messageDataQuery.GetSort(DataSortBuilder),
+            Skip = messageDataQuery.Skip,
+            Limit = messageDataQuery.Take,
+            Options = messageDataQuery.Options as MongoDbQueryOptions,
         };
     }
 

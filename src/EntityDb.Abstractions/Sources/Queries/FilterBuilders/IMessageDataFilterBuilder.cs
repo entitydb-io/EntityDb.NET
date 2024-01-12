@@ -9,7 +9,7 @@ namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 ///     deltas, facts, and tags.
 /// </summary>
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-public interface IMessageDataFilterBuilder<TFilter> : IFilterBuilder<TFilter>
+public interface IMessageDataFilterBuilder<TFilter> : IDataFilterBuilder<TFilter>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with a state

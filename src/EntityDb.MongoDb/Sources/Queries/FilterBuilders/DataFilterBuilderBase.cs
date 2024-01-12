@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.FilterBuilders;
 
-internal abstract class FilterBuilderBase : IFilterBuilder<FilterDefinition<BsonDocument>>
+internal abstract class DataFilterBuilderBase : IDataFilterBuilder<FilterDefinition<BsonDocument>>
 {
     private static readonly FilterDefinitionBuilder<BsonDocument> FilterBuilder = Builders<BsonDocument>.Filter;
 

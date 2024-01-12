@@ -5,7 +5,7 @@ using EntityDb.Abstractions.States.Attributes;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record MatchingLeaseDataQuery(ILease Lease) : ILeaseDataDataQuery
+internal sealed record MatchingLeaseDataQuery(ILease Lease) : ILeaseDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {

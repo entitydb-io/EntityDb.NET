@@ -5,7 +5,7 @@ using EntityDb.Common.Tests.Implementations.States.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record CountDataDataDataDataQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseDataDataQuery, ITagDataDataQuery
+public record CountDataQuery(ulong Gte, ulong Lte, object? Options = null) : ILeaseDataQuery, ITagDataQuery
 {
     public int? Skip => null;
 

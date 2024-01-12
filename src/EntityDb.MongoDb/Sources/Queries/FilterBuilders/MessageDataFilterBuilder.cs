@@ -7,7 +7,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Sources.Queries.FilterBuilders;
 
-internal class MessageDataFilterBuilder : FilterBuilderBase,
+internal class MessageDataFilterBuilder : DataFilterBuilderBase,
     IMessageDataFilterBuilder<FilterDefinition<BsonDocument>>
 {
     public FilterDefinition<BsonDocument> StateIdIn(params Id[] stateIds)

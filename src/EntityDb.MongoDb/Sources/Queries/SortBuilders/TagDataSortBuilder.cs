@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.SortBuilders;
 
-internal sealed class TagDataSortBuilder : MessageSortBuilder, ITagDataSortBuilder<SortDefinition<BsonDocument>>
+internal sealed class TagDataSortBuilder : MessageDataSortBuilder, ITagDataSortBuilder<SortDefinition<BsonDocument>>
 {
     public SortDefinition<BsonDocument> TagLabel(bool ascending)
     {

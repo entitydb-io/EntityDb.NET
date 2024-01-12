@@ -13,7 +13,7 @@ internal sealed record AgentSignatureDocument : SourceDataDocumentBase
 {
     public const string CollectionName = "AgentSignatures";
 
-    private static readonly SourceDataSortBuilder SortBuilder = new();
+    private static readonly SourceDataSortBuilder DataSortBuilder = new();
 
     public static InsertDocumentsCommand<AgentSignatureDocument> GetInsertCommand
     (
@@ -57,17 +57,17 @@ internal sealed record AgentSignatureDocument : SourceDataDocumentBase
 
     public static DocumentQuery<AgentSignatureDocument> GetQuery
     (
-        ISourceDataDataQuery sourceDataDataQuery
+        ISourceDataQuery sourceDataQuery
     )
     {
         return new DocumentQuery<AgentSignatureDocument>
         {
             CollectionName = CollectionName,
-            Filter = sourceDataDataQuery.GetFilter(FilterBuilder),
-            Sort = sourceDataDataQuery.GetSort(SortBuilder),
-            Skip = sourceDataDataQuery.Skip,
-            Limit = sourceDataDataQuery.Take,
-            Options = sourceDataDataQuery.Options as MongoDbQueryOptions,
+            Filter = sourceDataQuery.GetFilter(DataFilterBuilder),
+            Sort = sourceDataQuery.GetSort(DataSortBuilder),
+            Skip = sourceDataQuery.Skip,
+            Limit = sourceDataQuery.Take,
+            Options = sourceDataQuery.Options as MongoDbQueryOptions,
         };
     }
 }

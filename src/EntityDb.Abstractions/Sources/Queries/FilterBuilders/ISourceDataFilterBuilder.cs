@@ -8,7 +8,7 @@ namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 ///     agent signatures
 /// </summary>
 /// <typeparam name="TFilter">The type of filter used by the repository.</typeparam>
-public interface ISourceDataFilterBuilder<TFilter> : IFilterBuilder<TFilter>
+public interface ISourceDataFilterBuilder<TFilter> : IDataFilterBuilder<TFilter>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with any state

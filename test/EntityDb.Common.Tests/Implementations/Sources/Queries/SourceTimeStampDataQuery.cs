@@ -5,9 +5,9 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record SourceTimeStampDataDataDataDataQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataDataQuery,
-    IMessageDataDataQuery,
-    ILeaseDataDataQuery, ITagDataDataQuery
+public record SourceTimeStampDataQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataQuery,
+    IMessageDataQuery,
+    ILeaseDataQuery, ITagDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {

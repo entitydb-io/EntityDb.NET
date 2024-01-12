@@ -5,10 +5,10 @@ using EntityDb.Common.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.Modified;
 
-internal sealed record ModifiedLeaseDataDataQuery : ModifiedQueryBase, ILeaseDataDataQuery
+internal sealed record ModifiedLeaseDataQuery : ModifiedQueryBase, ILeaseDataQuery
 {
-    public required ILeaseDataDataQuery LeaseDataDataQuery { get; init; }
-    protected override IDataQuery DataQuery => LeaseDataDataQuery;
+    public required ILeaseDataQuery LeaseDataQuery { get; init; }
+    protected override IDataQuery DataQuery => LeaseDataQuery;
 
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {
@@ -16,16 +16,16 @@ internal sealed record ModifiedLeaseDataDataQuery : ModifiedQueryBase, ILeaseDat
         {
             return builder.Not
             (
-                LeaseDataDataQuery.GetFilter(builder)
+                LeaseDataQuery.GetFilter(builder)
             );
         }
 
-        return LeaseDataDataQuery.GetFilter(builder);
+        return LeaseDataQuery.GetFilter(builder);
     }
 
     public TSort? GetSort<TSort>(ILeaseDataSortBuilder<TSort> builder)
     {
-        return LeaseDataDataQuery.GetSort(ModifiedQueryOptions.ReverseSort
+        return LeaseDataQuery.GetSort(ModifiedQueryOptions.ReverseSort
             ? builder.Reverse()
             : builder);
     }

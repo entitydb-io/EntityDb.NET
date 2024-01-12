@@ -6,7 +6,7 @@ internal sealed record ReverseSourceDataSortBuilder<TSort> : ReverseSortBuilderB
     ISourceDataSortBuilder<TSort>
 {
     public required ISourceDataSortBuilder<TSort> SourceDataSortBuilder { get; init; }
-    protected override ISortBuilder<TSort> SortBuilder => SourceDataSortBuilder;
+    protected override IDataSortBuilder<TSort> DataSortBuilder => SourceDataSortBuilder;
 
     public TSort StateIds(bool ascending)
     {

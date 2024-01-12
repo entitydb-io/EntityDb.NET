@@ -5,7 +5,7 @@
 ///     agentSignatures, deltas, facts, and leases.
 /// </summary>
 /// <typeparam name="TSort">The type of sort used by the repository.</typeparam>
-public interface ISortBuilder<TSort>
+public interface IDataSortBuilder<TSort>
 {
     /// <summary>
     ///     Returns a <typeparamref name="TSort" /> that orders objects by source timestamp.

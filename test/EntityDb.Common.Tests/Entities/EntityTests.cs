@@ -101,7 +101,7 @@ public class EntityTests : TestsBase<Startup>
 
         sourceRepositoryMock
             .Setup(repository =>
-                repository.EnumerateDeltas(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()))
+                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
             .Returns(() => AsyncEnumerablePolyfill.FromResult(deltas))
             .Verifiable();
 
@@ -143,7 +143,7 @@ public class EntityTests : TestsBase<Startup>
 
         sourceRepositoryMock
             .Verify(
-                repository => repository.EnumerateDeltas(It.IsAny<IMessageDataDataQuery>(), It.IsAny<CancellationToken>()),
+                repository => repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()),
                 Times.Once);
     }
 

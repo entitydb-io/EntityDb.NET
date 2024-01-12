@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Queries.SortBuilders;
 
-internal abstract class SortBuilderBase : ISortBuilder<SortDefinition<BsonDocument>>
+internal abstract class DataSortBuilderBase : IDataSortBuilder<SortDefinition<BsonDocument>>
 {
     private static readonly SortDefinitionBuilder<BsonDocument> SortBuilder = Builders<BsonDocument>.Sort;
 

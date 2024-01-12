@@ -14,128 +14,128 @@ public interface ISourceRepository : IDisposableResource
     /// <summary>
     ///     Returns the source ids which are found by a message group query.
     /// </summary>
-    /// <param name="sourceDataDataQuery">The source data query.</param>
+    /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The source ids which are found by <paramref name="sourceDataDataQuery" />.</returns>
-    IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataDataQuery sourceDataDataQuery,
+    /// <returns>The source ids which are found by <paramref name="sourceDataQuery" />.</returns>
+    IAsyncEnumerable<Id> EnumerateSourceIds(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the source ids which are found by a message query.
     /// </summary>
-    /// <param name="messageDataDataQuery">The message data query.</param>
+    /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The source ids which are found by <paramref name="messageDataDataQuery" />.</returns>
-    IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataDataQuery messageDataDataQuery,
+    /// <returns>The source ids which are found by <paramref name="messageDataQuery" />.</returns>
+    IAsyncEnumerable<Id> EnumerateSourceIds(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the source ids which are found by a lease query.
     /// </summary>
-    /// <param name="leaseDataDataQuery">The lease query.</param>
+    /// <param name="leaseDataQuery">The lease query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The source ids which are found by <paramref name="leaseDataDataQuery" />.</returns>
-    IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseDataDataQuery leaseDataDataQuery,
+    /// <returns>The source ids which are found by <paramref name="leaseDataQuery" />.</returns>
+    IAsyncEnumerable<Id> EnumerateSourceIds(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the source ids which are found by a tag query.
     /// </summary>
-    /// <param name="tagDataDataQuery">The tag query.</param>
+    /// <param name="tagDataQuery">The tag query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The source ids which are found by <paramref name="tagDataDataQuery" />.</returns>
-    IAsyncEnumerable<Id> EnumerateSourceIds(ITagDataDataQuery tagDataDataQuery,
+    /// <returns>The source ids which are found by <paramref name="tagDataQuery" />.</returns>
+    IAsyncEnumerable<Id> EnumerateSourceIds(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state pointers which are found by a agentSignature query.
     /// </summary>
-    /// <param name="sourceDataDataQuery">The source data query.</param>
+    /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The state pointers which are found by <paramref name="sourceDataDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataDataQuery sourceDataDataQuery,
+    /// <returns>The state pointers which are found by <paramref name="sourceDataQuery" />.</returns>
+    IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state pointers which are found by a message query.
     /// </summary>
-    /// <param name="messageDataDataQuery">The message data query.</param>
+    /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The state pointers which are found by <paramref name="messageDataDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataDataQuery messageDataDataQuery,
+    /// <returns>The state pointers which are found by <paramref name="messageDataQuery" />.</returns>
+    IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state pointers which are found by a lease query.
     /// </summary>
-    /// <param name="leaseDataDataQuery">The lease query.</param>
+    /// <param name="leaseDataQuery">The lease query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The state pointers which are found by <paramref name="leaseDataDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataDataQuery leaseDataDataQuery,
+    /// <returns>The state pointers which are found by <paramref name="leaseDataQuery" />.</returns>
+    IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state pointers which are found by a tag query.
     /// </summary>
-    /// <param name="tagDataDataQuery">The tag query.</param>
+    /// <param name="tagDataQuery">The tag query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The state pointers which are found by <paramref name="tagDataDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataDataQuery tagDataDataQuery,
+    /// <returns>The state pointers which are found by <paramref name="tagDataQuery" />.</returns>
+    IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the agentSignatures which are found by an message group query.
     /// </summary>
-    /// <param name="sourceDataDataQuery">The source data query.</param>
+    /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The agent signatures which are found by <paramref name="sourceDataDataQuery" />.</returns>
-    IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataDataQuery sourceDataDataQuery,
+    /// <returns>The agent signatures which are found by <paramref name="sourceDataQuery" />.</returns>
+    IAsyncEnumerable<object> EnumerateAgentSignatures(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the deltas which are found by a message query.
     /// </summary>
-    /// <param name="messageDataDataQuery">The message data query.</param>
+    /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The deltas which are found by <paramref name="messageDataDataQuery" />.</returns>
-    IAsyncEnumerable<object> EnumerateDeltas(IMessageDataDataQuery messageDataDataQuery,
+    /// <returns>The deltas which are found by <paramref name="messageDataQuery" />.</returns>
+    IAsyncEnumerable<object> EnumerateDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the leases which are found by a lease query.
     /// </summary>
-    /// <param name="leaseDataDataQuery">The lease query.</param>
+    /// <param name="leaseDataQuery">The lease query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The leases which are found by <paramref name="leaseDataDataQuery" />.</returns>
-    IAsyncEnumerable<ILease> EnumerateLeases(ILeaseDataDataQuery leaseDataDataQuery,
+    /// <returns>The leases which are found by <paramref name="leaseDataQuery" />.</returns>
+    IAsyncEnumerable<ILease> EnumerateLeases(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the tags which are found by a tag query.
     /// </summary>
-    /// <param name="tagDataDataQuery">The tag query.</param>
+    /// <param name="tagDataQuery">The tag query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The tags which are found by <paramref name="tagDataDataQuery" />.</returns>
-    IAsyncEnumerable<ITag> EnumerateTags(ITagDataDataQuery tagDataDataQuery,
+    /// <returns>The tags which are found by <paramref name="tagDataQuery" />.</returns>
+    IAsyncEnumerable<ITag> EnumerateTags(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the annotated agent signatures which are found by a message group query.
     /// </summary>
-    /// <param name="sourceDataDataQuery">The source data query.</param>
+    /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The annotated agent signatures which are found by <paramref name="sourceDataDataQuery" />.</returns>
+    /// <returns>The annotated agent signatures which are found by <paramref name="sourceDataQuery" />.</returns>
     IAsyncEnumerable<IAnnotatedSourceData<object>> EnumerateAnnotatedAgentSignatures(
-        ISourceDataDataQuery sourceDataDataQuery,
+        ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the annotated deltas which are found by a message query.
     /// </summary>
-    /// <param name="messageDataDataQuery">The message data query.</param>
+    /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The annotated deltas which are found by <paramref name="messageDataDataQuery" />.</returns>
-    IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataDataQuery messageDataDataQuery,
+    /// <returns>The annotated deltas which are found by <paramref name="messageDataQuery" />.</returns>
+    IAsyncEnumerable<IAnnotatedMessageData<object>> EnumerateAnnotatedDeltas(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -5,8 +5,8 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record StateVersionDataDataDataDataQuery(Version Gte, Version Lte, object? Options = null) : IMessageDataDataQuery,
-    ILeaseDataDataQuery, ITagDataDataQuery
+public record StateVersionDataQuery(Version Gte, Version Lte, object? Options = null) : IMessageDataQuery,
+    ILeaseDataQuery, ITagDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {

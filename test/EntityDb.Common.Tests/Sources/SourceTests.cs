@@ -108,7 +108,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetSourceIds
     (
         IServiceScope serviceScope,
-        ISourceDataDataQuery dataQuery,
+        ISourceDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -135,7 +135,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetSourceIds
     (
         IServiceScope serviceScope,
-        IMessageDataDataQuery dataQuery,
+        IMessageDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -162,7 +162,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetSourceIds
     (
         IServiceScope serviceScope,
-        ILeaseDataDataQuery dataDataQuery,
+        ILeaseDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -182,14 +182,14 @@ public sealed class SourceTests : TestsBase<Startup>
         IAsyncEnumerable<Id> GetActualResults(ISourceRepository sourceRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return sourceRepository.EnumerateSourceIds(dataDataQuery.Modify(modifiedQueryOptions));
+            return sourceRepository.EnumerateSourceIds(dataQuery.Modify(modifiedQueryOptions));
         }
     }
 
     private static async Task TestGetSourceIds
     (
         IServiceScope serviceScope,
-        ITagDataDataQuery dataDataQuery,
+        ITagDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -209,14 +209,14 @@ public sealed class SourceTests : TestsBase<Startup>
         IAsyncEnumerable<Id> GetActualResults(ISourceRepository sourceRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return sourceRepository.EnumerateSourceIds(dataDataQuery.Modify(modifiedQueryOptions));
+            return sourceRepository.EnumerateSourceIds(dataQuery.Modify(modifiedQueryOptions));
         }
     }
 
     private static async Task TestGetStateIds
     (
         IServiceScope serviceScope,
-        ISourceDataDataQuery dataQuery,
+        ISourceDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -245,7 +245,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetStateIds
     (
         IServiceScope serviceScope,
-        IMessageDataDataQuery dataQuery,
+        IMessageDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -274,7 +274,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetStateIds
     (
         IServiceScope serviceScope,
-        ILeaseDataDataQuery dataDataQuery,
+        ILeaseDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -295,7 +295,7 @@ public sealed class SourceTests : TestsBase<Startup>
             ModifiedQueryOptions modifiedQueryOptions)
         {
             return sourceRepository
-                .EnumerateStatePointers(dataDataQuery.Modify(modifiedQueryOptions))
+                .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
                 .Select(pointer => pointer.Id);
         }
     }
@@ -303,7 +303,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetStateIds
     (
         IServiceScope serviceScope,
-        ITagDataDataQuery dataDataQuery,
+        ITagDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -324,7 +324,7 @@ public sealed class SourceTests : TestsBase<Startup>
             ModifiedQueryOptions modifiedQueryOptions)
         {
             return sourceRepository
-                .EnumerateStatePointers(dataDataQuery.Modify(modifiedQueryOptions))
+                .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
                 .Select(pointer => pointer.Id);
         }
     }
@@ -332,7 +332,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetAgentSignatures
     (
         IServiceScope serviceScope,
-        ISourceDataDataQuery dataQuery,
+        ISourceDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -359,7 +359,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetDeltas
     (
         IServiceScope serviceScope,
-        IMessageDataDataQuery dataQuery,
+        IMessageDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -386,7 +386,7 @@ public sealed class SourceTests : TestsBase<Startup>
     private static async Task TestGetLeases
     (
         IServiceScope serviceScope,
-        ILeaseDataDataQuery dataDataQuery,
+        ILeaseDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -406,14 +406,14 @@ public sealed class SourceTests : TestsBase<Startup>
         IAsyncEnumerable<ILease> GetActualResults(ISourceRepository sourceRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return sourceRepository.EnumerateLeases(dataDataQuery.Modify(modifiedQueryOptions));
+            return sourceRepository.EnumerateLeases(dataQuery.Modify(modifiedQueryOptions));
         }
     }
 
     private static async Task TestGetTags
     (
         IServiceScope serviceScope,
-        ITagDataDataQuery dataDataQuery,
+        ITagDataQuery dataQuery,
         ExpectedObjects expectedObjects
     )
     {
@@ -425,7 +425,7 @@ public sealed class SourceTests : TestsBase<Startup>
         IAsyncEnumerable<ITag> GetActualResults(ISourceRepository sourceRepository,
             ModifiedQueryOptions modifiedQueryOptions)
         {
-            return sourceRepository.EnumerateTags(dataDataQuery.Modify(modifiedQueryOptions));
+            return sourceRepository.EnumerateTags(dataQuery.Modify(modifiedQueryOptions));
         }
 
         ITag[] GetExpectedResults(bool invert)
@@ -532,13 +532,13 @@ public sealed class SourceTests : TestsBase<Startup>
             .GetRequiredService<IOptionsFactory<TOptions>>()
             .Create("Count");
 
-        var query = new CountDataDataDataDataQuery(gte, lte, options);
+        var query = new CountDataQuery(gte, lte, options);
 
         await PutSources(serviceScope, sources);
-        await TestGetSourceIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ITagDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ITagDataQuery, expectedObjects);
         await TestGetLeases(serviceScope, query, expectedObjects);
         await TestGetTags(serviceScope, query, expectedObjects);
     }
@@ -815,7 +815,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var committed = await writeRepository.Commit(source);
 
-        var query = new StateDataDataDataDataQuery(expectedStateId);
+        var query = new StateDataQuery(expectedStateId);
 
         // ARRANGE ASSERTIONS
 
@@ -1064,7 +1064,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var source = CreateSource(new[] { 1ul });
 
-        var versionOneQuery = new StateVersionDataDataDataDataQuery(new Version(1), new Version(1));
+        var versionOneQuery = new StateVersionDataQuery(new Version(1), new Version(1));
 
         // ACT
 
@@ -1099,7 +1099,7 @@ public sealed class SourceTests : TestsBase<Startup>
         var firstSource = CreateSource(new[] { 1ul }, stateId: stateId);
         var secondSource = CreateSource(new[] { 2ul }, stateId: stateId);
 
-        var versionTwoQuery = new StateVersionDataDataDataDataQuery(new Version(2), new Version(2));
+        var versionTwoQuery = new StateVersionDataQuery(new Version(2), new Version(2));
 
         // ACT
 
@@ -1191,17 +1191,17 @@ public sealed class SourceTests : TestsBase<Startup>
         gte.ShouldNotBeNull();
         lte.ShouldNotBeNull();
 
-        var query = new SourceTimeStampDataDataDataDataQuery(gte.Value, lte.Value);
+        var query = new SourceTimeStampDataQuery(gte.Value, lte.Value);
 
         await PutSources(serviceScope, sources);
-        await TestGetSourceIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ITagDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ITagDataQuery, expectedObjects);
         await TestGetAgentSignatures(serviceScope, query, expectedObjects);
         await TestGetDeltas(serviceScope, query, expectedObjects);
         await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1271,17 +1271,17 @@ public sealed class SourceTests : TestsBase<Startup>
 
         sourceId.ShouldNotBeNull();
 
-        var query = new SourceIdDataDataDataDataQuery(sourceId.Value);
+        var query = new SourceIdDataQuery(sourceId.Value);
 
         await PutSources(serviceScope, sources);
-        await TestGetSourceIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ITagDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ITagDataQuery, expectedObjects);
         await TestGetAgentSignatures(serviceScope, query, expectedObjects);
         await TestGetDeltas(serviceScope, query, expectedObjects);
         await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1352,17 +1352,17 @@ public sealed class SourceTests : TestsBase<Startup>
 
         stateId.ShouldNotBeNull();
 
-        var query = new StateDataDataDataDataQuery(stateId.Value);
+        var query = new StateDataQuery(stateId.Value);
 
         await PutSources(serviceScope, sources);
-        await TestGetSourceIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetSourceIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ISourceDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as IMessageDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ILeaseDataDataQuery, expectedObjects);
-        await TestGetStateIds(serviceScope, query as ITagDataDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetSourceIds(serviceScope, query as ITagDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ISourceDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as IMessageDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ILeaseDataQuery, expectedObjects);
+        await TestGetStateIds(serviceScope, query as ITagDataQuery, expectedObjects);
         await TestGetAgentSignatures(serviceScope, query, expectedObjects);
         await TestGetDeltas(serviceScope, query, expectedObjects);
         await TestGetLeases(serviceScope, query, expectedObjects);
@@ -1419,7 +1419,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var sources = new List<Source> { source };
 
-        var query = new StateVersionDataDataDataDataQuery(new Version(gte), new Version(lte));
+        var query = new StateVersionDataQuery(new Version(gte), new Version(lte));
 
         await PutSources(serviceScope, sources);
         await TestGetDeltas(serviceScope, query, expectedObjects);

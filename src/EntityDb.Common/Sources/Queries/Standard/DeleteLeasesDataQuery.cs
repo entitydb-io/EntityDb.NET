@@ -6,7 +6,7 @@ using EntityDb.Abstractions.States.Attributes;
 namespace EntityDb.Common.Sources.Queries.Standard;
 
 internal sealed record DeleteLeasesDataQuery(IReadOnlyCollection<ILease> Leases,
-    object? Options = null) : ILeaseDataDataQuery
+    object? Options = null) : ILeaseDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)
     {

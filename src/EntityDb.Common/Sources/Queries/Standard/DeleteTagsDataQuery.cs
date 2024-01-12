@@ -7,7 +7,7 @@ using EntityDb.Abstractions.ValueObjects;
 namespace EntityDb.Common.Sources.Queries.Standard;
 
 internal sealed record DeleteTagsDataQuery
-    (Id StateId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagDataDataQuery
+    (Id StateId, IReadOnlyCollection<ITag> Tags, object? Options = null) : ITagDataQuery
 {
     public TFilter GetFilter<TFilter>(ITagDataFilterBuilder<TFilter> builder)
     {
