@@ -10,19 +10,16 @@ internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactor
     where TEntity : IEntity<TEntity>
 {
     private readonly IAgentAccessor _agentAccessor;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ISourceRepositoryFactory _sourceRepositoryFactory;
     private readonly IStateRepositoryFactory<TEntity>? _stateRepositoryFactory;
 
     public EntityRepositoryFactory
     (
-        IServiceProvider serviceProvider,
         IAgentAccessor agentAccessor,
         ISourceRepositoryFactory sourceRepositoryFactory,
         IStateRepositoryFactory<TEntity>? stateRepositoryFactory = null
     )
     {
-        _serviceProvider = serviceProvider;
         _agentAccessor = agentAccessor;
         _sourceRepositoryFactory = sourceRepositoryFactory;
         _stateRepositoryFactory = stateRepositoryFactory;
@@ -70,17 +67,15 @@ internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactor
         CancellationToken cancellationToken = default
     )
     {
-        var agent = await _agentAccessor.GetAgent(agentSignatureOptionsName, cancellationToken);
-
         var sourceRepository = await _sourceRepositoryFactory
             .Create(sourceSessionOptionsName, cancellationToken);
 
         if (_stateRepositoryFactory is null || stateSessionOptionsName is null)
         {
-            return MultipleEntityRepository<TEntity>.Create
+            return new MultipleEntityRepository<TEntity>
             (
-                _serviceProvider,
-                agent,
+                _agentAccessor,
+                agentSignatureOptionsName,
                 sourceRepository
             );
         }
@@ -88,10 +83,10 @@ internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactor
         var stateRepository = await _stateRepositoryFactory
             .Create(stateSessionOptionsName, cancellationToken);
 
-        return MultipleEntityRepository<TEntity>.Create
+        return new MultipleEntityRepository<TEntity>
         (
-            _serviceProvider,
-            agent,
+            _agentAccessor,
+            agentSignatureOptionsName,
             sourceRepository,
             stateRepository
         );

@@ -2,24 +2,20 @@
 using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Abstractions.Streams;
 using EntityDb.Abstractions.ValueObjects;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Streams;
 
 internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
 {
     private readonly IAgentAccessor _agentAccessor;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ISourceRepositoryFactory _sourceRepositoryFactory;
 
     public StreamRepositoryFactory
     (
-        IServiceProvider serviceProvider,
         IAgentAccessor agentAccessor,
         ISourceRepositoryFactory sourceRepositoryFactory
     )
     {
-        _serviceProvider = serviceProvider;
         _agentAccessor = agentAccessor;
         _sourceRepositoryFactory = sourceRepositoryFactory;
     }
@@ -47,11 +43,14 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
         CancellationToken cancellationToken
     )
     {
-        var agent = await _agentAccessor.GetAgent(agentSignatureOptionsName, cancellationToken);
-
         var sourceRepository = await _sourceRepositoryFactory
             .Create(sourceSessionOptionsName, cancellationToken);
 
-        return ActivatorUtilities.CreateInstance<MultipleStreamRepository>(_serviceProvider, agent, sourceRepository);
+        return new MultipleStreamRepository
+        (
+            _agentAccessor,
+            agentSignatureOptionsName,
+            sourceRepository
+        );
     }
 }

@@ -15,14 +15,16 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
     private const string RootScope = "Stream";
     private const string StreamKeyLabel = "StreamKey";
     private const string MessageKeyLabel = "MessageKey";
-    private readonly IAgent _agent;
+    private readonly string _agentSignatureOptionsName;
+    private readonly IAgentAccessor _agentAccessor;
     private readonly Dictionary<Key, Stream> _knownStreams = new();
     private readonly List<Message> _messages = new();
 
-    public MultipleStreamRepository(IAgent agent, ISourceRepository sourceRepository)
+    public MultipleStreamRepository(IAgentAccessor agentAccessor, string agentSignatureOptionsName, ISourceRepository sourceRepository)
     {
-        _agent = agent;
-
+        _agentSignatureOptionsName = agentSignatureOptionsName;
+        _agentAccessor = agentAccessor;
+        
         SourceRepository = sourceRepository;
     }
 
@@ -86,12 +88,14 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
         {
             return true;
         }
+
+        var agent = await _agentAccessor.GetAgent(_agentSignatureOptionsName, cancellationToken);
         
         var source = new Source
         {
             Id = Id.NewId(),
-            TimeStamp = _agent.TimeStamp,
-            AgentSignature = _agent.Signature,
+            TimeStamp = agent.TimeStamp,
+            AgentSignature = agent.Signature,
             Messages = _messages.ToArray(),
         };
 

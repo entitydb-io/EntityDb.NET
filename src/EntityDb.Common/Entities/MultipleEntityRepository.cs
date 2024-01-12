@@ -15,18 +15,22 @@ namespace EntityDb.Common.Entities;
 internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, IMultipleEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly IAgent _agent;
+    private readonly string _agentSignatureOptionsName;
+    private readonly IAgentAccessor _agentAccessor;
     private readonly Dictionary<Id, TEntity> _knownEntities = new();
     private readonly List<Message> _messages = new();
 
     public MultipleEntityRepository
     (
-        IAgent agent,
+        IAgentAccessor agentAccessor,
+        string agentSignatureOptionsName,
         ISourceRepository sourceRepository,
         IStateRepository<TEntity>? stateRepository = null
     )
     {
-        _agent = agent;
+        _agentSignatureOptionsName = agentSignatureOptionsName;
+        _agentAccessor = agentAccessor;
+        
         SourceRepository = sourceRepository;
         StateRepository = stateRepository;
     }
@@ -126,12 +130,14 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
         {
             return true;
         }
+
+        var agent = await _agentAccessor.GetAgent(_agentSignatureOptionsName, cancellationToken);
         
         var source = new Source
         {
             Id = Id.NewId(),
-            TimeStamp = _agent.TimeStamp,
-            AgentSignature = _agent.Signature,
+            TimeStamp = agent.TimeStamp,
+            AgentSignature = agent.Signature,
             Messages = _messages.ToArray(),
         };
 
@@ -155,32 +161,5 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
         {
             await StateRepository.DisposeAsync();
         }
-    }
-
-    public static MultipleEntityRepository<TEntity> Create
-    (
-        IServiceProvider serviceProvider,
-        IAgent agent,
-        ISourceRepository sourceRepository,
-        IStateRepository<TEntity>? stateRepository = null
-    )
-    {
-        if (stateRepository is null)
-        {
-            return ActivatorUtilities.CreateInstance<MultipleEntityRepository<TEntity>>
-            (
-                serviceProvider,
-                agent,
-                sourceRepository
-            );
-        }
-
-        return ActivatorUtilities.CreateInstance<MultipleEntityRepository<TEntity>>
-        (
-            serviceProvider,
-            agent,
-            sourceRepository,
-            stateRepository
-        );
     }
 }
