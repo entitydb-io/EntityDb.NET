@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.MongoDbAtlas.Models;
 
-internal class Cluster
+internal sealed class Cluster
 {
     [JsonPropertyName("srvAddress")] public string? SrvAddress { get; set; }
 }

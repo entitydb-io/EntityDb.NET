@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace EntityDb.Provisioner.MongoDbAtlas;
 
-internal record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop,
+internal sealed record DigestChallengeRequest(string? Realm, string? Domain, string? Nonce, string? Algorithm, string? Qop,
     string? Stale, uint NonceCount, string ClientNonce, DateTime ExpiresAt)
 {
     private const int MinClientNonce = 0x100000;

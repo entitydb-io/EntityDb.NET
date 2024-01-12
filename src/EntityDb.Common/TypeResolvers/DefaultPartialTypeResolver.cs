@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace EntityDb.Common.TypeResolvers;
 
-internal class DefaultPartialTypeResolver : IPartialTypeResolver
+internal sealed class DefaultPartialTypeResolver : IPartialTypeResolver
 {
     private readonly IOptions<DefaultPartialTypeResolverOptions> _options;
 

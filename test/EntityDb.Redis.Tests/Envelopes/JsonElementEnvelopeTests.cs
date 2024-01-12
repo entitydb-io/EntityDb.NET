@@ -3,7 +3,7 @@ using System.Text;
 
 namespace EntityDb.Redis.Tests.Envelopes;
 
-public class JsonElementEnvelopeTests : EnvelopeTestsBase<Startup, byte[]>
+public sealed class JsonElementEnvelopeTests : EnvelopeTestsBase<Startup, byte[]>
 {
     public JsonElementEnvelopeTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

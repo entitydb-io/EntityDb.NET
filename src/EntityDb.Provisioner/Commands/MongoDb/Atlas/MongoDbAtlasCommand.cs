@@ -4,7 +4,7 @@ using System.CommandLine;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas;
 
-internal class MongoDbAtlasCommand
+internal sealed class MongoDbAtlasCommand
 {
     public static void AddTo(Command parentCommand)
     {

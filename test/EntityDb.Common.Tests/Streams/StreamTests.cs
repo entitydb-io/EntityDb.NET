@@ -15,7 +15,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 namespace EntityDb.Common.Tests.Streams;
 
 [Collection(nameof(DatabaseContainerCollection))]
-public class StreamTests : TestsBase<Startup>
+public sealed class StreamTests : TestsBase<Startup>
 {
     public StreamTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture)
         : base(serviceProvider, databaseContainerFixture)

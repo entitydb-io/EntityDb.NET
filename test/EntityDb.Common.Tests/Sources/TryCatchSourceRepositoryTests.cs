@@ -8,7 +8,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Sources;
 
-public class TryCatchSourceRepositoryTests : TestsBase<Startup>
+public sealed class TryCatchSourceRepositoryTests : TestsBase<Startup>
 {
     public TryCatchSourceRepositoryTests(IServiceProvider serviceProvider) : base(serviceProvider)
     {

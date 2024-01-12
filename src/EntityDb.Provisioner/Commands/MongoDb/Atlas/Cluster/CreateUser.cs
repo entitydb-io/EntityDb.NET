@@ -4,7 +4,7 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
-internal class CreateUser : CommandBase
+internal sealed class CreateUser : CommandBase
 {
     private static async Task Execute(Arguments arguments)
     {
@@ -55,7 +55,7 @@ internal class CreateUser : CommandBase
         parentCommand.AddCommand(createUser);
     }
 
-    public record Arguments
+    public sealed record Arguments
     (
         string GroupName,
         string PublicKey,

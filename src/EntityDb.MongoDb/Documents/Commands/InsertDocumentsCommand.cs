@@ -2,7 +2,7 @@
 
 namespace EntityDb.MongoDb.Documents.Commands;
 
-internal record InsertDocumentsCommand<TDocument>
+internal sealed record InsertDocumentsCommand<TDocument>
 (
     string CollectionName,
     TDocument[] Documents

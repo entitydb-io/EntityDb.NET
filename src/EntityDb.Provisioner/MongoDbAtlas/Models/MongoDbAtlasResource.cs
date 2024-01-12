@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.MongoDbAtlas.Models;
 
-internal class MongoDbAtlasResource
+internal sealed class MongoDbAtlasResource
 {
     [JsonPropertyName("db")] public string? Db { get; set; }
 

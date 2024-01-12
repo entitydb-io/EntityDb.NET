@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Sources.ReprocessorQueues;
 
-internal class TestModeSourceReprocessorQueue : ISourceReprocessorQueue
+internal sealed class TestModeSourceReprocessorQueue : ISourceReprocessorQueue
 {
     private readonly ILogger<TestModeSourceReprocessorQueue> _logger;
     private readonly ISourceProcessorQueue _sourceProcessorQueue;

@@ -7,7 +7,7 @@ using Moq;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
-public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, HttpContextSeederOptions>
+public sealed class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, HttpContextSeederOptions>
 {
     public HttpContextAgentAccessorTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

@@ -3,7 +3,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Documents.Serializers;
 
-internal class VersionSerializer : IBsonSerializer<Version>
+internal sealed class VersionSerializer : IBsonSerializer<Version>
 {
     public Type ValueType => typeof(Version);
 

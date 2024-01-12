@@ -5,7 +5,7 @@ using EntityDb.Common.Sources.Processors.Queues;
 
 namespace EntityDb.Common.Sources.Subscribers;
 
-internal class ProjectionStateSourceSubscriber<TProjection> : ISourceSubscriber
+internal sealed class ProjectionStateSourceSubscriber<TProjection> : ISourceSubscriber
     where TProjection : IProjection<TProjection>
 {
     private readonly ISourceProcessorQueue _sourceProcessorQueue;

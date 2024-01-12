@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization;
 
 namespace EntityDb.MongoDb.Documents.Serializers;
 
-internal class TimeStampSerializer : IBsonSerializer<TimeStamp>
+internal sealed class TimeStampSerializer : IBsonSerializer<TimeStamp>
 {
     public Type ValueType => typeof(TimeStamp);
 

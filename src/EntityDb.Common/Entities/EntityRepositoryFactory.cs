@@ -6,7 +6,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Entities;
 
-internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
+internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
     where TEntity : IEntity<TEntity>
 {
     private readonly IAgentAccessor _agentAccessor;

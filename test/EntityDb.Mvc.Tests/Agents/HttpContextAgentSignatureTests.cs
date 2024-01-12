@@ -5,7 +5,7 @@ using Xunit;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
-public class HttpContextAgentSignatureTests
+public sealed class HttpContextAgentSignatureTests
 {
     [Fact]
     public void GivenNoRedactedHeaders_WhenHttpContextHasHeader_ThenAgentSignatureHasHeaderValue()

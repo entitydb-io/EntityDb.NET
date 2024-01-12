@@ -11,7 +11,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;
 
-public class LifoTypeResolverTests : TestsBase<Startup>
+public sealed class LifoTypeResolverTests : TestsBase<Startup>
 {
     public LifoTypeResolverTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

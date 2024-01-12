@@ -6,7 +6,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
-public record TestEntity : IEntity<TestEntity>, IStateWithTestLogic<TestEntity>
+public sealed record TestEntity : IEntity<TestEntity>, IStateWithTestLogic<TestEntity>
 {
     public required Pointer Pointer { get; init; }
 

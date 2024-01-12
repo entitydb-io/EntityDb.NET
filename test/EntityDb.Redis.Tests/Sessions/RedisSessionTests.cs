@@ -6,7 +6,7 @@ using Xunit;
 
 namespace EntityDb.Redis.Tests.Sessions;
 
-public class RedisSessionTests : TestsBase<Startup>
+public sealed class RedisSessionTests : TestsBase<Startup>
 {
     public RedisSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

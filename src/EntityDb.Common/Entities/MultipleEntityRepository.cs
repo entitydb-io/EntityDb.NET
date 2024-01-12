@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Entities;
 
-internal class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, IMultipleEntityRepository<TEntity>
+internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, IMultipleEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
     private readonly IAgent _agent;

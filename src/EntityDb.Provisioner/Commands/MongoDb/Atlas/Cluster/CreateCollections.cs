@@ -5,7 +5,7 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
-internal class CreateCollections : CommandBase
+internal sealed class CreateCollections : CommandBase
 {
     private static async Task Execute(Arguments arguments)
     {
@@ -32,7 +32,7 @@ internal class CreateCollections : CommandBase
         await mongoClient.ProvisionSourceCollections(arguments.ServiceName);
     }
 
-    protected static void AddClusterNameArgument(Command command)
+    private static void AddClusterNameArgument(Command command)
     {
         var clusterNameArgument = new Argument<string>("cluster-name")
         {
@@ -57,7 +57,7 @@ internal class CreateCollections : CommandBase
         parentCommand.AddCommand(createCollections);
     }
 
-    public record Arguments
+    public sealed record Arguments
     (
         string GroupName,
         string PublicKey,

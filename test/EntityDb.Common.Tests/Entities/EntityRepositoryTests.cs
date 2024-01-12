@@ -14,7 +14,7 @@ namespace EntityDb.Common.Tests.Entities;
 
 [Collection(nameof(DatabaseContainerCollection))]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public class EntityRepositoryTests : TestsBase<Startup>
+public sealed class EntityRepositoryTests : TestsBase<Startup>
 {
     public EntityRepositoryTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) :
         base(

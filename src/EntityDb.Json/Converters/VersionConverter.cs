@@ -4,7 +4,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Json.Converters;
 
-internal class VersionConverter : JsonConverter<Version>
+internal sealed class VersionConverter : JsonConverter<Version>
 {
     public override Version Read
     (

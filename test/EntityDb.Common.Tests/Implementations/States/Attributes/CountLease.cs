@@ -2,7 +2,7 @@
 
 namespace EntityDb.Common.Tests.Implementations.States.Attributes;
 
-public record CountLease(ulong Number) : ILease
+public sealed record CountLease(ulong Number) : ILease
 {
     public string Scope => "";
     public string Label => "";

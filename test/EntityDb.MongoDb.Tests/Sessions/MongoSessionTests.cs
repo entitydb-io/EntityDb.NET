@@ -6,7 +6,7 @@ using Xunit;
 
 namespace EntityDb.MongoDb.Tests.Sessions;
 
-public class MongoSessionTests : TestsBase<Startup>
+public sealed class MongoSessionTests : TestsBase<Startup>
 {
     public MongoSessionTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

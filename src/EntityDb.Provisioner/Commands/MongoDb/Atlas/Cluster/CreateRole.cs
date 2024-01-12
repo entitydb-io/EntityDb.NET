@@ -5,7 +5,7 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
-internal class CreateRole : CommandBase
+internal sealed class CreateRole : CommandBase
 {
     private static async Task Execute(Arguments arguments)
     {
@@ -84,7 +84,7 @@ internal class CreateRole : CommandBase
         parentCommand.AddCommand(createRole);
     }
 
-    public record Arguments
+    public sealed record Arguments
     (
         string GroupName,
         string PublicKey,

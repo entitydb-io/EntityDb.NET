@@ -11,7 +11,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
-public class OneToOneProjection : IProjection<OneToOneProjection>, IStateWithTestLogic<OneToOneProjection>
+public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IStateWithTestLogic<OneToOneProjection>
 {
     public TimeStamp LastSourceAt { get; set; }
 

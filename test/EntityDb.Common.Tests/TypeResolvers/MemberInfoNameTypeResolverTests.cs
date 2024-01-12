@@ -5,7 +5,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;
 
-public class MemberInfoNameTypeResolverTests
+public sealed class MemberInfoNameTypeResolverTests
 {
     [Fact]
     public void GivenMemberInfoNameTypeResolverKnowsExpectedType_WhenResolvingType_ThenReturnExpectedType()

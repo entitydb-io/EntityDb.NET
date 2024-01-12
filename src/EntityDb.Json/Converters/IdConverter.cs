@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace EntityDb.Json.Converters;
 
-internal class IdConverter : JsonConverter<Id>
+internal sealed class IdConverter : JsonConverter<Id>
 {
     public override Id Read
     (

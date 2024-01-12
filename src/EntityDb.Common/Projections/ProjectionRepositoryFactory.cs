@@ -3,7 +3,7 @@ using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Projections;
 
-internal class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryFactory<TProjection>
+internal sealed class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryFactory<TProjection>
     where TProjection : IProjection<TProjection>
 {
     private readonly IServiceProvider _serviceProvider;

@@ -13,7 +13,7 @@ namespace EntityDb.Common.Tests.Projections;
 
 [Collection(nameof(DatabaseContainerCollection))]
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public class ProjectionsTests : TestsBase<Startup>
+public sealed class ProjectionsTests : TestsBase<Startup>
 {
     public ProjectionsTests(IServiceProvider startupServiceProvider, DatabaseContainerFixture databaseContainerFixture)
         : base(startupServiceProvider, databaseContainerFixture)

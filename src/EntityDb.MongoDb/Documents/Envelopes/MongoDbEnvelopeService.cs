@@ -11,7 +11,7 @@ using VersionSerializer = EntityDb.MongoDb.Documents.Serializers.VersionSerializ
 
 namespace EntityDb.MongoDb.Documents.Envelopes;
 
-internal class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
+internal sealed class MongoDbEnvelopeService : IEnvelopeService<BsonDocument>
 {
     public const string TypeDiscriminatorPropertyName = "_t";
 

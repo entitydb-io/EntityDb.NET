@@ -10,7 +10,7 @@ using Xunit;
 
 namespace EntityDb.MongoDb.Tests.Envelopes;
 
-public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument>
+public sealed class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument>
 {
     public BsonDocumentEnvelopeTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

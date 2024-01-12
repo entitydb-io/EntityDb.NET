@@ -4,7 +4,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests;
 
-public class DatabaseContainerFixture : IAsyncLifetime
+public sealed class DatabaseContainerFixture : IAsyncLifetime
 {
     public const string OmniParameter = "entitydb";
 

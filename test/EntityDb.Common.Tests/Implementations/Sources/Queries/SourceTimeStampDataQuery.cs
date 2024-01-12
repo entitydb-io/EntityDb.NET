@@ -5,7 +5,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public record SourceTimeStampDataQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataQuery,
+public sealed record SourceTimeStampDataQuery(TimeStamp Gte, TimeStamp Lte, object? Options = null) : ISourceDataQuery,
     IMessageDataQuery,
     ILeaseDataQuery, ITagDataQuery
 {

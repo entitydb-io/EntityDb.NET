@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EntityDb.Common.Sources.Processors.Queues;
 
-internal class TestModeSourceProcessorQueue : ISourceProcessorQueue
+internal sealed class TestModeSourceProcessorQueue : ISourceProcessorQueue
 {
     private readonly ILogger<TestModeSourceProcessorQueue> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;

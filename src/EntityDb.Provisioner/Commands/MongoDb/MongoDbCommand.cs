@@ -3,7 +3,7 @@ using System.CommandLine;
 
 namespace EntityDb.Provisioner.Commands.MongoDb;
 
-internal class MongoDbCommand
+internal sealed class MongoDbCommand
 {
     public static void AddTo(Command parentCommand)
     {

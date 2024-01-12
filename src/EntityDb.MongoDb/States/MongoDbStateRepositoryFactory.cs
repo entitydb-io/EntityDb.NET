@@ -9,7 +9,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.States;
 
-internal class MongoDbStateRepositoryFactory<TState> : DisposableResourceBaseClass,
+internal sealed class MongoDbStateRepositoryFactory<TState> : DisposableResourceBaseClass,
     IMongoDbStateRepositoryFactory<TState>
     where TState : notnull
 {

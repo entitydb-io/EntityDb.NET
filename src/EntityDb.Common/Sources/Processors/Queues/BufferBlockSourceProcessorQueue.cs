@@ -7,7 +7,7 @@ using System.Threading.Tasks.Dataflow;
 namespace EntityDb.Common.Sources.Processors.Queues;
 
 [ExcludeFromCodeCoverage(Justification = "Not used in tests.")]
-internal class BufferBlockSourceProcessorQueue : BackgroundService, ISourceProcessorQueue
+internal sealed class BufferBlockSourceProcessorQueue : BackgroundService, ISourceProcessorQueue
 {
     private readonly BufferBlock<ISourceProcessorQueueItem> _bufferBlock = new();
     private readonly ILogger<BufferBlockSourceProcessorQueue> _logger;

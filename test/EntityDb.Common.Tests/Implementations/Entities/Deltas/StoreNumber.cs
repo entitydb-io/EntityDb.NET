@@ -6,7 +6,7 @@ using EntityDb.Common.Tests.Implementations.States.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Entities.Deltas;
 
-public record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOneProjection>,
+public sealed record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<OneToOneProjection>,
     IAddLeasesDelta<TestEntity>, IAddTagsDelta<TestEntity>
 {
     public IEnumerable<ILease> GetLeases(TestEntity state)

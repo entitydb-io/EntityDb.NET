@@ -14,7 +14,7 @@ using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Sources;
 
-internal class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRepository
+internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISourceRepository
 {
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
     private readonly IMongoSession _mongoSession;

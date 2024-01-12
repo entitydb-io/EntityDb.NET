@@ -7,7 +7,7 @@ namespace EntityDb.Mvc.Agents;
 ///     Represents the description of an agent who records sources using an
 ///     <see cref="HttpContext" />.
 /// </summary>
-public class HttpContextAgentSignature
+public sealed class HttpContextAgentSignature
 {
     /// <summary>
     ///     Request details

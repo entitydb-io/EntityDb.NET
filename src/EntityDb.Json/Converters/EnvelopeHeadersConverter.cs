@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace EntityDb.Json.Converters;
 
-internal class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
+internal sealed class EnvelopeHeadersConverter : JsonConverter<EnvelopeHeaders>
 {
     public override EnvelopeHeaders Read
     (

@@ -33,7 +33,7 @@ using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests;
 
-public class TestsBase<TStartup>
+public abstract class TestsBase<TStartup>
     where TStartup : IStartup, new()
 {
     public delegate void AddDependenciesDelegate(IServiceCollection serviceCollection);
@@ -560,7 +560,7 @@ public class TestsBase<TStartup>
         return stateRepositoryFactoryMock.Object;
     }
 
-    public record Log
+    public sealed record Log
     {
         public required object[] ScopesStates { get; init; }
         public required LogLevel LogLevel { get; init; }
@@ -569,7 +569,7 @@ public class TestsBase<TStartup>
         public required Exception? Exception { get; init; }
     }
 
-    private class Logger(ICollection<Log> logs) : ILogger
+    private sealed class Logger(ICollection<Log> logs) : ILogger
     {
         private readonly Stack<object> _scopeStates = new();
 
@@ -598,7 +598,7 @@ public class TestsBase<TStartup>
             });
         }
 
-        private class Scope(Stack<object> scopeStates) : IDisposable
+        private sealed class Scope(Stack<object> scopeStates) : IDisposable
         {
             void IDisposable.Dispose()
             {
@@ -607,7 +607,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    internal record TestServiceScope : DisposableResourceBaseRecord, IServiceScope
+    internal sealed record TestServiceScope : DisposableResourceBaseRecord, IServiceScope
     {
         public required ServiceProvider SingletonServiceProvider { get; init; }
         public required AsyncServiceScope AsyncServiceScope { get; init; }
@@ -621,7 +621,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record SourceRepositoryAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
+    public sealed record SourceRepositoryAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
         AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
@@ -630,7 +630,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record StateRepositoryAdder(string Name, Type StateType, AddDependenciesDelegate AddDependencies)
+    public sealed record StateRepositoryAdder(string Name, Type StateType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
@@ -638,7 +638,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record EntityRepositoryAdder(string Name, Type EntityType, AddDependenciesDelegate AddDependencies)
+    public sealed record EntityRepositoryAdder(string Name, Type EntityType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {
@@ -646,7 +646,7 @@ public class TestsBase<TStartup>
         }
     }
 
-    public record ProjectionRepositoryAdder(string Name, Type ProjectionType, AddDependenciesDelegate AddDependencies)
+    public sealed record ProjectionRepositoryAdder(string Name, Type ProjectionType, AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {

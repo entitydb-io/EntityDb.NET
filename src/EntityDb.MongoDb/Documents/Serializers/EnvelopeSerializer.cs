@@ -6,7 +6,7 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace EntityDb.MongoDb.Documents.Serializers;
 
-internal class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
+internal sealed class EnvelopeSerializer : IBsonSerializer<Envelope<BsonDocument>>
 {
     private static readonly BsonDocumentSerializer BsonDocumentSerializer = new();
 

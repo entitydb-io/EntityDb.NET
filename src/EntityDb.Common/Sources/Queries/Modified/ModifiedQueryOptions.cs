@@ -6,7 +6,7 @@ namespace EntityDb.Common.Sources.Queries.Modified;
 /// <summary>
 ///     Options for modified queries, which can be created via <see cref="QueryExtensions" />.
 /// </summary>
-public record ModifiedQueryOptions
+public sealed record ModifiedQueryOptions
 {
     /// <summary>
     ///     If <c>true</c>, then the new query will return the value of

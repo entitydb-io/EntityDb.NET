@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace EntityDb.MongoDb.Sources.Sessions;
 
-internal record MongoSession
+internal sealed record MongoSession
 (
     ILogger<MongoSession> Logger,
     IMongoDatabase MongoDatabase,

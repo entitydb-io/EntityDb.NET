@@ -3,4 +3,4 @@
 /// <summary>
 ///     Represents the signature of an unknown actor.
 /// </summary>
-public record UnknownAgentSignature(Dictionary<string, string> ApplicationInfo);
+public sealed record UnknownAgentSignature(Dictionary<string, string> ApplicationInfo);

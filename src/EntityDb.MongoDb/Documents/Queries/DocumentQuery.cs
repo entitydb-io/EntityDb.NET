@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Documents.Queries;
 
-internal record DocumentQuery<TDocument>
+internal sealed record DocumentQuery<TDocument>
 {
     public required string CollectionName { get; init; }
     public required FilterDefinition<BsonDocument> Filter { get; init; }

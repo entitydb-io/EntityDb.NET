@@ -3,7 +3,7 @@ using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Sources.Annotations;
 
-internal record AnnotatedSourceData<TData>
+internal sealed record AnnotatedSourceData<TData>
 (
     Id SourceId,
     TimeStamp SourceTimeStamp,

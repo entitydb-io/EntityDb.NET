@@ -2,7 +2,7 @@
 
 namespace EntityDb.MongoDb.States;
 
-internal class TestModeMongoDbStateRepositoryFactory<TState> : MongoDbStateRepositoryFactoryWrapper<TState>
+internal sealed class TestModeMongoDbStateRepositoryFactory<TState> : MongoDbStateRepositoryFactoryWrapper<TState>
 {
     private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 

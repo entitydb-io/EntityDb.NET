@@ -6,7 +6,7 @@ using EntityDb.Redis.States.Sessions;
 
 namespace EntityDb.Redis.States;
 
-internal class RedisStateRepository<TState> : DisposableResourceBaseClass, IStateRepository<TState>
+internal sealed class RedisStateRepository<TState> : DisposableResourceBaseClass, IStateRepository<TState>
 {
     private readonly IEnvelopeService<byte[]> _envelopeService;
     private readonly IRedisSession _redisSession;

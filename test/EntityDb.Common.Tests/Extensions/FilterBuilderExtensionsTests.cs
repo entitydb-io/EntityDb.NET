@@ -6,7 +6,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.Extensions;
 
-public class FilterBuilderExtensionsTests
+public sealed class FilterBuilderExtensionsTests
 {
     private static IDataFilterBuilder<bool> GetFilterBuilder()
     {
@@ -194,7 +194,7 @@ public class FilterBuilderExtensionsTests
         }
     }
 
-    private record SingleInput(bool Input1, bool ExpectedOutput);
+    private sealed record SingleInput(bool Input1, bool ExpectedOutput);
 
-    private record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
+    private sealed record DoubleInput(bool Input1, bool Input2, bool ExpectedOutput);
 }

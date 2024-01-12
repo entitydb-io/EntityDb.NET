@@ -7,7 +7,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;
 
-public class DefaultTypeResolverTests
+public sealed class DefaultTypeResolverTests
 {
     [Fact]
     public void GivenEmptyHeaders_WhenLoadingType_ThenReturnNull()

@@ -9,7 +9,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources;
 
-internal class MongoDbSourceRepositoryFactory : DisposableResourceBaseClass, IMongoDbSourceRepositoryFactory
+internal sealed class MongoDbSourceRepositoryFactory : DisposableResourceBaseClass, IMongoDbSourceRepositoryFactory
 {
     private readonly IEnvelopeService<BsonDocument> _envelopeService;
     private readonly IOptionsFactory<MongoDbSourceSessionOptions> _optionsFactory;

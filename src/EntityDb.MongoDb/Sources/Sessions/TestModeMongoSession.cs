@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Sources.Sessions;
 
-internal record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
+internal sealed record TestModeMongoSession(IMongoSession MongoSession) : DisposableResourceBaseRecord, IMongoSession
 {
     public IMongoDatabase MongoDatabase => MongoSession.MongoDatabase;
 

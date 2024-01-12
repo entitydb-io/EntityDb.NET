@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace EntityDb.Redis.ConnectionMultiplexers;
 
-internal class ConnectionMultiplexerFactory : DisposableResourceBaseClass
+internal sealed class ConnectionMultiplexerFactory : DisposableResourceBaseClass
 {
     private readonly ConcurrentDictionary<string, IConnectionMultiplexer> _connectionMultiplexers = new();
     private readonly SemaphoreSlim _connectionSemaphore = new(1);

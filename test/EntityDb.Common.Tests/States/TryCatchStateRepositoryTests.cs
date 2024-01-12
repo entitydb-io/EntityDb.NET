@@ -13,7 +13,7 @@ using Xunit;
 namespace EntityDb.Common.Tests.States;
 
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
-public class TryCatchStateRepositoryTests : TestsBase<Startup>
+public sealed class TryCatchStateRepositoryTests : TestsBase<Startup>
 {
     public TryCatchStateRepositoryTests(IServiceProvider serviceProvider) : base(serviceProvider)
     {

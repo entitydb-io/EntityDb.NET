@@ -2,8 +2,7 @@
 
 namespace EntityDb.MongoDb.Sources;
 
-internal class
-    TestModeMongoDbSourceRepositoryFactory : MongoDbSourceRepositoryFactoryWrapper
+internal sealed class TestModeMongoDbSourceRepositoryFactory : MongoDbSourceRepositoryFactoryWrapper
 {
     private (IMongoSession Normal, TestModeMongoSession TestMode)? _sessions;
 

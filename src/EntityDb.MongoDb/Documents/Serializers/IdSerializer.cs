@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization;
 
 namespace EntityDb.MongoDb.Documents.Serializers;
 
-internal class IdSerializer : IBsonSerializer<Id>
+internal sealed class IdSerializer : IBsonSerializer<Id>
 {
     public Type ValueType => typeof(Id);
 

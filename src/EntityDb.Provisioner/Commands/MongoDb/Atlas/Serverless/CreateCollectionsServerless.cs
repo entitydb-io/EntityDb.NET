@@ -5,7 +5,7 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Serverless;
 
-internal class CreateCollectionsServerless : CommandBase
+internal sealed class CreateCollectionsServerless : CommandBase
 {
     private static async Task Execute(Arguments arguments)
     {
@@ -32,7 +32,7 @@ internal class CreateCollectionsServerless : CommandBase
         await mongoClient.ProvisionSourceCollections(arguments.ServiceName);
     }
 
-    protected static void AddServerlessNameArgument(Command command)
+    private static void AddServerlessNameArgument(Command command)
     {
         var clusterNameArgument = new Argument<string>("instance-name")
         {
@@ -57,7 +57,7 @@ internal class CreateCollectionsServerless : CommandBase
         parentCommand.AddCommand(createCollections);
     }
 
-    public record Arguments
+    public sealed record Arguments
     (
         string GroupName,
         string PublicKey,

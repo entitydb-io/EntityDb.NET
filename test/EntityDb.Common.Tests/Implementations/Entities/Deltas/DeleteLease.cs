@@ -3,7 +3,7 @@ using EntityDb.Abstractions.States.Deltas;
 
 namespace EntityDb.Common.Tests.Implementations.Entities.Deltas;
 
-public record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesDelta<TestEntity>
+public sealed record DeleteLease(ILease Lease) : DoNothing, IDeleteLeasesDelta<TestEntity>
 {
     public IEnumerable<ILease> GetLeases(TestEntity state)
     {

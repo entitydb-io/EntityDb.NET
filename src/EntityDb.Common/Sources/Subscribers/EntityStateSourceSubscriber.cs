@@ -5,7 +5,7 @@ using EntityDb.Common.Sources.Processors.Queues;
 
 namespace EntityDb.Common.Sources.Subscribers;
 
-internal class EntityStateSourceSubscriber<TEntity> : ISourceSubscriber
+internal sealed class EntityStateSourceSubscriber<TEntity> : ISourceSubscriber
     where TEntity : IEntity<TEntity>
 {
     private readonly ISourceProcessorQueue _sourceProcessorQueue;

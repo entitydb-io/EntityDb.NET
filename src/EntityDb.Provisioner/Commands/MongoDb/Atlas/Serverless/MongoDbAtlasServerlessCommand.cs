@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Serverless;
 
-internal class MongoDbAtlasServerlessCommand
+internal sealed class MongoDbAtlasServerlessCommand
 {
     public static void AddTo(Command parentCommand)
     {

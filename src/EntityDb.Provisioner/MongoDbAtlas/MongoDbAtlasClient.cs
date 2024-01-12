@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EntityDb.Provisioner.MongoDbAtlas;
 
-internal class MongoDbAtlasClient : IDisposable
+internal sealed class MongoDbAtlasClient : IDisposable
 {
     private static readonly HttpClient HttpClient = new();
 

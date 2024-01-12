@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Tests.Sources.Agents;
 
-public class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
+public sealed class UnknownAgentAccessorTests : AgentAccessorTestsBase<Startup, object>
 {
     public UnknownAgentAccessorTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {

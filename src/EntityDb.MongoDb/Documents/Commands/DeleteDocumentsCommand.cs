@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace EntityDb.MongoDb.Documents.Commands;
 
-internal record DeleteDocumentsCommand
+internal sealed record DeleteDocumentsCommand
 {
     public required string CollectionName { get; init; }
     public required FilterDefinition<BsonDocument> FilterDefinition { get; init; }

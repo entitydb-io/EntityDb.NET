@@ -8,7 +8,7 @@ using MongoDB.Bson;
 
 namespace EntityDb.MongoDb.States;
 
-internal class MongoDbStateRepository<TState> : DisposableResourceBaseClass, IStateRepository<TState>
+internal sealed class MongoDbStateRepository<TState> : DisposableResourceBaseClass, IStateRepository<TState>
     where TState : notnull
 {
     private readonly IEnvelopeService<BsonDocument> _envelopeService;

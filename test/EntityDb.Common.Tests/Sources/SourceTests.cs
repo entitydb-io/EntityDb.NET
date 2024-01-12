@@ -1439,7 +1439,7 @@ public sealed class SourceTests : TestsBase<Startup>
         );
     }
 
-    private class ExpectedObjects
+    private sealed class ExpectedObjects
     {
         public readonly List<object> FalseAgentSignatures = new();
         public readonly List<object> FalseDeltas = new();

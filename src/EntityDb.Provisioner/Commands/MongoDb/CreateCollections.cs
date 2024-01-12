@@ -5,7 +5,7 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb;
 
-internal class CreateCollections : CommandBase
+internal sealed class CreateCollections : CommandBase
 {
     private static async Task Execute(Arguments arguments)
     {
@@ -37,7 +37,7 @@ internal class CreateCollections : CommandBase
         parentCommand.AddCommand(createCollectionsDirect);
     }
 
-    public record Arguments
+    public sealed record Arguments
     (
         string ServiceName,
         string ConnectionString

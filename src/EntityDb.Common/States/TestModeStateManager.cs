@@ -4,7 +4,7 @@ using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.States;
 
-internal class TestModeStateManager<TState> : DisposableResourceBaseClass
+internal sealed class TestModeStateManager<TState> : DisposableResourceBaseClass
 {
     private readonly Dictionary<IStateRepository<TState>, List<Pointer>> _dictionary = new();
 

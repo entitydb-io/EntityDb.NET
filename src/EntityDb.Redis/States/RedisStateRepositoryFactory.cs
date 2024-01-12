@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace EntityDb.Redis.States;
 
-internal class RedisStateRepositoryFactory<TState> : DisposableResourceBaseClass,
+internal sealed class RedisStateRepositoryFactory<TState> : DisposableResourceBaseClass,
     IStateRepositoryFactory<TState>
 {
     private readonly ConnectionMultiplexerFactory _connectionMultiplexerFactory;
