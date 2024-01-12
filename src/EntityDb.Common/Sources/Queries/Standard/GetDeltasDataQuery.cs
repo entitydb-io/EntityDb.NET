@@ -13,12 +13,12 @@ internal sealed record GetDeltasDataQuery(Pointer StatePointer, Version Persiste
     {
         var filters = new List<TFilter>
         {
-            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(StatePointer.Version.Next()),
+            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(PersistedStateVersion.Next()),
         };
 
-        if (PersistedStateVersion != Version.Zero)
+        if (StatePointer.Version != Version.Zero)
         {
-            filters.Add(builder.StateVersionLte(PersistedStateVersion));
+            filters.Add(builder.StateVersionLte(StatePointer.Version));
         }
 
         return builder.And(filters.ToArray());
