@@ -63,7 +63,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgent(default!);
+            var agent = await agentAccessor.GetAgent(default!);
 
             // ASSERT
 
