@@ -63,7 +63,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
 
         if (streamPointer == default)
         {
-            throw new UnknownStreamException();
+            throw new UnknownStreamKeyException();
         }
 
         _knownStreams.Add(streamKey, new Stream
@@ -93,7 +93,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
     {
         if (!_knownStreams.TryGetValue(streamKey, out var stream))
         {
-            throw new UnknownStreamException();
+            throw new UnknownStreamKeyException();
         }
 
         var addLeases = new List<ILease>();
@@ -121,7 +121,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
     {
         if (!_knownStreams.TryGetValue(streamKey, out var stream))
         {
-            throw new UnknownStreamException();
+            throw new UnknownStreamKeyException();
         }
 
         var messageKeyLease = GetMessageKeyLease(streamKey, messageKey);
