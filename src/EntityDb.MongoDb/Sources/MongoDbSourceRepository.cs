@@ -210,28 +210,28 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .GetInsertCommand(_envelopeService, source, message)
             .Execute(_mongoSession, cancellationToken);
 
-        if (message.AddLeases.Length > 0)
+        if (message.AddLeases.Count > 0)
         {
             await LeaseDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.AddTags.Length > 0)
+        if (message.AddTags.Count > 0)
         {
             await TagDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.DeleteLeases.Length > 0)
+        if (message.DeleteLeases.Count > 0)
         {
             await LeaseDataDocument
                 .GetDeleteCommand(message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.DeleteTags.Length > 0)
+        if (message.DeleteTags.Count > 0)
         {
             await TagDataDocument
                 .GetDeleteCommand(message)

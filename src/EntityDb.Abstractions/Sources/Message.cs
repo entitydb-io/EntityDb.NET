@@ -27,29 +27,29 @@ public sealed record Message
     /// <summary>
     ///     The leases to be added.
     /// </summary>
-    public ILease[] AddLeases { get; init; } = Array.Empty<ILease>();
+    public IReadOnlyCollection<ILease> AddLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The tags to be added.
     /// </summary>
-    public ITag[] AddTags { get; init; } = Array.Empty<ITag>();
+    public IReadOnlyCollection<ITag> AddTags { get; init; } = Array.Empty<ITag>();
 
     /// <summary>
     ///     The leases to be deleted.
     /// </summary>
-    public ILease[] DeleteLeases { get; init; } = Array.Empty<ILease>();
+    public IReadOnlyCollection<ILease> DeleteLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The tags to be deleted.
     /// </summary>
-    public ITag[] DeleteTags { get; init; } = Array.Empty<ITag>();
+    public IReadOnlyCollection<ITag> DeleteTags { get; init; } = Array.Empty<ITag>();
 
     internal static Message NewMessage<TState>
     (
         TState state,
         Pointer statePointer,
         object delta,
-        IEnumerable<ILease>? additionalAddLeases = null
+        IReadOnlyCollection<ILease>? additionalAddLeases = null
     )
     {
         additionalAddLeases ??= Array.Empty<ILease>();
@@ -61,7 +61,7 @@ public sealed record Message
             Delta = delta,
             AddLeases = delta is IAddLeasesDelta<TState> addLeasesDelta
                 ? addLeasesDelta.GetLeases(state).Concat(additionalAddLeases).ToArray()
-                : Array.Empty<ILease>(),
+                : additionalAddLeases,
             AddTags = delta is IAddTagsDelta<TState> addTagsDelta
                 ? addTagsDelta.GetTags(state).ToArray()
                 : Array.Empty<ITag>(),

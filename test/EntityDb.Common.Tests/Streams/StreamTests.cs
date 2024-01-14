@@ -82,9 +82,9 @@ public sealed class StreamTests : TestsBase<Startup>
         committedSources[0].Messages.Length.ShouldBe(1);
         committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.Zero);
         committedSources[0].Messages[0].Delta.ShouldBe(expectedDelta);
-        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(2);
-        committedSources[0].Messages[0].AddLeases[0].ShouldBe(expectedMessageKeyLease);
-        committedSources[0].Messages[0].AddLeases[1].ShouldBe(expectedStreamKeyLease);
+        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(2);
+        committedSources[0].Messages[0].AddLeases.ElementAt(0).ShouldBe(expectedMessageKeyLease);
+        committedSources[0].Messages[0].AddLeases.ElementAt(1).ShouldBe(expectedStreamKeyLease);
     }
 
     [Theory]
@@ -191,8 +191,8 @@ public sealed class StreamTests : TestsBase<Startup>
         committedSources[0].Messages.Length.ShouldBe(1);
         committedSources[0].Messages[0].StatePointer.Id.ShouldBe(statePointer.Id);
         committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.Zero);
-        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
-        committedSources[0].Messages[0].AddLeases[0].ShouldBe(expectedLease);
+        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(1);
+        committedSources[0].Messages[0].AddLeases.ElementAt(0).ShouldBe(expectedLease);
     }
 
     [Theory]

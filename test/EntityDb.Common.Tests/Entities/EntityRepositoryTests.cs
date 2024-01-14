@@ -107,7 +107,7 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
 
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
-        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
+        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(1);
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
