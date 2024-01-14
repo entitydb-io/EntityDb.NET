@@ -26,7 +26,7 @@ public interface IMultipleStreamRepository : IDisposableResource
     /// <returns>A task.</returns>
     Task LoadOrCreate(Key streamKey, CancellationToken cancellationToken = default);
 
-    void Append(Key streamKey, object delta, CancellationToken cancellationToken = default);
+    void Append(Key streamKey, object delta);
     
     /// <summary>
     ///     Stages a single delta with a given state key and message key.

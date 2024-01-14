@@ -89,7 +89,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
         });
     }
 
-    public void Append(Key streamKey, object delta, CancellationToken cancellationToken = default)
+    public void Append(Key streamKey, object delta)
     {
         if (!_knownStreams.TryGetValue(streamKey, out var stream))
         {
