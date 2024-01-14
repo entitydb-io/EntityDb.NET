@@ -80,7 +80,7 @@ public sealed class StreamTests : TestsBase<Startup>
 
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
-        committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.Zero);
+        committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.One);
         committedSources[0].Messages[0].Delta.ShouldBe(expectedDelta);
         committedSources[0].Messages[0].AddLeases.Count.ShouldBe(2);
         committedSources[0].Messages[0].AddLeases.ElementAt(0).ShouldBe(expectedMessageKeyLease);
