@@ -17,6 +17,9 @@ public readonly record struct Version(ulong Value)
     ///     this value is reserved to point to the latest state.
     /// </summary>
     public static readonly Version Zero = new(ulong.MinValue);
+    
+    
+    public static readonly Version One = new(1);
 
     /// <summary>
     ///     Returns the next version.

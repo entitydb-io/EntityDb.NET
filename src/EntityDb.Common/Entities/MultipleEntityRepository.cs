@@ -102,24 +102,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
 
         entity = entity.Reduce(delta);
 
-        _messages.Add(new Message
-        {
-            Id = Id.NewId(),
-            StatePointer = entity.GetPointer(),
-            Delta = delta,
-            AddLeases = delta is IAddLeasesDelta<TEntity> addLeasesDelta
-                ? addLeasesDelta.GetLeases(entity).ToArray()
-                : Array.Empty<ILease>(),
-            AddTags = delta is IAddTagsDelta<TEntity> addTagsDelta
-                ? addTagsDelta.GetTags(entity).ToArray()
-                : Array.Empty<ITag>(),
-            DeleteLeases = delta is IDeleteLeasesDelta<TEntity> deleteLeasesDelta
-                ? deleteLeasesDelta.GetLeases(entity).ToArray()
-                : Array.Empty<ILease>(),
-            DeleteTags = delta is IDeleteTagsDelta<TEntity> deleteTagsDelta
-                ? deleteTagsDelta.GetTags(entity).ToArray()
-                : Array.Empty<ITag>(),
-        });
+        _messages.Add(Message.NewMessage(entity, entity.GetPointer(), delta));
 
         _knownEntities[entityId] = entity;
     }

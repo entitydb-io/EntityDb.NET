@@ -36,6 +36,38 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
         return new SingleStreamRepository(multipleStreamRepository, streamKey);
     }
 
+    public async Task<ISingleStreamRepository> CreateSingleForNew
+    (
+        Key streamKey,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var multipleStreamRepository =
+            await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName, cancellationToken);
+
+        multipleStreamRepository.Create(streamKey, cancellationToken);
+
+        return new SingleStreamRepository(multipleStreamRepository, streamKey);
+    }
+
+    public async Task<ISingleStreamRepository> CreateSingleForExisting
+    (
+        Key streamKey,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var multipleStreamRepository =
+            await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName, cancellationToken);
+
+        await multipleStreamRepository.Load(streamKey, cancellationToken);
+
+        return new SingleStreamRepository(multipleStreamRepository, streamKey);
+    }
+
     public async Task<IMultipleStreamRepository> CreateMultiple
     (
         string agentSignatureOptionsName,

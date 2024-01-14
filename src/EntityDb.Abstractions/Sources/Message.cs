@@ -1,4 +1,5 @@
 using EntityDb.Abstractions.States.Attributes;
+using EntityDb.Abstractions.States.Deltas;
 using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Sources;
@@ -42,4 +43,34 @@ public sealed record Message
     ///     The tags to be deleted.
     /// </summary>
     public ITag[] DeleteTags { get; init; } = Array.Empty<ITag>();
+
+    internal static Message NewMessage<TState>
+    (
+        TState state,
+        Pointer statePointer,
+        object delta,
+        IEnumerable<ILease>? additionalAddLeases = null
+    )
+    {
+        additionalAddLeases ??= Array.Empty<ILease>();
+        
+        return new Message
+        {
+            Id = Id.NewId(),
+            StatePointer = statePointer,
+            Delta = delta,
+            AddLeases = delta is IAddLeasesDelta<TState> addLeasesDelta
+                ? addLeasesDelta.GetLeases(state).Concat(additionalAddLeases).ToArray()
+                : Array.Empty<ILease>(),
+            AddTags = delta is IAddTagsDelta<TState> addTagsDelta
+                ? addTagsDelta.GetTags(state).ToArray()
+                : Array.Empty<ITag>(),
+            DeleteLeases = delta is IDeleteLeasesDelta<TState> deleteLeasesDelta
+                ? deleteLeasesDelta.GetLeases(state).ToArray()
+                : Array.Empty<ILease>(),
+            DeleteTags = delta is IDeleteTagsDelta<TState> deleteTagsDelta
+                ? deleteTagsDelta.GetTags(state).ToArray()
+                : Array.Empty<ITag>(),
+        };
+    }
 }

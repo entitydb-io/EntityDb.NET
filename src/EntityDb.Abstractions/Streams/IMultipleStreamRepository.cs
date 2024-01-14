@@ -14,6 +14,10 @@ public interface IMultipleStreamRepository : IDisposableResource
     /// </summary>
     ISourceRepository SourceRepository { get; }
 
+    void Create(Key streamKey, CancellationToken cancellationToken = default);
+    
+    Task Load(Key streamKey, CancellationToken cancellationToken = default);
+    
     /// <summary>
     ///     Load a stream if it exists, or create a new stream.
     /// </summary>
@@ -22,6 +26,8 @@ public interface IMultipleStreamRepository : IDisposableResource
     /// <returns>A task.</returns>
     Task LoadOrCreate(Key streamKey, CancellationToken cancellationToken = default);
 
+    void Append(Key streamKey, object delta, CancellationToken cancellationToken = default);
+    
     /// <summary>
     ///     Stages a single delta with a given state key and message key.
     /// </summary>
@@ -30,7 +36,7 @@ public interface IMultipleStreamRepository : IDisposableResource
     /// <param name="delta">The new delta that modifies the stream.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>Only <c>false</c> if the message key already exists.</returns>
-    Task<bool> Stage(Key streamKey, Key messageKey, object delta, CancellationToken cancellationToken = default);
+    Task<bool> Append(Key streamKey, Key messageKey, object delta, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Commits all stages deltas.

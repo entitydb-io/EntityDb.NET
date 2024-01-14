@@ -24,6 +24,22 @@ public interface IStreamRepositoryFactory
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default
     );
+    
+    Task<ISingleStreamRepository> CreateSingleForNew
+    (
+        Key streamKey,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        CancellationToken cancellationToken = default
+    );
+    
+    Task<ISingleStreamRepository> CreateSingleForExisting
+        (
+            Key streamKey,
+            string agentSignatureOptionsName,
+            string sourceSessionOptionsName,
+            CancellationToken cancellationToken = default
+        );
 
     /// <summary>
     ///     Creates a new instance of <see cref="IMultipleStreamRepository" />.

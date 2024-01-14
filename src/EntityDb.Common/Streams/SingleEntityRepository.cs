@@ -21,7 +21,7 @@ internal sealed class SingleStreamRepository : DisposableResourceBaseClass, ISin
 
     public Task<bool> Stage(Key messageKey, object delta, CancellationToken cancellationToken = default)
     {
-        return _multipleStreamRepository.Stage(StreamKey, messageKey, delta, cancellationToken);
+        return _multipleStreamRepository.Append(StreamKey, messageKey, delta, cancellationToken);
     }
 
     public Task<bool> Commit(CancellationToken cancellationToken = default)

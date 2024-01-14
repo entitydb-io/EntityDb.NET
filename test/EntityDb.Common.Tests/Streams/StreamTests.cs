@@ -68,7 +68,7 @@ public sealed class StreamTests : TestsBase<Startup>
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Stage(streamKey, messageKey, expectedDelta);
+            .Append(streamKey, messageKey, expectedDelta);
 
         var committed = await writeRepository
             .Commit();
@@ -114,7 +114,7 @@ public sealed class StreamTests : TestsBase<Startup>
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Stage(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, messageKey, new DoNothing());
 
         var committed = await writeRepository.Commit();
 
@@ -178,7 +178,7 @@ public sealed class StreamTests : TestsBase<Startup>
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Stage(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, messageKey, new DoNothing());
 
         var committed = await writeRepository.Commit();
 
@@ -223,7 +223,7 @@ public sealed class StreamTests : TestsBase<Startup>
         await writeRepository.LoadOrCreate(streamKey);
 
         var firstStaged = await writeRepository
-            .Stage(streamKey, messageKey1, new DoNothing());
+            .Append(streamKey, messageKey1, new DoNothing());
 
         var firstCommitted = await writeRepository.Commit();
 
@@ -235,7 +235,7 @@ public sealed class StreamTests : TestsBase<Startup>
         // ACT
 
         var secondStaged = await writeRepository
-            .Stage(streamKey, messageKey2, new DoNothing());
+            .Append(streamKey, messageKey2, new DoNothing());
 
         var secondCommitted = await writeRepository.Commit();
 
@@ -291,7 +291,7 @@ public sealed class StreamTests : TestsBase<Startup>
         // ACT
 
         var staged = await writeRepository
-            .Stage(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, messageKey, new DoNothing());
 
         // ASSERT
 
@@ -320,7 +320,7 @@ public sealed class StreamTests : TestsBase<Startup>
         await writeRepository.LoadOrCreate(streamKey);
 
         var stagedOnce = await writeRepository
-            .Stage(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, messageKey, new DoNothing());
 
         var committedOnce = await writeRepository.Commit();
 
@@ -332,7 +332,7 @@ public sealed class StreamTests : TestsBase<Startup>
         // ACT
 
         var stagedTwice = await writeRepository
-            .Stage(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, messageKey, new DoNothing());
 
         // ASSERT
 

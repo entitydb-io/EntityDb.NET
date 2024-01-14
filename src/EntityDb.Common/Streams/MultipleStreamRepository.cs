@@ -1,12 +1,14 @@
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Abstractions.States.Attributes;
+using EntityDb.Abstractions.States.Deltas;
 using EntityDb.Abstractions.Streams;
 using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Queries.Standard;
 using EntityDb.Common.States.Attributes;
+using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Streams;
 
@@ -48,7 +50,73 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
         _knownStreams.Add(streamKey, stream);
     }
 
-    public async Task<bool> Stage(Key streamKey, Key messageKey, object delta,
+    public async Task Load(Key streamKey, CancellationToken cancellationToken = default)
+    {
+        if (_knownStreams.ContainsKey(streamKey))
+        {
+            throw new ExistingStreamException();
+        }
+
+        var streamKeyLease = GetStreamKeyLease(streamKey);
+
+        var streamPointer = await GetStreamPointer(streamKeyLease, cancellationToken);
+
+        if (streamPointer == default)
+        {
+            throw new UnknownStreamException();
+        }
+
+        _knownStreams.Add(streamKey, new Stream
+        {
+            Key = streamKey,
+            Id = streamPointer.Id,
+            New = false,
+        });
+    }
+
+    public void Create(Key streamKey, CancellationToken cancellationToken = default)
+    {
+        if (_knownStreams.ContainsKey(streamKey))
+        {
+            throw new ExistingStreamException();
+        }
+
+        _knownStreams.Add(streamKey, new Stream
+        {
+            Key = streamKey,
+            Id = Id.NewId(),
+            New = true,
+        });
+    }
+
+    public void Append(Key streamKey, object delta, CancellationToken cancellationToken = default)
+    {
+        if (!_knownStreams.TryGetValue(streamKey, out var stream))
+        {
+            throw new UnknownStreamException();
+        }
+
+        var addLeases = new List<ILease>();
+
+        Pointer nextStreamPointer;
+        
+        if (stream.New)
+        {
+            addLeases.Add(GetStreamKeyLease(stream.Key));
+
+            _knownStreams[streamKey] = stream with { New = false };
+
+            nextStreamPointer = stream.Id + Version.One;
+        }
+        else
+        {
+            nextStreamPointer = stream.Id;
+        }
+
+        _messages.Add(Message.NewMessage<IStream>(stream, nextStreamPointer, delta, addLeases));
+    }
+
+    public async Task<bool> Append(Key streamKey, Key messageKey, object delta,
         CancellationToken cancellationToken = default)
     {
         if (!_knownStreams.TryGetValue(streamKey, out var stream))
@@ -58,26 +126,31 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
 
         var messageKeyLease = GetMessageKeyLease(streamKey, messageKey);
 
-        var statePointer = await GetStreamPointer(messageKeyLease, cancellationToken);
+        var streamPointer = await GetStreamPointer(messageKeyLease, cancellationToken);
 
-        if (statePointer != default)
+        if (streamPointer != default)
         {
             return false;
         }
 
         var addLeases = new List<ILease> { messageKeyLease };
 
+        Pointer nextStreamPointer;
+        
         if (stream.New)
         {
             addLeases.Add(GetStreamKeyLease(stream.Key));
 
             _knownStreams[streamKey] = stream with { New = false };
+
+            nextStreamPointer = stream.Id + Version.One;
+        }
+        else
+        {
+            nextStreamPointer = stream.Id;
         }
 
-        _messages.Add(new Message
-        {
-            Id = Id.NewId(), StatePointer = stream.Id, Delta = delta, AddLeases = addLeases.ToArray(),
-        });
+        _messages.Add(Message.NewMessage<IStream>(stream, nextStreamPointer, delta, addLeases));
 
         return true;
     }
