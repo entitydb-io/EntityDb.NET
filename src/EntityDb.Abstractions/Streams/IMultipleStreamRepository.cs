@@ -14,7 +14,7 @@ public interface IMultipleStreamRepository : IDisposableResource
     /// </summary>
     ISourceRepository SourceRepository { get; }
 
-    void Create(Key streamKey, CancellationToken cancellationToken = default);
+    void Create(Key streamKey);
     
     Task Load(Key streamKey, CancellationToken cancellationToken = default);
     

@@ -47,7 +47,7 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
         var multipleStreamRepository =
             await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName, cancellationToken);
 
-        multipleStreamRepository.Create(streamKey, cancellationToken);
+        multipleStreamRepository.Create(streamKey);
 
         return new SingleStreamRepository(multipleStreamRepository, streamKey);
     }

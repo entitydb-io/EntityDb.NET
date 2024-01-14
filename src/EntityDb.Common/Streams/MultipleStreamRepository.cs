@@ -74,7 +74,7 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
         });
     }
 
-    public void Create(Key streamKey, CancellationToken cancellationToken = default)
+    public void Create(Key streamKey)
     {
         if (_knownStreams.ContainsKey(streamKey))
         {
