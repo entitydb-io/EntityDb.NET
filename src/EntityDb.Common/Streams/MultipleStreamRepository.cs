@@ -75,39 +75,38 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
         _knownStreams.Add(streamKey, new Stream { Key = streamKey, Id = Id.NewId(), IsNew = true });
     }
 
-    public async Task<bool> Append(IStateKey streamKey, object delta, CancellationToken cancellationToken = default)
+    public void Append(IStateKey streamKey, object delta)
     {
         if (!_knownStreams.TryGetValue(streamKey, out var stream))
         {
             throw new UnknownStreamKeyException();
         }
 
-        if (delta is IAddMessageKeyDelta addMessageKeyDelta)
+        var nextStreamPointer = stream.GetNextPointer();
+
+        _messages.Add(Message.NewMessage<IStream>(stream, nextStreamPointer, delta, streamKey));
+    }
+    
+    public async Task<bool> Append<TDelta>(IStateKey streamKey, TDelta delta, CancellationToken cancellationToken = default)
+        where TDelta : IAddMessageKeyDelta
+    {
+        if (!_knownStreams.TryGetValue(streamKey, out var stream))
         {
-            var messageKeyLease = addMessageKeyDelta
-                .GetMessageKey()
-                .ToLease(streamKey);
-
-            var streamPointer = await GetStreamPointer(messageKeyLease, cancellationToken);
-
-            if (streamPointer != default)
-            {
-                return false;
-            }
+            throw new UnknownStreamKeyException();
         }
 
-        StatePointer nextStreamPointer;
+        var messageKeyLease = delta
+            .GetMessageKey()
+            .ToLease(streamKey);
 
-        if (stream.IsNew)
-        {
-            _knownStreams[streamKey].IsNew = false;
+        var streamPointer = await GetStreamPointer(messageKeyLease, cancellationToken);
 
-            nextStreamPointer = stream.Id + StateVersion.One;
-        }
-        else
+        if (streamPointer != default)
         {
-            nextStreamPointer = stream.Id;
+            return false;
         }
+
+        var nextStreamPointer = stream.GetNextPointer();
 
         _messages.Add(Message.NewMessage<IStream>(stream, nextStreamPointer, delta, streamKey));
 

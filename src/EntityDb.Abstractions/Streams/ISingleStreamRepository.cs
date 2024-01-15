@@ -20,6 +20,8 @@ public interface ISingleStreamRepository : IDisposableResource
     /// </summary>
     IStateKey StreamKey { get; }
 
+    void Append(object delta);
+    
     /// <summary>
     ///     Stages a single delta with a given state key and message key.
     /// </summary>
@@ -30,7 +32,8 @@ public interface ISingleStreamRepository : IDisposableResource
     ///     Only <c>false</c> if the the delta implements <see cref="IAddMessageKeyDelta" /> and
     ///     the message key already exists.
     /// </returns>
-    Task<bool> Append(object delta, CancellationToken cancellationToken = default);
+    Task<bool> Append<TDelta>(TDelta delta, CancellationToken cancellationToken = default)
+        where TDelta : IAddMessageKeyDelta;
 
     /// <summary>
     ///     Commits all stages deltas.

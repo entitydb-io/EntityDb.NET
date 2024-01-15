@@ -1,5 +1,6 @@
 ﻿using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Abstractions.States.Deltas;
 using EntityDb.Abstractions.Streams;
 using EntityDb.Common.Disposables;
 
@@ -19,7 +20,13 @@ internal sealed class SingleStreamRepository : DisposableResourceBaseClass, ISin
     public ISourceRepository SourceRepository => _multipleStreamRepository.SourceRepository;
     public IStateKey StreamKey { get; }
 
-    public Task<bool> Append(object delta, CancellationToken cancellationToken = default)
+    public void Append(object delta)
+    {
+        _multipleStreamRepository.Append(StreamKey, delta);
+    }
+    
+    public Task<bool> Append<TDelta>(TDelta delta, CancellationToken cancellationToken = default)
+        where TDelta : IAddMessageKeyDelta
     {
         return _multipleStreamRepository.Append(StreamKey, delta, cancellationToken);
     }
