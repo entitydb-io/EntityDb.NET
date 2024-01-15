@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.MongoDb.Documents;
@@ -62,7 +62,7 @@ internal sealed record MongoSession
 
     public async Task<StateDocument?> Fetch
     (
-        Pointer statePointer,
+        StatePointer statePointer,
         CancellationToken cancellationToken
     )
     {
@@ -103,7 +103,7 @@ internal sealed record MongoSession
         return stateDocument;
     }
 
-    public async Task Delete(Pointer[] statePointer, CancellationToken cancellationToken)
+    public async Task Delete(StatePointer[] statePointer, CancellationToken cancellationToken)
     {
         AssertNotReadOnly();
 
@@ -209,7 +209,7 @@ internal sealed record MongoSession
         return base.DisposeAsync();
     }
 
-    private static FilterDefinition<StateDocument> GetFilter(Pointer statePointer)
+    private static FilterDefinition<StateDocument> GetFilter(StatePointer statePointer)
     {
         return Filter.Eq(document => document.StatePointer, statePointer);
     }

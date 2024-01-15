@@ -1,8 +1,8 @@
-﻿using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Polyfills;
 using EntityDb.Common.Sources.Agents;
@@ -14,7 +14,6 @@ using Moq;
 using Shouldly;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Entities;
 
@@ -45,7 +44,7 @@ public sealed class EntityTests : TestsBase<Startup>
         const ulong n = 10UL;
         const ulong m = 5UL;
 
-        var versionM = new Version(m);
+        var versionM = new StateVersion(m);
 
         var entityId = Id.NewId();
 
@@ -61,13 +60,13 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await readOnlyRepository.Load(entityId + new Version(m));
+        await readOnlyRepository.Load(entityId + new StateVersion(m));
 
         var entity = readOnlyRepository.Get(entityId);
 
         // ASSERT
 
-        entity.GetPointer().Version.ShouldBe(versionM);
+        entity.GetPointer().StateVersion.ShouldBe(versionM);
     }
 
     private async Task Generic_GivenExistingEntityWithNoPersistedState_WhenGettingEntity_ThenGetDeltasRuns<TEntity>(
@@ -77,7 +76,7 @@ public sealed class EntityTests : TestsBase<Startup>
         // ARRANGE
 
         const uint expectedVersionNumber = 10;
-        var expectedVersion = new Version(expectedVersionNumber);
+        var expectedVersion = new StateVersion(expectedVersionNumber);
 
         var entityId = Id.NewId();
 
@@ -139,7 +138,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ASSERT
 
-        entity.GetPointer().Version.ShouldBe(expectedVersion);
+        entity.GetPointer().StateVersion.ShouldBe(expectedVersion);
 
         sourceRepositoryMock
             .Verify(
@@ -240,7 +239,7 @@ public sealed class EntityTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var previousEntity = TEntity.Construct(default(Id) + new Version(1));
+        var previousEntity = TEntity.Construct(default(Id) + new StateVersion(1));
 
         var newDeltas = new object[] { new DoNothing(), new DoNothing() };
 
@@ -263,8 +262,8 @@ public sealed class EntityTests : TestsBase<Startup>
         // ASSERT
 
         currentEntity.ShouldNotBe(previousEntity);
-        currentEntity.GetPointer().Version.ShouldBe(
-            new Version(previousEntity.GetPointer().Version.Value + Convert.ToUInt64(newDeltas.Length)));
+        currentEntity.GetPointer().StateVersion.ShouldBe(
+            new StateVersion(previousEntity.GetPointer().StateVersion.Value + Convert.ToUInt64(newDeltas.Length)));
     }
 
     private async Task Generic_GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow<TEntity>(
@@ -301,7 +300,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         var entityId = Id.NewId();
 
-        var expectedEntity = TEntity.Construct(entityId + new Version(1));
+        var expectedEntity = TEntity.Construct(entityId + new StateVersion(1));
 
         await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 

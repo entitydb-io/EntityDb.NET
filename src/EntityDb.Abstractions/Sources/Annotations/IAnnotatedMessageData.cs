@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Sources.Annotations;
 
@@ -24,12 +24,12 @@ public interface IAnnotatedMessageData<out TData>
     Id MessageId { get; }
 
     /// <summary>
+    ///     The state pointer
+    /// </summary>
+    StatePointer StatePointer { get; }
+
+    /// <summary>
     ///     The data
     /// </summary>
     TData Data { get; }
-
-    /// <summary>
-    ///     A pointer to the state
-    /// </summary>
-    Pointer StatePointer { get; }
 }

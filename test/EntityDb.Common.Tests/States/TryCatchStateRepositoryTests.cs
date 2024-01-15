@@ -1,6 +1,5 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -32,16 +31,16 @@ public sealed class TryCatchStateRepositoryTests : TestsBase<Startup>
         var stateRepositoryMock = new Mock<IStateRepository<TEntity>>(MockBehavior.Strict);
 
         stateRepositoryMock
-            .Setup(repository => repository.Get(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.Get(It.IsAny<StatePointer>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         stateRepositoryMock
             .Setup(repository =>
-                repository.Put(It.IsAny<Pointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
+                repository.Put(It.IsAny<StatePointer>(), It.IsAny<TEntity>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         stateRepositoryMock
-            .Setup(repository => repository.Delete(It.IsAny<Pointer[]>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.Delete(It.IsAny<StatePointer[]>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotImplementedException());
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>

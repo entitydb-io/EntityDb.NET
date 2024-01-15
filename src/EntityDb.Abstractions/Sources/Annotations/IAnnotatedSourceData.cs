@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Sources.Annotations;
 
@@ -19,17 +19,17 @@ public interface IAnnotatedSourceData<out TData>
     TimeStamp SourceTimeStamp { get; }
 
     /// <summary>
-    ///     The ids of the messages
+    ///     The message ids
     /// </summary>
     Id[] MessageIds { get; }
+
+    /// <summary>
+    ///     The state pointers
+    /// </summary>
+    StatePointer[] StatePointers { get; }
 
     /// <summary>
     ///     The data
     /// </summary>
     TData Data { get; }
-
-    /// <summary>
-    ///     The pointers of the entities
-    /// </summary>
-    Pointer[] StatePointers { get; }
 }

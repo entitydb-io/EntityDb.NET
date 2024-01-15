@@ -1,8 +1,8 @@
-﻿using EntityDb.Abstractions.States.Attributes;
+﻿using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.States.Deltas;
 using EntityDb.Abstractions.States.Transforms;
 using EntityDb.Common.Tests.Implementations.Projections;
-using EntityDb.Common.Tests.Implementations.States.Attributes;
+using EntityDb.Common.Tests.Implementations.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Entities.Deltas;
 
@@ -21,11 +21,11 @@ public sealed record StoreNumber(ulong Number) : IReducer<TestEntity>, IMutator<
 
     public void Mutate(OneToOneProjection projection)
     {
-        projection.Pointer = projection.Pointer.Next();
+        projection.StatePointer = projection.StatePointer.Next();
     }
 
     public TestEntity Reduce(TestEntity entity)
     {
-        return new TestEntity { Pointer = entity.Pointer.Next() };
+        return new TestEntity { StatePointer = entity.StatePointer.Next() };
     }
 }

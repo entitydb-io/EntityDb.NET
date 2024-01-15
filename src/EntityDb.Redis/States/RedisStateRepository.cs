@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Redis.States.Sessions;
@@ -21,7 +20,7 @@ internal sealed class RedisStateRepository<TState> : DisposableResourceBaseClass
         _redisSession = redisSession;
     }
 
-    public async Task<bool> Put(Pointer statePointer, TState state,
+    public async Task<bool> Put(StatePointer statePointer, TState state,
         CancellationToken cancellationToken = default)
     {
         var stateValue = _envelopeService
@@ -30,7 +29,7 @@ internal sealed class RedisStateRepository<TState> : DisposableResourceBaseClass
         return await _redisSession.Upsert(statePointer, stateValue).WaitAsync(cancellationToken);
     }
 
-    public async Task<TState?> Get(Pointer statePointer,
+    public async Task<TState?> Get(StatePointer statePointer,
         CancellationToken cancellationToken = default)
     {
         var stateValue = await _redisSession.Fetch(statePointer).WaitAsync(cancellationToken);
@@ -44,7 +43,7 @@ internal sealed class RedisStateRepository<TState> : DisposableResourceBaseClass
             .Deserialize<TState>(stateValue!);
     }
 
-    public Task<bool> Delete(Pointer[] statePointers, CancellationToken cancellationToken = default)
+    public Task<bool> Delete(StatePointer[] statePointers, CancellationToken cancellationToken = default)
     {
         return _redisSession.Delete(statePointers).WaitAsync(cancellationToken);
     }

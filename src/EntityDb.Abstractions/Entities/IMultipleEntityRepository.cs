@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Entities;
 
@@ -33,14 +32,14 @@ public interface IMultipleEntityRepository<TEntity> : IDisposableResource
     /// <summary>
     ///     Associate a <typeparamref name="TEntity" /> with a given state id.
     /// </summary>
-    /// <param name="entityPointer">A pointer associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="entityPointer">A state pointer associated with a <typeparamref name="TEntity" />.</param>
     /// <param name="cancellationToken">A cancellation token</param>
     /// <returns>A task.</returns>
     /// <remarks>
     ///     Call this method to load an entity that already exists before calling
     ///     <see cref="Append" />.
     /// </remarks>
-    Task Load(Pointer entityPointer, CancellationToken cancellationToken = default);
+    Task Load(StatePointer entityPointer, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state of a <typeparamref name="TEntity" /> for a given <see cref="Id" />.

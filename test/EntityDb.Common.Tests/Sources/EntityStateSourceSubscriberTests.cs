@@ -1,5 +1,5 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.States;
 using Shouldly;
@@ -54,7 +54,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
 
         committed.ShouldBeTrue();
         persistedEntity.ShouldNotBeNull();
-        persistedEntity.GetPointer().Version.Value.ShouldBe(numberOfVersions);
+        persistedEntity.GetPointer().StateVersion.Value.ShouldBe(numberOfVersions);
     }
 
     [Theory]

@@ -36,7 +36,7 @@ internal sealed record TagDataDocument : MessageDataDocumentBase
                 SourceId = source.Id,
                 MessageId = message.Id,
                 StateId = message.StatePointer.Id,
-                StateVersion = message.StatePointer.Version,
+                StateVersion = message.StatePointer.StateVersion,
                 StatePointer = message.StatePointer,
                 DataType = tag.GetType().Name,
                 Data = envelopeService.Serialize(tag),

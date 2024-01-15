@@ -1,28 +1,27 @@
 ﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.States;
 
 internal sealed class TestModeStateManager<TState> : DisposableResourceBaseClass
 {
-    private readonly Dictionary<IStateRepository<TState>, List<Pointer>> _dictionary = new();
+    private readonly Dictionary<IStateRepository<TState>, List<StatePointer>> _dictionary = new();
 
-    private List<Pointer> GetStoredStatePointers(IStateRepository<TState> stateRepository)
+    private List<StatePointer> GetStoredStatePointers(IStateRepository<TState> stateRepository)
     {
         if (_dictionary.TryGetValue(stateRepository, out var storedStatePointers))
         {
             return storedStatePointers;
         }
 
-        storedStatePointers = new List<Pointer>();
+        storedStatePointers = new List<StatePointer>();
 
         _dictionary.Add(stateRepository, storedStatePointers);
 
         return storedStatePointers;
     }
 
-    public void AddStatePointer(IStateRepository<TState> stateRepository, Pointer statePointer)
+    public void AddStatePointer(IStateRepository<TState> stateRepository, StatePointer statePointer)
     {
         var storedStatePointers = GetStoredStatePointers(stateRepository);
 
@@ -30,7 +29,7 @@ internal sealed class TestModeStateManager<TState> : DisposableResourceBaseClass
     }
 
     public void RemoveStatePointers(IStateRepository<TState> stateRepository,
-        IEnumerable<Pointer> statePointers)
+        IEnumerable<StatePointer> statePointers)
     {
         var storedStatePointers = GetStoredStatePointers(stateRepository);
 

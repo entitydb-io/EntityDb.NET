@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
-
-namespace EntityDb.Abstractions.Sources.Agents;
+﻿namespace EntityDb.Abstractions.Sources.Agents;
 
 /// <summary>
 ///     Represents an actor who can record sources.

@@ -1,6 +1,7 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Abstractions.States.Deltas;
 
 namespace EntityDb.Abstractions.Streams;
 
@@ -15,18 +16,21 @@ public interface ISingleStreamRepository : IDisposableResource
     ISourceRepository SourceRepository { get; }
 
     /// <summary>
-    ///     The pointer for the current stream.
+    ///     The state pointer for the current stream.
     /// </summary>
-    Key StreamKey { get; }
+    IStateKey StreamKey { get; }
 
     /// <summary>
     ///     Stages a single delta with a given state key and message key.
     /// </summary>
-    /// <param name="messageKey">The key associated with the message.</param>
     /// <param name="delta">The new delta that modifies the stream.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>Only <c>false</c> if the message key already exists.</returns>
-    Task<bool> Stage(Key messageKey, object delta, CancellationToken cancellationToken = default);
+    /// <returns>
+    ///     Only async if the delta implements <see cref="IAddMessageKeyDelta" />.
+    ///     Only <c>false</c> if the the delta implements <see cref="IAddMessageKeyDelta" /> and
+    ///     the message key already exists.
+    /// </returns>
+    Task<bool> Append(object delta, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Commits all stages deltas.

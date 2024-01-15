@@ -1,8 +1,9 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.States.Attributes;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Exceptions;
@@ -10,7 +11,6 @@ using EntityDb.MongoDb.Documents;
 using EntityDb.MongoDb.Documents.Queries;
 using EntityDb.MongoDb.Sources.Sessions;
 using MongoDB.Bson;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Sources;
 
@@ -61,7 +61,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .EnumerateSourceIds(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return AgentSignatureDocument
@@ -69,7 +69,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .EnumerateSourceDataStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return DeltaDataDocument
@@ -77,7 +77,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default)
     {
         return LeaseDataDocument
@@ -85,7 +85,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .EnumerateMessageStatePointers(_mongoSession, cancellationToken);
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default)
     {
         return TagDataDocument
@@ -162,7 +162,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
                 var previousVersion = await DeltaDataDocument
                     .GetLastStateVersion(_mongoSession, message.StatePointer.Id, cancellationToken);
 
-                if (message.StatePointer.Version == Version.Zero)
+                if (message.StatePointer.StateVersion == StateVersion.Zero)
                 {
                     currentMessage = currentMessage with
                     {
@@ -172,7 +172,7 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
                 else
                 {
                     OptimisticConcurrencyException.ThrowIfMismatch(previousVersion.Next(),
-                        message.StatePointer.Version);
+                        message.StatePointer.StateVersion);
                 }
 
                 await Put(source, currentMessage, cancellationToken);
@@ -210,28 +210,28 @@ internal sealed class MongoDbSourceRepository : DisposableResourceBaseClass, ISo
             .GetInsertCommand(_envelopeService, source, message)
             .Execute(_mongoSession, cancellationToken);
 
-        if (message.AddLeases.Count > 0)
+        if (message.AddLeases.Length > 0)
         {
             await LeaseDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.AddTags.Count > 0)
+        if (message.AddTags.Length > 0)
         {
             await TagDataDocument
                 .GetInsertCommand(_envelopeService, source, message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.DeleteLeases.Count > 0)
+        if (message.DeleteLeases.Length > 0)
         {
             await LeaseDataDocument
                 .GetDeleteCommand(message)
                 .Execute(_mongoSession, cancellationToken);
         }
 
-        if (message.DeleteTags.Count > 0)
+        if (message.DeleteTags.Length > 0)
         {
             await TagDataDocument
                 .GetDeleteCommand(message)

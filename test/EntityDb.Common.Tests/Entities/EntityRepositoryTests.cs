@@ -1,14 +1,14 @@
-﻿using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Exceptions;
-using EntityDb.Common.States.Attributes;
+using EntityDb.Common.Sources.Attributes;
 using EntityDb.Common.Tests.Implementations.Entities.Deltas;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Entities;
 
@@ -107,7 +107,7 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
 
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
-        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(1);
+        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
     }
 
     private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
@@ -180,13 +180,13 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
 
         committedSources.Count.ShouldBe(1);
 
-        var expectedVersion = Version.Zero;
+        var expectedVersion = StateVersion.Zero;
 
         for (var i = 1; i <= numberOfVersionsToTest; i++)
         {
             expectedVersion = expectedVersion.Next();
 
-            committedSources[0].Messages[i - 1].StatePointer.Version.ShouldBe(expectedVersion);
+            committedSources[0].Messages[i - 1].StatePointer.StateVersion.ShouldBe(expectedVersion);
         }
     }
 

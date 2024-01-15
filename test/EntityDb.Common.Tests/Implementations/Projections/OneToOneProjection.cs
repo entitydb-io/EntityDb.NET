@@ -1,13 +1,13 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.States.Transforms;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Sources;
 using EntityDb.Common.Sources.Queries.Standard;
 using EntityDb.Common.Tests.Implementations.States;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Projections;
 
@@ -15,16 +15,16 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
 {
     public TimeStamp LastSourceAt { get; set; }
 
-    public required Pointer Pointer { get; set; }
+    public required StatePointer StatePointer { get; set; }
 
-    public static OneToOneProjection Construct(Pointer pointer)
+    public static OneToOneProjection Construct(StatePointer statePointer)
     {
-        return new OneToOneProjection { Pointer = pointer };
+        return new OneToOneProjection { StatePointer = statePointer };
     }
 
-    public Pointer GetPointer()
+    public StatePointer GetPointer()
     {
-        return Pointer;
+        return StatePointer;
     }
 
     public void Mutate(Source source)
@@ -40,7 +40,7 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
 
             mutator.Mutate(this);
 
-            Pointer = message.StatePointer;
+            StatePointer = message.StatePointer;
         }
     }
 
@@ -58,7 +58,7 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
     public async IAsyncEnumerable<Source> EnumerateSources
     (
         IServiceProvider serviceProvider,
-        Pointer projectionPointer,
+        StatePointer projectionPointer,
         [EnumeratorCancellation] CancellationToken cancellationToken
     )
     {
@@ -95,9 +95,9 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
     public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
         new();
 
-    public OneToOneProjection WithVersion(Version version)
+    public OneToOneProjection WithVersion(StateVersion stateVersion)
     {
-        Pointer = Pointer.Id + version;
+        StatePointer = StatePointer.Id + stateVersion;
 
         return this;
     }

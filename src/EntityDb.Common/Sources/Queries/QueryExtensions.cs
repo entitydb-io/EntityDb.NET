@@ -42,7 +42,8 @@ public static class QueryExtensions
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="ILeaseDataQuery" />. The way in which it is modified depends on the parameters of
+    ///     Returns a new, modified <see cref="ILeaseDataQuery" />. The way in which it is modified depends on the parameters
+    ///     of
     ///     this extension method.
     /// </summary>
     /// <param name="leaseDataQuery">The lease query.</param>
@@ -50,11 +51,15 @@ public static class QueryExtensions
     /// <returns>A new, modified <see cref="ILeaseDataQuery" />.</returns>
     public static ILeaseDataQuery Modify(this ILeaseDataQuery leaseDataQuery, ModifiedQueryOptions modifiedQueryOptions)
     {
-        return new ModifiedLeaseDataQuery { ModifiedQueryOptions = modifiedQueryOptions, LeaseDataQuery = leaseDataQuery };
+        return new ModifiedLeaseDataQuery
+        {
+            ModifiedQueryOptions = modifiedQueryOptions, LeaseDataQuery = leaseDataQuery,
+        };
     }
 
     /// <summary>
-    ///     Returns a new, modified <see cref="ITagDataQuery" />. The way in which it is modified depends on the parameters of this
+    ///     Returns a new, modified <see cref="ITagDataQuery" />. The way in which it is modified depends on the parameters of
+    ///     this
     ///     extension method.
     /// </summary>
     /// <param name="tagDataQuery">The tag query.</param>

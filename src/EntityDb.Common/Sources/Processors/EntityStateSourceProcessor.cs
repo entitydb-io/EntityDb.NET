@@ -1,6 +1,7 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -52,7 +53,7 @@ public sealed class EntityStateSourceProcessor<TEntity> : ISourceProcessor
         }
 
         var latestEntities = new Dictionary<Id, TEntity>();
-        var saveEntities = new Dictionary<Pointer, TEntity>();
+        var saveEntities = new Dictionary<StatePointer, TEntity>();
 
         foreach (var message in source.Messages)
         {

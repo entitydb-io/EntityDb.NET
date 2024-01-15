@@ -1,6 +1,7 @@
-using EntityDb.Abstractions.States.Attributes;
+using EntityDb.Abstractions.Extensions;
+using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.States.Deltas;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Sources;
 
@@ -15,9 +16,9 @@ public sealed record Message
     public required Id Id { get; init; }
 
     /// <summary>
-    ///     A pointer to the state
+    ///     The state pointer
     /// </summary>
-    public required Pointer StatePointer { get; init; }
+    public required StatePointer StatePointer { get; init; }
 
     /// <summary>
     ///     The data.
@@ -27,41 +28,67 @@ public sealed record Message
     /// <summary>
     ///     The leases to be added.
     /// </summary>
-    public IReadOnlyCollection<ILease> AddLeases { get; init; } = Array.Empty<ILease>();
+    public ILease[] AddLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The tags to be added.
     /// </summary>
-    public IReadOnlyCollection<ITag> AddTags { get; init; } = Array.Empty<ITag>();
+    public ITag[] AddTags { get; init; } = Array.Empty<ITag>();
 
     /// <summary>
     ///     The leases to be deleted.
     /// </summary>
-    public IReadOnlyCollection<ILease> DeleteLeases { get; init; } = Array.Empty<ILease>();
+    public ILease[] DeleteLeases { get; init; } = Array.Empty<ILease>();
 
     /// <summary>
     ///     The tags to be deleted.
     /// </summary>
-    public IReadOnlyCollection<ITag> DeleteTags { get; init; } = Array.Empty<ITag>();
+    public ITag[] DeleteTags { get; init; } = Array.Empty<ITag>();
 
     internal static Message NewMessage<TState>
     (
         TState state,
-        Pointer statePointer,
+        StatePointer statePointer,
         object delta,
-        IReadOnlyCollection<ILease>? additionalAddLeases = null
+        IStateKey? stateKey = default
     )
     {
-        additionalAddLeases ??= Array.Empty<ILease>();
-        
+        IEnumerable<ILease>? addLeases = default;
+
+        if (stateKey != default)
+        {
+            if (statePointer.StateVersion == StateVersion.One)
+            {
+                addLeases = new[] { stateKey.ToLease() };
+            }
+
+            if (delta is IAddAlternateStateKeysDelta<TState> addAlternateStateKeysDelta)
+            {
+                addLeases = addLeases
+                    .ConcatOrCoalesce(addAlternateStateKeysDelta
+                        .GetAlternateStateKeys(state)
+                        .Select(key => key.ToLease()));
+            }
+
+            if (delta is IAddMessageKeyDelta addMessageKeyDelta)
+            {
+                addLeases = addLeases
+                    .AppendOrStart(addMessageKeyDelta
+                        .GetMessageKey()
+                        .ToLease(stateKey));
+            }
+        }
+        else if (delta is IAddLeasesDelta<TState> addLeasesDelta)
+        {
+            addLeases = addLeasesDelta.GetLeases(state);
+        }
+
         return new Message
         {
             Id = Id.NewId(),
             StatePointer = statePointer,
             Delta = delta,
-            AddLeases = delta is IAddLeasesDelta<TState> addLeasesDelta
-                ? addLeasesDelta.GetLeases(state).Concat(additionalAddLeases).ToArray()
-                : additionalAddLeases,
+            AddLeases = addLeases?.ToArray() ?? Array.Empty<ILease>(),
             AddTags = delta is IAddTagsDelta<TState> addTagsDelta
                 ? addTagsDelta.GetTags(state).ToArray()
                 : Array.Empty<ITag>(),

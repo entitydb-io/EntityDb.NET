@@ -36,11 +36,13 @@ public sealed class TryCatchSourceRepositoryTests : TestsBase<Startup>
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.EnumerateSourceIds(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock
-            .Setup(repository => repository.EnumerateSourceIds(It.IsAny<ITagDataQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.EnumerateSourceIds(It.IsAny<ITagDataQuery>(), It.IsAny<CancellationToken>()))
             .Throws(new NotImplementedException());
 
         sourceRepositoryMock

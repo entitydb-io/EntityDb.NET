@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.States.Attributes;
+﻿using EntityDb.Abstractions.Sources.Attributes;
 
-namespace EntityDb.Common.Tests.Implementations.States.Attributes;
+namespace EntityDb.Common.Tests.Implementations.Sources.Attributes;
 
 public sealed record CountLease(ulong Number) : ILease
 {

@@ -1,5 +1,5 @@
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.Sources.Attributes;
 
 namespace EntityDb.Abstractions.Streams;
 
@@ -19,27 +19,27 @@ public interface IStreamRepositoryFactory
     /// <returns>A new instance of <see cref="ISingleEntityRepository{TEntity}" />.</returns>
     Task<ISingleStreamRepository> CreateSingle
     (
-        Key streamKey,
+        IStateKey streamKey,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default
     );
-    
+
     Task<ISingleStreamRepository> CreateSingleForNew
     (
-        Key streamKey,
+        IStateKey streamKey,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default
     );
-    
+
     Task<ISingleStreamRepository> CreateSingleForExisting
-        (
-            Key streamKey,
-            string agentSignatureOptionsName,
-            string sourceSessionOptionsName,
-            CancellationToken cancellationToken = default
-        );
+    (
+        IStateKey streamKey,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     ///     Creates a new instance of <see cref="IMultipleStreamRepository" />.

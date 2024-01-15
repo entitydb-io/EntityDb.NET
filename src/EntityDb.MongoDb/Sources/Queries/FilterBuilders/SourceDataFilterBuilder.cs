@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;

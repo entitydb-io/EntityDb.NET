@@ -1,8 +1,8 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.States.Attributes;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Sources;
 
@@ -48,12 +48,12 @@ public interface ISourceRepository : IDisposableResource
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Returns the state pointers which are found by a agentSignature query.
+    ///     Returns the state pointers which are found by a source data query.
     /// </summary>
     /// <param name="sourceDataQuery">The source data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state pointers which are found by <paramref name="sourceDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
+    IAsyncEnumerable<StatePointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -62,7 +62,7 @@ public interface ISourceRepository : IDisposableResource
     /// <param name="messageDataQuery">The message data query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state pointers which are found by <paramref name="messageDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
+    IAsyncEnumerable<StatePointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -71,7 +71,7 @@ public interface ISourceRepository : IDisposableResource
     /// <param name="leaseDataQuery">The lease query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state pointers which are found by <paramref name="leaseDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
+    IAsyncEnumerable<StatePointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -80,7 +80,7 @@ public interface ISourceRepository : IDisposableResource
     /// <param name="tagDataQuery">The tag query.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state pointers which are found by <paramref name="tagDataQuery" />.</returns>
-    IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
+    IAsyncEnumerable<StatePointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default);
 
     /// <summary>

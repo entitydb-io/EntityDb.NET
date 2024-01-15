@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.States.Attributes;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.States.Deltas;
 
 namespace EntityDb.Common.Tests.Implementations.Entities.Deltas;

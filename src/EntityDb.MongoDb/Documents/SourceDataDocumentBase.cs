@@ -1,4 +1,5 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Sources.Documents;
 using EntityDb.MongoDb.Sources.Queries.FilterBuilders;
 using MongoDB.Bson;
@@ -16,5 +17,5 @@ internal abstract record SourceDataDocumentBase : DocumentBase, ISourceDataDocum
     public required Id[] StateIds { get; init; }
 
     public required Id[] MessageIds { get; init; }
-    public required Pointer[] StatePointers { get; init; }
+    public required StatePointer[] StatePointers { get; init; }
 }

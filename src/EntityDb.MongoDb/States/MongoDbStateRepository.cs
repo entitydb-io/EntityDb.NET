@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Envelopes;
 using EntityDb.MongoDb.Documents;
@@ -24,7 +23,7 @@ internal sealed class MongoDbStateRepository<TState> : DisposableResourceBaseCla
         _mongoSession = mongoSession;
     }
 
-    public async Task<bool> Put(Pointer statePointer, TState state,
+    public async Task<bool> Put(StatePointer statePointer, TState state,
         CancellationToken cancellationToken = default)
     {
         try
@@ -36,7 +35,7 @@ internal sealed class MongoDbStateRepository<TState> : DisposableResourceBaseCla
                 DataType = state.GetType().Name,
                 Data = _envelopeService.Serialize(state),
                 StateId = statePointer.Id,
-                StateVersion = statePointer.Version,
+                StateVersion = statePointer.StateVersion,
                 StatePointer = statePointer,
             }, cancellationToken);
 
@@ -54,7 +53,7 @@ internal sealed class MongoDbStateRepository<TState> : DisposableResourceBaseCla
         }
     }
 
-    public async Task<TState?> Get(Pointer statePointer,
+    public async Task<TState?> Get(StatePointer statePointer,
         CancellationToken cancellationToken = default)
     {
         var stateDocument = await _mongoSession.Fetch(statePointer, cancellationToken);
@@ -68,7 +67,7 @@ internal sealed class MongoDbStateRepository<TState> : DisposableResourceBaseCla
             .Deserialize<TState>(stateDocument.Data);
     }
 
-    public async Task<bool> Delete(Pointer[] statePointers, CancellationToken cancellationToken = default)
+    public async Task<bool> Delete(StatePointer[] statePointers, CancellationToken cancellationToken = default)
     {
         await _mongoSession.Delete(statePointers, cancellationToken);
 

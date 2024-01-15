@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
-
-namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
+﻿namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 
 /// <summary>
 ///     Builds a <typeparamref name="TFilter" /> for an object. Possible objects include:

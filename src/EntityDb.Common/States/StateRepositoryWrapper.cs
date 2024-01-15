@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.States;
@@ -17,19 +16,19 @@ internal abstract class StateRepositoryWrapper<TState> : DisposableResourceBaseC
         _stateRepository = stateRepository;
     }
 
-    public virtual Task<bool> Put(Pointer statePointer, TState state,
+    public virtual Task<bool> Put(StatePointer statePointer, TState state,
         CancellationToken cancellationToken = default)
     {
         return WrapCommand(() => _stateRepository.Put(statePointer, state, cancellationToken));
     }
 
-    public virtual Task<TState?> Get(Pointer statePointer,
+    public virtual Task<TState?> Get(StatePointer statePointer,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _stateRepository.Get(statePointer, cancellationToken));
     }
 
-    public virtual Task<bool> Delete(Pointer[] statePointers, CancellationToken cancellationToken = default)
+    public virtual Task<bool> Delete(StatePointer[] statePointers, CancellationToken cancellationToken = default)
     {
         return WrapCommand(() => _stateRepository.Delete(statePointers, cancellationToken));
     }

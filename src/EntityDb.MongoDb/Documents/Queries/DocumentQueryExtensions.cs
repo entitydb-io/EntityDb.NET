@@ -1,5 +1,6 @@
-﻿using EntityDb.Abstractions.Sources.Annotations;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Polyfills;
 using EntityDb.Common.Sources.Documents;
@@ -31,12 +32,12 @@ internal static class DocumentQueryExtensions
         return documents.EnumerateIds(skip, limit, mapToIds);
     }
 
-    private static IAsyncEnumerable<Pointer> EnumeratePointers<TDocument>
+    private static IAsyncEnumerable<StatePointer> EnumeratePointers<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
         ProjectionDefinition<BsonDocument, TDocument> projection,
-        Func<IAsyncEnumerable<TDocument>, IAsyncEnumerable<Pointer>> mapToPointers,
+        Func<IAsyncEnumerable<TDocument>, IAsyncEnumerable<StatePointer>> mapToPointers,
         CancellationToken cancellationToken
     )
     {
@@ -67,7 +68,7 @@ internal static class DocumentQueryExtensions
         );
     }
 
-    public static IAsyncEnumerable<Pointer> EnumerateSourceDataStatePointers<TDocument>
+    public static IAsyncEnumerable<StatePointer> EnumerateSourceDataStatePointers<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,
@@ -84,7 +85,7 @@ internal static class DocumentQueryExtensions
         );
     }
 
-    public static IAsyncEnumerable<Pointer> EnumerateMessageStatePointers<TDocument>
+    public static IAsyncEnumerable<StatePointer> EnumerateMessageStatePointers<TDocument>
     (
         this DocumentQuery<TDocument> documentQuery,
         IMongoSession mongoSession,

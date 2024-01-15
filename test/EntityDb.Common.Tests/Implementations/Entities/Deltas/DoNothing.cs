@@ -7,11 +7,11 @@ public record DoNothing : IReducer<TestEntity>, IMutator<OneToOneProjection>
 {
     public void Mutate(OneToOneProjection projection)
     {
-        projection.Pointer = projection.Pointer.Next();
+        projection.StatePointer = projection.StatePointer.Next();
     }
 
     public TestEntity Reduce(TestEntity entity)
     {
-        return new TestEntity { Pointer = entity.Pointer.Next() };
+        return new TestEntity { StatePointer = entity.StatePointer.Next() };
     }
 }

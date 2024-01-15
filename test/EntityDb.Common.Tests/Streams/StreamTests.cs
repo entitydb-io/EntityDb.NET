@@ -1,16 +1,17 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
+using EntityDb.Common.Sources.Attributes;
 using EntityDb.Common.Sources.Queries.Standard;
-using EntityDb.Common.Streams;
 using EntityDb.Common.Tests.Implementations.Entities.Deltas;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Streams;
 
@@ -37,14 +38,14 @@ public sealed class StreamTests : TestsBase<Startup>
             .InSequence(sequenceMock)
             .Setup(repository =>
                 repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(AsyncEnumerable.Empty<Pointer>());
+            .Returns(AsyncEnumerable.Empty<StatePointer>());
 
         // Second query checks if message key lease already exists
         sourceRepositoryMock
             .InSequence(sequenceMock)
             .Setup(repository =>
                 repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(AsyncEnumerable.Empty<Pointer>());
+            .Returns(AsyncEnumerable.Empty<StatePointer>());
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -55,20 +56,20 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var expectedStreamKeyLease = MultipleStreamRepository.GetStreamKeyLease(streamKey);
+        IStateKey streamKey = new Key("StreamKey");
+        var expectedStreamKeyLease = streamKey.ToLease();
 
-        var messageKey = new Key("MessageKey");
-        var expectedMessageKeyLease = MultipleStreamRepository.GetMessageKeyLease(streamKey, messageKey);
+        IMessageKey messageKey = new Key("MessageKey");
+        var expectedMessageKeyLease = messageKey.ToLease(streamKey);
 
-        var expectedDelta = new DoNothing();
+        var expectedDelta = new DoNothingIdempotent(messageKey);
 
         // ACT
 
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Append(streamKey, messageKey, expectedDelta);
+            .Append(streamKey, expectedDelta);
 
         var committed = await writeRepository
             .Commit();
@@ -80,11 +81,11 @@ public sealed class StreamTests : TestsBase<Startup>
 
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
-        committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.One);
+        committedSources[0].Messages[0].StatePointer.StateVersion.ShouldBe(StateVersion.One);
         committedSources[0].Messages[0].Delta.ShouldBe(expectedDelta);
-        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(2);
-        committedSources[0].Messages[0].AddLeases.ElementAt(0).ShouldBe(expectedMessageKeyLease);
-        committedSources[0].Messages[0].AddLeases.ElementAt(1).ShouldBe(expectedStreamKeyLease);
+        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(2);
+        committedSources[0].Messages[0].AddLeases[0].ShouldBe(expectedStreamKeyLease);
+        committedSources[0].Messages[0].AddLeases[1].ShouldBe(expectedMessageKeyLease);
     }
 
     [Theory]
@@ -103,18 +104,18 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var streamKeyLease = MultipleStreamRepository.GetStreamKeyLease(streamKey);
+        IStateKey streamKey = new Key("StreamKey");
+        var streamKeyLease = streamKey.ToLease();
 
-        var messageKey = new Key("MessageKey");
-        var messageKeyLease = MultipleStreamRepository.GetMessageKeyLease(streamKey, messageKey);
+        IMessageKey messageKey = new Key("MessageKey");
+        var messageKeyLease = messageKey.ToLease(streamKey);
 
         // ACT
 
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Append(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey));
 
         var committed = await writeRepository.Commit();
 
@@ -134,7 +135,7 @@ public sealed class StreamTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var statePointer = Id.NewId() + Version.Zero.Next();
+        var statePointer = Id.NewId() + StateVersion.One;
 
         var committedSources = new List<Source>();
 
@@ -153,7 +154,7 @@ public sealed class StreamTests : TestsBase<Startup>
             .InSequence(sequenceMock)
             .Setup(repository =>
                 repository.EnumerateStatePointers(It.IsAny<ILeaseDataQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(AsyncEnumerable.Empty<Pointer>());
+            .Returns(AsyncEnumerable.Empty<StatePointer>());
 
         await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
@@ -164,21 +165,21 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var messageKey = new Key("MessageKey");
+        IStateKey streamKey = new Key("StreamKey");
+        IMessageKey messageKey = new Key("MessageKey");
 
-        var expectedLease = MultipleStreamRepository.GetMessageKeyLease(streamKey, messageKey);
+        var expectedLease = messageKey.ToLease(streamKey);
 
         // ARRANGE ASSERTIONS
 
-        statePointer.Version.ShouldNotBe(Version.Zero);
+        statePointer.StateVersion.ShouldNotBe(StateVersion.Zero);
 
         // ACT
 
         await writeRepository.LoadOrCreate(streamKey);
 
         var staged = await writeRepository
-            .Append(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey));
 
         var committed = await writeRepository.Commit();
 
@@ -190,9 +191,9 @@ public sealed class StreamTests : TestsBase<Startup>
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
         committedSources[0].Messages[0].StatePointer.Id.ShouldBe(statePointer.Id);
-        committedSources[0].Messages[0].StatePointer.Version.ShouldBe(Version.Zero);
-        committedSources[0].Messages[0].AddLeases.Count.ShouldBe(1);
-        committedSources[0].Messages[0].AddLeases.ElementAt(0).ShouldBe(expectedLease);
+        committedSources[0].Messages[0].StatePointer.StateVersion.ShouldBe(StateVersion.Zero);
+        committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
+        committedSources[0].Messages[0].AddLeases[0].ShouldBe(expectedLease);
     }
 
     [Theory]
@@ -211,19 +212,19 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var streamKeyLease = MultipleStreamRepository.GetStreamKeyLease(streamKey);
+        IStateKey streamKey = new Key("StreamKey");
+        var streamKeyLease = streamKey.ToLease();
 
-        var messageKey1 = new Key("MessageKey1");
-        var messageKeyLease1 = MultipleStreamRepository.GetMessageKeyLease(streamKey, messageKey1);
+        IMessageKey messageKey1 = new Key("MessageKey1");
+        var messageKeyLease1 = messageKey1.ToLease(streamKey);
 
-        var messageKey2 = new Key("MessageKey2");
-        var messageKeyLease2 = MultipleStreamRepository.GetMessageKeyLease(streamKey, messageKey2);
+        IMessageKey messageKey2 = new Key("MessageKey2");
+        var messageKeyLease2 = messageKey2.ToLease(streamKey);
 
         await writeRepository.LoadOrCreate(streamKey);
 
         var firstStaged = await writeRepository
-            .Append(streamKey, messageKey1, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey1));
 
         var firstCommitted = await writeRepository.Commit();
 
@@ -235,7 +236,7 @@ public sealed class StreamTests : TestsBase<Startup>
         // ACT
 
         var secondStaged = await writeRepository
-            .Append(streamKey, messageKey2, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey2));
 
         var secondCommitted = await writeRepository.Commit();
 
@@ -255,7 +256,7 @@ public sealed class StreamTests : TestsBase<Startup>
     {
         // ARRANGE
 
-        var statePointer = Id.NewId() + Version.Zero.Next();
+        var statePointer = Id.NewId() + StateVersion.One;
 
         var sequenceMock = new MockSequence();
         var sourceRepositoryMock = new Mock<ISourceRepository>(MockBehavior.Strict);
@@ -283,15 +284,15 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var messageKey = new Key("MessageKey");
+        IStateKey streamKey = new Key("StreamKey");
+        IMessageKey messageKey = new Key("MessageKey");
 
         await writeRepository.LoadOrCreate(streamKey);
 
         // ACT
 
         var staged = await writeRepository
-            .Append(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey));
 
         // ASSERT
 
@@ -314,13 +315,13 @@ public sealed class StreamTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStreamRepository(serviceScope);
 
-        var streamKey = new Key("StreamKey");
-        var messageKey = new Key("MessageKey");
+        IStateKey streamKey = new Key("StreamKey");
+        IMessageKey messageKey = new Key("MessageKey");
 
         await writeRepository.LoadOrCreate(streamKey);
 
         var stagedOnce = await writeRepository
-            .Append(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey));
 
         var committedOnce = await writeRepository.Commit();
 
@@ -332,7 +333,7 @@ public sealed class StreamTests : TestsBase<Startup>
         // ACT
 
         var stagedTwice = await writeRepository
-            .Append(streamKey, messageKey, new DoNothing());
+            .Append(streamKey, new DoNothingIdempotent(messageKey));
 
         // ASSERT
 

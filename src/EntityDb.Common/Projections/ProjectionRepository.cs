@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +24,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
     public IStateRepository<TProjection>? StateRepository { get; }
 
-    public async Task<TProjection> Get(Pointer projectionPointer, CancellationToken cancellationToken = default)
+    public async Task<TProjection> Get(StatePointer projectionPointer, CancellationToken cancellationToken = default)
     {
         var projection = StateRepository is not null
             ? await StateRepository.Get(projectionPointer, cancellationToken) ??
@@ -39,10 +38,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
             projection.Mutate(source);
         }
 
-        if (!projectionPointer.IsSatisfiedBy(projection.GetPointer()))
-        {
-            throw new StateDoesNotExistException();
-        }
+        StateDoesNotExistException.ThrowIfNotAcceptable(projectionPointer, projection.GetPointer());
 
         return projection;
     }

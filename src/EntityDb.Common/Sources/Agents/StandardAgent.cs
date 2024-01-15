@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.Sources.Agents;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Agents;
 
 namespace EntityDb.Common.Sources.Agents;
 

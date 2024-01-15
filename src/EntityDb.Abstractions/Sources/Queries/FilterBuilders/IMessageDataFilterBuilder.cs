@@ -1,5 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
+﻿using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 
@@ -26,21 +25,21 @@ public interface IMessageDataFilterBuilder<TFilter> : IDataFilterBuilder<TFilter
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an state
     ///     version greater than or equal to a specific state version.
     /// </summary>
-    /// <param name="stateVersion">The state ids.</param>
+    /// <param name="stateStateVersion">The state ids.</param>
     /// <returns>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an state
-    ///     version greater than or equal to <paramref name="stateVersion" />.
+    ///     version greater than or equal to <paramref name="stateStateVersion" />.
     /// </returns>
-    TFilter StateVersionGte(Version stateVersion);
+    TFilter StateVersionGte(StateVersion stateStateVersion);
 
     /// <summary>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an state
     ///     version greater than or equal to a specific state version.
     /// </summary>
-    /// <param name="stateVersion">The state ids.</param>
+    /// <param name="stateStateVersion">The state ids.</param>
     /// <returns>
     ///     Returns a <typeparamref name="TFilter" /> that only includes objects with an state
-    ///     version less than or equal to <paramref name="stateVersion" />.
+    ///     version less than or equal to <paramref name="stateStateVersion" />.
     /// </returns>
-    TFilter StateVersionLte(Version stateVersion);
+    TFilter StateVersionLte(StateVersion stateStateVersion);
 }

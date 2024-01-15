@@ -1,8 +1,8 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Sources.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -12,8 +12,8 @@ internal abstract record MessageDataDocumentBase : DocumentBase, IMessageDataDoc
         ProjectionBuilder.Include(nameof(StatePointer));
 
     public required Id StateId { get; init; }
-    public required Version StateVersion { get; init; }
+    public required StateVersion StateVersion { get; init; }
 
     public required Id MessageId { get; init; }
-    public required Pointer StatePointer { get; init; }
+    public required StatePointer StatePointer { get; init; }
 }

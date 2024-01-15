@@ -1,5 +1,5 @@
-﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.States;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Shouldly;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.States;
 
@@ -36,7 +35,7 @@ public sealed class StateTests : TestsBase<Startup>
         await using var writeRepository = await GetWriteStateRepository<TState>(serviceScope);
 
         var stateId = Id.NewId();
-        var expectedState = TState.Construct(stateId + new Version(300));
+        var expectedState = TState.Construct(stateId + new StateVersion(300));
 
         // ACT
 
@@ -84,7 +83,7 @@ public sealed class StateTests : TestsBase<Startup>
 
         await using var readOnlyRepository = await GetReadOnlyStateRepository<TState>(serviceScope);
 
-        var stateSnapshot = TState.Construct(Id.NewId() + new Version(300));
+        var stateSnapshot = TState.Construct(Id.NewId() + new StateVersion(300));
 
         // ACT
 
@@ -127,9 +126,9 @@ public sealed class StateTests : TestsBase<Startup>
 
         TState.ShouldRecordAsLatestLogic.Value = (_, _) => true;
 
-        Pointer latestPointer = Id.NewId();
+        StatePointer latestPointer = Id.NewId();
 
-        var stateSnapshot = TState.Construct(latestPointer.Id + new Version(5000));
+        var stateSnapshot = TState.Construct(latestPointer.Id + new StateVersion(5000));
 
         var persisted = await writeRepository.Put(latestPointer, stateSnapshot);
 
@@ -180,7 +179,7 @@ public sealed class StateTests : TestsBase<Startup>
 
         var stateId = Id.NewId();
 
-        var expectedSnapshot = TState.Construct(stateId + new Version(5000));
+        var expectedSnapshot = TState.Construct(stateId + new StateVersion(5000));
 
         var persisted = await writeRepository.Put(stateId, expectedSnapshot);
 

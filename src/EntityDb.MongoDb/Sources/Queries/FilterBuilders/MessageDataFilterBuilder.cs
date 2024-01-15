@@ -1,9 +1,9 @@
-﻿using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
+using EntityDb.Abstractions.States;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Sources.Queries.FilterBuilders;
 
@@ -20,12 +20,12 @@ internal class MessageDataFilterBuilder : DataFilterBuilderBase,
         );
     }
 
-    public FilterDefinition<BsonDocument> StateVersionGte(Version stateVersion)
+    public FilterDefinition<BsonDocument> StateVersionGte(StateVersion stateVersion)
     {
         return Gte(nameof(MessageDataDocumentBase.StateVersion), stateVersion);
     }
 
-    public FilterDefinition<BsonDocument> StateVersionLte(Version stateVersion)
+    public FilterDefinition<BsonDocument> StateVersionLte(StateVersion stateVersion)
     {
         return Lte(nameof(MessageDataDocumentBase.StateVersion), stateVersion);
     }

@@ -1,4 +1,5 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Common.Sources.Documents;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;

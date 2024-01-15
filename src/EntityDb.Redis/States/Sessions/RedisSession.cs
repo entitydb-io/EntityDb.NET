@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +14,7 @@ internal sealed record RedisSession
     RedisStateSessionOptions Options
 ) : DisposableResourceBaseRecord, IRedisSession
 {
-    public async Task<bool> Upsert(Pointer statePointer, RedisValue redisValue)
+    public async Task<bool> Upsert(StatePointer statePointer, RedisValue redisValue)
     {
         AssertNotReadOnly();
 
@@ -48,7 +48,7 @@ internal sealed record RedisSession
         return upserted;
     }
 
-    public async Task<RedisValue> Fetch(Pointer statePointer)
+    public async Task<RedisValue> Fetch(StatePointer statePointer)
     {
         var redisKey = GetRedisKey(statePointer);
 
@@ -74,7 +74,7 @@ internal sealed record RedisSession
         return redisValue;
     }
 
-    public async Task<bool> Delete(Pointer[] statePointers)
+    public async Task<bool> Delete(StatePointer[] statePointers)
     {
         AssertNotReadOnly();
 
@@ -130,7 +130,7 @@ internal sealed record RedisSession
         }
     }
 
-    private RedisKey GetRedisKey(Pointer statePointer)
+    private RedisKey GetRedisKey(StatePointer statePointer)
     {
         return $"{Options.KeyNamespace}#{statePointer}";
     }

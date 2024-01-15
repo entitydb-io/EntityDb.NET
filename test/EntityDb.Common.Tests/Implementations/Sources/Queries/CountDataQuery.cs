@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
-using EntityDb.Common.Tests.Implementations.States.Attributes;
+using EntityDb.Common.Tests.Implementations.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 

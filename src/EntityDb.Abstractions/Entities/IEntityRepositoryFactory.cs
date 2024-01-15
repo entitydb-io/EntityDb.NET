@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Abstractions.Entities;
 
@@ -32,7 +32,7 @@ public interface IEntityRepositoryFactory<TEntity>
     ///     Create a new instance of <see cref="ISingleEntityRepository{TEntity}" />
     ///     for an existing entity.
     /// </summary>
-    /// <param name="entityPointer">A pointer associated with a <typeparamref name="TEntity" />.</param>
+    /// <param name="entityPointer">A state pointer associated with a <typeparamref name="TEntity" />.</param>
     /// <param name="agentSignatureOptionsName">The name of the agent signature options.</param>
     /// <param name="sourceSessionOptionsName">The agent's use case for the source repository.</param>
     /// <param name="stateSessionOptionsName">The agent's use case for the state repository.</param>
@@ -40,7 +40,7 @@ public interface IEntityRepositoryFactory<TEntity>
     /// <returns>A new instance of <see cref="ISingleEntityRepository{TEntity}" />.</returns>
     Task<ISingleEntityRepository<TEntity>> CreateSingleForExisting
     (
-        Pointer entityPointer,
+        StatePointer entityPointer,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         string? stateSessionOptionsName = null,

@@ -1,11 +1,12 @@
 ﻿using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Tests.Implementations.Sources.Queries;
 
-public sealed record StateVersionDataQuery(Version Gte, Version Lte, object? Options = null) : IMessageDataQuery,
+public sealed record StateVersionDataQuery(StateVersion Gte, StateVersion Lte, object? Options = null) :
+    IMessageDataQuery,
     ILeaseDataQuery, ITagDataQuery
 {
     public TFilter GetFilter<TFilter>(ILeaseDataFilterBuilder<TFilter> builder)

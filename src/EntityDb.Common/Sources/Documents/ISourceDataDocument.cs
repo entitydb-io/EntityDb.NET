@@ -1,9 +1,10 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Sources.Documents;
 
 internal interface ISourceDataDocument<out TData> : IDocument<TData>
 {
     Id[] MessageIds { get; }
-    Pointer[] StatePointers { get; }
+    StatePointer[] StatePointers { get; }
 }

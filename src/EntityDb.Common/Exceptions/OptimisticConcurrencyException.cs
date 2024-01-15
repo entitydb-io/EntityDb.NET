@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Sources;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using Microsoft.Extensions.Logging;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Exceptions;
 
@@ -10,9 +9,9 @@ namespace EntityDb.Common.Exceptions;
 ///     <see cref="Source" /> to
 ///     <see cref="ISourceRepository.Commit" /> with any
 ///     <see cref="Message" /> where the value of
-///     <see cref="Pointer.Version" /> in
+///     <see cref="StatePointer.StateVersion" /> in
 ///     <see cref="Message.StatePointer" />
-///     is not equal to <see cref="Abstractions.ValueObjects.Version.Next()" />
+///     is not equal to <see cref="StateVersion.Next()" />
 ///     of the committed previous version.
 /// </summary>
 /// <remarks>
@@ -23,15 +22,15 @@ namespace EntityDb.Common.Exceptions;
 public sealed class OptimisticConcurrencyException : Exception
 {
     /// <summary>
-    ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="actualPreviousVersion" />
-    ///     is not equal to <paramref name="expectedPreviousVersion" />.
+    ///     Throws a new <see cref="OptimisticConcurrencyException" /> if <paramref name="actualPreviousStateVersion" />
+    ///     is not equal to <paramref name="expectedPreviousStateVersion" />.
     /// </summary>
-    /// <param name="expectedPreviousVersion">The expected previous version.</param>
-    /// <param name="actualPreviousVersion">The actual previous version.</param>
-    public static void ThrowIfMismatch(Version expectedPreviousVersion,
-        Version actualPreviousVersion)
+    /// <param name="expectedPreviousStateVersion">The expected previous version.</param>
+    /// <param name="actualPreviousStateVersion">The actual previous version.</param>
+    public static void ThrowIfMismatch(StateVersion expectedPreviousStateVersion,
+        StateVersion actualPreviousStateVersion)
     {
-        if (expectedPreviousVersion != actualPreviousVersion)
+        if (expectedPreviousStateVersion != actualPreviousStateVersion)
         {
             throw new OptimisticConcurrencyException();
         }

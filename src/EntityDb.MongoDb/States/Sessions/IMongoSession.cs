@@ -1,5 +1,5 @@
 ﻿using EntityDb.Abstractions.Disposables;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Driver;
 
@@ -12,9 +12,9 @@ internal interface IMongoSession : IDisposableResource
 
     Task Upsert(StateDocument stateDocument, CancellationToken cancellationToken);
 
-    Task<StateDocument?> Fetch(Pointer statePointer, CancellationToken cancellationToken);
+    Task<StateDocument?> Fetch(StatePointer statePointer, CancellationToken cancellationToken);
 
-    Task Delete(Pointer[] statePointer, CancellationToken cancellationToken);
+    Task Delete(StatePointer[] statePointer, CancellationToken cancellationToken);
 
     void StartTransaction();
     Task CommitTransaction(CancellationToken cancellationToken);

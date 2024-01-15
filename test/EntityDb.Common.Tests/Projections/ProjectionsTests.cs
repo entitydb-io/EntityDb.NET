@@ -1,13 +1,13 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Tests.Implementations.Seeders;
 using EntityDb.Common.Tests.Implementations.States;
 using Shouldly;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Projections;
 
@@ -65,7 +65,7 @@ public sealed class ProjectionsTests : TestsBase<Startup>
         const uint replaceAtVersionValue = 3;
 
         TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
-            projection.GetPointer().Version == new Version(replaceAtVersionValue);
+            projection.GetPointer().StateVersion == new StateVersion(replaceAtVersionValue);
 
         var stateId = Id.NewId();
 
@@ -95,9 +95,9 @@ public sealed class ProjectionsTests : TestsBase<Startup>
 
         // ASSERT
 
-        currentProjection.GetPointer().Version.Value.ShouldBe(numberOfVersions);
+        currentProjection.GetPointer().StateVersion.Value.ShouldBe(numberOfVersions);
         persistedProjection.ShouldNotBeNull();
-        persistedProjection.GetPointer().Version.Value.ShouldBe(replaceAtVersionValue);
+        persistedProjection.GetPointer().StateVersion.Value.ShouldBe(replaceAtVersionValue);
     }
 
     [Theory]

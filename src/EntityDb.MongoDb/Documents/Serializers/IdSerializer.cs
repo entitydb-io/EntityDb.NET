@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
 using MongoDB.Bson.Serialization;
 
 namespace EntityDb.MongoDb.Documents.Serializers;

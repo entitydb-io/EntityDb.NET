@@ -1,5 +1,4 @@
 ﻿using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.States;
@@ -20,7 +19,7 @@ internal sealed class TestModeStateRepository<TState> : DisposableResourceBaseCl
         _testModeStateManager = testModeStateManager;
     }
 
-    public Task<bool> Put(Pointer statePointer, TState state,
+    public Task<bool> Put(StatePointer statePointer, TState state,
         CancellationToken cancellationToken = default)
     {
         _testModeStateManager.AddStatePointer(this, statePointer);
@@ -28,12 +27,12 @@ internal sealed class TestModeStateRepository<TState> : DisposableResourceBaseCl
         return _stateRepository.Put(statePointer, state, cancellationToken);
     }
 
-    public Task<TState?> Get(Pointer statePointer, CancellationToken cancellationToken = default)
+    public Task<TState?> Get(StatePointer statePointer, CancellationToken cancellationToken = default)
     {
         return _stateRepository.Get(statePointer, cancellationToken);
     }
 
-    public Task<bool> Delete(Pointer[] statePointers, CancellationToken cancellationToken = default)
+    public Task<bool> Delete(StatePointer[] statePointers, CancellationToken cancellationToken = default)
     {
         _testModeStateManager.RemoveStatePointers(this, statePointers);
 

@@ -1,6 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
-
-namespace EntityDb.Abstractions.Sources;
+﻿namespace EntityDb.Abstractions.Sources;
 
 /// <summary>
 ///     Represents a set of messages that can be committed.

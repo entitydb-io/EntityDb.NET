@@ -1,7 +1,8 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.States.Attributes;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Agents;
 using EntityDb.Common.Sources.Queries;
@@ -9,8 +10,8 @@ using EntityDb.Common.Sources.Queries.Modified;
 using EntityDb.Common.Sources.Queries.Standard;
 using EntityDb.Common.Tests.Implementations.Entities.Deltas;
 using EntityDb.Common.Tests.Implementations.Seeders;
+using EntityDb.Common.Tests.Implementations.Sources.Attributes;
 using EntityDb.Common.Tests.Implementations.Sources.Queries;
-using EntityDb.Common.Tests.Implementations.States.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,6 @@ using Microsoft.Extensions.Options;
 using Shouldly;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Sources;
 
@@ -238,7 +238,7 @@ public sealed class SourceTests : TestsBase<Startup>
         {
             return sourceRepository
                 .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
-                .Select(pointer => pointer.Id);
+                .Select(statePointer => statePointer.Id);
         }
     }
 
@@ -267,7 +267,7 @@ public sealed class SourceTests : TestsBase<Startup>
         {
             return sourceRepository
                 .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
-                .Select(pointer => pointer.Id);
+                .Select(statePointer => statePointer.Id);
         }
     }
 
@@ -296,7 +296,7 @@ public sealed class SourceTests : TestsBase<Startup>
         {
             return sourceRepository
                 .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
-                .Select(pointer => pointer.Id);
+                .Select(statePointer => statePointer.Id);
         }
     }
 
@@ -325,7 +325,7 @@ public sealed class SourceTests : TestsBase<Startup>
         {
             return sourceRepository
                 .EnumerateStatePointers(dataQuery.Modify(modifiedQueryOptions))
-                .Select(pointer => pointer.Id);
+                .Select(statePointer => statePointer.Id);
         }
     }
 
@@ -457,7 +457,7 @@ public sealed class SourceTests : TestsBase<Startup>
                 .Select(versionNumber => new Message
                 {
                     Id = Id.NewId(),
-                    StatePointer = nonNullableStateId + new Version(versionNumber),
+                    StatePointer = nonNullableStateId + new StateVersion(versionNumber),
                     Delta = new StoreNumber(versionNumber),
                 })
                 .ToArray(),
@@ -889,7 +889,7 @@ public sealed class SourceTests : TestsBase<Startup>
             annotatedDelta.SourceId.ShouldBe(expectedSourceId);
             annotatedDelta.SourceTimeStamp.ShouldBe(expectedSourceTimeStamp);
             annotatedDelta.StatePointer.Id.ShouldBe(expectedStateId);
-            annotatedDelta.StatePointer.Version.ShouldBe(new Version(number));
+            annotatedDelta.StatePointer.StateVersion.ShouldBe(new StateVersion(number));
 
             annotatedDelta.Data
                 .ShouldBeAssignableTo<StoreNumber>()
@@ -1064,7 +1064,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var source = CreateSource(new[] { 1ul });
 
-        var versionOneQuery = new StateVersionDataQuery(new Version(1), new Version(1));
+        var versionOneQuery = new StateVersionDataQuery(new StateVersion(1), new StateVersion(1));
 
         // ACT
 
@@ -1099,7 +1099,7 @@ public sealed class SourceTests : TestsBase<Startup>
         var firstSource = CreateSource(new[] { 1ul }, stateId: stateId);
         var secondSource = CreateSource(new[] { 2ul }, stateId: stateId);
 
-        var versionTwoQuery = new StateVersionDataQuery(new Version(2), new Version(2));
+        var versionTwoQuery = new StateVersionDataQuery(new StateVersion(2), new StateVersion(2));
 
         // ACT
 
@@ -1419,7 +1419,7 @@ public sealed class SourceTests : TestsBase<Startup>
 
         var sources = new List<Source> { source };
 
-        var query = new StateVersionDataQuery(new Version(gte), new Version(lte));
+        var query = new StateVersionDataQuery(new StateVersion(gte), new StateVersion(lte));
 
         await PutSources(serviceScope, sources);
         await TestGetDeltas(serviceScope, query, expectedObjects);

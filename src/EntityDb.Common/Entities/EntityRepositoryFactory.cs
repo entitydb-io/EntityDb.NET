@@ -1,8 +1,8 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Entities;
 
@@ -44,7 +44,7 @@ internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactor
 
     public async Task<ISingleEntityRepository<TEntity>> CreateSingleForExisting
     (
-        Pointer entityPointer,
+        StatePointer entityPointer,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         string? stateSessionOptionsName = null,

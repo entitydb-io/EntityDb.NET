@@ -1,8 +1,9 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.States.Attributes;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.Sources;
@@ -40,25 +41,25 @@ internal abstract class SourceRepositoryWrapper : DisposableResourceBaseClass, I
         return WrapQuery(() => _sourceRepository.EnumerateSourceIds(tagDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ISourceDataQuery sourceDataQuery,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _sourceRepository.EnumerateStatePointers(sourceDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(IMessageDataQuery messageDataQuery,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _sourceRepository.EnumerateStatePointers(messageDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ILeaseDataQuery leaseDataQuery,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _sourceRepository.EnumerateStatePointers(leaseDataQuery, cancellationToken));
     }
 
-    public IAsyncEnumerable<Pointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
+    public IAsyncEnumerable<StatePointer> EnumerateStatePointers(ITagDataQuery tagDataQuery,
         CancellationToken cancellationToken = default)
     {
         return WrapQuery(() => _sourceRepository.EnumerateStatePointers(tagDataQuery, cancellationToken));

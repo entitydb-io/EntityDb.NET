@@ -1,6 +1,5 @@
 using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Projections;
 
@@ -16,10 +15,10 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     IStateRepository<TProjection>? StateRepository { get; }
 
     /// <summary>
-    ///     Returns the state of a <typeparamref name="TProjection" /> for a given <see cref="Pointer" />.
+    ///     Returns the state of a <typeparamref name="TProjection" /> for a given <see cref="StatePointer" />.
     /// </summary>
-    /// <param name="projectionPointer">A pointer to the projection.</param>
+    /// <param name="projectionPointer">The state pointer to the projection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
-    Task<TProjection> Get(Pointer projectionPointer, CancellationToken cancellationToken = default);
+    Task<TProjection> Get(StatePointer projectionPointer, CancellationToken cancellationToken = default);
 }

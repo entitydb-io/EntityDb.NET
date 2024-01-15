@@ -1,5 +1,6 @@
-﻿using EntityDb.Abstractions.Sources.Annotations;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Sources.Annotations;
 using System.Runtime.CompilerServices;
@@ -33,29 +34,29 @@ internal static class DocumentsExtensions
         return ids;
     }
 
-    public static IAsyncEnumerable<Pointer> EnumeratePointers<TDocument>
+    public static IAsyncEnumerable<StatePointer> EnumeratePointers<TDocument>
     (
         this IAsyncEnumerable<TDocument> documents,
         int? skip,
         int? limit,
-        Func<IAsyncEnumerable<TDocument>, IAsyncEnumerable<Pointer>> mapToPointers
+        Func<IAsyncEnumerable<TDocument>, IAsyncEnumerable<StatePointer>> mapToStatePointers
     )
     {
-        var pointers = mapToPointers
+        var statePointers = mapToStatePointers
             .Invoke(documents)
             .Distinct();
 
         if (skip.HasValue)
         {
-            pointers = pointers.Skip(skip.Value);
+            statePointers = statePointers.Skip(skip.Value);
         }
 
         if (limit.HasValue)
         {
-            pointers = pointers.Take(limit.Value);
+            statePointers = statePointers.Take(limit.Value);
         }
 
-        return pointers;
+        return statePointers;
     }
 
     public static async IAsyncEnumerable<IAnnotatedMessageData<TData>> EnumerateAnnotatedSourceData<TDocument,

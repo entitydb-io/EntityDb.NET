@@ -1,7 +1,7 @@
 ﻿using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Streams;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Common.Streams;
 
@@ -22,7 +22,7 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
 
     public async Task<ISingleStreamRepository> CreateSingle
     (
-        Key streamKey,
+        IStateKey streamKey,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default
@@ -38,7 +38,7 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
 
     public async Task<ISingleStreamRepository> CreateSingleForNew
     (
-        Key streamKey,
+        IStateKey streamKey,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default
@@ -54,7 +54,7 @@ internal sealed class StreamRepositoryFactory : IStreamRepositoryFactory
 
     public async Task<ISingleStreamRepository> CreateSingleForExisting
     (
-        Key streamKey,
+        IStateKey streamKey,
         string agentSignatureOptionsName,
         string sourceSessionOptionsName,
         CancellationToken cancellationToken = default

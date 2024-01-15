@@ -1,22 +1,20 @@
-﻿using EntityDb.Abstractions.Entities;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.States.Attributes;
-using EntityDb.Abstractions.States.Deltas;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Sources.Queries.Standard;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Common.Entities;
 
-internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass, IMultipleEntityRepository<TEntity>
+internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBaseClass,
+    IMultipleEntityRepository<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly string _agentSignatureOptionsName;
     private readonly IAgentAccessor _agentAccessor;
+    private readonly string _agentSignatureOptionsName;
     private readonly Dictionary<Id, TEntity> _knownEntities = new();
     private readonly List<Message> _messages = new();
 
@@ -30,7 +28,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
     {
         _agentSignatureOptionsName = agentSignatureOptionsName;
         _agentAccessor = agentAccessor;
-        
+
         SourceRepository = sourceRepository;
         StateRepository = stateRepository;
     }
@@ -50,7 +48,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
         _knownEntities.Add(entityId, entity);
     }
 
-    public async Task Load(Pointer entityPointer, CancellationToken cancellationToken = default)
+    public async Task Load(StatePointer entityPointer, CancellationToken cancellationToken = default)
     {
         if (_knownEntities.ContainsKey(entityPointer.Id))
         {
@@ -64,7 +62,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
 
         var statePointer = state.GetPointer();
 
-        var query = new GetDeltasDataQuery(entityPointer, statePointer.Version);
+        var query = new GetDeltasDataQuery(entityPointer, statePointer.StateVersion);
 
         var entity = await SourceRepository
             .EnumerateDeltas(query, cancellationToken)
@@ -75,10 +73,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
                 cancellationToken
             );
 
-        if (!entityPointer.IsSatisfiedBy(entity.GetPointer()))
-        {
-            throw new StateDoesNotExistException();
-        }
+        StateDoesNotExistException.ThrowIfNotAcceptable(entityPointer, entity.GetPointer());
 
         _knownEntities.Add(entityPointer.Id, entity);
     }
@@ -115,7 +110,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
         }
 
         var agent = await _agentAccessor.GetAgent(_agentSignatureOptionsName, cancellationToken);
-        
+
         var source = new Source
         {
             Id = Id.NewId(),

@@ -1,24 +1,23 @@
 ﻿using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.Sources.Queries.FilterBuilders;
 using EntityDb.Abstractions.Sources.Queries.SortBuilders;
-using EntityDb.Abstractions.ValueObjects;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetDeltasDataQuery(Pointer StatePointer, Version PersistedStateVersion,
+internal sealed record GetDeltasDataQuery(StatePointer StatePointer, StateVersion PersistedStateStateVersion,
     object? Options = null) : IMessageDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
         var filters = new List<TFilter>
         {
-            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(PersistedStateVersion.Next()),
+            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(PersistedStateStateVersion.Next()),
         };
 
-        if (StatePointer.Version != Version.Zero)
+        if (StatePointer.StateVersion != StateVersion.Zero)
         {
-            filters.Add(builder.StateVersionLte(StatePointer.Version));
+            filters.Add(builder.StateVersionLte(StatePointer.StateVersion));
         }
 
         return builder.And(filters.ToArray());

@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.States.Attributes;
+﻿using EntityDb.Abstractions.Sources.Attributes;
 
 namespace EntityDb.Abstractions.Sources.Queries.SortBuilders;
 

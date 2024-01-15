@@ -1,5 +1,3 @@
-using EntityDb.Abstractions.ValueObjects;
-
 namespace EntityDb.Abstractions.States;
 
 /// <summary>
@@ -11,15 +9,15 @@ public interface IState<TState>
     /// <summary>
     ///     Creates a new instance of a <typeparamref name="TState" />.
     /// </summary>
-    /// <param name="pointer">The pointer of the state.</param>
+    /// <param name="statePointer">The state pointer.</param>
     /// <returns>A new instance of <typeparamref name="TState" />.</returns>
-    static abstract TState Construct(Pointer pointer);
+    static abstract TState Construct(StatePointer statePointer);
 
     /// <summary>
-    ///     Returns a pointer for the current state of the state.
+    ///     Returns the state pointer for the current state.
     /// </summary>
-    /// <returns>A pointer for the current state of the state</returns>
-    Pointer GetPointer();
+    /// <returns>The state pointer for the current state.</returns>
+    StatePointer GetPointer();
 
     /// <summary>
     ///     Indicates if this state instance version should be recorded (independent of the latest state).

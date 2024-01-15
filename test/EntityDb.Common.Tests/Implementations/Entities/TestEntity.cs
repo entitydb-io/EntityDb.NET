@@ -1,23 +1,22 @@
 ﻿using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.States.Transforms;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.States;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Common.Tests.Implementations.Entities;
 
 public sealed record TestEntity : IEntity<TestEntity>, IStateWithTestLogic<TestEntity>
 {
-    public required Pointer Pointer { get; init; }
+    public required StatePointer StatePointer { get; init; }
 
-    public static TestEntity Construct(Pointer pointer)
+    public static TestEntity Construct(StatePointer statePointer)
     {
-        return new TestEntity { Pointer = pointer };
+        return new TestEntity { StatePointer = statePointer };
     }
 
-    public Pointer GetPointer()
+    public StatePointer GetPointer()
     {
-        return Pointer;
+        return StatePointer;
     }
 
     public static bool CanReduce(object delta)
@@ -53,8 +52,8 @@ public sealed record TestEntity : IEntity<TestEntity>, IStateWithTestLogic<TestE
 
     public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
 
-    public TestEntity WithVersion(Version version)
+    public TestEntity WithVersion(StateVersion stateVersion)
     {
-        return new TestEntity { Pointer = Pointer.Id + version };
+        return new TestEntity { StatePointer = StatePointer.Id + stateVersion };
     }
 }

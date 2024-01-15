@@ -1,7 +1,7 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.States;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -13,6 +13,6 @@ internal sealed record StateDocument
     public required string DataType { get; init; }
     public required BsonDocument Data { get; init; }
     public required Id StateId { get; init; }
-    public required Version StateVersion { get; init; }
-    public required Pointer StatePointer { get; init; }
+    public required StateVersion StateVersion { get; init; }
+    public required StatePointer StatePointer { get; init; }
 }

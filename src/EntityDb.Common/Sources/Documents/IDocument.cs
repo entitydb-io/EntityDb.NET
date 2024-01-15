@@ -1,4 +1,5 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
 
 namespace EntityDb.Common.Sources.Documents;
 

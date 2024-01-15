@@ -1,4 +1,4 @@
-﻿namespace EntityDb.Abstractions.States.Attributes;
+﻿namespace EntityDb.Abstractions.Sources.Attributes;
 
 /// <summary>
 ///     Represents a single metadata property and the context in which the metadata property must be unique.

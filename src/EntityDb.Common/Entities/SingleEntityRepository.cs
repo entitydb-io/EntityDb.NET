@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Entities;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.Entities;
@@ -11,7 +10,8 @@ internal sealed class SingleEntityRepository<TEntity> : DisposableResourceBaseCl
 {
     private readonly IMultipleEntityRepository<TEntity> _multipleEntityRepository;
 
-    public SingleEntityRepository(IMultipleEntityRepository<TEntity> multipleEntityRepository, Pointer entityPointer)
+    public SingleEntityRepository(IMultipleEntityRepository<TEntity> multipleEntityRepository,
+        StatePointer entityPointer)
     {
         _multipleEntityRepository = multipleEntityRepository;
 
@@ -20,7 +20,7 @@ internal sealed class SingleEntityRepository<TEntity> : DisposableResourceBaseCl
 
     public ISourceRepository SourceRepository => _multipleEntityRepository.SourceRepository;
     public IStateRepository<TEntity>? StateRepository => _multipleEntityRepository.StateRepository;
-    public Pointer EntityPointer { get; }
+    public StatePointer EntityPointer { get; }
 
     public TEntity Get()
     {

@@ -1,5 +1,5 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Tests.Implementations.Entities.Deltas;
 
 namespace EntityDb.Common.Tests.Implementations.Seeders;

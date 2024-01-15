@@ -1,9 +1,9 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.Sources.Attributes;
 
 namespace EntityDb.Abstractions.Streams;
 
 public interface IStream
 {
-    Key Key { get; }
+    IStateKey Key { get; }
     Id Id { get; }
 }

@@ -1,4 +1,4 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

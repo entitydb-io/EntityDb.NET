@@ -1,5 +1,7 @@
-﻿using EntityDb.Abstractions.Sources.Annotations;
-using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Annotations;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Sources.Annotations;
 
@@ -9,7 +11,7 @@ internal sealed record AnnotatedSourceData<TData>
     TimeStamp SourceTimeStamp,
     Id[] MessageIds,
     TData Data,
-    Pointer[] StatePointers
+    StatePointer[] StatePointers
 ) : IAnnotatedSourceData<TData>
 {
     public static IAnnotatedSourceData<TData> CreateFromBoxedData
@@ -18,7 +20,7 @@ internal sealed record AnnotatedSourceData<TData>
         TimeStamp sourceTimeStamp,
         Id[] messageIds,
         object boxedData,
-        Pointer[] statePointers
+        StatePointer[] statePointers
     )
     {
         var dataAnnotationType = typeof(AnnotatedSourceData<>).MakeGenericType(boxedData.GetType());

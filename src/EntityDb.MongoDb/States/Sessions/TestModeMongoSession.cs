@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.ValueObjects;
+﻿using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.MongoDb.Documents;
 using MongoDB.Driver;
@@ -16,7 +16,7 @@ internal sealed record TestModeMongoSession(IMongoSession MongoSession) : Dispos
         return MongoSession.Upsert(stateDocument, cancellationToken);
     }
 
-    public Task<StateDocument?> Fetch(Pointer statePointer, CancellationToken cancellationToken)
+    public Task<StateDocument?> Fetch(StatePointer statePointer, CancellationToken cancellationToken)
     {
         return MongoSession.Fetch
         (
@@ -25,7 +25,7 @@ internal sealed record TestModeMongoSession(IMongoSession MongoSession) : Dispos
         );
     }
 
-    public Task Delete(Pointer[] statePointer, CancellationToken cancellationToken)
+    public Task Delete(StatePointer[] statePointer, CancellationToken cancellationToken)
     {
         return MongoSession.Delete(statePointer, cancellationToken);
     }

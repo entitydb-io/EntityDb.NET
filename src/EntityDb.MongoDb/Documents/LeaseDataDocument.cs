@@ -37,7 +37,7 @@ internal sealed record LeaseDataDocument : MessageDataDocumentBase
                 SourceId = source.Id,
                 MessageId = message.Id,
                 StateId = message.StatePointer.Id,
-                StateVersion = message.StatePointer.Version,
+                StateVersion = message.StatePointer.StateVersion,
                 StatePointer = message.StatePointer,
                 DataType = lease.GetType().Name,
                 Data = envelopeService.Serialize(lease),

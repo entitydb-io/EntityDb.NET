@@ -1,12 +1,12 @@
+using EntityDb.Abstractions.States;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.Json.Converters;
 
-internal sealed class VersionConverter : JsonConverter<Version>
+internal sealed class VersionConverter : JsonConverter<StateVersion>
 {
-    public override Version Read
+    public override StateVersion Read
     (
         ref Utf8JsonReader reader,
         Type typeToConvert,
@@ -20,17 +20,17 @@ internal sealed class VersionConverter : JsonConverter<Version>
 
         var ulongValue = reader.GetUInt64();
 
-        return new Version(ulongValue);
+        return new StateVersion(ulongValue);
     }
 
     public override void Write
     (
         Utf8JsonWriter writer,
-        Version version,
+        StateVersion stateVersion,
         JsonSerializerOptions options
     )
     {
-        var ulongValue = version.Value;
+        var ulongValue = stateVersion.Value;
 
         writer.WriteNumberValue(ulongValue);
     }

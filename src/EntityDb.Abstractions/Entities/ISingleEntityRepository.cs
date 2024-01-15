@@ -1,7 +1,6 @@
 ﻿using EntityDb.Abstractions.Disposables;
 using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.States;
-using EntityDb.Abstractions.ValueObjects;
 
 namespace EntityDb.Abstractions.Entities;
 
@@ -22,9 +21,9 @@ public interface ISingleEntityRepository<TEntity> : IDisposableResource
     IStateRepository<TEntity>? StateRepository { get; }
 
     /// <summary>
-    ///     The pointer for the current entity.
+    ///     The state pointer for the current entity.
     /// </summary>
-    Pointer EntityPointer { get; }
+    StatePointer EntityPointer { get; }
 
     /// <summary>
     ///     Returns the state of a <typeparamref name="TEntity" />.

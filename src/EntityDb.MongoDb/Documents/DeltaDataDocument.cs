@@ -1,6 +1,7 @@
-﻿using EntityDb.Abstractions.Sources;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Queries;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Envelopes;
 using EntityDb.Common.Sources.Queries.Standard;
 using EntityDb.MongoDb.Documents.Commands;
@@ -11,7 +12,6 @@ using EntityDb.MongoDb.Sources.Queries.SortBuilders;
 using EntityDb.MongoDb.Sources.Sessions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Version = EntityDb.Abstractions.ValueObjects.Version;
 
 namespace EntityDb.MongoDb.Documents;
 
@@ -45,7 +45,7 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
                 SourceId = source.Id,
                 MessageId = message.Id,
                 StateId = message.StatePointer.Id,
-                StateVersion = message.StatePointer.Version,
+                StateVersion = message.StatePointer.StateVersion,
                 StatePointer = message.StatePointer,
                 DataType = message.Delta.GetType().Name,
                 Data = envelopeService.Serialize(message.Delta),
@@ -75,7 +75,7 @@ internal sealed record DeltaDataDocument : MessageDataDocumentBase
         };
     }
 
-    public static async Task<Version> GetLastStateVersion
+    public static async Task<StateVersion> GetLastStateVersion
     (
         IMongoSession mongoSession,
         Id stateId,

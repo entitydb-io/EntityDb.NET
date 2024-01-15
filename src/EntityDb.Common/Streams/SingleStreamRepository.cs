@@ -1,6 +1,6 @@
 ﻿using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Attributes;
 using EntityDb.Abstractions.Streams;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 
 namespace EntityDb.Common.Streams;
@@ -9,7 +9,7 @@ internal sealed class SingleStreamRepository : DisposableResourceBaseClass, ISin
 {
     private readonly IMultipleStreamRepository _multipleStreamRepository;
 
-    public SingleStreamRepository(IMultipleStreamRepository multipleStreamRepository, Key streamKey)
+    public SingleStreamRepository(IMultipleStreamRepository multipleStreamRepository, IStateKey streamKey)
     {
         _multipleStreamRepository = multipleStreamRepository;
 
@@ -17,11 +17,11 @@ internal sealed class SingleStreamRepository : DisposableResourceBaseClass, ISin
     }
 
     public ISourceRepository SourceRepository => _multipleStreamRepository.SourceRepository;
-    public Key StreamKey { get; }
+    public IStateKey StreamKey { get; }
 
-    public Task<bool> Stage(Key messageKey, object delta, CancellationToken cancellationToken = default)
+    public Task<bool> Append(object delta, CancellationToken cancellationToken = default)
     {
-        return _multipleStreamRepository.Append(StreamKey, messageKey, delta, cancellationToken);
+        return _multipleStreamRepository.Append(StreamKey, delta, cancellationToken);
     }
 
     public Task<bool> Commit(CancellationToken cancellationToken = default)

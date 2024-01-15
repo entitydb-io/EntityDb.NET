@@ -4,7 +4,6 @@ using EntityDb.Abstractions.Sources;
 using EntityDb.Abstractions.Sources.Queries;
 using EntityDb.Abstractions.States;
 using EntityDb.Abstractions.Streams;
-using EntityDb.Abstractions.ValueObjects;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Extensions;
 using EntityDb.Common.Polyfills;
@@ -29,7 +28,6 @@ using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 using Xunit.Sdk;
-using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests;
 
@@ -540,7 +538,7 @@ public abstract class TestsBase<TStartup>
         var stateRepositoryMock = new Mock<IStateRepository<TEntity>>(MockBehavior.Strict);
 
         stateRepositoryMock
-            .Setup(repository => repository.Get(It.IsAny<Pointer>(), It.IsAny<CancellationToken>()))
+            .Setup(repository => repository.Get(It.IsAny<StatePointer>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(state);
 
         stateRepositoryMock
@@ -621,7 +619,8 @@ public abstract class TestsBase<TStartup>
         }
     }
 
-    public sealed record SourceRepositoryAdder(string Name, Type QueryOptionsType, Func<TimeStamp, TimeStamp> FixTimeStamp,
+    public sealed record SourceRepositoryAdder(string Name, Type QueryOptionsType,
+        Func<TimeStamp, TimeStamp> FixTimeStamp,
         AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
@@ -646,7 +645,8 @@ public abstract class TestsBase<TStartup>
         }
     }
 
-    public sealed record ProjectionRepositoryAdder(string Name, Type ProjectionType, AddDependenciesDelegate AddDependencies)
+    public sealed record ProjectionRepositoryAdder(string Name, Type ProjectionType,
+        AddDependenciesDelegate AddDependencies)
     {
         public override string ToString()
         {

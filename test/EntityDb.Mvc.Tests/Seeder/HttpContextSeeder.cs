@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;

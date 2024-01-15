@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace EntityDb.Abstractions.ValueObjects;
+namespace EntityDb.Abstractions.Sources;
 
 /// <summary>
 ///     Represents a relevant moment in time.
