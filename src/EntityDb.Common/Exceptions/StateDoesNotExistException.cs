@@ -22,10 +22,14 @@ public sealed class StateDoesNotExistException : Exception
     /// <param name="foundStatePointer">The state pointer found by a query.</param>
     public static void ThrowIfNotAcceptable(StatePointer requestedStatePointer, StatePointer foundStatePointer)
     {
-        if (requestedStatePointer.StateVersion == StateVersion.Zero &&
-            foundStatePointer.StateVersion == StateVersion.Zero)
+        if (requestedStatePointer.StateVersion == StateVersion.Zero)
         {
-            throw new StateDoesNotExistException("Requested latest but found none");
+            if (foundStatePointer.StateVersion == StateVersion.Zero)
+            {
+                throw new StateDoesNotExistException("Requested latest but found none");   
+            }
+            
+            return;
         }
 
         if (requestedStatePointer != foundStatePointer)
