@@ -18,7 +18,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenStateShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntityStateSourceSubscriber_ThenAlwaysPersistState<
+        Generic_GivenStateShouldPersistAsLatestAlwaysReturnsTrue_WhenRunningEntityStateSourceSubscriber_ThenAlwaysPersistState<
             TEntity>(
             SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder stateRepositoryAdder)
         where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
@@ -35,7 +35,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
 
         await using var stateRepository = await GetReadOnlyStateRepository<TEntity>(serviceScope);
 
-        TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => true;
+        TEntity.ShouldPersistAsLatestLogic.Value = _ => true;
 
         var entityId = Id.NewId();
 
@@ -60,7 +60,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(With_Source_EntityState))]
     private Task
-        GivenStateShouldRecordAsMostRecentAlwaysReturnsTrue_WhenRunningEntityStateSourceSubscriber_ThenAlwaysPersistState(
+        GivenStateShouldPersistAsLatestAlwaysReturnsTrue_WhenRunningEntityStateSourceSubscriber_ThenAlwaysPersistState(
             SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder)
     {
         return RunGenericTestAsync
@@ -71,7 +71,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
     }
 
     private async Task
-        Generic_GivenStateShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntityStateSourceSubscriber_ThenNeverPersistState<
+        Generic_GivenStateShouldPersistAsLatestAlwaysReturnsFalse_WhenRunningEntityStateSourceSubscriber_ThenNeverPersistState<
             TEntity>(SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder stateRepositoryAdder)
         where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
@@ -86,7 +86,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
         await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
         await using var stateRepository = await GetReadOnlyStateRepository<TEntity>(serviceScope);
 
-        TEntity.ShouldRecordAsLatestLogic.Value = (_, _) => false;
+        TEntity.ShouldPersistAsLatestLogic.Value = _ => false;
 
         var entityId = Id.NewId();
 
@@ -107,7 +107,7 @@ public sealed class EntityStateSourceSubscriberTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(With_Source_EntityState))]
     private Task
-        GivenStateShouldRecordAsMostRecentAlwaysReturnsFalse_WhenRunningEntityStateSourceSubscriber_ThenNeverPersistState(
+        GivenStateShouldPersistAsLatestAlwaysReturnsFalse_WhenRunningEntityStateSourceSubscriber_ThenNeverPersistState(
             SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder)
     {
         return RunGenericTestAsync

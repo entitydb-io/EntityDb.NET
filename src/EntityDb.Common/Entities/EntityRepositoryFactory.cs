@@ -54,7 +54,7 @@ internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactor
         var multipleEntityRepository = await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName,
             stateSessionOptionsName, cancellationToken);
 
-        await multipleEntityRepository.Load(entityPointer, cancellationToken);
+        await multipleEntityRepository.TryLoad(entityPointer, cancellationToken);
 
         return new SingleEntityRepository<TEntity>(multipleEntityRepository, entityPointer);
     }

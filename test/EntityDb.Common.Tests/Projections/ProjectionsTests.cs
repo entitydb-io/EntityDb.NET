@@ -20,7 +20,7 @@ public sealed class ProjectionsTests : TestsBase<Startup>
     {
     }
 
-    private async Task Generic_GivenEmptySourceRepository_WhenGettingProjection_ThenThrow<TProjection>(
+    private async Task Generic_GivenEmptySourceRepository_WhenLoadingProjection_ThenReturnFalse<TProjection>(
         SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder,
         StateRepositoryAdder projectionStateRepositoryAdder)
         where TProjection : IProjection<TProjection>
@@ -36,10 +36,13 @@ public sealed class ProjectionsTests : TestsBase<Startup>
 
         await using var readOnlyRepository = await GetReadOnlyProjectionRepository<TProjection>(serviceScope, true);
 
-        // ACT & ASSERT
+        // ACT
 
-        await Should.ThrowAsync<StateDoesNotExistException>(() =>
-            readOnlyRepository.Get(default));
+        var loaded = await readOnlyRepository.TryLoad(default);
+        
+        // ASSERT
+
+        loaded.ShouldBeFalse();
     }
 
     private async Task
@@ -64,7 +67,7 @@ public sealed class ProjectionsTests : TestsBase<Startup>
         const uint numberOfVersions = 5;
         const uint replaceAtVersionValue = 3;
 
-        TProjection.ShouldRecordAsLatestLogic.Value = (projection, _) =>
+        TProjection.ShouldPersistAsLatestLogic.Value = projection =>
             projection.GetPointer().StateVersion == new StateVersion(replaceAtVersionValue);
 
         var stateId = Id.NewId();
@@ -89,8 +92,10 @@ public sealed class ProjectionsTests : TestsBase<Startup>
         projectionRepository.StateRepository.ShouldNotBeNull();
 
         // ACT
-
-        var currentProjection = await projectionRepository.Get(stateId);
+        
+        await projectionRepository.TryLoad(stateId);
+        
+        var currentProjection = projectionRepository.Get(stateId);
         var persistedProjection = await projectionRepository.StateRepository.Get(stateId);
 
         // ASSERT
@@ -102,7 +107,7 @@ public sealed class ProjectionsTests : TestsBase<Startup>
 
     [Theory]
     [MemberData(nameof(With_Source_EntityState_ProjectionState))]
-    public Task GivenEmptySourceRepository_WhenGettingProjection_ThenThrow(SourceRepositoryAdder sourceRepositoryAdder,
+    public Task GivenEmptySourceRepository_WhenLoadingProjection_ThenReturnFalse(SourceRepositoryAdder sourceRepositoryAdder,
         StateRepositoryAdder entityStateRepositoryAdder, StateRepositoryAdder projectionStateRepositoryAdder)
     {
         return RunGenericTestAsync

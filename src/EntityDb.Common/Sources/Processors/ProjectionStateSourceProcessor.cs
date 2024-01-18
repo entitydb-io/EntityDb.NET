@@ -42,29 +42,22 @@ public sealed class ProjectionStateSourceProcessor<TProjection> : ISourceProcess
             return;
         }
 
-        foreach (var stateId in TProjection.EnumerateRelevantStateIds(source))
+        foreach (var projectionId in TProjection.EnumerateProjectionIds(source).Distinct())
         {
-            var previousProjection = await projectionRepository.StateRepository
-                .Get(stateId, cancellationToken);
+            var projection = await projectionRepository.TryLoad(projectionId, cancellationToken)
+                ? projectionRepository.Get(projectionId)
+                : TProjection.Construct(projectionId);
+            
+            projection.Mutate(source);
 
-            var nextProjection = previousProjection == null
-                ? TProjection.Construct(stateId)
-                : previousProjection;
-
-            nextProjection.Mutate(source);
-
-            var nextProjectionPointer = nextProjection.GetPointer();
-
-            if (nextProjection.ShouldRecordAsLatest(previousProjection))
+            if (projection.ShouldPersist())
             {
-                await projectionRepository.StateRepository.Put(nextProjectionPointer.Id, nextProjection,
-                    cancellationToken);
+                await projectionRepository.StateRepository.Put(projection.GetPointer(), projection, cancellationToken);
             }
 
-            if (nextProjection.ShouldRecord())
+            if (projection.ShouldPersistAsLatest())
             {
-                await projectionRepository.StateRepository.Put(nextProjectionPointer, nextProjection,
-                    cancellationToken);
+                await projectionRepository.StateRepository.Put(projectionId, projection, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();

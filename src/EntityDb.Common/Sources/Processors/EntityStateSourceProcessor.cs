@@ -37,7 +37,7 @@ public sealed class EntityStateSourceProcessor<TEntity> : ISourceProcessor
     /// <inheritdoc />
     public async Task Process(Source source, CancellationToken cancellationToken)
     {
-        if (!source.Messages.Any(message => TEntity.CanReduce(message.Delta)))
+        if (source.Messages.Any(message => !TEntity.CanReduce(message.Delta)))
         {
             throw new NotSupportedException();
         }
@@ -52,38 +52,52 @@ public sealed class EntityStateSourceProcessor<TEntity> : ISourceProcessor
             return;
         }
 
-        var latestEntities = new Dictionary<Id, TEntity>();
-        var saveEntities = new Dictionary<StatePointer, TEntity>();
+        var persistEntities = new Dictionary<StatePointer, TEntity>();
 
-        foreach (var message in source.Messages)
+        var entityMessageGroups = source.Messages
+            .GroupBy(message => message.StatePointer.Id);
+
+        foreach (var entityMessageGroup in entityMessageGroups)
         {
-            var entityPointer = message.StatePointer;
+            var entityId = entityMessageGroup.Key;
+            var messages = entityMessageGroup.ToArray();
 
-            if (!latestEntities.Remove(entityPointer.Id, out var previousEntity))
+            StatePointer previousEntityPointer = messages[0].StatePointer.Previous();
+            
+            TEntity previousEntity;
+            
+            if (previousEntityPointer.StateVersion == StateVersion.Zero)
             {
-                previousEntity =
-                    await entityRepository.StateRepository.Get(entityPointer, cancellationToken);
+                previousEntity = TEntity.Construct(entityId);
             }
-
-            var nextEntity = (previousEntity ?? TEntity.Construct(entityPointer.Id)).Reduce(message.Delta);
-            var nextEntityPointer = nextEntity.GetPointer();
-
-            if (nextEntity.ShouldRecordAsLatest(previousEntity))
+            else if (await entityRepository.TryLoad(previousEntityPointer, cancellationToken))
             {
-                saveEntities[entityPointer.Id] = nextEntity;
+                previousEntity = entityRepository.Get(entityId);
             }
-
-            if (nextEntity.ShouldRecord())
+            else
             {
-                saveEntities[nextEntityPointer] = nextEntity;
+                throw new NotSupportedException();
             }
+            
+            foreach (var message in messages)
+            {
+                var nextEntity = previousEntity.Reduce(message.Delta);
 
-            latestEntities[entityPointer.Id] = nextEntity;
+                if (nextEntity.ShouldPersist())
+                {
+                    persistEntities[nextEntity.GetPointer()] = nextEntity;
+                }
+                
+                if (nextEntity.ShouldPersistAsLatest())
+                {
+                    persistEntities[entityId] = nextEntity;
+                }
 
-            cancellationToken.ThrowIfCancellationRequested();
+                previousEntity = nextEntity;
+            }
         }
 
-        foreach (var (entityPointer, entity) in saveEntities)
+        foreach (var (entityPointer, entity) in persistEntities)
         {
             await entityRepository.StateRepository.Put(entityPointer, entity, cancellationToken);
         }

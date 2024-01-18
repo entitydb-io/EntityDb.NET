@@ -27,12 +27,11 @@ public interface IState<TState>
     ///     You would use this if you intent to fetch a state at multiple versions and don't want to hit
     ///     the source database when it can be avoided.
     /// </remarks>
-    bool ShouldRecord();
+    bool ShouldPersist() => false;
 
     /// <summary>
     ///     Indicates if this state instance should be recorded as the latest state.
     /// </summary>
-    /// <param name="previousLatestState">The previous instance of the latest state.</param>
     /// <returns><c>true</c> if this state instance should be recorded as the latest state, or else <c>false</c>.</returns>
-    bool ShouldRecordAsLatest(TState? previousLatestState);
+    bool ShouldPersistAsLatest() => false;
 }

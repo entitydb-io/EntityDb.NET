@@ -48,41 +48,60 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
         _knownEntities.Add(entityId, entity);
     }
 
-    public async Task Load(StatePointer entityPointer, CancellationToken cancellationToken = default)
+    public async Task<bool> TryLoad(StatePointer entityPointer, CancellationToken cancellationToken = default)
     {
-        if (_knownEntities.ContainsKey(entityPointer.Id))
+        var entityId = entityPointer.Id;
+        
+        if (_knownEntities.TryGetValue(entityId, out var entity))
         {
-            throw new ExistingEntityException();
+            var knownEntityPointer = entity.GetPointer();
+            
+            if (entityPointer.IsSatisfiedBy(knownEntityPointer))
+            {
+                return true;
+            }
+
+            if (entityPointer.StateVersion.Value < knownEntityPointer.StateVersion.Value)
+            {
+                return false;
+            }
+        }
+        else if (StateRepository is not null)
+        {
+            entity = await StateRepository.Get(entityPointer, cancellationToken) ??
+                          TEntity.Construct(entityId);
+        }
+        else
+        {
+            entity = TEntity.Construct(entityId);
         }
 
-        var state = StateRepository is not null
-            ? await StateRepository.Get(entityPointer, cancellationToken) ??
-              TEntity.Construct(entityPointer.Id)
-            : TEntity.Construct(entityPointer.Id);
+        var query = new GetDeltasDataQuery(entityPointer, entity.GetPointer().StateVersion);
 
-        var statePointer = state.GetPointer();
-
-        var query = new GetDeltasDataQuery(entityPointer, statePointer.StateVersion);
-
-        var entity = await SourceRepository
+        entity = await SourceRepository
             .EnumerateDeltas(query, cancellationToken)
             .AggregateAsync
             (
-                state,
-                (current, delta) => current.Reduce(delta),
+                entity,
+                (previousEntity, delta) => previousEntity.Reduce(delta),
                 cancellationToken
             );
 
-        StateDoesNotExistException.ThrowIfNotAcceptable(entityPointer, entity.GetPointer());
+        if (!entityPointer.IsSatisfiedBy(entity.GetPointer()))
+        {
+            return false;
+        }
 
-        _knownEntities.Add(entityPointer.Id, entity);
+        _knownEntities.Add(entityId, entity);
+
+        return true;
     }
 
     public TEntity Get(Id entityId)
     {
         if (!_knownEntities.TryGetValue(entityId, out var entity))
         {
-            throw new UnknownEntityIdException();
+            throw new UnknownEntityException();
         }
 
         return entity;
@@ -92,7 +111,7 @@ internal sealed class MultipleEntityRepository<TEntity> : DisposableResourceBase
     {
         if (!_knownEntities.TryGetValue(entityId, out var entity))
         {
-            throw new UnknownEntityIdException();
+            throw new UnknownEntityException();
         }
 
         entity = entity.Reduce(delta);

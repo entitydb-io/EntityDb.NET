@@ -20,5 +20,7 @@ public interface IProjectionRepository<TProjection> : IDisposableResource
     /// <param name="projectionPointer">The state pointer to the projection.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The state of a <typeparamref name="TProjection" /> for <paramref name="projectionPointer" />.</returns>
-    Task<TProjection> Get(StatePointer projectionPointer, CancellationToken cancellationToken = default);
+    Task<bool> TryLoad(StatePointer projectionPointer, CancellationToken cancellationToken = default);
+
+    TProjection Get(Id projectionId);
 }

@@ -34,26 +34,21 @@ public sealed record TestEntity : IEntity<TestEntity>, IStateWithTestLogic<TestE
         throw new NotSupportedException();
     }
 
-    public bool ShouldRecord()
+    public bool ShouldPersist()
     {
-        return ShouldRecordLogic.Value is not null && ShouldRecordLogic.Value.Invoke(this);
+        return ShouldPersistLogic.Value is not null && ShouldPersistLogic.Value.Invoke(this);
     }
 
-    public bool ShouldRecordAsLatest(TestEntity? previousLatestState)
+    public bool ShouldPersistAsLatest()
     {
-        return ShouldRecordAsLatestLogic.Value is not null &&
-               ShouldRecordAsLatestLogic.Value.Invoke(this, previousLatestState);
+        return ShouldPersistAsLatestLogic.Value is not null &&
+               ShouldPersistAsLatestLogic.Value.Invoke(this);
     }
 
     public static string MongoDbCollectionName => "TestEntities";
     public static string RedisKeyNamespace => "test-entity";
 
-    public static AsyncLocal<Func<TestEntity, bool>?> ShouldRecordLogic { get; } = new();
+    public static AsyncLocal<Func<TestEntity, bool>?> ShouldPersistLogic { get; } = new();
 
-    public static AsyncLocal<Func<TestEntity, TestEntity?, bool>?> ShouldRecordAsLatestLogic { get; } = new();
-
-    public TestEntity WithVersion(StateVersion stateVersion)
-    {
-        return new TestEntity { StatePointer = StatePointer.Id + stateVersion };
-    }
+    public static AsyncLocal<Func<TestEntity, bool>?> ShouldPersistAsLatestLogic { get; } = new();
 }

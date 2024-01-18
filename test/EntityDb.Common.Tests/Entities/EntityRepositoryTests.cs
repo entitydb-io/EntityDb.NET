@@ -38,7 +38,7 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
 
         // ASSERT
 
-        Should.Throw<UnknownEntityIdException>(() => entityRepository.Get(default));
+        Should.Throw<UnknownEntityException>(() => entityRepository.Get(default));
     }
 
     private async Task Generic_GivenEntityKnown_WhenGettingEntity_ThenReturnExpectedEntity<TEntity>(
@@ -108,41 +108,6 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
         committedSources.Count.ShouldBe(1);
         committedSources[0].Messages.Length.ShouldBe(1);
         committedSources[0].Messages[0].AddLeases.Length.ShouldBe(1);
-    }
-
-    private async Task Generic_GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows<TEntity>(
-        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
-        where TEntity : IEntity<TEntity>
-    {
-        // ARRANGE
-
-        await using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
-            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
-        });
-
-        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
-        await using var readRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
-
-        var entityId = Id.NewId();
-
-        writeRepository.Create(entityId);
-        writeRepository.Append(entityId, new DoNothing());
-
-        var committed = await writeRepository.Commit();
-
-        // ARRANGE ASSERTIONS
-
-        committed.ShouldBeTrue();
-
-        // ACT
-
-        await readRepository.Load(entityId);
-
-        // ASSERT
-
-        await Should.ThrowAsync<ExistingEntityException>(readRepository.Load(entityId));
     }
 
     private async Task Generic_GivenNonExistingEntityId_WhenAppendingDeltas_ThenVersionAutoIncrements<TEntity>(
@@ -251,18 +216,6 @@ public sealed class EntityRepositoryTests : TestsBase<Startup>
     [Theory]
     [MemberData(nameof(With_Source_Entity))]
     public Task GivenAddLeasesDelta_WhenBuildingNewEntityWithLease_ThenSourceDoesAddLeases(
-        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
-    {
-        return RunGenericTestAsync
-        (
-            new[] { entityRepositoryAdder.EntityType },
-            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
-        );
-    }
-
-    [Theory]
-    [MemberData(nameof(With_Source_Entity))]
-    public Task GivenExistingEntityId_WhenUsingEntityIdForLoadTwice_ThenLoadThrows(
         SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync

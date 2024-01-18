@@ -60,7 +60,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await readOnlyRepository.Load(entityId + new StateVersion(m));
+        await readOnlyRepository.TryLoad(entityId + new StateVersion(m));
 
         var entity = readOnlyRepository.Get(entityId);
 
@@ -132,7 +132,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await readOnlyRepository.Load(entityId);
+        await readOnlyRepository.TryLoad(entityId);
 
         var entity = readOnlyRepository.Get(entityId);
 
@@ -255,7 +255,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await entityRepository.Load(default);
+        await entityRepository.TryLoad(default);
 
         var currentEntity = entityRepository.Get(default);
 
@@ -283,7 +283,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ASSERT
 
-        Should.Throw<UnknownEntityIdException>(() => entityRepository.Get(default));
+        Should.Throw<UnknownEntityException>(() => entityRepository.Get(default));
     }
 
     private async Task Generic_GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity<TEntity>(
@@ -320,7 +320,7 @@ public sealed class EntityTests : TestsBase<Startup>
 
         // ACT
 
-        await entityRepository.Load(entityId);
+        await entityRepository.TryLoad(entityId);
 
         var actualEntity = entityRepository.Get(entityId);
 

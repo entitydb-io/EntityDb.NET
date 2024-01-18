@@ -35,5 +35,5 @@ public interface IProjection<TProjection> : IState<TProjection>
     /// </summary>
     /// <param name="source">A source</param>
     /// <returns>The state ids for the projections.</returns>
-    static abstract IEnumerable<Id> EnumerateRelevantStateIds(Source source);
+    static abstract IEnumerable<Id> EnumerateProjectionIds(Source source);
 }

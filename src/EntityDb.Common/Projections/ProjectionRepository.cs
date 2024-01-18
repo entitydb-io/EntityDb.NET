@@ -1,8 +1,10 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Projections;
 using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Common.Projections;
 
@@ -11,6 +13,7 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
     where TProjection : IProjection<TProjection>
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly Dictionary<Id, TProjection> _knownProjections = new();
 
     public ProjectionRepository
     (
@@ -24,12 +27,33 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
 
     public IStateRepository<TProjection>? StateRepository { get; }
 
-    public async Task<TProjection> Get(StatePointer projectionPointer, CancellationToken cancellationToken = default)
+    public async Task<bool> TryLoad(StatePointer projectionPointer, CancellationToken cancellationToken = default)
     {
-        var projection = StateRepository is not null
-            ? await StateRepository.Get(projectionPointer, cancellationToken) ??
-              TProjection.Construct(projectionPointer.Id)
-            : TProjection.Construct(projectionPointer.Id);
+        var projectionId = projectionPointer.Id;
+        
+        if (_knownProjections.TryGetValue(projectionId, out var projection))
+        {
+            var knownProjectionPointer = projection.GetPointer();
+
+            if (projectionPointer.IsSatisfiedBy(knownProjectionPointer))
+            {
+                return true;
+            }
+            
+            if (projectionPointer.StateVersion.Value < knownProjectionPointer.StateVersion.Value)
+            {
+                return false;
+            }
+        }
+        else if (StateRepository is not null)
+        {
+            projection = await StateRepository.Get(projectionPointer, cancellationToken) ??
+                              TProjection.Construct(projectionId);
+        }
+        else
+        {
+            projection = TProjection.Construct(projectionId);
+        }
 
         var sources = projection.EnumerateSources(_serviceProvider, projectionPointer, cancellationToken);
 
@@ -38,7 +62,22 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
             projection.Mutate(source);
         }
 
-        StateDoesNotExistException.ThrowIfNotAcceptable(projectionPointer, projection.GetPointer());
+        if (!projectionPointer.IsSatisfiedBy(projection.GetPointer()))
+        {
+            return false;
+        }
+
+        _knownProjections.Add(projectionId, projection);
+
+        return true;
+    }
+
+    public TProjection Get(Id projectionId)
+    {
+        if (!_knownProjections.TryGetValue(projectionId, out var projection))
+        {
+            throw new UnknownProjectionException();
+        }
 
         return projection;
     }

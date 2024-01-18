@@ -16,6 +16,34 @@ public readonly record struct StatePointer(Id Id, StateVersion StateVersion)
     {
         return $"{Id}@{StateVersion}";
     }
+    
+    /// <summary>
+    ///     Checks if the state pointer found satisfies the state pointer requested.
+    /// </summary>
+    /// <param name="candidateStatePointer">A candidate state pointer.</param>
+    public bool IsSatisfiedBy(StatePointer candidateStatePointer)
+    {
+        if (Id != candidateStatePointer.Id)
+        {
+            return false;
+        }
+        
+        if (StateVersion == StateVersion.Zero)
+        {
+            return candidateStatePointer.StateVersion != StateVersion.Zero;
+        }
+
+        return StateVersion == candidateStatePointer.StateVersion;
+    }
+
+    /// <summary>
+    ///     Returns the next state pointer.
+    /// </summary>
+    /// <returns>The next state pointer.</returns>
+    public StatePointer Previous()
+    {
+        return Id + StateVersion.Previous();
+    }
 
     /// <summary>
     ///     Returns the next state pointer.

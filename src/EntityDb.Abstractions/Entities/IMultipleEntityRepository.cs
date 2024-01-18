@@ -39,7 +39,7 @@ public interface IMultipleEntityRepository<TEntity> : IDisposableResource
     ///     Call this method to load an entity that already exists before calling
     ///     <see cref="Append" />.
     /// </remarks>
-    Task Load(StatePointer entityPointer, CancellationToken cancellationToken = default);
+    Task<bool> TryLoad(StatePointer entityPointer, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Returns the state of a <typeparamref name="TEntity" /> for a given <see cref="Id" />.

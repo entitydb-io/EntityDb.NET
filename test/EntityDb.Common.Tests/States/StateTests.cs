@@ -124,7 +124,7 @@ public sealed class StateTests : TestsBase<Startup>
 
         await using var writeRepository = await GetWriteStateRepository<TState>(serviceScope);
 
-        TState.ShouldRecordAsLatestLogic.Value = (_, _) => true;
+        TState.ShouldPersistAsLatestLogic.Value = _ => true;
 
         StatePointer latestPointer = Id.NewId();
 

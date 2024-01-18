@@ -7,6 +7,6 @@ public interface IStateWithTestLogic<TState> : IState<TState>
 {
     static abstract string MongoDbCollectionName { get; }
     static abstract string RedisKeyNamespace { get; }
-    static abstract AsyncLocal<Func<TState, bool>?> ShouldRecordLogic { get; }
-    static abstract AsyncLocal<Func<TState, TState?, bool>?> ShouldRecordAsLatestLogic { get; }
+    static abstract AsyncLocal<Func<TState, bool>?> ShouldPersistLogic { get; }
+    static abstract AsyncLocal<Func<TState, bool>?> ShouldPersistAsLatestLogic { get; }
 }

@@ -44,15 +44,15 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
         }
     }
 
-    public bool ShouldRecord()
+    public bool ShouldPersist()
     {
-        return ShouldRecordLogic.Value is not null && ShouldRecordLogic.Value.Invoke(this);
+        return ShouldPersistLogic.Value is not null && ShouldPersistLogic.Value.Invoke(this);
     }
 
-    public bool ShouldRecordAsLatest(OneToOneProjection? previousLatestState)
+    public bool ShouldPersistAsLatest()
     {
-        return ShouldRecordAsLatestLogic.Value is not null &&
-               ShouldRecordAsLatestLogic.Value.Invoke(this, previousLatestState);
+        return ShouldPersistAsLatestLogic.Value is not null &&
+               ShouldPersistAsLatestLogic.Value.Invoke(this);
     }
 
     public async IAsyncEnumerable<Source> EnumerateSources
@@ -79,26 +79,18 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
         }
     }
 
-    public static IEnumerable<Id> EnumerateRelevantStateIds(Source source)
+    public static IEnumerable<Id> EnumerateProjectionIds(Source source)
     {
         return source.Messages
             .Where(message => message.Delta is IMutator<OneToOneProjection>)
-            .Select(message => message.StatePointer.Id)
-            .Distinct();
+            .Select(message => message.StatePointer.Id);
     }
 
     public static string MongoDbCollectionName => "OneToOneProjections";
     public static string RedisKeyNamespace => "one-to-one-projection";
 
-    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldRecordLogic { get; } = new();
+    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldPersistLogic { get; } = new();
 
-    public static AsyncLocal<Func<OneToOneProjection, OneToOneProjection?, bool>?> ShouldRecordAsLatestLogic { get; } =
+    public static AsyncLocal<Func<OneToOneProjection, bool>?> ShouldPersistAsLatestLogic { get; } =
         new();
-
-    public OneToOneProjection WithVersion(StateVersion stateVersion)
-    {
-        StatePointer = StatePointer.Id + stateVersion;
-
-        return this;
-    }
 }

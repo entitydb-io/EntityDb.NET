@@ -7,4 +7,4 @@ namespace EntityDb.Common.Exceptions;
 ///     <see cref="IMultipleEntityRepository{TEntity}.Append" /> is called for an entity that
 ///     is not loaded into the repository.
 /// </summary>
-public sealed class UnknownEntityIdException : Exception;
+public sealed class UnknownEntityException : Exception;

@@ -22,6 +22,15 @@ public readonly record struct StateVersion(ulong Value)
     ///     Returns the next version.
     /// </summary>
     /// <returns>The next version.</returns>
+    public StateVersion Previous()
+    {
+        return new StateVersion(Value - 1);
+    }
+
+    /// <summary>
+    ///     Returns the next version.
+    /// </summary>
+    /// <returns>The next version.</returns>
     public StateVersion Next()
     {
         return new StateVersion(Value + 1);

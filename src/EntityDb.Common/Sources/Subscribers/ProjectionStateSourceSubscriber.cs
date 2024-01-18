@@ -17,7 +17,7 @@ internal sealed class ProjectionStateSourceSubscriber<TProjection> : ISourceSubs
 
     public void Notify(Source source)
     {
-        if (!TProjection.EnumerateRelevantStateIds(source).Any())
+        if (!TProjection.EnumerateProjectionIds(source).Any())
         {
             return;
         }

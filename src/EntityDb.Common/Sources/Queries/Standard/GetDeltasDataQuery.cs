@@ -5,14 +5,14 @@ using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetDeltasDataQuery(StatePointer StatePointer, StateVersion PersistedStateStateVersion,
+internal sealed record GetDeltasDataQuery(StatePointer StatePointer, StateVersion KnownStateVersion,
     object? Options = null) : IMessageDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
         var filters = new List<TFilter>
         {
-            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(PersistedStateStateVersion.Next()),
+            builder.StateIdIn(StatePointer.Id), builder.StateVersionGte(KnownStateVersion.Next()),
         };
 
         if (StatePointer.StateVersion != StateVersion.Zero)
