@@ -4,5 +4,5 @@ namespace EntityDb.Abstractions.States.Deltas;
 
 public interface IAddMessageKeyDelta
 {
-    IMessageKey GetMessageKey();
+    IMessageKey? GetMessageKey();
 }

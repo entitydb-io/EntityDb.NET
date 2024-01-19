@@ -70,12 +70,10 @@ public sealed record Message
                         .Select(key => key.ToLease()));
             }
 
-            if (delta is IAddMessageKeyDelta addMessageKeyDelta)
+            if (delta is IAddMessageKeyDelta addMessageKeyDelta && addMessageKeyDelta.GetMessageKey() is { } messageKey)
             {
                 addLeases = addLeases
-                    .AppendOrStart(addMessageKeyDelta
-                        .GetMessageKey()
-                        .ToLease(stateKey));
+                    .AppendOrStart(messageKey.ToLease(stateKey));
             }
         }
         else if (delta is IAddLeasesDelta<TState> addLeasesDelta)
