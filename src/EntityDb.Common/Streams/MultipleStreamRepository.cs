@@ -95,15 +95,16 @@ internal sealed class MultipleStreamRepository : DisposableResourceBaseClass, IM
             throw new UnknownStreamKeyException();
         }
 
-        var messageKeyLease = delta
-            .GetMessageKey()
-            .ToLease(streamKey);
-
-        var streamPointer = await GetStreamPointer(messageKeyLease, cancellationToken);
-
-        if (streamPointer != default)
+        if (delta.GetMessageKey() is { } messageKey)
         {
-            return false;
+            var messageKeyLease = messageKey.ToLease(streamKey);
+
+            var streamPointer = await GetStreamPointer(messageKeyLease, cancellationToken);
+
+            if (streamPointer != default)
+            {
+                return false;
+            }   
         }
 
         var nextStreamPointer = stream.GetNextPointer();
