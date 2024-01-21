@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Common.Disposables;
 
-internal record DisposableResourceBaseRecord : IDisposableResource
+internal abstract record DisposableResourceBaseRecord : IDisposableResource
 {
     [ExcludeFromCodeCoverage(Justification = "All Tests Use DisposeAsync")]
     public virtual void Dispose()

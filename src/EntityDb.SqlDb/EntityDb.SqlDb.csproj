@@ -1,8 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<ItemGroup>
-		<ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
-		<ProjectReference Include="..\EntityDb.Json\EntityDb.Json.csproj" />
-	</ItemGroup>
-
-</Project>

@@ -12,17 +12,17 @@ internal abstract class CommandBase
     {
         var groupName = new Argument<string>("group-name")
         {
-            Description = "The name of the MongoDb Atlas Group/Project to access via API."
+            Description = "The name of the MongoDb Atlas Group/Project to access via API.",
         };
 
         var publicKey = new Argument<string>("public-key")
         {
-            Description = "The public key used to authenticate via API."
+            Description = "The public key used to authenticate via API.",
         };
 
         var privateKey = new Argument<string>("private-key")
         {
-            Description = "The private key used to authenticate via API."
+            Description = "The private key used to authenticate via API.",
         };
 
         command.AddArgument(groupName);
@@ -34,7 +34,7 @@ internal abstract class CommandBase
     {
         var serviceName = new Argument<string>("service-name")
         {
-            Description = "The name of the service that will use this database."
+            Description = "The name of the service that will use this database.",
         };
 
         serviceName.AddValidator(serviceNameResult =>
@@ -43,7 +43,8 @@ internal abstract class CommandBase
 
             if (!ServiceNameRegex.IsMatch(serviceName))
             {
-                serviceNameResult.ErrorMessage = "The service name must begin with an letter, and can only contain letters.";
+                serviceNameResult.ErrorMessage =
+                    "The service name must begin with an letter, and can only contain letters.";
             }
         });
 
@@ -54,7 +55,7 @@ internal abstract class CommandBase
     {
         var servicePassword = new Argument<string>("service-password")
         {
-            Description = "The password for the service that will use this database."
+            Description = "The password for the service that will use this database.",
         };
 
         command.AddArgument(servicePassword);

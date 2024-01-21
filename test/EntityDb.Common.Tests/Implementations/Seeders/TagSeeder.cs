@@ -1,5 +1,5 @@
-using EntityDb.Abstractions.Tags;
-using EntityDb.Common.Tags;
+using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Common.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Seeders;
 

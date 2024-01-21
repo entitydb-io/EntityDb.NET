@@ -1,5 +1,5 @@
 ﻿namespace EntityDb.Common.Tests;
 
-public class Startup : StartupBase
+public sealed class Startup : StartupBase
 {
 }

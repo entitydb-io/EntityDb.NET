@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.MongoDbAtlas.Models;
 
-internal class Group
+internal sealed class Group
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
 

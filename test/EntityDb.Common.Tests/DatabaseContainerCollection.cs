@@ -3,6 +3,4 @@
 namespace EntityDb.Common.Tests;
 
 [CollectionDefinition(nameof(DatabaseContainerCollection))]
-public class DatabaseContainerCollection : ICollectionFixture<DatabaseContainerFixture>
-{
-}
+public sealed class DatabaseContainerCollection : ICollectionFixture<DatabaseContainerFixture>;

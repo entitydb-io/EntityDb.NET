@@ -1,44 +1,39 @@
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Projections;
 
-internal class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryFactory<TProjection>
+internal sealed class ProjectionRepositoryFactory<TProjection> : IProjectionRepositoryFactory<TProjection>
     where TProjection : IProjection<TProjection>
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ISnapshotRepositoryFactory<TProjection>? _snapshotRepositoryFactory;
-    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
+    private readonly IStateRepositoryFactory<TProjection>? _stateRepositoryFactory;
 
     public ProjectionRepositoryFactory
     (
         IServiceProvider serviceProvider,
-        ITransactionRepositoryFactory transactionRepositoryFactory,
-        ISnapshotRepositoryFactory<TProjection>? snapshotRepositoryFactory = null
+        IStateRepositoryFactory<TProjection>? stateRepositoryFactory = null
     )
     {
         _serviceProvider = serviceProvider;
-        _transactionRepositoryFactory = transactionRepositoryFactory;
-        _snapshotRepositoryFactory = snapshotRepositoryFactory;
+        _stateRepositoryFactory = stateRepositoryFactory;
     }
 
-    public async Task<IProjectionRepository<TProjection>> CreateRepository(string transactionSessionOptionsName,
-        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
+    public async Task<IProjectionRepository<TProjection>> CreateRepository
+    (
+        string? stateSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    )
     {
-        var transactionRepository =
-            await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
-
-        if (_snapshotRepositoryFactory is null || snapshotSessionOptionsName is null)
+        if (_stateRepositoryFactory is null || stateSessionOptionsName is null)
         {
-            return ProjectionRepository<TProjection>.Create(_serviceProvider,
-                transactionRepository);
+            return ProjectionRepository<TProjection>.Create(_serviceProvider);
         }
 
-        var snapshotRepository =
-            await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
+        var stateRepository =
+            await _stateRepositoryFactory.Create(stateSessionOptionsName, cancellationToken);
 
         return ProjectionRepository<TProjection>.Create(_serviceProvider,
-            transactionRepository, snapshotRepository);
+            stateRepository);
     }
 }

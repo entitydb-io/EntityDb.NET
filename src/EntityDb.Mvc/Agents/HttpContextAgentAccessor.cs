@@ -1,6 +1,6 @@
-﻿using EntityDb.Abstractions.Agents;
-using EntityDb.Common.Agents;
+﻿using EntityDb.Abstractions.Sources.Agents;
 using EntityDb.Common.Exceptions;
+using EntityDb.Common.Sources.Agents;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +26,7 @@ internal sealed class HttpContextAgentAccessor : IAgentAccessor
         _agentSignatureAugmenter = agentSignatureAugmenter;
     }
 
-    public async Task<IAgent> GetAgentAsync(string signatureOptionsName, CancellationToken cancellationToken)
+    public async Task<IAgent> GetAgent(string signatureOptionsName, CancellationToken cancellationToken)
     {
         var httpContext = _httpContextAccessor.HttpContext;
 
@@ -39,7 +39,7 @@ internal sealed class HttpContextAgentAccessor : IAgentAccessor
 
         if (_agentSignatureAugmenter != null)
         {
-            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfoAsync(cancellationToken);
+            applicationInfo = await _agentSignatureAugmenter.GetApplicationInfo(cancellationToken);
         }
 
         var signatureOptions = _httpContextAgentOptionsFactory.Create(signatureOptionsName);

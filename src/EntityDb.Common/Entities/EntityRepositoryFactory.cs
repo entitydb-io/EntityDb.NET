@@ -1,44 +1,94 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Agents;
+using EntityDb.Abstractions.States;
 
 namespace EntityDb.Common.Entities;
 
-internal class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
+internal sealed class EntityRepositoryFactory<TEntity> : IEntityRepositoryFactory<TEntity>
     where TEntity : IEntity<TEntity>
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ISnapshotRepositoryFactory<TEntity>? _snapshotRepositoryFactory;
-    private readonly ITransactionRepositoryFactory _transactionRepositoryFactory;
+    private readonly IAgentAccessor _agentAccessor;
+    private readonly ISourceRepositoryFactory _sourceRepositoryFactory;
+    private readonly IStateRepositoryFactory<TEntity>? _stateRepositoryFactory;
 
     public EntityRepositoryFactory
     (
-        IServiceProvider serviceProvider,
-        ITransactionRepositoryFactory transactionRepositoryFactory,
-        ISnapshotRepositoryFactory<TEntity>? snapshotRepositoryFactory = null
+        IAgentAccessor agentAccessor,
+        ISourceRepositoryFactory sourceRepositoryFactory,
+        IStateRepositoryFactory<TEntity>? stateRepositoryFactory = null
     )
     {
-        _serviceProvider = serviceProvider;
-        _transactionRepositoryFactory = transactionRepositoryFactory;
-        _snapshotRepositoryFactory = snapshotRepositoryFactory;
+        _agentAccessor = agentAccessor;
+        _sourceRepositoryFactory = sourceRepositoryFactory;
+        _stateRepositoryFactory = stateRepositoryFactory;
     }
 
-    public async Task<IEntityRepository<TEntity>> CreateRepository(string transactionSessionOptionsName,
-        string? snapshotSessionOptionsName = null, CancellationToken cancellationToken = default)
+    public async Task<ISingleEntityRepository<TEntity>> CreateSingleForNew
+    (
+        Id entityId,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? stateSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    )
     {
-        var transactionRepository =
-            await _transactionRepositoryFactory.CreateRepository(transactionSessionOptionsName, cancellationToken);
+        var multipleEntityRepository = await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName,
+            stateSessionOptionsName, cancellationToken);
 
-        if (_snapshotRepositoryFactory is null || snapshotSessionOptionsName is null)
+        multipleEntityRepository.Create(entityId);
+
+        return new SingleEntityRepository<TEntity>(multipleEntityRepository, entityId);
+    }
+
+    public async Task<ISingleEntityRepository<TEntity>> CreateSingleForExisting
+    (
+        StatePointer entityPointer,
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? stateSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var multipleEntityRepository = await CreateMultiple(agentSignatureOptionsName, sourceSessionOptionsName,
+            stateSessionOptionsName, cancellationToken);
+
+        await multipleEntityRepository.TryLoad(entityPointer, cancellationToken);
+
+        return new SingleEntityRepository<TEntity>(multipleEntityRepository, entityPointer);
+    }
+
+    public async Task<IMultipleEntityRepository<TEntity>> CreateMultiple
+    (
+        string agentSignatureOptionsName,
+        string sourceSessionOptionsName,
+        string? stateSessionOptionsName = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var sourceRepository = await _sourceRepositoryFactory
+            .Create(sourceSessionOptionsName, cancellationToken);
+
+        if (_stateRepositoryFactory is null || stateSessionOptionsName is null)
         {
-            return EntityRepository<TEntity>.Create(_serviceProvider,
-                transactionRepository);
+            return new MultipleEntityRepository<TEntity>
+            (
+                _agentAccessor,
+                agentSignatureOptionsName,
+                sourceRepository
+            );
         }
 
-        var snapshotRepository =
-            await _snapshotRepositoryFactory.CreateRepository(snapshotSessionOptionsName, cancellationToken);
+        var stateRepository = await _stateRepositoryFactory
+            .Create(stateSessionOptionsName, cancellationToken);
 
-        return EntityRepository<TEntity>.Create(_serviceProvider,
-            transactionRepository, snapshotRepository);
+        return new MultipleEntityRepository<TEntity>
+        (
+            _agentAccessor,
+            agentSignatureOptionsName,
+            sourceRepository,
+            stateRepository
+        );
     }
 }

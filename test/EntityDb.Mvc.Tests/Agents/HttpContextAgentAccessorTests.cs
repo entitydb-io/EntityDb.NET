@@ -1,4 +1,4 @@
-﻿using EntityDb.Common.Tests.Agents;
+﻿using EntityDb.Common.Tests.Sources.Agents;
 using EntityDb.Mvc.Agents;
 using EntityDb.Mvc.Tests.Seeder;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +7,7 @@ using Moq;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
-public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, HttpContextSeederOptions>
+public sealed class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, HttpContextSeederOptions>
 {
     public HttpContextAgentAccessorTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
@@ -44,26 +44,20 @@ public class HttpContextAgentAccessorTests : AgentAccessorTestsBase<Startup, Htt
         {
             new HttpContextSeederOptions
             {
-                Headers = new Dictionary<string, string[]>
-                {
-                    ["Content-Type"] = new[] { "application/json" }
-                },
-                HasIpAddress = true
+                Headers = new Dictionary<string, string[]> { ["Content-Type"] = new[] { "application/json" } },
+                HasIpAddress = true,
             },
             new HttpContextSeederOptions
             {
-                Headers = new Dictionary<string, string[]>
-                {
-                    ["Content-Type"] = new[] { "application/json" }
-                },
-                HasIpAddress = false
-            }
+                Headers = new Dictionary<string, string[]> { ["Content-Type"] = new[] { "application/json" } },
+                HasIpAddress = false,
+            },
         };
     }
 
     protected override Dictionary<string, string>? GetApplicationInfo(object agentSignature)
     {
-        return agentSignature is not HttpContextAgentSignature.Snapshot httpContextAgentSignature
+        return agentSignature is not HttpContextAgentSignature httpContextAgentSignature
             ? null
             : httpContextAgentSignature.ApplicationInfo;
     }

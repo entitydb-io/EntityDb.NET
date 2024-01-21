@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.MongoDbAtlas.Models;
 
-internal class ServerlessConnectionStrings
+internal sealed class ServerlessConnectionStrings
 {
     [JsonPropertyName("standardSrv")] public string? StandardSrv { get; set; }
 }

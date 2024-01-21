@@ -1,5 +1,5 @@
-using EntityDb.Abstractions.Leases;
-using EntityDb.Common.Leases;
+using EntityDb.Abstractions.Sources.Attributes;
+using EntityDb.Common.Sources.Attributes;
 
 namespace EntityDb.Common.Tests.Implementations.Seeders;
 

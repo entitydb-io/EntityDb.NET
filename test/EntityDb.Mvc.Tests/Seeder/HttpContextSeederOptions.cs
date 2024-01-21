@@ -1,6 +1,6 @@
 ﻿namespace EntityDb.Mvc.Tests.Seeder;
 
-public class HttpContextSeederOptions
+public sealed class HttpContextSeederOptions
 {
     // Request
     public Dictionary<string, string[]> Headers { get; init; } = new();

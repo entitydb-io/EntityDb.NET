@@ -1,410 +1,428 @@
-﻿using EntityDb.Abstractions.Entities;
-using EntityDb.Abstractions.Queries;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.Transactions.Builders;
-using EntityDb.Abstractions.Transactions.Steps;
-using EntityDb.Abstractions.ValueObjects;
-using EntityDb.Common.Entities;
+﻿using EntityDb.Abstractions;
+using EntityDb.Abstractions.Entities;
+using EntityDb.Abstractions.Sources;
+using EntityDb.Abstractions.Sources.Queries;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Exceptions;
 using EntityDb.Common.Polyfills;
-using EntityDb.Common.Tests.Implementations.Commands;
-using EntityDb.Common.Tests.Implementations.Snapshots;
+using EntityDb.Common.Sources.Agents;
+using EntityDb.Common.Tests.Implementations.Entities.Deltas;
+using EntityDb.Common.Tests.Implementations.Seeders;
+using EntityDb.Common.Tests.Implementations.States;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shouldly;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace EntityDb.Common.Tests.Entities;
 
 [Collection(nameof(DatabaseContainerCollection))]
-public class EntityTests : TestsBase<Startup>
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
+public sealed class EntityTests : TestsBase<Startup>
 {
-    public EntityTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(serviceProvider, databaseContainerFixture)
+    public EntityTests(IServiceProvider serviceProvider, DatabaseContainerFixture databaseContainerFixture) : base(
+        serviceProvider, databaseContainerFixture)
     {
     }
-
-    private static async Task<ITransaction> BuildTransaction<TEntity>
-    (
-        IServiceScope serviceScope,
-        Id entityId,
-        VersionNumber from,
-        VersionNumber to,
-        TEntity? entity = default
-    )
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
-    {
-        var transactionBuilder = await serviceScope.ServiceProvider
-            .GetRequiredService<ITransactionBuilderFactory<TEntity>>()
-            .CreateForSingleEntity(default!, entityId);
-
-        if (entity is not null) transactionBuilder.Load(entity);
-
-        for (var i = from; i.Value <= to.Value; i = i.Next())
-        {
-            if (transactionBuilder.IsEntityKnown() &&
-                transactionBuilder.GetEntity().VersionNumber.Value >= i.Value) continue;
-
-            transactionBuilder.Append(new DoNothing());
-        }
-
-        return transactionBuilder.Build(Id.NewId());
-    }
-
 
     private async Task Generic_GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM<TEntity>(
-        TransactionsAdder transactionsAdder, SnapshotAdder entitySnapshotAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        SourceRepositoryAdder sourceRepositoryAdder, StateRepositoryAdder entityStateRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>
     {
         // ARRANGE
+
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
+        {
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityStateRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+        });
+
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
+        await using var readOnlyRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
         const ulong n = 10UL;
         const ulong m = 5UL;
 
-        var versionNumberN = new VersionNumber(n);
-
-        var versionNumberM = new VersionNumber(m);
-
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            transactionsAdder.AddDependencies.Invoke(serviceCollection);
-            entitySnapshotAdder.AddDependencies.Invoke(serviceCollection);
-        });
+        var versionM = new StateVersion(m);
 
         var entityId = Id.NewId();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write,
-                TestSessionOptions.Write);
+        writeRepository.Create(entityId);
+        writeRepository.Seed(entityId, m);
+        writeRepository.Seed(entityId, n - m);
 
-        var transaction = await BuildTransaction<TEntity>(serviceScope, entityId, new VersionNumber(1), versionNumberN);
-
-        var transactionInserted = await entityRepository.PutTransaction(transaction);
+        var committed = await writeRepository.Commit();
 
         // ARRANGE ASSERTIONS
 
-        transactionInserted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
-        var entityAtVersionM = await entityRepository.GetSnapshot(entityId + versionNumberM);
+        await readOnlyRepository.TryLoad(entityId + new StateVersion(m));
+
+        var entity = readOnlyRepository.Get(entityId);
 
         // ASSERT
 
-        entityAtVersionM.VersionNumber.ShouldBe(versionNumberM);
+        entity.GetPointer().StateVersion.ShouldBe(versionM);
     }
 
-    private async Task Generic_GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns<TEntity>(
-        EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+    private async Task Generic_GivenExistingEntityWithNoPersistedState_WhenGettingEntity_ThenGetDeltasRuns<TEntity>(
+        EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>
     {
         // ARRANGE
 
-        var expectedVersionNumber = new VersionNumber(10);
+        const uint expectedVersionNumber = 10;
+        var expectedVersion = new StateVersion(expectedVersionNumber);
 
         var entityId = Id.NewId();
 
-        var commands = new List<object>();
+        var deltas = new List<object>();
 
-        var transactionRepositoryMock = new Mock<ITransactionRepository>(MockBehavior.Strict);
+        var sourceRepositoryMock = new Mock<ISourceRepository>(MockBehavior.Strict);
 
-        transactionRepositoryMock
-            .Setup(repository => repository.PutTransaction(It.IsAny<ITransaction>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((ITransaction transaction, CancellationToken _) =>
+        sourceRepositoryMock
+            .Setup(repository =>
+                repository.Commit(It.IsAny<Source>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Source source, CancellationToken _) =>
             {
-                foreach (var transactionStep in transaction.Steps)
-                    if (transactionStep is IAppendCommandTransactionStep commandTransactionStep)
-                        commands.Add(commandTransactionStep.Command);
+                deltas.AddRange(source.Messages.Select(message => message.Delta));
 
                 return true;
             });
 
-        transactionRepositoryMock
+        sourceRepositoryMock
             .Setup(factory => factory.DisposeAsync())
             .Returns(ValueTask.CompletedTask);
 
-        transactionRepositoryMock
-            .Setup(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(() => AsyncEnumerablePolyfill.FromResult(commands))
+        sourceRepositoryMock
+            .Setup(repository =>
+                repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(() => AsyncEnumerablePolyfill.FromResult(deltas))
             .Verifiable();
 
-        var transactionRepositoryFactoryMock =
-            new Mock<ITransactionRepositoryFactory>(MockBehavior.Strict);
+        var sourceRepositoryFactoryMock =
+            new Mock<ISourceRepositoryFactory>(MockBehavior.Strict);
 
-        transactionRepositoryFactoryMock
-            .Setup(factory => factory.CreateRepository(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(transactionRepositoryMock.Object);
+        sourceRepositoryFactoryMock
+            .Setup(factory => factory.Create(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(sourceRepositoryMock.Object);
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-            serviceCollection.AddSingleton(transactionRepositoryFactoryMock.Object);
+            serviceCollection.AddSingleton(sourceRepositoryFactoryMock.Object);
         });
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(TestSessionOptions.Write);
+        await using var writeRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+        await using var readOnlyRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
 
-        var transaction =
-            await BuildTransaction<TEntity>(serviceScope, entityId, new VersionNumber(1), expectedVersionNumber);
+        writeRepository.Create(entityId);
+        writeRepository.Seed(entityId, expectedVersionNumber);
 
-        var transactionInserted = await entityRepository.PutTransaction(transaction);
+        var committed = await writeRepository.Commit();
 
         // ARRANGE ASSERTIONS
 
-        transactionInserted.ShouldBeTrue();
+        committed.ShouldBeTrue();
 
         // ACT
 
-        var currenEntity = await entityRepository.GetSnapshot(entityId);
+        await readOnlyRepository.TryLoad(entityId);
+
+        var entity = readOnlyRepository.Get(entityId);
 
         // ASSERT
 
-        currenEntity.VersionNumber.ShouldBe(expectedVersionNumber);
+        entity.GetPointer().StateVersion.ShouldBe(expectedVersion);
 
-        transactionRepositoryMock
-            .Verify(repository => repository.EnumerateCommands(It.IsAny<ICommandQuery>(), It.IsAny<CancellationToken>()),
+        sourceRepositoryMock
+            .Verify(
+                repository => repository.EnumerateDeltas(It.IsAny<IMessageDataQuery>(), It.IsAny<CancellationToken>()),
                 Times.Once);
     }
 
     private async Task
-        Generic_GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
-            EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        Generic_GivenNoStateRepositoryFactory_WhenCreatingEntityRepository_ThenNoStateRepository<TEntity>(
+            EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory());
         });
 
         // ACT
 
-        await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TEntity>>();
+        await using var stateRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<IStateRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
         // ASSERT
 
-        snapshotRepositoryFactory.ShouldBeNull();
+        stateRepositoryFactory.ShouldBeNull();
 
-        entityRepository.SnapshotRepository.ShouldBeNull();
+        entityRepository.StateRepository.ShouldBeNull();
     }
 
     private async Task
-        Generic_GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<TEntity>(
-            EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        Generic_GivenNoStateSessionOptions_WhenCreatingEntityRepository_ThenNoStateRepository<TEntity>(
+            EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory<TEntity>());
+            serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedStateRepositoryFactory<TEntity>());
         });
 
         // ACT
 
-        await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TEntity>>();
+        await using var stateRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<IStateRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL");
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
 
         // ASSERT
 
-        snapshotRepositoryFactory.ShouldNotBeNull();
+        stateRepositoryFactory.ShouldNotBeNull();
 
-        entityRepository.SnapshotRepository.ShouldBeNull();
+        entityRepository.StateRepository.ShouldBeNull();
     }
 
     private async Task
-        Generic_GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository<
-            TEntity>(EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        Generic_GivenStateRepositoryFactoryAndStateSessionOptions_WhenCreatingEntityRepository_ThenNoStateRepository<
+            TEntity>(EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
-            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory<TEntity>());
+            serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedStateRepositoryFactory<TEntity>());
         });
 
         // ACT
 
-        await using var snapshotRepositoryFactory = serviceScope.ServiceProvider
-            .GetService<ISnapshotRepositoryFactory<TEntity>>();
+        await using var stateRepositoryFactory = serviceScope.ServiceProvider
+            .GetService<IStateRepositoryFactory<TEntity>>();
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, true);
 
         // ASSERT
 
-        snapshotRepositoryFactory.ShouldNotBeNull();
+        stateRepositoryFactory.ShouldNotBeNull();
 
-        entityRepository.SnapshotRepository.ShouldNotBeNull();
+        entityRepository.StateRepository.ShouldNotBeNull();
     }
 
     private async Task
-        Generic_GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot<TEntity>(
-            EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        Generic_GivenPersistedStateAndNewDeltas_WhenGettingCurrentState_ThenReturnNewerThanPersistedState<TEntity>(
+            EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>
     {
         // ARRANGE
 
-        var snapshot = TEntity.Construct(default).WithVersionNumber(new VersionNumber(1));
+        var previousEntity = TEntity.Construct(default(Id) + new StateVersion(1));
 
-        var newCommands = new object[]
+        var newDeltas = new object[] { new DoNothing(), new DoNothing() };
+
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            new DoNothing(),
-            new DoNothing()
-        };
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
-        {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
-
-            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory(newCommands));
-            serviceCollection.AddSingleton(GetMockedSnapshotRepositoryFactory(snapshot));
+            serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory(newDeltas));
+            serviceCollection.AddSingleton(GetMockedStateRepositoryFactory(previousEntity));
         });
+
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, true);
 
         // ACT
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository("NOT NULL", "NOT NULL");
+        await entityRepository.TryLoad(default);
 
-        var snapshotOrDefault = await entityRepository.GetSnapshot(default);
+        var currentEntity = entityRepository.Get(default);
 
         // ASSERT
 
-        snapshotOrDefault.ShouldNotBe(default);
-        snapshotOrDefault.ShouldNotBe(snapshot);
-        snapshotOrDefault.VersionNumber.ShouldBe(
-            new VersionNumber(snapshot.VersionNumber.Value + Convert.ToUInt64(newCommands.Length)));
+        currentEntity.ShouldNotBe(previousEntity);
+        currentEntity.GetPointer().StateVersion.ShouldBe(
+            new StateVersion(previousEntity.GetPointer().StateVersion.Value + Convert.ToUInt64(newDeltas.Length)));
     }
 
     private async Task Generic_GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow<TEntity>(
-        EntityAdder entityAdder)
-        where TEntity : class, IEntity<TEntity>, ISnapshotWithTestLogic<TEntity>
+        EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>, IStateWithTestLogic<TEntity>
     {
         // ARRANGE
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            entityAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
 
-            serviceCollection.AddSingleton(GetMockedTransactionRepositoryFactory());
+            serviceCollection.AddSingleton(GetMockedSourceRepositoryFactory());
         });
 
-        await using var entityRepository = await serviceScope.ServiceProvider
-            .GetRequiredService<IEntityRepositoryFactory<TEntity>>()
-            .CreateRepository(default!);
+        await using var entityRepository = await GetReadOnlyEntityRepository<TEntity>(serviceScope, false);
 
         // ASSERT
 
-        await Should.ThrowAsync<SnapshotPointerDoesNotExistException>(async () =>
+        Should.Throw<UnknownEntityException>(() => entityRepository.Get(default));
+    }
+
+    private async Task Generic_GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity<TEntity>(
+        SourceRepositoryAdder sourceRepositoryAdder, EntityRepositoryAdder entityRepositoryAdder)
+        where TEntity : class, IEntity<TEntity>
+    {
+        // ARRANGE
+
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
-            await entityRepository.GetSnapshot(default);
+            sourceRepositoryAdder.AddDependencies.Invoke(serviceCollection);
+            entityRepositoryAdder.AddDependencies.Invoke(serviceCollection);
         });
+
+        var entityId = Id.NewId();
+
+        var expectedEntity = TEntity.Construct(entityId + new StateVersion(1));
+
+        await using var entityRepository = await GetWriteEntityRepository<TEntity>(serviceScope, false);
+
+        var source = new Source
+        {
+            Id = Id.NewId(),
+            TimeStamp = TimeStamp.UtcNow,
+            AgentSignature = new UnknownAgentSignature(new Dictionary<string, string>()),
+            Messages = new[] { new Message { Id = Id.NewId(), StatePointer = entityId, Delta = new DoNothing() } },
+        };
+
+        var committed = await entityRepository.SourceRepository.Commit(source);
+
+        // ARRANGE ASSERTIONS
+
+        committed.ShouldBeTrue();
+
+        // ACT
+
+        await entityRepository.TryLoad(entityId);
+
+        var actualEntity = entityRepository.Get(entityId);
+
+        // ASSERT
+
+        actualEntity.ShouldBeEquivalentTo(expectedEntity);
     }
 
     [Theory]
-    [MemberData(nameof(AddTransactionsAndEntitySnapshots))]
-    public Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(TransactionsAdder transactionsAdder,
-        SnapshotAdder entitySnapshotAdder)
+    [MemberData(nameof(With_Source_EntityState))]
+    public Task GivenEntityWithNVersions_WhenGettingAtVersionM_ThenReturnAtVersionM(
+        SourceRepositoryAdder sourceRepositoryAdder,
+        StateRepositoryAdder entityStateRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entitySnapshotAdder.SnapshotType },
-            new object?[] { transactionsAdder, entitySnapshotAdder }
+            new[] { entityStateRepositoryAdder.StateType },
+            new object?[] { sourceRepositoryAdder, entityStateRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
-    public Task GivenExistingEntityWithNoSnapshot_WhenGettingEntity_ThenGetCommandsRuns(EntityAdder entityAdder)
+    [MemberData(nameof(With_Entity))]
+    public Task GivenExistingEntityWithNoPersistedState_WhenGettingEntity_ThenGetDeltasRuns(
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
-    public Task GivenNoSnapshotRepositoryFactory_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
-        EntityAdder entityAdder)
+    [MemberData(nameof(With_Entity))]
+    public Task GivenNoStateRepositoryFactory_WhenCreatingEntityRepository_ThenNoStateRepository(
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
-    public Task GivenNoSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
-        EntityAdder entityAdder)
+    [MemberData(nameof(With_Entity))]
+    public Task GivenNoStateSessionOptions_WhenCreatingEntityRepository_ThenNoStateRepository(
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
+    [MemberData(nameof(With_Entity))]
     public Task
-        GivenSnapshotRepositoryFactoryAndSnapshotSessionOptions_WhenCreatingEntityRepository_ThenNoSnapshotRepository(
-            EntityAdder entityAdder)
+        GivenStateRepositoryFactoryAndStateSessionOptions_WhenCreatingEntityRepository_ThenNoStateRepository(
+            EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
-    public Task GivenSnapshotAndNewCommands_WhenGettingSnapshotOrDefault_ThenReturnNewerThanSnapshot(
-        EntityAdder entityAdder)
+    [MemberData(nameof(With_Entity))]
+    public Task GivenPersistedStateAndNewDeltas_WhenGettingCurrentState_ThenReturnNewerThanPersistedState(
+        EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
         );
     }
 
     [Theory]
-    [MemberData(nameof(AddEntity))]
-    public Task GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow(EntityAdder entityAdder)
+    [MemberData(nameof(With_Entity))]
+    public Task GivenNonExistentEntityId_WhenGettingCurrentEntity_ThenThrow(EntityRepositoryAdder entityRepositoryAdder)
     {
         return RunGenericTestAsync
         (
-            new[] { entityAdder.EntityType },
-            new object?[] { entityAdder }
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { entityRepositoryAdder }
+        );
+    }
+
+    [Theory]
+    [MemberData(nameof(With_Source_Entity))]
+    public Task GivenEntityCommitted_WhenGettingEntity_ThenReturnEntity(SourceRepositoryAdder sourceRepositoryAdder,
+        EntityRepositoryAdder entityRepositoryAdder)
+    {
+        return RunGenericTestAsync
+        (
+            new[] { entityRepositoryAdder.EntityType },
+            new object?[] { sourceRepositoryAdder, entityRepositoryAdder }
         );
     }
 }

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace EntityDb.Common.Tests.TypeResolvers;
 
-public class MemberInfoNameTypeResolverTests
+public sealed class MemberInfoNameTypeResolverTests
 {
     [Fact]
     public void GivenMemberInfoNameTypeResolverKnowsExpectedType_WhenResolvingType_ThenReturnExpectedType()
@@ -17,7 +17,7 @@ public class MemberInfoNameTypeResolverTests
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
             [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            [EnvelopeHelper.MemberInfoName] = expectedType.Name
+            [EnvelopeHelper.MemberInfoName] = expectedType.Name,
         });
 
         var typeResolver = new MemberInfoNamePartialTypeResolver(new[] { expectedType });
@@ -60,8 +60,7 @@ public class MemberInfoNameTypeResolverTests
 
         var envelopeHeaders = new EnvelopeHeaders(new Dictionary<string, string>
         {
-            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform,
-            [EnvelopeHelper.MemberInfoName] = ""
+            [EnvelopeHelper.Platform] = EnvelopeHelper.ThisPlatform, [EnvelopeHelper.MemberInfoName] = "",
         });
 
         // ACT

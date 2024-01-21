@@ -1,6 +1,6 @@
 ﻿using EntityDb.Common.Envelopes;
 using EntityDb.Common.Tests.Envelopes;
-using EntityDb.MongoDb.Envelopes;
+using EntityDb.MongoDb.Documents.Envelopes;
 using EntityDb.MongoDb.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,7 +10,7 @@ using Xunit;
 
 namespace EntityDb.MongoDb.Tests.Envelopes;
 
-public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument>
+public sealed class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument>
 {
     public BsonDocumentEnvelopeTests(IServiceProvider startupServiceProvider) : base(startupServiceProvider)
     {
@@ -24,14 +24,14 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(
+    public async Task GivenTypeDiscriminatorShouldBeRemovedOption_ThereBsonDocumentMatchesOption(
         bool removeTypeDiscriminatorProperty)
     {
         // ARRANGE
 
         var expectedContainsTypeDiscriminatorProperty = !removeTypeDiscriminatorProperty;
 
-        using var serviceScope = CreateServiceScope(serviceCollection =>
+        await using var serviceScope = CreateServiceScope(serviceCollection =>
         {
             serviceCollection.RemoveAll(typeof(IEnvelopeService<BsonDocument>));
 
@@ -46,7 +46,8 @@ public class BsonDocumentEnvelopeTests : EnvelopeTestsBase<Startup, BsonDocument
         var bsonDocumentEnvelope = envelopeService.Serialize(value);
 
         var actualContainsTypeDiscriminatorProperty =
-            bsonDocumentEnvelope.GetElement("Value").Value.AsBsonDocument.Contains(MongoDbEnvelopeService.TypeDiscriminatorPropertyName);
+            bsonDocumentEnvelope.GetElement("Value").Value.AsBsonDocument
+                .Contains(MongoDbEnvelopeService.TypeDiscriminatorPropertyName);
 
         // ASSERT
 

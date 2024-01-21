@@ -1,10 +1,10 @@
+using EntityDb.Abstractions;
 using EntityDb.Abstractions.Projections;
-using EntityDb.Abstractions.Snapshots;
-using EntityDb.Abstractions.Transactions;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions.States;
 using EntityDb.Common.Disposables;
 using EntityDb.Common.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EntityDb.Common.Projections;
 
@@ -12,60 +12,85 @@ internal sealed class ProjectionRepository<TProjection> : DisposableResourceBase
     IProjectionRepository<TProjection>
     where TProjection : IProjection<TProjection>
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly Dictionary<Id, TProjection> _knownProjections = new();
+
     public ProjectionRepository
     (
-        ITransactionRepository transactionRepository,
-        ISnapshotRepository<TProjection>? snapshotRepository = null
+        IServiceProvider serviceProvider,
+        IStateRepository<TProjection>? stateRepository = null
     )
     {
-        TransactionRepository = transactionRepository;
-        SnapshotRepository = snapshotRepository;
+        _serviceProvider = serviceProvider;
+        StateRepository = stateRepository;
     }
 
-    public ITransactionRepository TransactionRepository { get; }
+    public IStateRepository<TProjection>? StateRepository { get; }
 
-    public ISnapshotRepository<TProjection>? SnapshotRepository { get; }
-
-    public Id? GetProjectionIdOrDefault(object entity)
+    public async Task<bool> TryLoad(StatePointer projectionPointer, CancellationToken cancellationToken = default)
     {
-        return TProjection.GetProjectionIdOrDefault(entity);
-    }
-
-    public async Task<TProjection> GetSnapshot(Pointer projectionPointer, CancellationToken cancellationToken = default)
-    {
-        var projection = SnapshotRepository is not null
-            ? await SnapshotRepository.GetSnapshotOrDefault(projectionPointer, cancellationToken) ??
-              TProjection.Construct(projectionPointer.Id)
-            : TProjection.Construct(projectionPointer.Id);
-
-        var commandQuery = projection.GetCommandQuery(projectionPointer);
-
-        var annotatedCommands = TransactionRepository.EnumerateAnnotatedCommands(commandQuery, cancellationToken);
-
-        await foreach (var annotatedCommand in annotatedCommands)
+        var projectionId = projectionPointer.Id;
+        
+        if (_knownProjections.TryGetValue(projectionId, out var projection))
         {
-            projection = projection.Reduce(annotatedCommand);
+            var knownProjectionPointer = projection.GetPointer();
+
+            if (projectionPointer.IsSatisfiedBy(knownProjectionPointer))
+            {
+                return true;
+            }
+            
+            if (projectionPointer.StateVersion.Value < knownProjectionPointer.StateVersion.Value)
+            {
+                return false;
+            }
+        }
+        else if (StateRepository is not null)
+        {
+            projection = await StateRepository.Get(projectionPointer, cancellationToken) ??
+                              TProjection.Construct(projectionId);
+        }
+        else
+        {
+            projection = TProjection.Construct(projectionId);
         }
 
-        if (!projectionPointer.IsSatisfiedBy(projection.GetVersionNumber()))
+        var sources = projection.EnumerateSources(_serviceProvider, projectionPointer, cancellationToken);
+
+        await foreach (var source in sources)
         {
-            throw new SnapshotPointerDoesNotExistException();
+            projection.Mutate(source);
+        }
+
+        if (!projectionPointer.IsSatisfiedBy(projection.GetPointer()))
+        {
+            return false;
+        }
+
+        _knownProjections.Add(projectionId, projection);
+
+        return true;
+    }
+
+    public TProjection Get(Id projectionId)
+    {
+        if (!_knownProjections.TryGetValue(projectionId, out var projection))
+        {
+            throw new UnknownProjectionException();
         }
 
         return projection;
     }
 
     public static IProjectionRepository<TProjection> Create(IServiceProvider serviceProvider,
-        ITransactionRepository transactionRepository,
-        ISnapshotRepository<TProjection>? snapshotRepository = null)
+        IStateRepository<TProjection>? stateRepository = null)
     {
-        if (snapshotRepository is null)
+        if (stateRepository is null)
         {
-            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-                transactionRepository);
+            return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider);
         }
 
         return ActivatorUtilities.CreateInstance<ProjectionRepository<TProjection>>(serviceProvider,
-            transactionRepository, snapshotRepository);
+            stateRepository);
     }
 }

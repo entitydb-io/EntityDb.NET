@@ -5,7 +5,7 @@ using Xunit;
 
 namespace EntityDb.Mvc.Tests.Agents;
 
-public class HttpContextAgentSignatureTests
+public sealed class HttpContextAgentSignatureTests
 {
     [Fact]
     public void GivenNoRedactedHeaders_WhenHttpContextHasHeader_ThenAgentSignatureHasHeaderValue()
@@ -15,29 +15,23 @@ public class HttpContextAgentSignatureTests
         const string headerName = nameof(headerName);
         const string headerValue = nameof(headerValue);
 
-        var httpContextAgentOptions = new HttpContextAgentSignatureOptions
-        {
-            RedactedHeaders = Array.Empty<string>()
-        };
+        var httpContextAgentOptions = new HttpContextAgentSignatureOptions { RedactedHeaders = Array.Empty<string>() };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            Headers = new Dictionary<string, string[]>
-            {
-                [headerName] = new[] { headerValue }
-            }
+            Headers = new Dictionary<string, string[]> { [headerName] = new[] { headerValue } },
         });
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
+        var signature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
-        request.Headers.Length.ShouldBe(1);
-        request.Headers[0].Name.ShouldBe(headerName);
-        request.Headers[0].Values.Length.ShouldBe(1);
-        request.Headers[0].Values[0].ShouldBe(headerValue);
+        signature.Request.Headers.Length.ShouldBe(1);
+        signature.Request.Headers[0].Name.ShouldBe(headerName);
+        signature.Request.Headers[0].Values.Length.ShouldBe(1);
+        signature.Request.Headers[0].Values[0].ShouldBe(headerValue);
     }
 
     [Fact]
@@ -51,28 +45,24 @@ public class HttpContextAgentSignatureTests
 
         var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            RedactedHeaders = new[] { headerName },
-            RedactedValue = redactedValue
+            RedactedHeaders = new[] { headerName }, RedactedValue = redactedValue,
         };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
-            Headers = new Dictionary<string, string[]>
-            {
-                [headerName] = new[] { headerValue }
-            }
+            Headers = new Dictionary<string, string[]> { [headerName] = new[] { headerValue } },
         });
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
+        var signature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
-        request.Headers.Length.ShouldBe(1);
-        request.Headers[0].Name.ShouldBe(headerName);
-        request.Headers[0].Values.Length.ShouldBe(1);
-        request.Headers[0].Values[0].ShouldBe(redactedValue);
+        signature.Request.Headers.Length.ShouldBe(1);
+        signature.Request.Headers[0].Name.ShouldBe(headerName);
+        signature.Request.Headers[0].Values.Length.ShouldBe(1);
+        signature.Request.Headers[0].Values[0].ShouldBe(redactedValue);
     }
 
     [Fact]
@@ -86,27 +76,27 @@ public class HttpContextAgentSignatureTests
 
         var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            RedactedQueryStringParams = Array.Empty<string>()
+            RedactedQueryStringParams = Array.Empty<string>(),
         };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
             QueryStringParams = new Dictionary<string, string[]>
             {
-                [queryStringParamName] = new[] { queryStringParamValue }
-            }
+                [queryStringParamName] = new[] { queryStringParamValue },
+            },
         });
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
+        var signature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
-        request.QueryStringParams.Length.ShouldBe(1);
-        request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
-        request.QueryStringParams[0].Values.Length.ShouldBe(1);
-        request.QueryStringParams[0].Values[0].ShouldBe(queryStringParamValue);
+        signature.Request.QueryStringParams.Length.ShouldBe(1);
+        signature.Request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
+        signature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
+        signature.Request.QueryStringParams[0].Values[0].ShouldBe(queryStringParamValue);
     }
 
     [Fact]
@@ -121,27 +111,26 @@ public class HttpContextAgentSignatureTests
 
         var httpContextAgentOptions = new HttpContextAgentSignatureOptions
         {
-            RedactedQueryStringParams = new[] { queryStringParamName },
-            RedactedValue = redactedValue
+            RedactedQueryStringParams = new[] { queryStringParamName }, RedactedValue = redactedValue,
         };
 
         var httpContext = HttpContextSeeder.CreateHttpContext(new HttpContextSeederOptions
         {
             QueryStringParams = new Dictionary<string, string[]>
             {
-                [queryStringParamName] = new[] { queryStringParamValue }
-            }
+                [queryStringParamName] = new[] { queryStringParamValue },
+            },
         });
 
         // ACT
 
-        var (request, _, _) = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
+        var signature = HttpContextAgentSignature.GetSnapshot(httpContext, httpContextAgentOptions, default!);
 
         // ASSERT
 
-        request.QueryStringParams.Length.ShouldBe(1);
-        request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
-        request.QueryStringParams[0].Values.Length.ShouldBe(1);
-        request.QueryStringParams[0].Values[0].ShouldBe(redactedValue);
+        signature.Request.QueryStringParams.Length.ShouldBe(1);
+        signature.Request.QueryStringParams[0].Name.ShouldBe(queryStringParamName);
+        signature.Request.QueryStringParams[0].Values.Length.ShouldBe(1);
+        signature.Request.QueryStringParams[0].Values[0].ShouldBe(redactedValue);
     }
 }

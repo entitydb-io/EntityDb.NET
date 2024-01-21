@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -14,7 +14,7 @@ public static class HttpContextSeeder
 
         connectionInfoMock
             .SetupGet(info => info.Id)
-            .Returns(Id.NewId().ToString()!);
+            .Returns(Id.NewId().ToString());
 
         var faker = new Faker();
 

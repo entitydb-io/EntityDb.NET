@@ -4,17 +4,8 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
-internal class CreateUser : CommandBase
+internal sealed class CreateUser : CommandBase
 {
-    public record Arguments
-    (
-        string GroupName,
-        string PublicKey,
-        string PrivateKey,
-        string ServiceName,
-        string ServicePassword
-    );
-
     private static async Task Execute(Arguments arguments)
     {
         const string adminDatabaseName = "admin";
@@ -39,11 +30,7 @@ internal class CreateUser : CommandBase
 
         var roles = new[]
         {
-            new MongoDbAtlasUserRole
-            {
-                DatabaseName = adminDatabaseName,
-                RoleName = arguments.ServiceName
-            }
+            new MongoDbAtlasUserRole { DatabaseName = adminDatabaseName, RoleName = arguments.ServiceName },
         };
 
         await mongoDbAtlasClient.CreateUser
@@ -67,4 +54,13 @@ internal class CreateUser : CommandBase
 
         parentCommand.AddCommand(createUser);
     }
+
+    public sealed record Arguments
+    (
+        string GroupName,
+        string PublicKey,
+        string PrivateKey,
+        string ServiceName,
+        string ServicePassword
+    );
 }

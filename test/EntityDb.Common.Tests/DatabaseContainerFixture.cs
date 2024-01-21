@@ -1,20 +1,12 @@
-﻿using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
-using DotNet.Testcontainers.Containers;
+﻿using Testcontainers.MongoDb;
+using Testcontainers.Redis;
 using Xunit;
 
 namespace EntityDb.Common.Tests;
 
-public class DatabaseContainerFixture : IAsyncLifetime
+public sealed class DatabaseContainerFixture : IAsyncLifetime
 {
-    private static readonly RedisTestcontainerConfiguration _redisConfiguration = new("redis:7.0.2");
-
-    private static readonly MongoDbTestcontainerConfiguration _mongoDbConfiguration = new("mongo:5.0.9")
-    {
-        Database = "entitydb",
-        Username = null,
-        Password = null
-    };
+    public const string OmniParameter = "entitydb";
 
     private static readonly string DockerVolumeMongoDbInit = Path.Combine
     (
@@ -24,44 +16,27 @@ public class DatabaseContainerFixture : IAsyncLifetime
         "Init"
     );
 
-    private static readonly PostgreSqlTestcontainerConfiguration _postgreSqlConfiguration = new("postgres:12.6")
-    {
-        Database = "entitydb",
-        Username = "entitydb",
-        Password = "entitydb",
-    };
-
-    public RedisTestcontainerConfiguration RedisConfiguration => _redisConfiguration;
-
-    public MongoDbTestcontainerConfiguration MongoDbConfiguration => _mongoDbConfiguration;
-
-    public PostgreSqlTestcontainerConfiguration PostgreSqlConfiguration => _postgreSqlConfiguration;
-
-    public RedisTestcontainer RedisContainer { get; } = new TestcontainersBuilder<RedisTestcontainer>()
-        .WithDatabase(_redisConfiguration)
+    public RedisContainer RedisContainer { get; } = new RedisBuilder()
+        .WithImage("redis:7.2.0")
         .Build();
 
-    public MongoDbTestcontainer MongoDbContainer { get; } = new TestcontainersBuilder<MongoDbTestcontainer>()
-        .WithDatabase(_mongoDbConfiguration)
+    public MongoDbContainer MongoDbContainer { get; } = new MongoDbBuilder()
+        .WithImage("mongo:7.0.0")
+        .WithUsername(null)
+        .WithPassword(null)
         .WithBindMount(DockerVolumeMongoDbInit, "/docker-entrypoint-initdb.d")
-        .WithCommand("--replSet", "entitydb")
+        .WithCommand("--replSet", OmniParameter)
         .Build();
-
-    public PostgreSqlTestcontainer PostgreSqlContainer { get; } = new TestcontainersBuilder<PostgreSqlTestcontainer>()
-            .WithDatabase(_postgreSqlConfiguration)
-            .Build();
 
     public async Task InitializeAsync()
     {
         await RedisContainer.StartAsync();
         await MongoDbContainer.StartAsync();
-        await PostgreSqlContainer.StartAsync();
     }
 
     public async Task DisposeAsync()
     {
         await RedisContainer.DisposeAsync();
         await MongoDbContainer.DisposeAsync();
-        await PostgreSqlContainer.DisposeAsync();
     }
 }

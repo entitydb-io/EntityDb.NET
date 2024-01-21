@@ -1,18 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!--Pack-->
     <PropertyGroup>
-        <PackageTags>EntityDb EventSourcing DDD CQRS Redis</PackageTags>
-        <Description>An implementation of the EntityDb Snapshot Repository interface, specifically for Redis.</Description>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS Redis</PackageTags>
+        <Description>An implementation of the EntityDb IStateRepository interface, specifically for Redis.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
+        <PackageReference Include="StackExchange.Redis" Version="2.7.10"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
-        <ProjectReference Include="..\EntityDb.Json\EntityDb.Json.csproj" />
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
+        <ProjectReference Include="..\EntityDb.Json\EntityDb.Json.csproj"/>
     </ItemGroup>
 
 </Project>

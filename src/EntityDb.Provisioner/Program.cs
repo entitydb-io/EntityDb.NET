@@ -1,5 +1,4 @@
 ﻿using EntityDb.Provisioner.Commands.MongoDb;
-using EntityDb.Provisioner.Commands.Npgsql;
 using System.CommandLine;
 
 #if DEBUG
@@ -16,6 +15,5 @@ if (args.Length == 0)
 var rootCommand = new RootCommand();
 
 MongoDbCommand.AddTo(rootCommand);
-NpgsqlCommand.AddTo(rootCommand);
 
 return await rootCommand.InvokeAsync(args);
