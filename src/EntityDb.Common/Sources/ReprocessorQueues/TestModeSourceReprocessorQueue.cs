@@ -40,7 +40,7 @@ internal sealed class TestModeSourceReprocessorQueue : ISourceReprocessorQueue
             foreach (var sourceId in sourceIds)
             {
                 var source = await sourceRepository
-                    .GetSource(sourceId, cancellationToken);
+                    .GetSource(sourceId, default, cancellationToken);
 
                 _sourceProcessorQueue.Enqueue(new SourceProcessorQueueItem
                 {

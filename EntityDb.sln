@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Json", "src\Entity
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityDb.Provisioner", "src\EntityDb.Provisioner\EntityDb.Provisioner.csproj", "{26FCDB9D-0DE3-4BB9-858D-3E2C3EF763E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityDb.Aws", "src\EntityDb.Aws\EntityDb.Aws.csproj", "{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{26FCDB9D-0DE3-4BB9-858D-3E2C3EF763E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26FCDB9D-0DE3-4BB9-858D-3E2C3EF763E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26FCDB9D-0DE3-4BB9-858D-3E2C3EF763E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,6 +117,7 @@ Global
 		{FA2AD2E9-84DA-4667-BF46-140B0B050563} = {92484C44-2754-4C1D-BD46-98D83E4020EE}
 		{4936FFE0-98E5-43A2-89C9-0415A13CAA9B} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 		{26FCDB9D-0DE3-4BB9-858D-3E2C3EF763E3} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
+		{71EF2C8C-F6BF-4CE3-91A4-62F8C7C9FB8B} = {ABACFBCC-B59F-4616-B6CC-99C37AEC8960}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E9D288EE-9351-4018-ABE8-B0968AEB0465}

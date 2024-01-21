@@ -5,10 +5,18 @@ using EntityDb.Abstractions.Sources.Queries.SortBuilders;
 
 namespace EntityDb.Common.Sources.Queries.Standard;
 
-internal sealed record GetSourceDataQuery(Id SourceId) : ISourceDataQuery, IMessageDataQuery
+internal sealed record GetSourceDataQuery(Id SourceId, Id? StateId) : ISourceDataQuery, IMessageDataQuery
 {
     public TFilter GetFilter<TFilter>(IMessageDataFilterBuilder<TFilter> builder)
     {
+        if (StateId.HasValue)
+        {
+            return builder.And
+            (
+                builder.StateIdIn(StateId.Value),
+                builder.SourceIdIn(SourceId)
+            );
+        }
         return builder.SourceIdIn(SourceId);
     }
 

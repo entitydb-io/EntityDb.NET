@@ -36,6 +36,7 @@ public static class SourceRepositoryExtensions
     /// </summary>
     /// <param name="sourceRepository">The source repository</param>
     /// <param name="sourceId">The source id</param>
+    /// <param name="stateId">Optional: The state id</param>
     /// <param name="cancellationToken">A cancellation token</param>
     /// <returns>An instance of <see cref="Source" />.</returns>
     /// <remarks>
@@ -60,10 +61,11 @@ public static class SourceRepositoryExtensions
     (
         this ISourceRepository sourceRepository,
         Id sourceId,
+        Id? stateId = default,
         CancellationToken cancellationToken = default
     )
     {
-        var query = new GetSourceDataQuery(sourceId);
+        var query = new GetSourceDataQuery(sourceId, stateId);
 
         var annotatedAgentSignature = await sourceRepository
             .EnumerateAnnotatedAgentSignatures(query, cancellationToken)

@@ -57,7 +57,7 @@ internal sealed class BufferBlockSourceReprocessorQueue : BackgroundService, ISo
                 await Task.Delay(item.EnqueueDelay, cancellationToken);
 
                 var source = await sourceRepository
-                    .GetSource(sourceId, cancellationToken);
+                    .GetSource(sourceId, default, cancellationToken);
 
                 _sourceProcessorQueue.Enqueue(new SourceProcessorQueueItem
                 {

@@ -75,7 +75,7 @@ public sealed class OneToOneProjection : IProjection<OneToOneProjection>, IState
         foreach (var sourceId in sourceIds)
         {
             yield return await sourceRepository
-                .GetSource(sourceId, cancellationToken);
+                .GetSource(sourceId, default, cancellationToken);
         }
     }
 
