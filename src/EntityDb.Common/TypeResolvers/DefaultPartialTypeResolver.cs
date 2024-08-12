@@ -8,6 +8,7 @@ namespace EntityDb.Common.TypeResolvers;
 internal sealed class DefaultPartialTypeResolver : IPartialTypeResolver
 {
     private readonly IOptions<DefaultPartialTypeResolverOptions> _options;
+    private readonly Dictionary<string, Type> _cache = new();
 
     public DefaultPartialTypeResolver(IOptions<DefaultPartialTypeResolverOptions> options)
     {
@@ -24,30 +25,59 @@ internal sealed class DefaultPartialTypeResolver : IPartialTypeResolver
             return false;
         }
 
-        resolvedType = Type.GetType
-        (
-            Assembly.CreateQualifiedName(assemblyFullName, typeFullName),
-            AssemblyResolver,
-            (assembly, typeName, ignoreCase) => assembly!.GetType(typeName, true, ignoreCase),
-            true,
-            false
-        )!;
+        var qualifiedTypeName = Assembly.CreateQualifiedName(assemblyFullName, typeFullName);
+
+        if (_cache.TryGetValue(qualifiedTypeName, out resolvedType))
+        {
+            return true;
+        }
+
+        if (!TryGetType(qualifiedTypeName, out resolvedType))
+        {
+            return false;
+        }
+
+        _cache.Add(qualifiedTypeName, resolvedType);
 
         return true;
     }
 
-    private Assembly AssemblyResolver(AssemblyName assemblyName)
+    private bool TryGetType(string qualifiedTypeName, [NotNullWhen(true)] out Type? resolvedType)
     {
-        if (assemblyName.Name is { } originalName && _options.Value.UpdateNames.TryGetValue(originalName, out var newName))
+        foreach (var (oldNamespace, newNamespace) in _options.Value.UpdateNamespaces)
         {
-            assemblyName.Name = newName;
+            qualifiedTypeName = qualifiedTypeName.Replace(oldNamespace, newNamespace);
         }
         
+        resolvedType = Type.GetType
+        (
+            qualifiedTypeName,
+            AssemblyResolver,
+            TypeResolver,
+            _options.Value.ThrowOnError,
+            _options.Value.IgnoreCase
+        );
+
+        return resolvedType is not null;
+    }
+
+    private Assembly AssemblyResolver(AssemblyName assemblyName)
+    {
         if (_options.Value.IgnoreVersion)
         {
             assemblyName.Version = null;
         }
 
         return Assembly.Load(assemblyName);
+    }
+
+    private Type? TypeResolver(Assembly? assembly, string typeName, bool ignoreCase)
+    {
+        return assembly?.GetType
+        (
+            typeName,
+            _options.Value.ThrowOnError,
+            ignoreCase
+        );
     }
 }
