@@ -1,10 +1,10 @@
-using EntityDb.Abstractions.ValueObjects;
+using EntityDb.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace EntityDb.Json.Converters;
 
-internal class IdConverter : JsonConverter<Id>
+internal sealed class IdConverter : JsonConverter<Id>
 {
     public override Id Read
     (

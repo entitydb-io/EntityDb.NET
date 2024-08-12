@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!--Pack-->
     <PropertyGroup>
-        <PackageTags>EntityDb EventSourcing DDD CQRS MongoDb</PackageTags>
-        <Description>An implementation of the EntityDb Transaction Repository interface, specifically for MongoDb.</Description>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS</PackageTags>
+        <Description>Implementations of the EntityDb ISourceRepository and IStateRepository interfaces, specifically for MongoDb.</Description>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+        <PackageReference Include="MongoDB.Driver" Version="2.23.1"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj" />
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
     </ItemGroup>
 
 </Project>

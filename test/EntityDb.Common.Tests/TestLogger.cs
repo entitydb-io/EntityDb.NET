@@ -3,7 +3,7 @@ using Xunit.Abstractions;
 
 namespace EntityDb.Common.Tests;
 
-public class TestLogger<T> : ILogger<T>
+public sealed class TestLogger<T> : ILogger<T>
 {
     private readonly ILogger _logger;
     private readonly ITest _test;

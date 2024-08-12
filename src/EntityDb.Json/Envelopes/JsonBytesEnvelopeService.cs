@@ -7,14 +7,15 @@ namespace EntityDb.Json.Envelopes;
 
 internal sealed class JsonBytesEnvelopeService : JsonEnvelopeService<byte[]>
 {
-    public JsonBytesEnvelopeService(ILogger<JsonBytesEnvelopeService> logger, ITypeResolver typeResolver) : base(logger, typeResolver)
+    public JsonBytesEnvelopeService(ILogger<JsonBytesEnvelopeService> logger, ITypeResolver typeResolver) : base(logger,
+        typeResolver)
     {
     }
 
     protected override Envelope<JsonElement> DeserializeEnvelope(byte[] serializedData)
     {
         return (Envelope<JsonElement>)JsonSerializer.Deserialize(serializedData, typeof(Envelope<JsonElement>),
-                JsonSerializerOptions)!;
+            JsonSerializerOptions)!;
     }
 
     protected override byte[] SerializeEnvelope(Envelope<JsonElement> envelope)

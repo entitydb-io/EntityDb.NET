@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EntityDb.Provisioner.MongoDbAtlas;
 
-internal class MongoDbAtlasClient : IDisposable
+internal sealed class MongoDbAtlasClient : IDisposable
 {
     private static readonly HttpClient HttpClient = new();
 
@@ -91,14 +91,14 @@ internal class MongoDbAtlasClient : IDisposable
         var getUserResponse = await Send(() => new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/databaseUsers/{databaseName}/{username}")
+            RequestUri = GetUri($"groups/{_groupId}/databaseUsers/{databaseName}/{username}"),
         });
 
         return getUserResponse.StatusCode switch
         {
             HttpStatusCode.OK => true,
             HttpStatusCode.NotFound => false,
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 
@@ -106,15 +106,14 @@ internal class MongoDbAtlasClient : IDisposable
     {
         var getRoleResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}")
+            Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles/{role}"),
         });
 
         return getRoleResponse.StatusCode switch
         {
             HttpStatusCode.OK => true,
             HttpStatusCode.NotFound => false,
-            _ => throw new InvalidOperationException()
+            _ => throw new InvalidOperationException(),
         };
     }
 
@@ -128,7 +127,7 @@ internal class MongoDbAtlasClient : IDisposable
         {
             Method = HttpMethod.Post,
             RequestUri = GetUri($"groups/{_groupId}/customDBRoles/roles"),
-            Content = content
+            Content = content,
         });
 
         if (createRoleResponse.IsSuccessStatusCode)
@@ -148,9 +147,7 @@ internal class MongoDbAtlasClient : IDisposable
 
         var createUserResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Post,
-            RequestUri = GetUri($"groups/{_groupId}/databaseUsers"),
-            Content = content
+            Method = HttpMethod.Post, RequestUri = GetUri($"groups/{_groupId}/databaseUsers"), Content = content,
         });
 
         if (createUserResponse.IsSuccessStatusCode)
@@ -165,8 +162,7 @@ internal class MongoDbAtlasClient : IDisposable
     {
         var getServerlessInstanceResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/serverless/{instanceName}")
+            Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/serverless/{instanceName}"),
         });
 
         if (!getServerlessInstanceResponse.IsSuccessStatusCode)
@@ -183,8 +179,7 @@ internal class MongoDbAtlasClient : IDisposable
     {
         var getClusterResponse = await Send(() => new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
-            RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}")
+            Method = HttpMethod.Get, RequestUri = GetUri($"groups/{_groupId}/clusters/{clusterName}"),
         });
 
         if (!getClusterResponse.IsSuccessStatusCode)

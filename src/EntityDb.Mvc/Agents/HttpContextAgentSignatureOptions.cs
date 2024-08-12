@@ -3,7 +3,7 @@
 /// <summary>
 ///     Configuration options for the Http Context agent.
 /// </summary>
-public class HttpContextAgentSignatureOptions
+public sealed class HttpContextAgentSignatureOptions
 {
     /// <summary>
     ///     If there is a header whose value is sensitive and should not be recorded in the

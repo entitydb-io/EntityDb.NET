@@ -5,26 +5,20 @@ using System.CommandLine.NamingConventionBinder;
 
 namespace EntityDb.Provisioner.Commands.MongoDb;
 
-internal class CreateCollections : CommandBase
+internal sealed class CreateCollections : CommandBase
 {
-    public record Arguments
-    (
-        string ServiceName,
-        string ConnectionString
-    );
-
     private static async Task Execute(Arguments arguments)
     {
         var mongoClient = new MongoClient(arguments.ConnectionString);
 
-        await mongoClient.ProvisionCollections(arguments.ServiceName);
+        await mongoClient.ProvisionSourceCollections(arguments.ServiceName);
     }
 
     private static void AddConnectionStringArgument(Command command)
     {
         var connectionStringArgument = new Argument<string>("connection-string")
         {
-            Description = "The connection string to the mongodb instance."
+            Description = "The connection string to the mongodb instance.",
         };
 
         command.AddArgument(connectionStringArgument);
@@ -34,7 +28,7 @@ internal class CreateCollections : CommandBase
     {
         var createCollectionsDirect = new Command("create-collections")
         {
-            Handler = CommandHandler.Create<Arguments>(Execute)
+            Handler = CommandHandler.Create<Arguments>(Execute),
         };
 
         AddServiceNameArgument(createCollectionsDirect);
@@ -42,4 +36,10 @@ internal class CreateCollections : CommandBase
 
         parentCommand.AddCommand(createCollectionsDirect);
     }
+
+    public sealed record Arguments
+    (
+        string ServiceName,
+        string ConnectionString
+    );
 }

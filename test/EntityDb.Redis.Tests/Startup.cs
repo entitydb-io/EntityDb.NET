@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDb.Redis.Tests;
 
-public class Startup : StartupBase
+public sealed class Startup : StartupBase
 {
     public override void AddServices(IServiceCollection serviceCollection)
     {

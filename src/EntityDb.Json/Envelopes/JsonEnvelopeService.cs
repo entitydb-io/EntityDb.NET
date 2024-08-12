@@ -8,21 +8,24 @@ using System.Text.Json.Serialization;
 
 namespace EntityDb.Json.Envelopes;
 
-internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<TSerializedData>
+internal abstract class JsonEnvelopeService
+{
+    protected static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+}
+
+internal abstract class JsonEnvelopeService<TSerializedData> : JsonEnvelopeService, IEnvelopeService<TSerializedData>
 {
     private readonly ILogger<JsonEnvelopeService<TSerializedData>> _logger;
     private readonly ITypeResolver _typeResolver;
-
-    protected static readonly JsonSerializerOptions JsonSerializerOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
 
     static JsonEnvelopeService()
     {
         JsonSerializerOptions.Converters.Add(new EnvelopeHeadersConverter());
         JsonSerializerOptions.Converters.Add(new IdConverter());
-        JsonSerializerOptions.Converters.Add(new VersionNumberConverter());
+        JsonSerializerOptions.Converters.Add(new VersionConverter());
     }
 
     protected JsonEnvelopeService
@@ -34,10 +37,6 @@ internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<
         _logger = logger;
         _typeResolver = typeResolver;
     }
-
-    protected abstract TSerializedData SerializeEnvelope(Envelope<JsonElement> envelope);
-
-    protected abstract Envelope<JsonElement> DeserializeEnvelope(TSerializedData serializedData);
 
     public TSerializedData Serialize<TData>(TData data)
     {
@@ -59,7 +58,7 @@ internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<
         {
             _logger.LogError(exception, "Unable to serialize");
 
-            throw new SerializeException();
+            throw new DataSerializationException();
         }
     }
 
@@ -76,7 +75,11 @@ internal abstract class JsonEnvelopeService<TSerializedData> : IEnvelopeService<
         {
             _logger.LogError(exception, "Unable to deserialize");
 
-            throw new DeserializeException();
+            throw new DataDeserializationException();
         }
     }
+
+    protected abstract TSerializedData SerializeEnvelope(Envelope<JsonElement> envelope);
+
+    protected abstract Envelope<JsonElement> DeserializeEnvelope(TSerializedData serializedData);
 }

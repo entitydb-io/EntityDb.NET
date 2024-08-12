@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.Commands.MongoDb.Atlas.Cluster;
 
-internal class MongoDbAtlasClusterCommand
+internal sealed class MongoDbAtlasClusterCommand
 {
     public static void AddTo(Command parentCommand)
     {

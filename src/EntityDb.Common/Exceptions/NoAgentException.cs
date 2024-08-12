@@ -1,4 +1,4 @@
-﻿using EntityDb.Abstractions.Agents;
+﻿using EntityDb.Abstractions.Sources.Agents;
 
 namespace EntityDb.Common.Exceptions;
 
@@ -6,6 +6,4 @@ namespace EntityDb.Common.Exceptions;
 ///     The exception that is thrown when the <see cref="IAgentAccessor" /> cannot return an instance of
 ///     <see cref="IAgent" />.
 /// </summary>
-public class NoAgentException : Exception
-{
-}
+public sealed class NoAgentException : Exception;

@@ -2,7 +2,7 @@
 
 namespace EntityDb.Provisioner.MongoDbAtlas.Models;
 
-internal class ListOf<T>
+internal sealed class ListOf<T>
 {
     [JsonPropertyName("results")] public T[] Results { get; set; } = Array.Empty<T>();
 

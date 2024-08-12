@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageTags>EntityDb EventSourcing EventStreaming DDD CQRS</PackageTags>
+        <Description>A partial set of implementations of the EntityDb common layer.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\EntityDb.Common\EntityDb.Common.csproj"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.SQS" Version="3.7.300.39" />
+    </ItemGroup>
+
+</Project>
