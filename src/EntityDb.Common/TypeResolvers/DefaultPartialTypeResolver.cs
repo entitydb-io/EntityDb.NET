@@ -38,6 +38,11 @@ internal sealed class DefaultPartialTypeResolver : IPartialTypeResolver
 
     private Assembly AssemblyResolver(AssemblyName assemblyName)
     {
+        if (assemblyName.Name is { } originalName && _options.Value.UpdateNames.TryGetValue(originalName, out var newName))
+        {
+            assemblyName.Name = newName;
+        }
+        
         if (_options.Value.IgnoreVersion)
         {
             assemblyName.Version = null;
