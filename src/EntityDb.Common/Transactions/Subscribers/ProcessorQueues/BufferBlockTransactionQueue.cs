@@ -23,7 +23,11 @@ internal class BufferBlockTransactionQueue<TTransactionProcessor> : BackgroundSe
 
     public void Enqueue(ITransaction transaction)
     {
-        _transactionQueue.Post(transaction);
+        _logger.LogInformation("Enqueueing Transaction {TransactionId} to Transaction Queue.", transaction.Id.Value);
+        
+        var enqueued = _transactionQueue.Post(transaction);
+        
+        _logger.LogInformation("{Enqueued} Transaction {TransactionId} to Transaction Queue.", enqueued, transaction.Id.Value);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
