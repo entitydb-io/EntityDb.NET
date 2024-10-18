@@ -23,6 +23,8 @@ internal class BufferBlockTransactionQueue<TTransactionProcessor> : BackgroundSe
 
     public void Enqueue(ITransaction transaction)
     {
+        _logger.LogInformation("Enqueueing Transaction {TransactionId} to Transaction Queue.", transaction.Id.Value);
+        
         _transactionQueue.Post(transaction);
     }
 
