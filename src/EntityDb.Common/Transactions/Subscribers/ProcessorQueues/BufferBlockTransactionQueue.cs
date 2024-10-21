@@ -11,12 +11,16 @@ namespace EntityDb.Common.Transactions.Subscribers.ProcessorQueues;
 internal class BufferBlockTransactionQueue<TTransactionProcessor> : BackgroundService, ITransactionProcessorQueue<TTransactionProcessor>
     where TTransactionProcessor : ITransactionProcessor
 {
-    private readonly BufferBlock<ITransaction> _transactionQueue = new();
+    private readonly BufferBlock<ITransaction> _foregroundQueue = new();
+    private readonly BufferBlock<ITransaction> _backgroundQueue = new();
+    private readonly IDisposable _link;
     private readonly ILogger<BufferBlockTransactionQueue<TTransactionProcessor>> _logger;
     private readonly TTransactionProcessor _transactionProcessor;
 
     public BufferBlockTransactionQueue(ILogger<BufferBlockTransactionQueue<TTransactionProcessor>> logger, TTransactionProcessor transactionProcessor)
     {
+        _link = _foregroundQueue.LinkTo(_backgroundQueue);
+        
         _logger = logger;
         _transactionProcessor = transactionProcessor;
     }
@@ -25,18 +29,18 @@ internal class BufferBlockTransactionQueue<TTransactionProcessor> : BackgroundSe
     {
         _logger.LogInformation("Enqueueing Transaction {TransactionId} to Transaction Queue.", transaction.Id.Value);
         
-        var enqueued = _transactionQueue.Post(transaction);
-        
+        var enqueued = _foregroundQueue.Post(transaction);
+
         _logger.LogInformation("{Enqueued} Transaction {TransactionId} to Transaction Queue.", enqueued, transaction.Id.Value);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (await _transactionQueue.OutputAvailableAsync(stoppingToken))
+        while (await _backgroundQueue.OutputAvailableAsync(stoppingToken))
         {
             try
             {
-                var transaction = await _transactionQueue.ReceiveAsync(stoppingToken);
+                var transaction = await _backgroundQueue.ReceiveAsync(stoppingToken);
 
                 await _transactionProcessor.ProcessTransaction(transaction, stoppingToken);
             }
@@ -45,5 +49,12 @@ internal class BufferBlockTransactionQueue<TTransactionProcessor> : BackgroundSe
                 _logger.LogError(exception, "Error occurred while processing transaction");
             }
         }
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        _link.Dispose();
     }
 }
