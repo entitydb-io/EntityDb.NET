@@ -1,16 +1,15 @@
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
+using Xunit;
+using Xunit.Sdk;
 
 namespace EntityDb.Common.Tests;
 
 public class TestLogger<T> : ILogger<T>
 {
     private readonly ILogger _logger;
-    private readonly ITest _test;
 
-    public TestLogger(ITest test, ILoggerFactory loggerFactory)
+    public TestLogger(ILoggerFactory loggerFactory)
     {
-        _test = test;
         _logger = new Logger<T>(loggerFactory);
     }
 
@@ -27,7 +26,7 @@ public class TestLogger<T> : ILogger<T>
     void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
-        using (_logger.BeginScope($"Test: {_test.DisplayName}"))
+        using (_logger.BeginScope($"Test: {TestContext.Current.Test!.TestDisplayName}"))
         {
             _logger.Log(logLevel, eventId, state, exception, formatter);
         }

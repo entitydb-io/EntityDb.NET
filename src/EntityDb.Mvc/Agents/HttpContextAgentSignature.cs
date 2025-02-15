@@ -81,7 +81,7 @@ public static class HttpContextAgentSignature
     (
         string Method,
         string Scheme,
-        string Host,
+        string? Host,
         string? Path,
         string Protocol,
         NameValuesPairSnapshot[] Headers,

@@ -51,14 +51,14 @@ public class DatabaseContainerFixture : IAsyncLifetime
             .WithDatabase(_postgreSqlConfiguration)
             .Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await RedisContainer.StartAsync();
         await MongoDbContainer.StartAsync();
         await PostgreSqlContainer.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await RedisContainer.DisposeAsync();
         await MongoDbContainer.DisposeAsync();

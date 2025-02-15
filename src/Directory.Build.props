@@ -2,6 +2,7 @@
     <Import Project="../Directory.Build.props"/>
 
     <PropertyGroup>
+        <TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
         <OutputType>Library</OutputType>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>

@@ -17,6 +17,8 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
     [Fact]
     public async Task GivenRepositoryAlwaysThrows_WhenExecutingAnyMethod_ThenExceptionIsLogged()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        
         // ARRANGE
 
         var (loggerFactory, loggerVerifier) = GetMockedLoggerFactory<Exception>();
@@ -90,34 +92,60 @@ public class TryCatchTransactionRepositoryTests : TestsBase<Startup>
 
         // ACT
 
-        var transactionIdsFromAgentSignatureQuery =
-            await tryCatchTransactionRepository.EnumerateTransactionIds(default(IAgentSignatureQuery)!).ToArrayAsync();
-        var transactionIdsFromCommandQuery =
-            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ICommandQuery)!).ToArrayAsync();
-        var transactionIdsFromLeaseQuery =
-            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ILeaseQuery)!).ToArrayAsync();
-        var transactionIdsFromTagQuery =
-            await tryCatchTransactionRepository.EnumerateTransactionIds(default(ITagQuery)!).ToArrayAsync();
-        var entityIdsFromAgentSignatureQuery =
-            await tryCatchTransactionRepository.EnumerateEntityIds(default(IAgentSignatureQuery)!).ToArrayAsync();
-        var entityIdsFromCommandQuery =
-            await tryCatchTransactionRepository.EnumerateEntityIds(default(ICommandQuery)!).ToArrayAsync();
-        var entityIdsFromLeaseQuery =
-            await tryCatchTransactionRepository.EnumerateEntityIds(default(ILeaseQuery)!).ToArrayAsync();
-        var entityIdsFromTagQuery =
-            await tryCatchTransactionRepository.EnumerateEntityIds(default(ITagQuery)!).ToArrayAsync();
-        var agentSignatures =
-            await tryCatchTransactionRepository.EnumerateAgentSignatures(default!).ToArrayAsync();
-        var commands =
-            await tryCatchTransactionRepository.EnumerateCommands(default!).ToArrayAsync();
-        var leases =
-            await tryCatchTransactionRepository.EnumerateLeases(default!).ToArrayAsync();
-        var tags =
-            await tryCatchTransactionRepository.EnumerateTags(default!).ToArrayAsync();
-        var annotatedCommands =
-            await tryCatchTransactionRepository.EnumerateAnnotatedCommands(default!).ToArrayAsync();
-        var inserted =
-            await tryCatchTransactionRepository.PutTransaction(default!);
+        var transactionIdsFromAgentSignatureQuery = await tryCatchTransactionRepository
+            .EnumerateTransactionIds(default(IAgentSignatureQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var transactionIdsFromCommandQuery = await tryCatchTransactionRepository
+            .EnumerateTransactionIds(default(ICommandQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var transactionIdsFromLeaseQuery = await tryCatchTransactionRepository
+            .EnumerateTransactionIds(default(ILeaseQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var transactionIdsFromTagQuery = await tryCatchTransactionRepository
+            .EnumerateTransactionIds(default(ITagQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var entityIdsFromAgentSignatureQuery = await tryCatchTransactionRepository
+            .EnumerateEntityIds(default(IAgentSignatureQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var entityIdsFromCommandQuery = await tryCatchTransactionRepository
+            .EnumerateEntityIds(default(ICommandQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var entityIdsFromLeaseQuery = await tryCatchTransactionRepository
+            .EnumerateEntityIds(default(ILeaseQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var entityIdsFromTagQuery = await tryCatchTransactionRepository
+            .EnumerateEntityIds(default(ITagQuery)!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var agentSignatures = await tryCatchTransactionRepository
+            .EnumerateAgentSignatures(default!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var commands = await tryCatchTransactionRepository
+            .EnumerateCommands(default!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var leases = await tryCatchTransactionRepository
+            .EnumerateLeases(default!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var tags = await tryCatchTransactionRepository
+            .EnumerateTags(default!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var annotatedCommands = await tryCatchTransactionRepository
+            .EnumerateAnnotatedCommands(default!, cancellationToken)
+            .ToArrayAsync(cancellationToken);
+        
+        var inserted = await tryCatchTransactionRepository
+            .PutTransaction(default!, cancellationToken);
 
         // ASSERT
 

@@ -24,17 +24,16 @@ using EntityDb.Npgsql.Queries;
 using EntityDb.Redis.Extensions;
 using EntityDb.Redis.Sessions;
 using EntityDb.SqlDb.Sessions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Moq;
 using Shouldly;
-using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 using Xunit.Sdk;
+using Xunit.v3;
 using Pointer = EntityDb.Abstractions.ValueObjects.Pointer;
 
 namespace EntityDb.Common.Tests;
@@ -126,7 +125,6 @@ public class TestsBase<TStartup>
     };
 
     private readonly IConfiguration _configuration;
-    private readonly ITest _test;
     private readonly ITestOutputHelperAccessor _testOutputHelperAccessor;
     private readonly DatabaseContainerFixture? _databaseContainerFixture;
 
@@ -134,9 +132,6 @@ public class TestsBase<TStartup>
     {
         _configuration = startupServiceProvider.GetRequiredService<IConfiguration>();
         _testOutputHelperAccessor = startupServiceProvider.GetRequiredService<ITestOutputHelperAccessor>();
-        _test =
-            (typeof(TestOutputHelper).GetField("test", ~BindingFlags.Public)!.GetValue(_testOutputHelperAccessor.Output)
-                as ITest).ShouldNotBeNull();
         _databaseContainerFixture = databaseContainerFixture;
     }
 
@@ -354,11 +349,11 @@ public class TestsBase<TStartup>
         var startup = new TStartup();
 
         serviceCollection.AddSingleton(_configuration);
-        serviceCollection.AddSingleton(_test);
+        serviceCollection.AddSingleton(_testOutputHelperAccessor);
 
         serviceCollection.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddProvider(new XunitTestOutputLoggerProvider(_testOutputHelperAccessor, (_,_) => true));
+            loggingBuilder.AddXunitOutput();
             loggingBuilder.AddDebug();
             loggingBuilder.AddSimpleConsole(options => { options.IncludeScopes = true; });
         });

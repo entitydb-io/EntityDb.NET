@@ -48,6 +48,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     {
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
+            var cancellationToken = TestContext.Current.CancellationToken;
+            
             // ARRANGE
 
             using var serviceScope = CreateServiceScope(serviceCollection =>
@@ -60,7 +62,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             // ACT
 
-            var agent = agentAccessor.GetAgentAsync(default!);
+            var agent = agentAccessor.GetAgentAsync(default!, cancellationToken);
 
             // ASSERT
 
@@ -71,6 +73,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     [Fact]
     public async Task GivenBackingServiceActive_ThenCanGetTimestamp()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
             // ARRANGE
@@ -84,7 +88,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, cancellationToken);
 
             // ASSERT
 
@@ -95,6 +99,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     [Fact]
     public async Task GivenBackingServiceActive_WhenGettingAgentSignature_ThenReturnAgentSignature()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
             // ARRANGE
@@ -106,7 +112,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, cancellationToken);
 
             // ACT
 
@@ -122,6 +128,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     public async Task
         GivenBackingServiceActiveAndNoSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnEmptyApplicationInfo()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
             // ARRANGE
@@ -135,7 +143,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, cancellationToken);
 
             // ACT
 
@@ -154,6 +162,8 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
     public async Task
         GivenBackingServiceActiveAndHasSignatureAugmenter_WhenGettingApplicationInfo_ThenReturnExpectedApplicationInfo()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        
         foreach (var agentAccessorConfiguration in GetAgentAccessorOptions())
         {
             // ARRANGE
@@ -178,7 +188,7 @@ public abstract class AgentAccessorTestsBase<TStartup, TAgentAccessorConfigurati
 
             var agent = await serviceScope.ServiceProvider
                 .GetRequiredService<IAgentAccessor>()
-                .GetAgentAsync(default!);
+                .GetAgentAsync(default!, cancellationToken);
 
             // ACT
 
